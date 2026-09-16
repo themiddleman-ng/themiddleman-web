@@ -39,11 +39,23 @@ const LEGAL_DOCS: Record<string, LegalDocument> = {
       { heading: '5. Data Retention', body: 'Account data is retained while your account is active. Transaction records are retained for 7 years to comply with Nigerian financial regulations. Messages are retained for 2 years after the last activity. Upon account deletion, personal data is purged within 30 days, except where retention is required by law.' },
       { heading: '6. Your Rights (NDPR)', body: 'Under the NDPR, you have the right to: (a) access your personal data; (b) request correction of inaccurate data; (c) request deletion of your data; (d) object to processing; (e) data portability; (f) withdraw consent at any time. To exercise these rights, email hello@themiddleman.com.ng. We respond within 30 days.' },
       { heading: '7. Data Security', body: 'We implement industry-standard security measures including: encryption in transit (TLS 1.3), encryption at rest, role-based access control, regular security audits, and two-factor authentication for administrative access. No system is perfectly secure; we recommend using strong, unique passwords.' },
-      { heading: '8. Cookies & Analytics', body: 'We use essential cookies for authentication and session management. We use privacy-respecting analytics to understand Platform usage. We do not use third-party advertising trackers. You can disable non-essential cookies in your browser settings without affecting core functionality.' },
+      { heading: '8. Cookies', body: 'We use essential cookies and similar storage for authentication, session management, security, and remembering basic preferences. We do not currently use advertising cookies. If we introduce non-essential analytics or advertising cookies, we will update this policy and request consent where required.' },
       { heading: '9. Children\'s Privacy', body: 'The Middleman is not intended for users under 18. We do not knowingly collect data from minors. If we discover data from a minor, we will delete it promptly. Parents who believe their child has provided us data should contact us immediately.' },
       { heading: '10. International Transfers', body: 'Your data is stored on servers located in Nigeria and, where necessary, in jurisdictions with adequate data protection standards. Any international transfer complies with NDPR cross-border transfer requirements.' },
       { heading: '11. Changes to This Policy', body: 'We may update this policy periodically. Material changes will be notified via email 7 days before taking effect. Continued use after changes constitutes acceptance.' },
       { heading: '12. Contact & Complaints', body: 'For privacy concerns or complaints, contact: hello@themiddleman.com.ng. If unresolved, you may lodge a complaint with the Nigeria Data Protection Commission (NDPC).' },
+    ],
+  },
+  cookies: {
+    title: 'Cookie Policy',
+    updated: 'September 2026',
+    sections: [
+      { heading: '1. What Cookies Are', body: 'Cookies are small pieces of data stored by your browser. Similar technologies, such as local storage, can remember settings on your device. They help websites maintain sessions, protect accounts, and remember choices.' },
+      { heading: '2. Essential Cookies', body: 'The Middleman uses essential cookies for sign-in, authentication, session continuity, fraud prevention, and platform security. These technologies are necessary for requested services and cannot be switched off through an in-app preference control.' },
+      { heading: '3. Preference Storage', body: 'We may store limited preferences on your device, such as whether you have dismissed the cookie notice. This information is not used to build an advertising profile.' },
+      { heading: '4. Analytics and Advertising', body: 'We do not currently use advertising cookies. If we add non-essential analytics or advertising technologies, we will identify them here and provide a consent choice before they are activated where required.' },
+      { heading: '5. Managing Cookies', body: 'You can inspect, block, or delete cookies using your browser settings. Blocking essential cookies may prevent sign-in, checkout, messaging, or other account features from working correctly.' },
+      { heading: '6. Changes and Contact', body: 'We may update this policy when our technology or legal obligations change. Questions about cookies or privacy can be sent to hello@themiddleman.com.ng.' },
     ],
   },
   refunds: {
@@ -106,7 +118,13 @@ const LEGAL_DOCS: Record<string, LegalDocument> = {
 export async function generateMetadata({ params }: { params: Promise<{ document: string }> }) {
   const { document } = await params;
   const doc = LEGAL_DOCS[document];
-  return { title: doc ? `${doc.title} — The Middleman` : 'Page Not Found — The Middleman' };
+  if (!doc) return { title: 'Page Not Found', robots: { index: false, follow: false } };
+
+  return {
+    title: doc.title,
+    description: `${doc.title} for The Middleman digital marketplace.`,
+    alternates: { canonical: `/legal/${document}` },
+  };
 }
 
 export default async function LegalPage({ params }: { params: Promise<{ document: string }> }) {

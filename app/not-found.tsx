@@ -1,7 +1,7 @@
 import Link from "next/link";
 import Logo from "@/components/Logo";
 
-export const metadata = { title: "Page Not Found - The Middleman" };
+export const metadata = { title: "Page Not Found", robots: { index: false, follow: false } };
 
 export default function NotFound() {
   return (

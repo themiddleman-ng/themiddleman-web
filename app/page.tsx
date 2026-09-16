@@ -501,6 +501,11 @@ export default function Home() {
                   </Link>
                 </li>
                 <li>
+                  <Link href="/legal/cookies" className="transition-colors hover:text-[#f26419]">
+                    Cookie policy
+                  </Link>
+                </li>
+                <li>
                   <Link href="/legal/terms" className="transition-colors hover:text-[#f26419]">
                     Terms of service
                   </Link>

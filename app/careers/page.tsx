@@ -1,7 +1,11 @@
 import Link from "next/link";
 import { LogoMark } from "@/components/Logo";
 
-export const metadata = { title: "Careers - The Middleman" };
+export const metadata = {
+  title: "Careers",
+  description: "Learn about working with The Middleman to build trust into Nigeria's digital commerce.",
+  alternates: { canonical: "/careers" },
+};
 
 export default function CareersPage() {
   return (

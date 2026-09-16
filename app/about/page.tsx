@@ -1,7 +1,11 @@
 import Link from "next/link";
 import { LogoMark } from "@/components/Logo";
 
-export const metadata = { title: "About - The Middleman" };
+export const metadata = {
+  title: "About",
+  description: "Learn why The Middleman is building a safer marketplace for Nigeria's digital economy.",
+  alternates: { canonical: "/about" },
+};
 
 export default function AboutPage() {
   return (
