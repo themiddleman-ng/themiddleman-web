@@ -1,0 +1,23 @@
+# Dependencies & Package Lock
+node_modules/
+vendor/
+.venv/
+
+# Build & Dist
+dist/
+build/
+.next/
+out/
+
+# Environment Files & Secrets
+.env
+.env.*
+*.pem
+*.key
+
+# Database & Media
+*.sqlite
+*.db
+*.mp4
+*.png
+*.jpg

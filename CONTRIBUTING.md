@@ -1,28 +1,66 @@
-# 🚀 The Middleman Developer Playbook
+# Contributing to The Middleman
 
-Welcome to the team! To keep our codebase clean, stable, and production-ready, we use a structured Git workflow. Please read and follow these steps carefully before writing or submitting any code.
+Thanks for helping build this. This doc covers how we work day-to-day so
+changes land cleanly and nobody steps on anyone else's work.
+
+## Before you start
+
+- Read the README, open issues, and active pull requests before starting.
+- Confirm the task and repository with a maintainer when the same work may
+  already be in progress elsewhere.
+
+## Branching
+
+- Do not push directly to `main`; use a pull request.
+- Use descriptive branch names such as `feat/listing-search`,
+  `fix/payment-verification`, or `docs/setup-guide`.
+- Keep branches scoped to one feature or fix. Large, multi-purpose branches are
+  hard to review and hard to revert if something breaks.
+
+## Commits
+
+- Write commit messages that explain *why*, not just *what*
+  (e.g. `fix: correct RLS policy blocking sellers from editing own listings`
+  rather than `fix bug`).
+- Small, frequent commits over large infrequent ones.
+
+## Pull Requests
+
+1. Open a PR against `main` once your branch is ready for review.
+2. Include a short description: what changed, why, and how to test it.
+3. Link the related task/issue if one exists.
+4. Tag a maintainer for review — don't merge your own PR without a second pair of eyes,
+   even for small changes. Two-person review catches RLS/security mistakes especially.
+5. Squash-merge once approved, to keep `main`'s history readable.
+
+## Code Style
+
+- Follow existing patterns in the codebase before introducing new ones —
+  consistency matters more than personal preference at this stage.
+- Frontend: Tailwind utility classes over custom CSS where possible.
+  Match existing component structure in `components/`.
+- Backend/Supabase: any change touching Row-Level Security policies or
+  Edge Functions needs explicit review — these are the highest-risk surface
+  for data leaks or broken access control.
+- No secrets, API keys, or `.env` values committed, ever. Double-check diffs
+  before pushing.
+
+## Communication
+
+- GitHub issues and pull requests are the durable record of technical work.
+- If you're blocked or a task is bigger than expected, say so early.
+- Ask a maintainer when product direction or scope is unclear.
+
+## Reporting Bugs
+
+Non-security bugs: open a GitHub issue with steps to reproduce, expected vs.
+actual behavior, and screenshots if relevant.
+
+Security or data-exposure issues: **do not open a public issue** — see
+[`SECURITY.md`](./SECURITY.md) instead.
 
 ---
 
-## 🛡️ 1. Core Repository Rules
-
-### 🚫 The Golden Rule: Protected Main Branch
-The `main` branch is our production line. It is strictly locked by a branch protection rule. 
-* **NEVER try to push code directly to `main`** from your local terminal—GitHub will reject it instantly.
-* All code changes must enter `main` through an approved **Pull Request (PR)**.
-
-### 👥 Code Review Requirements
-* Every Pull Request requires at least **1 approval** from a teammate or team lead before it can be merged into production.
-* If changes are requested during review, fix them on your feature branch and push them up—the PR updates automatically.
-
----
-
-## 🏎️ 2. The Standard Git Workflow (Step-by-Step)
-
-Whenever you are assigned a new feature, UI component, or bug fix, execute this exact lifecycle:
-
-### Step 1: Sync Your Local Main
-Before starting any new work, ensure your local machine has the absolute latest code from the organization repository.
-```bash
-git checkout main
-git pull origin main
+Building something people actually trust with money and digital work is the whole
+point of The Middleman — so when in doubt on anything touching auth, payments,
+or user data, ask before merging rather than after.
