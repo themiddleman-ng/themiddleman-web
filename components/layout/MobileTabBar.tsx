@@ -1,11 +1,19 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
+import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/lib/supabaseClient";
 
-const HIDE_PREFIXES = ["/signup", "/onboarding", "/legal", "/forgot"];
+const APP_PREFIXES = [
+  "/marketplace",
+  "/browse",
+  "/gigs",
+  "/orders",
+  "/payments",
+  "/messages",
+  "/profile",
+];
 
 function fabAction(pathname: string): { href: string; label: string } {
   if (
@@ -66,25 +74,38 @@ type ConversationRow = {
 
 export default function MobileTabBar() {
   const pathname = usePathname();
-  const router = useRouter();
-
-  // Mobile app shell: logged-in users skip the marketing landing page.
-  useEffect(() => {
-    if (pathname !== "/") return;
-    if (typeof window === "undefined") return;
-    if (!window.matchMedia("(max-width: 767px)").matches) return;
-    let cancelled = false;
-    supabase.auth.getUser().then(({ data }) => {
-      if (!cancelled && data.user) router.replace("/marketplace");
-    });
-    return () => {
-      cancelled = true;
-    };
-  }, [pathname, router]);
-
+  const shouldShow = APP_PREFIXES.some((prefix) => pathname.startsWith(prefix));
+  const [visible, setVisible] = useState(true);
   const [unread, setUnread] = useState(0);
+  const lastScrollY = useRef(0);
 
   useEffect(() => {
+    if (!shouldShow) return;
+
+    setVisible(true);
+    lastScrollY.current = window.scrollY;
+
+    function handleScroll() {
+      const currentScrollY = window.scrollY;
+      const difference = currentScrollY - lastScrollY.current;
+
+      if (currentScrollY < 24) {
+        setVisible(true);
+      } else if (difference > 6) {
+        setVisible(false);
+      } else if (difference < -6) {
+        setVisible(true);
+      }
+
+      lastScrollY.current = currentScrollY;
+    }
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [shouldShow]);
+
+  useEffect(() => {
+    if (!shouldShow) return;
     let cancelled = false;
 
     async function loadUnreadCount() {
@@ -119,9 +140,9 @@ export default function MobileTabBar() {
       cancelled = true;
       window.removeEventListener("messages:read-updated", refresh);
     };
-  }, []);
+  }, [shouldShow]);
 
-  if (HIDE_PREFIXES.some((p) => pathname.startsWith(p))) return null;
+  if (!shouldShow) return null;
 
   const fab = fabAction(pathname);
 
@@ -129,7 +150,7 @@ export default function MobileTabBar() {
     | { href: string; label: string; icon: React.ReactNode; badge?: number }
     | null
   > = [
-    { href: "/marketplace", label: "Home", icon: <IconHome /> },
+    { href: "/", label: "Home", icon: <IconHome /> },
     { href: "/browse", label: "Browse", icon: <IconBrowse /> },
     null,
     { href: "/messages", label: "Messages", icon: <IconMessages />, badge: unread },
@@ -142,7 +163,9 @@ export default function MobileTabBar() {
       <div className="h-20 md:hidden" aria-hidden="true" />
 
       <nav
-        className="fixed inset-x-0 bottom-0 z-40 md:hidden"
+        className={`fixed inset-x-0 bottom-0 z-40 transition-transform duration-300 ease-out md:hidden ${
+          visible ? "translate-y-0" : "translate-y-full"
+        }`}
         style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
         aria-label="Mobile navigation"
       >
@@ -162,7 +185,7 @@ export default function MobileTabBar() {
                   </div>
                 );
               }
-              const active = pathname === "/" ? tab.href === "/marketplace" : pathname.startsWith(tab.href);
+              const active = tab.href === "/" ? pathname === "/" : pathname.startsWith(tab.href);
               return (
                 <Link
                   key={tab.href}
