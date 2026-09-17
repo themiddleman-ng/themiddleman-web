@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { supabase } from "@/lib/supabaseClient";
@@ -58,6 +58,7 @@ export default function GigPageClient({ gigId }: { gigId: string }) {
   const [reportDetails, setReportDetails] = useState("");
   const [reporting, setReporting] = useState(false);
   const [reportSuccess, setReportSuccess] = useState(false);
+  const orderRequestKey = useRef<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -113,8 +114,20 @@ export default function GigPageClient({ gigId }: { gigId: string }) {
     if (!publicKey) { setActionError("Payments aren't configured yet — add NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY to .env.local."); return; }
     setPaying(true);
     try {
-      const { data: order, error: orderError } = await supabase.from("orders").insert({ buyer_id: userId, seller_id: gig.seller_id, gig_id: gig.id, amount: gig.price_ngn, status: "pending_payment" }).select("id").single();
-      if (orderError) throw new Error(orderError.message);
+      orderRequestKey.current ??= crypto.randomUUID();
+      const orderResponse = await fetch("/api/orders", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Idempotency-Key": orderRequestKey.current,
+        },
+        body: JSON.stringify({ gigId: gig.id }),
+      });
+      const orderResult = await orderResponse.json();
+      if (!orderResponse.ok || !orderResult.order?.id) {
+        throw new Error(orderResult.error || "Could not create the order.");
+      }
+      const order = orderResult.order as { id: string };
       await loadPaystackScript();
       const win = window as PaystackWindow;
       const handler = win.PaystackPop!.setup({
