@@ -124,12 +124,22 @@ export default function OrdersPage() {
     if (!user) { setLoadError("Sign in to view your orders."); setLoading(false); return; }
     setUserId(user.id);
 
+    const { data: sellerProfile, error: sellerProfileError } = await supabase
+      .from("seller_profiles")
+      .select("id")
+      .eq("user_id", user.id)
+      .maybeSingle();
+    if (sellerProfileError) { setLoadError(sellerProfileError.message); setLoading(false); return; }
+
+    const ownershipFilters = [`buyer_id.eq.${user.id}`];
+    if (sellerProfile?.id) ownershipFilters.push(`seller_id.eq.${sellerProfile.id}`);
+
     const { data, error } = await supabase
       .from("orders")
       .select(
         "id, buyer_id, seller_id, gig_id, amount, status, created_at, gigs ( title ), buyer:users!orders_buyer_id_fkey ( full_name ), seller:seller_profiles!orders_seller_id_fkey ( display_name )"
       )
-      .or(`buyer_id.eq.${user.id},seller_id.eq.${user.id}`)
+      .or(ownershipFilters.join(","))
       .order("created_at", { ascending: false });
 
     if (error) { setLoadError(error.message); setLoading(false); return; }

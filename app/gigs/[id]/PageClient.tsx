@@ -105,12 +105,15 @@ export default function GigPageClient({ gigId }: { gigId: string }) {
   async function handleBuyAndPay() {
     setActionError("");
     if (!userId) { router.push("/signup?mode=signin"); return; }
-    if (!gig || userId === gig.seller_id) return;
+    if (!gig) return;
+    const sellerUserId = gig.seller_profiles?.user_id;
+    if (!sellerUserId) { setActionError("We could not verify the seller account for this product."); return; }
+    if (userId === sellerUserId) { setActionError("You cannot buy your own product."); return; }
     const publicKey = process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY;
     if (!publicKey) { setActionError("Payments aren't configured yet — add NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY to .env.local."); return; }
     setPaying(true);
     try {
-      const { data: order, error: orderError } = await supabase.from("orders").insert({ buyer_id: userId, seller_id: gig.seller_id, gig_id: gig.id, amount: gig.price_ngn, status: "pending" }).select("id").single();
+      const { data: order, error: orderError } = await supabase.from("orders").insert({ buyer_id: userId, seller_id: gig.seller_id, gig_id: gig.id, amount: gig.price_ngn, status: "pending_payment" }).select("id").single();
       if (orderError) throw new Error(orderError.message);
       await loadPaystackScript();
       const win = window as PaystackWindow;
@@ -130,7 +133,7 @@ export default function GigPageClient({ gigId }: { gigId: string }) {
 
   async function handleDeleteGig() {
     setActionError("");
-    if (!userId || !gig || userId !== gig.seller_id) return;
+    if (!userId || !gig || userId !== gig.seller_profiles?.user_id) return;
     if (!window.confirm("Delete this product? It will no longer appear in the marketplace.")) return;
     const { error } = await supabase.from("gigs").update({ status: "deleted" }).eq("id", gig.id);
     if (error) { setActionError(error.message); return; }
@@ -140,7 +143,7 @@ export default function GigPageClient({ gigId }: { gigId: string }) {
   async function handleReportGig() {
     setActionError(""); setReportSuccess(false);
     if (!userId) { router.push("/signup?mode=signin"); return; }
-    if (!gig || userId === gig.seller_id) { setActionError("You cannot report your own product."); return; }
+    if (!gig || userId === gig.seller_profiles?.user_id) { setActionError("You cannot report your own product."); return; }
     setReporting(true);
     const { error } = await supabase.from("gig_reports").insert({ gig_id: gig.id, reported_by: userId, reason: reportReason, details: reportDetails.trim() || null });
     if (error) { setActionError(error.message); setReporting(false); return; }

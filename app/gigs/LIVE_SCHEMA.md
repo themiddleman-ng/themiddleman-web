@@ -1,5 +1,5 @@
 # The Middleman — Live Supabase Schema
-# Source of truth as of audit on 2026-07-29
+# Source of truth as of Phase A verification on 2026-09-17
 # Always code against THIS file, not the original schema.sql
 
 ---
@@ -29,8 +29,9 @@
 - Column `payout_status`: 'pending' | 'paid' | 'failed'
 - NO `provider` or `status` columns
 
-### 5. orders.status values: 'pending' | 'in_progress' | 'delivered' | 'completed' | 'disputed' | 'cancelled'
-- Original had: 'pending_payment' | 'in_escrow' | 'approved' | 'refunded' — WRONG
+### 5. orders.status uses the `order_status` enum
+- Values: 'pending_payment' | 'in_escrow' | 'delivered' | 'approved' | 'disputed' | 'refunded'
+- Default: 'pending_payment'
 
 ### 6. disputes.status values: 'open' | 'investigating' | 'resolved'
 - Original had more values — WRONG
@@ -111,11 +112,11 @@ gig_category enum: 'development' | 'design' | 'marketing' | 'writing' | 'ai_assi
 | buyer_id | uuid | NO | — ← FK → users(id) |
 | seller_id | uuid | NO | — ← FK → seller_profiles(id) |
 | amount | numeric | NO | — |
-| status | text | NO | 'pending' |
+| status | order_status | NO | 'pending_payment' |
 | created_at | timestamptz | NO | now() |
 | updated_at | timestamptz | NO | now() |
 
-status CHECK: 'pending' | 'in_progress' | 'delivered' | 'completed' | 'disputed' | 'cancelled'
+order_status enum: 'pending_payment' | 'in_escrow' | 'delivered' | 'approved' | 'disputed' | 'refunded'
 
 ---
 

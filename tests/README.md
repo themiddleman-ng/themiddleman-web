@@ -10,6 +10,10 @@ This initial probe does **not** verify the application's schema or complete Phas
 The checked-in `supabase/schema.sql` differs from the inspected hosted schema;
 it must not be mistaken for a faithful production baseline.
 
+`phase-a-order-identity.test.mjs` creates the relevant hosted-schema baseline,
+applies the real Phase A migration, and verifies buyer/seller identity separation,
+self-purchase rejection, unrelated-user isolation, and the canonical status enum.
+
 Subsequent application tests need a reviewed schema-only fixture and the actual
 proposed repair SQL. PGlite does not provide Supabase Auth, PostgREST, Storage,
 or Paystack. Separate integration tests remain required for signup, API grants,
