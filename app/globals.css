@@ -1604,3 +1604,56 @@ html, body {
   .auth-glass-card > * { max-width: none; }
   .auth-login-shell { min-height: calc(100vh - 2.5rem); }
 }
+
+/* Final auth contrast and mobile-fit rules. Keep these after the legacy auth
+   blocks above so the dark login and signup surfaces cannot inherit the
+   light-page text palette. */
+.auth-glass-card h1,
+.auth-login-wrap .auth-login-title {
+  color: #f7f3ec;
+}
+
+.auth-input-shell input {
+  color: #f7f3ec;
+}
+
+.auth-input-shell input[type="password"],
+.auth-input-shell input[type="text"] {
+  padding-right: 4.75rem;
+}
+
+.auth-toggle-pass {
+  z-index: 1;
+  min-width: 3.5rem;
+  text-align: right;
+}
+
+.auth-oauth-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.auth-social-btn {
+  min-width: 0;
+  color: #f7f3ec;
+}
+
+.auth-social-btn svg {
+  display: block;
+  flex: 0 0 auto;
+}
+
+@media (max-width: 480px) {
+  .auth-login-panel {
+    min-height: auto;
+    padding: 3rem 1.25rem calc(3rem + env(safe-area-inset-bottom));
+  }
+
+  .auth-login-wrap {
+    padding: 0;
+  }
+
+  .auth-oauth-row {
+    grid-template-columns: 1fr;
+  }
+}

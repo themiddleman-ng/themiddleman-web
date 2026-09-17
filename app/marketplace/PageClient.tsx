@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { supabase } from "@/lib/supabaseClient";
+import { isSupabaseConfigured, supabase } from "@/lib/supabaseClient";
 import SiteHeader from "@/components/SiteHeader";
 import FadeIn from "@/components/motion/FadeIn";
 import GigCard, { type CardGig, type CardRating } from "@/components/marketplace/GigCard";
@@ -29,6 +29,48 @@ type GigRating = {
   average_rating: number;
   review_count: number;
 };
+
+type MarketplaceError = {
+  title: string;
+  message: string;
+  canRetry: boolean;
+};
+
+function describeMarketplaceError(error: unknown): MarketplaceError {
+  const detail =
+    error instanceof Error
+      ? error.message
+      : typeof error === "object" && error !== null && "message" in error
+        ? String(error.message)
+        : String(error ?? "");
+  const code =
+    typeof error === "object" && error !== null && "code" in error
+      ? String(error.code)
+      : "";
+  const normalized = `${code} ${detail}`.toLowerCase();
+
+  if (normalized.includes("failed to fetch") || normalized.includes("network")) {
+    return {
+      title: "We couldn't reach the marketplace",
+      message: "Check your connection and try again. If this continues, the preview deployment's Supabase settings need to be checked.",
+      canRetry: true,
+    };
+  }
+
+  if (normalized.includes("does not exist") || normalized.includes("42p01")) {
+    return {
+      title: "The marketplace database is not ready",
+      message: "The product catalogue has not been installed for this environment yet.",
+      canRetry: false,
+    };
+  }
+
+  return {
+    title: "Products are temporarily unavailable",
+    message: "Please try again in a moment.",
+    canRetry: true,
+  };
+}
 
 const CATEGORIES: Array<{ value: GigCategory | "all"; label: string }> = [
   { value: "all", label: "All" },
@@ -58,7 +100,8 @@ export default function MarketplacePage() {
   const [gigs, setGigs] = useState<GigRow[]>([]);
   const [ratings, setRatings] = useState<Record<string, GigRating>>({});
   const [loading, setLoading] = useState(true);
-  const [fetchError, setFetchError] = useState<string | null>(null);
+  const [fetchError, setFetchError] = useState<MarketplaceError | null>(null);
+  const [retryCount, setRetryCount] = useState(0);
   const initialCategory = searchParams.get("category");
   const [activeCategory, setActiveCategory] = useState<GigCategory | "all">(
     CATEGORIES.some((category) => category.value === initialCategory)
@@ -75,31 +118,47 @@ export default function MarketplacePage() {
       setLoading(true);
       setFetchError(null);
 
-      const [gigsResult, ratingsResult] = await Promise.all([
-        supabase
-          .from("gigs")
-          .select(
-            "id, title, description, category, price_ngn, is_ai_assisted, created_at, seller_profiles ( display_name, verification_status )"
-          )
-          .eq("status", "active")
-          .order("created_at", { ascending: false }),
-        supabase.rpc("get_gig_ratings"),
-      ]);
-
-      if (cancelled) return;
-
-      if (gigsResult.error) {
-        setFetchError(gigsResult.error.message);
+      if (!isSupabaseConfigured) {
         setGigs([]);
-      } else {
-        setGigs((gigsResult.data as unknown as GigRow[]) ?? []);
+        setFetchError({
+          title: "Marketplace connection is not configured",
+          message: "This deployment has not been connected to the product catalogue yet.",
+          canRetry: false,
+        });
+        setLoading(false);
+        return;
       }
 
-      const ratingsMap: Record<string, GigRating> = {};
-      ((ratingsResult.data as GigRating[]) ?? []).forEach((row) => {
-        ratingsMap[row.gig_id] = row;
-      });
-      setRatings(ratingsMap);
+      try {
+        const [gigsResult, ratingsResult] = await Promise.all([
+          supabase
+            .from("gigs")
+            .select(
+              "id, title, description, category, price_ngn, is_ai_assisted, created_at, seller_profiles ( display_name, verification_status )"
+            )
+            .eq("status", "active")
+            .order("created_at", { ascending: false }),
+          supabase.rpc("get_gig_ratings"),
+        ]);
+
+        if (cancelled) return;
+
+        if (gigsResult.error) throw gigsResult.error;
+        setGigs((gigsResult.data as unknown as GigRow[]) ?? []);
+
+        const ratingsMap: Record<string, GigRating> = {};
+        if (!ratingsResult.error) {
+          ((ratingsResult.data as GigRating[]) ?? []).forEach((row) => {
+            ratingsMap[row.gig_id] = row;
+          });
+        }
+        setRatings(ratingsMap);
+      } catch (error) {
+        if (cancelled) return;
+        console.error("[marketplace] Product loading failed", error);
+        setGigs([]);
+        setFetchError(describeMarketplaceError(error));
+      }
 
       setLoading(false);
     }
@@ -108,7 +167,7 @@ export default function MarketplacePage() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [retryCount]);
 
   const filteredGigs = gigs.filter((gig) => {
     const matchesCategory = activeCategory === "all" || gig.category === activeCategory;
@@ -186,10 +245,18 @@ export default function MarketplacePage() {
 
         {!loading && fetchError && (
           <FadeIn direction="up">
-            <div className="rounded-2xl border border-line bg-white/80 p-5 text-sm text-slate shadow-sm">
-              Couldn&apos;t load products right now ({fetchError}). This usually means{" "}
-              <code className="text-ember">supabase/schema.sql</code> hasn&apos;t been run against your
-              project yet.
+            <div className="rounded-2xl border border-line bg-white/80 p-5 text-sm text-slate shadow-sm" role="alert">
+              <p className="font-semibold text-bone">{fetchError.title}</p>
+              <p className="mt-1 leading-relaxed">{fetchError.message}</p>
+              {fetchError.canRetry && (
+                <button
+                  type="button"
+                  onClick={() => setRetryCount((count) => count + 1)}
+                  className="mt-4 rounded-full bg-ember px-4 py-2 font-semibold text-ink transition-transform hover:-translate-y-0.5"
+                >
+                  Try again
+                </button>
+              )}
             </div>
           </FadeIn>
         )}

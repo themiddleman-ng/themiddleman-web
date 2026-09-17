@@ -1,9 +1,16 @@
 import { createBrowserClient } from '@supabase/ssr';
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co';
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholder-anon-key';
+const configuredSupabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const configuredSupabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
-if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+export const isSupabaseConfigured = Boolean(
+  configuredSupabaseUrl && configuredSupabaseAnonKey
+);
+
+const supabaseUrl = configuredSupabaseUrl || 'https://placeholder.supabase.co';
+const supabaseAnonKey = configuredSupabaseAnonKey || 'placeholder-anon-key';
+
+if (!isSupabaseConfigured) {
   console.warn('[supabaseClient] Env vars missing — using placeholders. Supabase calls will fail.');
 }
 

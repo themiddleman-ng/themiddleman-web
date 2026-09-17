@@ -348,7 +348,7 @@ function AuthPageInner() {
             <div className="auth-login-panel">
               <div className="auth-login-wrap">
                 <div className="auth-form-eyebrow">WELCOME BACK</div>
-                <h2>Log in to The Middleman</h2>
+                <h2 className="auth-login-title">Log in to The Middleman</h2>
                 <p className="auth-sub">
                   Manage your products, orders, and payouts in one place.
                 </p>
