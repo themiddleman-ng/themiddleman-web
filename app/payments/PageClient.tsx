@@ -8,7 +8,7 @@ import SiteHeader from "@/components/SiteHeader";
 const steps: [string, string, string][] = [
   ["1", "Pay into escrow", "Confirm your order in ₦. The exact amount is visible before you proceed, and held securely until delivery."],
   ["2", "Seller delivers", "The seller provides the product, files, access, or finished deliverable included in the listing."],
-  ["3", "You approve", "Review the delivery, then approve release. Raise a dispute if it isn't as promised."],
+  ["3", "You accept", "Review the admin-approved delivery and accept it, or raise a dispute if it isn't as promised. Payout is a separate step."],
 ];
 
 const ESCROW_STATUS_LABELS: Record<string, string> = {
@@ -68,7 +68,7 @@ export default function PaymentsPage() {
         <p className="text-xs font-bold tracking-[.2em] text-ember">PAYMENTS</p>
         <h1 className="mt-3 font-display text-4xl font-bold">Escrow-protected payments, in Naira.</h1>
         <p className="mt-4 max-w-2xl text-slate">
-          Every price on The Middleman is shown in Nigerian Naira (₦). Payment is held in escrow until the work you ordered is delivered and approved.
+          Every price on The Middleman is shown in Nigerian Naira (₦). You can review your payment and delivery status here. Accepting a delivery does not by itself send a seller payout.
         </p>
 
         <div className="mt-8 grid gap-5 md:grid-cols-3">

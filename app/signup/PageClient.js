@@ -163,7 +163,8 @@ function AuthPageInner() {
         setEmail(saved.email || '');
         setPhone(saved.phone || '');
         setState(saved.state || '');
-        setPassword(saved.password || '');
+        // Passwords must never persist in browser storage.
+        window.localStorage.removeItem('mm_signup_draft');
         if (typeof setAgreedToTerms === 'function') setAgreedToTerms(!!saved.agreedToTerms);
       }
     } catch (e) { /* ignore corrupt storage */ }
@@ -172,8 +173,8 @@ function AuthPageInner() {
 
   useEffect(() => {
     if (typeof window === 'undefined' || !draftLoaded) return;
-    window.localStorage.setItem('mm_signup_draft', JSON.stringify({ fullName, email, phone, state, password, agreedToTerms }));
-  }, [fullName, email, phone, state, password, agreedToTerms, draftLoaded]);
+    window.localStorage.setItem('mm_signup_draft', JSON.stringify({ fullName, email, phone, state, agreedToTerms }));
+  }, [fullName, email, phone, state, agreedToTerms, draftLoaded]);
 
   const signupReady =
     fullName.trim().length > 0 &&

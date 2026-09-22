@@ -27,11 +27,9 @@ import SiteHeader from "@/components/SiteHeader";
 
 type ConversationRow = {
   id: string;
-  buyer_id: string;
-  seller_id: string;
+  role: 'buyer' | 'seller';
   gig_id: string | null;
-  buyer_last_read_at: string | null;
-  seller_last_read_at: string | null;
+  lastReadAt: string | null;
   counterpartName: string;
   counterpartInitials: string;
   gigTitle: string | null;
@@ -40,7 +38,7 @@ type ConversationRow = {
 type MessageRow = {
   id: string;
   conversation_id: string;
-  sender_id: string;
+  mine: boolean;
   body: string;
   created_at: string;
 };
@@ -163,39 +161,21 @@ function MessagesPageInner() {
       }
       if (!cancelled) setUserId(user.id);
 
-      const { data, error } = await supabase
-        .from("conversations")
-        .select(
-          "id, buyer_id, seller_id, gig_id, buyer_last_read_at, seller_last_read_at, gigs ( title ), buyer:users!conversations_buyer_id_fkey ( full_name ), seller:seller_profiles!conversations_seller_id_fkey ( display_name )"
-        )
-        .or(`buyer_id.eq.${user.id},seller_id.eq.${user.id}`);
+      const response = await fetch('/api/conversations', { cache: 'no-store' });
+      const result = await response.json();
 
       if (cancelled) return;
 
-      if (error) {
-        setLoadError(error.message);
+      if (!response.ok) {
+        setLoadError(result.error || 'Could not load conversations.');
         setConversations([]);
         setLoading(false);
         return;
       }
 
-      const rows: ConversationRow[] = (data ?? []).map((row: any) => {
-        const isBuyer = row.buyer_id === user.id;
-        const counterpartName = isBuyer
-          ? row.seller?.display_name ?? "Seller"
-          : row.buyer?.full_name ?? "Buyer";
-        return {
-          id: row.id,
-          buyer_id: row.buyer_id,
-          seller_id: row.seller_id,
-          gig_id: row.gig_id,
-          buyer_last_read_at: row.buyer_last_read_at ?? null,
-          seller_last_read_at: row.seller_last_read_at ?? null,
-          counterpartName,
-          counterpartInitials: initialsFrom(counterpartName),
-          gigTitle: row.gigs?.title ?? null,
-        };
-      });
+      const rows: ConversationRow[] = (result.conversations ?? []).map((row: ConversationRow) => ({
+        ...row, counterpartInitials: initialsFrom(row.counterpartName),
+      }));
 
       setConversations(rows);
       const preferredId = requestedConversationId && rows.some((r) => r.id === requestedConversationId)
@@ -221,27 +201,15 @@ function MessagesPageInner() {
     let cancelled = false;
 
     async function loadMessages() {
-      const { data, error } = await supabase
-        .from("messages")
-        .select("id, conversation_id, sender_id, body, created_at")
-        .eq("conversation_id", activeId)
-        .order("created_at", { ascending: true });
-
-      if (!cancelled && !error) setMessages((data as MessageRow[]) ?? []);
+      const response = await fetch(`/api/conversations/${activeId}/messages`, { cache: 'no-store' });
+      if (response.ok && !cancelled) {
+        const result = await response.json();
+        setMessages((result.messages as MessageRow[]) ?? []);
+      }
     }
 
     loadMessages();
-
-    const channel = supabase
-      .channel(`messages:${activeId}`)
-      .on(
-        "postgres_changes",
-        { event: "INSERT", schema: "public", table: "messages", filter: `conversation_id=eq.${activeId}` },
-        (payload) => {
-          setMessages((current) => [...current, payload.new as MessageRow]);
-        }
-      )
-      .subscribe();
+    const refreshTimer = window.setInterval(loadMessages, 5000);
 
     // Separate ephemeral broadcast channel for the typing indicator — no
     // table, no rows written, so it costs nothing against the Supabase
@@ -249,7 +217,7 @@ function MessagesPageInner() {
     const typingChannel = supabase
       .channel(`typing:${activeId}`, { config: { broadcast: { self: false } } })
       .on("broadcast", { event: "typing" }, ({ payload }) => {
-        if (payload?.userId && payload.userId !== userId) {
+        if (payload?.role && payload.role !== activeConversation?.role) {
           setOtherTyping(true);
           if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
           typingTimeoutRef.current = setTimeout(() => setOtherTyping(false), 2500);
@@ -260,12 +228,12 @@ function MessagesPageInner() {
 
     return () => {
       cancelled = true;
-      supabase.removeChannel(channel);
+      window.clearInterval(refreshTimer);
       supabase.removeChannel(typingChannel);
       if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
       setOtherTyping(false);
     };
-  }, [activeId, userId]);
+  }, [activeId, activeConversation?.role]);
 
   // Mark conversation as read when the user opens it
   useEffect(() => {
@@ -275,8 +243,7 @@ function MessagesPageInner() {
       const conversation = conversations.find((c) => c.id === activeId);
       if (!conversation) return;
 
-      const isBuyer = conversation.buyer_id === userId;
-      const role = isBuyer ? "buyer" : "seller";
+      const role = conversation.role;
 
       await supabase.rpc("mark_conversation_read", {
         p_conversation_id: activeId,
@@ -299,7 +266,7 @@ function MessagesPageInner() {
 
     const now = Date.now();
     if (activeId && userId && now - lastTypingSentRef.current > 1500) {
-      typingChannelRef.current?.send({ type: "broadcast", event: "typing", payload: { userId } });
+      typingChannelRef.current?.send({ type: "broadcast", event: "typing", payload: { role: activeConversation?.role } });
       lastTypingSentRef.current = now;
     }
   }
@@ -314,26 +281,19 @@ function MessagesPageInner() {
       return;
     }
 
-    const { error } = await supabase.from("messages").insert({
-      conversation_id: activeId,
-      sender_id: userId,
-      body: text,
+    const response = await fetch(`/api/conversations/${activeId}/messages`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ text }),
     });
-
-    if (error) {
-      // The DB check constraint is the real backstop for restricted
-      // content — if the client-side regex missed something, this
-      // is where it actually gets rejected.
-      setWarning(
-        error.message.includes("messages_no_contact_sharing")
-          ? "That message can't be sent — links and contact details aren't allowed here."
-          : error.message
-      );
+    if (!response.ok) {
+      const result = await response.json();
+      setWarning(result.error || 'Could not send message.');
       return;
     }
 
     setDraft("");
     setWarning(null);
+    const refreshed = await fetch(`/api/conversations/${activeId}/messages`, { cache: 'no-store' });
+    if (refreshed.ok) setMessages((await refreshed.json()).messages);
   }
 
   function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
@@ -435,8 +395,8 @@ function MessagesPageInner() {
                   <MessageEntry
                     key={message.id}
                     message={message}
-                    isYou={message.sender_id === userId}
-                    senderName={message.sender_id === userId ? "You" : activeConversation.counterpartName}
+                    isYou={message.mine}
+                    senderName={message.mine ? "You" : activeConversation.counterpartName}
                   />
                 ))}
                 {otherTyping && (

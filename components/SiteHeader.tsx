@@ -6,15 +6,6 @@ import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabaseClient';
 import Logo from '@/components/Logo';
 
-type ConversationUnreadRow = {
-  id: string;
-  buyer_id: string;
-  seller_id: string;
-  buyer_last_read_at: string | null;
-  seller_last_read_at: string | null;
-  messages: { sender_id: string; created_at: string }[] | null;
-};
-
 export default function SiteHeader({ isSeller = false }: { isSeller?: boolean }) {
   const router = useRouter();
   const [unreadCount, setUnreadCount] = useState(0);
@@ -31,33 +22,16 @@ export default function SiteHeader({ isSeller = false }: { isSeller?: boolean })
         return;
       }
 
-      const { data, error } = await supabase
-        .from('conversations')
-        .select('id, buyer_id, seller_id, buyer_last_read_at, seller_last_read_at, messages ( sender_id, created_at )')
-        .or(`buyer_id.eq.${user.id},seller_id.eq.${user.id}`);
+      const response = await fetch('/api/conversations', { cache: 'no-store' });
 
       if (cancelled) return;
 
-      if (error) {
+      if (!response.ok) {
         setUnreadCount(0);
         return;
       }
-
-      const conversations = (data ?? []) as ConversationUnreadRow[];
-
-      const count = conversations.reduce((total, conversation) => {
-        const isBuyer = conversation.buyer_id === user.id;
-        const lastReadAt = isBuyer ? conversation.buyer_last_read_at : conversation.seller_last_read_at;
-        const latestIncomingMessage = (conversation.messages ?? [])
-          .filter((message) => message.sender_id !== user.id)
-          .sort((left, right) => new Date(right.created_at).getTime() - new Date(left.created_at).getTime())[0];
-
-        if (!latestIncomingMessage) return total;
-        if (!lastReadAt) return total + 1;
-        return new Date(latestIncomingMessage.created_at) > new Date(lastReadAt) ? total + 1 : total;
-      }, 0);
-
-      setUnreadCount(count);
+      const result = await response.json();
+      setUnreadCount(result.unreadCount ?? 0);
     }
 
     loadUnreadCount();

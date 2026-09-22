@@ -75,14 +75,11 @@ function DisputeForm({ orderId, onSubmitted }) {
     if (reason.trim().length < 10) { setError("Give a brief description (10+ characters)."); return; }
     setSubmitting(true);
     setError("");
-    const { data: { user } } = await supabase.auth.getUser();
-    const { error: insertError } = await supabase.from("disputes").insert({
-      order_id: orderId,
-      raised_by: user.id,
-      reason: reason.trim(),
+    const response = await fetch(`/api/orders/${orderId}/action`, {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "dispute", reason: reason.trim() }),
     });
-    if (insertError) { setError(insertError.message); setSubmitting(false); return; }
-    await supabase.from("orders").update({ status: "disputed" }).eq("id", orderId);
+    if (!response.ok) { const result = await response.json(); setError(result.error || "Could not open dispute."); setSubmitting(false); return; }
     onSubmitted();
   }
 
@@ -114,6 +111,8 @@ export default function OrdersPage() {
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState("");
   const [busyOrderId, setBusyOrderId] = useState(null);
+  const [files, setFiles] = useState({});
+  const [actionError, setActionError] = useState("");
   const [openPanel, setOpenPanel] = useState(null); // { orderId, type: 'review' | 'dispute' }
 
   async function loadOrders() {
@@ -124,26 +123,10 @@ export default function OrdersPage() {
     if (!user) { setLoadError("Sign in to view your orders."); setLoading(false); return; }
     setUserId(user.id);
 
-    const { data: sellerProfile, error: sellerProfileError } = await supabase
-      .from("seller_profiles")
-      .select("id")
-      .eq("user_id", user.id)
-      .maybeSingle();
-    if (sellerProfileError) { setLoadError(sellerProfileError.message); setLoading(false); return; }
-
-    const ownershipFilters = [`buyer_id.eq.${user.id}`];
-    if (sellerProfile?.id) ownershipFilters.push(`seller_id.eq.${sellerProfile.id}`);
-
-    const { data, error } = await supabase
-      .from("orders")
-      .select(
-        "id, buyer_id, seller_id, gig_id, amount, status, created_at, gigs ( title ), buyer:users!orders_buyer_id_fkey ( full_name ), seller:seller_profiles!orders_seller_id_fkey ( display_name )"
-      )
-      .or(ownershipFilters.join(","))
-      .order("created_at", { ascending: false });
-
-    if (error) { setLoadError(error.message); setLoading(false); return; }
-    setOrders(data || []);
+    const response = await fetch('/api/orders', { cache: 'no-store' });
+    const result = await response.json();
+    if (!response.ok) { setLoadError(result.error || 'Could not load orders.'); setLoading(false); return; }
+    setOrders(result.orders || []);
 
     const { data: myReviews } = await supabase.from("reviews").select("order_id").eq("reviewer_id", user.id);
     setReviewedOrderIds(new Set((myReviews || []).map((r) => r.order_id)));
@@ -152,18 +135,53 @@ export default function OrdersPage() {
 
   useEffect(() => { loadOrders(); }, []);
 
-  async function markDelivered(orderId) {
+  async function submitDelivery(orderId) {
+    const file = files[orderId];
+    if (!file || file.size > 10 * 1024 * 1024) { setActionError("Select a supported file under 10 MB."); return; }
     setBusyOrderId(orderId);
-    await supabase.from("orders").update({ status: "delivered" }).eq("id", orderId);
-    await loadOrders();
-    setBusyOrderId(null);
+    setActionError("");
+    try {
+      const signed = await fetch(`/api/orders/${orderId}/delivery`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ intent: 'sign', contentType: file.type }),
+      });
+      const token = await signed.json();
+      if (!signed.ok) throw new Error(token.error || 'Could not prepare upload.');
+      const { error: uploadError } = await supabase.storage.from('order-deliveries')
+        .uploadToSignedUrl(token.path, token.token, file, { contentType: file.type });
+      if (uploadError) throw uploadError;
+      const submitted = await fetch(`/api/orders/${orderId}/delivery`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ intent: 'submit', storagePath: token.path }),
+      });
+      const result = await submitted.json();
+      if (!submitted.ok) throw new Error(result.error || 'Could not submit delivery.');
+      await loadOrders();
+    } catch (cause) { setActionError(cause.message || 'Upload failed.'); }
+    finally { setBusyOrderId(null); }
   }
 
   async function approveOrder(orderId) {
     setBusyOrderId(orderId);
-    await supabase.from("orders").update({ status: "approved" }).eq("id", orderId);
-    await loadOrders();
-    setBusyOrderId(null);
+    setActionError("");
+    try {
+      const response = await fetch(`/api/orders/${orderId}/action`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'accept' }),
+      });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || 'Could not accept delivery.');
+      await loadOrders();
+    } catch (cause) { setActionError(cause.message || 'Action failed.'); }
+    finally { setBusyOrderId(null); }
+  }
+
+  async function openDelivery(orderId) {
+    setActionError('');
+    const response = await fetch(`/api/orders/${orderId}/delivery`, { cache: 'no-store' });
+    const result = await response.json();
+    if (!response.ok) { setActionError(result.error || 'Delivery unavailable.'); return; }
+    window.open(result.url, '_blank', 'noopener,noreferrer');
   }
 
   if (loading) {
@@ -179,6 +197,7 @@ export default function OrdersPage() {
         <h1 className="mt-3 font-display text-3xl font-bold">Orders &amp; escrow</h1>
 
         {loadError && <p className="mt-6 text-sm text-slate">{loadError}</p>}
+        {actionError && <p role="alert" className="mt-6 text-sm text-red-300">{actionError}</p>}
 
         {!loadError && orders.length === 0 && (
           <p className="mt-6 text-sm text-slate">
@@ -188,8 +207,8 @@ export default function OrdersPage() {
 
         <div className="mt-8 space-y-4">
           {orders.map((order) => {
-            const isBuyer = order.buyer_id === userId;
-            const counterpart = isBuyer ? order.seller?.display_name : order.buyer?.full_name;
+            const isBuyer = order.role === 'buyer';
+            const counterpart = order.counterpart;
             const alreadyReviewed = reviewedOrderIds.has(order.id);
             const panelOpen = openPanel?.orderId === order.id ? openPanel.type : null;
 
@@ -209,15 +228,19 @@ export default function OrdersPage() {
                 </div>
 
                 <div className="mt-4 flex flex-wrap gap-2">
-                  {!isBuyer && order.status === "in_escrow" && (
-                    <button
-                      onClick={() => markDelivered(order.id)}
-                      disabled={busyOrderId === order.id}
-                      className="rounded-full bg-ember px-4 py-2 text-xs font-semibold text-ink hover:bg-ember/90 transition-colors disabled:opacity-50"
-                    >
-                      Mark as delivered
-                    </button>
+                  {!isBuyer && order.status === "in_escrow" &&
+                    (!order.deliveries?.length || order.deliveries[0]?.status === 'needs_seller_edit') && (
+                    <div className="w-full rounded-xl border border-line p-4">
+                      <label className="block text-xs text-slate" htmlFor={`delivery-${order.id}`}>Upload the finished digital product (PDF, ZIP, image or text; max 10 MB)</label>
+                      <input id={`delivery-${order.id}`} type="file" accept=".pdf,.zip,.png,.jpg,.jpeg,.txt"
+                        className="mt-2 block max-w-full text-sm" onChange={event => setFiles({ ...files, [order.id]: event.target.files?.[0] })} />
+                      <button onClick={() => submitDelivery(order.id)} disabled={busyOrderId === order.id}
+                        className="mt-3 rounded-full bg-ember px-4 py-2 text-xs font-semibold text-ink disabled:opacity-50">
+                        {busyOrderId === order.id ? 'Uploading…' : 'Submit for admin review'}
+                      </button>
+                    </div>
                   )}
+                  {!isBuyer && order.deliveries?.[0]?.status === 'pending_review' && <span className="text-sm text-slate">Awaiting admin review</span>}
 
                   {isBuyer && order.status === "delivered" && (
                     <button
@@ -225,8 +248,12 @@ export default function OrdersPage() {
                       disabled={busyOrderId === order.id}
                       className="rounded-full bg-ember px-4 py-2 text-xs font-semibold text-ink hover:bg-ember/90 transition-colors disabled:opacity-50"
                     >
-                      Approve &amp; release payment
+                      Accept delivery
                     </button>
+                  )}
+
+                  {isBuyer && ['delivered','approved','disputed'].includes(order.status) && order.deliveries?.[0]?.status === 'delivered' && (
+                    <button onClick={() => openDelivery(order.id)} className="rounded-full border border-line px-4 py-2 text-xs font-medium text-ember">Download delivery</button>
                   )}
 
                   {isBuyer && order.status === "approved" && !alreadyReviewed && (
@@ -241,7 +268,7 @@ export default function OrdersPage() {
                     <span className="text-xs text-slate">You reviewed this order</span>
                   )}
 
-                  {["in_escrow", "delivered"].includes(order.status) && (
+                  {isBuyer && ["in_escrow", "delivered"].includes(order.status) && (
                     <button
                       onClick={() => setOpenPanel(panelOpen === "dispute" ? null : { orderId: order.id, type: "dispute" })}
                       className="rounded-full border border-line px-4 py-2 text-xs font-medium text-slate hover:border-slate hover:text-bone transition-colors"

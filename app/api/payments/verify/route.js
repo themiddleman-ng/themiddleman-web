@@ -1,1 +1,4 @@
-YªçŠx-®éÜj×¢ëiºÚ+Š§j[h‘éÜ¢éíó„èµ©hºÚn¶X§zÍKËÍí¢G§²ÚîÆ­y
+// Browser callbacks are notifications, never payment authority.
+export async function POST() {
+  return Response.json({ pending: true, message: 'Payment confirmation is handled by the secure webhook. Check My Orders shortly.' }, { status: 202 });
+}

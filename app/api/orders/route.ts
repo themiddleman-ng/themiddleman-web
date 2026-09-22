@@ -2,6 +2,7 @@ import { createServerClient } from '@supabase/ssr';
 import { createClient } from '@supabase/supabase-js';
 import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
+import { authenticatedUser, privateJson, serviceClient } from '@/lib/server/marketplace';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -13,6 +14,34 @@ function json(body: unknown, status = 200) {
     status,
     headers: { 'Cache-Control': 'private, no-store' },
   });
+}
+
+// Seller records deliberately omit buyer_id and all buyer profile details.
+// The base-table RLS in Phase E denies seller SELECT; this route constructs the
+// only seller-facing order response after checking seller_profiles.user_id.
+export async function GET() {
+  const user = await authenticatedUser();
+  if (!user) return privateJson({ error: 'Sign in to view your orders.' }, 401);
+  const db = serviceClient();
+  if (!db) return privateJson({ error: 'Orders are not configured.' }, 503);
+  const { data: sellerProfile, error: profileError } = await db
+    .from('seller_profiles').select('id').eq('user_id', user.id).maybeSingle();
+  if (profileError) return privateJson({ error: 'Could not load your seller profile.' }, 500);
+  const [buyer, seller] = await Promise.all([
+    db.from('orders').select('id, gig_id, amount, status, created_at, gigs(title), seller_profiles!orders_seller_id_fkey(display_name), deliveries(id,status)')
+      .eq('buyer_id', user.id).order('created_at', { ascending: false }),
+    sellerProfile?.id
+      ? db.from('orders').select('id, gig_id, amount, status, created_at, gigs(title), deliveries(id,status)')
+        .eq('seller_id', sellerProfile.id).order('created_at', { ascending: false })
+      : Promise.resolve({ data: [], error: null }),
+  ]);
+  if (buyer.error || seller.error) return privateJson({ error: 'Could not load orders.' }, 500);
+  const buyerOrders = (buyer.data ?? []).map(row => ({ ...row, role: 'buyer',
+    counterpart: row.seller_profiles?.[0]?.display_name ?? 'Seller',
+    seller_profiles: undefined }));
+  const sellerOrders = (seller.data ?? []).map(row => ({ ...row, role: 'seller', counterpart: 'Private buyer' }));
+  return privateJson({ orders: [...buyerOrders, ...sellerOrders]
+    .sort((a, b) => Date.parse(b.created_at) - Date.parse(a.created_at)) });
 }
 
 export async function POST(request: Request) {

@@ -1657,3 +1657,25 @@ html, body {
     grid-template-columns: 1fr;
   }
 }
+
+/* Give the login artwork and its copy separate layout space at laptop heights. */
+@media (min-width: 769px) {
+  .auth-visual-panel {
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: center;
+    gap: 1.5rem;
+    padding: 6rem 2rem 2rem;
+  }
+  .auth-handshake-container {
+    flex: 0 0 auto;
+    width: 100%;
+    max-width: none;
+    height: clamp(160px, 27vh, 260px);
+    margin: 0;
+  }
+  .auth-visual-copy {
+    position: relative;
+    inset: auto;
+  }
+}

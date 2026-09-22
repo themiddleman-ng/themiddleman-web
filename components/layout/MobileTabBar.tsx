@@ -63,15 +63,6 @@ function IconPlus() {
   );
 }
 
-type ConversationRow = {
-  id: string;
-  buyer_id: string;
-  seller_id: string;
-  buyer_last_read_at: string | null;
-  seller_last_read_at: string | null;
-  messages: { sender_id: string; created_at: string }[] | null;
-};
-
 export default function MobileTabBar() {
   const pathname = usePathname();
   const shouldShow = APP_PREFIXES.some((prefix) => pathname.startsWith(prefix));
@@ -114,23 +105,10 @@ export default function MobileTabBar() {
         if (!cancelled) setUnread(0);
         return;
       }
-      const { data, error } = await supabase
-        .from("conversations")
-        .select("id, buyer_id, seller_id, buyer_last_read_at, seller_last_read_at, messages ( sender_id, created_at )")
-        .or(`buyer_id.eq.${user.id},seller_id.eq.${user.id}`);
-      if (cancelled || error) return;
-
-      const count = ((data ?? []) as ConversationRow[]).reduce((total, conversation) => {
-        const isBuyer = conversation.buyer_id === user.id;
-        const lastReadAt = isBuyer ? conversation.buyer_last_read_at : conversation.seller_last_read_at;
-        const latestIncoming = (conversation.messages ?? [])
-          .filter((m) => m.sender_id !== user.id)
-          .sort((a, b) => +new Date(b.created_at) - +new Date(a.created_at))[0];
-        if (!latestIncoming) return total;
-        if (!lastReadAt) return total + 1;
-        return new Date(latestIncoming.created_at) > new Date(lastReadAt) ? total + 1 : total;
-      }, 0);
-      setUnread(count);
+      const response = await fetch('/api/conversations', { cache: 'no-store' });
+      if (cancelled || !response.ok) return;
+      const result = await response.json();
+      setUnread(result.unreadCount ?? 0);
     }
 
     loadUnreadCount();
@@ -150,7 +128,7 @@ export default function MobileTabBar() {
     | { href: string; label: string; icon: React.ReactNode; badge?: number }
     | null
   > = [
-    { href: "/", label: "Home", icon: <IconHome /> },
+    { href: "/marketplace", label: "Home", icon: <IconHome /> },
     { href: "/browse", label: "Browse", icon: <IconBrowse /> },
     null,
     { href: "/messages", label: "Messages", icon: <IconMessages />, badge: unread },
