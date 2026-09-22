@@ -1,7 +1,8 @@
 'use client';
 
 import Link from 'next/link';
-import { useState } from 'react';
+import Image from 'next/image';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabaseClient';
 
@@ -37,8 +38,18 @@ export default function NewGigPage() {
 	const [deliveryDays, setDeliveryDays] = useState('7');
 	const [experienceTier, setExperienceTier] = useState('beginner');
 	const [isAiAssisted, setIsAiAssisted] = useState(false);
+	const [images, setImages] = useState<File[]>([]);
+	const [video, setVideo] = useState<File | null>(null);
+	const [linksInput, setLinksInput] = useState('');
+	const [previewImage, setPreviewImage] = useState<string | null>(null);
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState('');
+	useEffect(() => {
+		if (!images[0]) { setPreviewImage(null); return; }
+		const url = URL.createObjectURL(images[0]);
+		setPreviewImage(url);
+		return () => URL.revokeObjectURL(url);
+	}, [images]);
 
 	const formReady =
 		title.trim().length > 0 &&
@@ -57,6 +68,16 @@ export default function NewGigPage() {
 
 		if (isNaN(price) || price <= 0) { setError('Enter a valid price.'); return; }
 		if (isNaN(days) || days <= 0) { setError('Enter a valid delivery time.'); return; }
+		const links = linksInput.split('\n').map((value) => value.trim()).filter(Boolean);
+		if (links.length > 3 || links.some((value) => { try { return new URL(value).protocol !== 'https:'; } catch { return true; } })) {
+			setError('Add up to three complete HTTPS demo links, one per line.'); return;
+		}
+		if (images.length > 4 || images.some((file) => !['image/jpeg','image/png','image/webp'].includes(file.type) || file.size > 5 * 1024 * 1024)) {
+			setError('Choose up to four JPG, PNG or WebP images, each under 5 MB.'); return;
+		}
+		if (video && (!['video/mp4','video/webm'].includes(video.type) || video.size > 20 * 1024 * 1024)) {
+			setError('Demo videos must be MP4 or WebM under 20 MB.'); return;
+		}
 
 		setLoading(true);
 
@@ -78,6 +99,25 @@ export default function NewGigPage() {
 			setLoading(false); return;
 		}
 
+		const uploaded: string[] = [];
+		async function upload(file: File) {
+			const extension = file.type === 'image/jpeg' ? 'jpg' : file.type === 'image/png' ? 'png'
+				: file.type === 'image/webp' ? 'webp' : file.type === 'video/mp4' ? 'mp4' : 'webm';
+			const path = `${user!.id}/gigs/${crypto.randomUUID()}.${extension}`;
+			const { error: uploadError } = await supabase.storage.from('gig-media').upload(path, file, { contentType: file.type, upsert: false });
+			if (uploadError) throw uploadError;
+			uploaded.push(path);
+			return path;
+		}
+		let imagePaths: string[] = [];
+		let videoPath: string | null = null;
+		try {
+			for (const image of images) imagePaths.push(await upload(image));
+			if (video) videoPath = await upload(video);
+		} catch (cause) {
+			if (uploaded.length) await supabase.storage.from('gig-media').remove(uploaded);
+			setError(cause instanceof Error ? cause.message : 'Could not upload gig media.'); setLoading(false); return;
+		}
 		const { error: insertError } = await supabase.from('gigs').insert({
 			seller_id: profile.id,
 			title: title.trim(),
@@ -87,9 +127,15 @@ export default function NewGigPage() {
 			delivery_days: days,
 			experience_tier: experienceTier,
 			is_ai_assisted: isAiAssisted,
+			gallery_image_paths: imagePaths,
+			demo_video_path: videoPath,
+			demo_links: links,
 		});
 
-		if (insertError) { setError(insertError.message); setLoading(false); return; }
+		if (insertError) {
+			if (uploaded.length) await supabase.storage.from('gig-media').remove(uploaded);
+			setError(insertError.message); setLoading(false); return;
+		}
 		router.push('/gigs/mine');
 	}
 
@@ -169,6 +215,18 @@ export default function NewGigPage() {
 								<span className="block text-xs text-slate mt-0.5">Check this if you use AI tools as part of your delivery. This will be clearly labeled for buyers.</span>
 							</label>
 						</div>
+						<div className="space-y-5 rounded-xl border border-line p-5">
+							<h2 className="font-display text-lg font-semibold text-bone">Show your work</h2>
+							<label className="block text-sm text-bone">Product images (up to 4, 5 MB each)
+								<input type="file" accept="image/png,image/jpeg,image/webp" multiple onChange={(event) => setImages(Array.from(event.target.files || []))} className="mt-2 block w-full text-sm text-slate" />
+							</label>
+							<label className="block text-sm text-bone">Demo video (optional, MP4 or WebM, 20 MB max)
+								<input type="file" accept="video/mp4,video/webm" onChange={(event) => setVideo(event.target.files?.[0] ?? null)} className="mt-2 block w-full text-sm text-slate" />
+							</label>
+							<label className="block text-sm text-bone">Demo links (optional, up to 3 HTTPS URLs)
+								<textarea value={linksInput} onChange={(event) => setLinksInput(event.target.value)} rows={3} placeholder="https://example.com/demo" className="field-input mt-2 w-full bg-ink/50 text-bone" />
+							</label>
+						</div>
 
 						{error && (
 							<div className="rounded-xl border border-red-900/40 bg-red-950/20 px-4 py-3 text-sm text-red-400 flex items-center gap-2">
@@ -192,6 +250,7 @@ export default function NewGigPage() {
 						</div>
 
 						<div className="live-ticket-preview relative rounded-xl px-6 pt-6 pb-5">
+							{previewImage && <Image unoptimized src={previewImage} width={600} height={338} alt="Preview of your first product image" className="mb-5 aspect-video w-full rounded-lg object-cover" />}
 							<div className="ticket-notch-left" style={{background: '#0D0D0D'}} />
 							<div className="ticket-notch-right" style={{background: '#0D0D0D'}} />
 
@@ -211,6 +270,7 @@ export default function NewGigPage() {
 							<p className="text-[9px] uppercase tracking-wider text-slate mb-1.5">{categoryLabel}</p>
 							<p className="font-display font-bold text-[16px] leading-snug mb-2 text-bone min-h-[40px]">{title || 'Your Gig Title Will Appear Here...'}</p>
 							<p className="text-[12px] text-slate mb-6 leading-relaxed line-clamp-3 min-h-[54px]">{description || 'Your description will appear here. Make sure it is at least 30 characters long to pass validation.'}</p>
+							<p className="mb-4 text-[11px] text-slate">{experienceTier} · {deliveryDays || '—'} day delivery{images.length > 1 ? ` · ${images.length} images` : ''}{video ? ' · Demo video' : ''}{linksInput.trim() ? ' · Demo links' : ''}</p>
 
 							<div className="flex items-center justify-between pt-4 border-t border-white/5">
 								<span className="inline-flex items-center gap-1.5 text-[10px] text-slate"><EscrowIcon />Escrow protected</span>
@@ -227,7 +287,7 @@ export default function NewGigPage() {
 							)}
 						</div>
 
-						<p className="mt-4 text-[11px] text-slate text-center leading-relaxed px-4">This is exactly how buyers will see your product in the marketplace.</p>
+						<p className="mt-4 text-[11px] text-slate text-center leading-relaxed px-4">A live preview of your product details. The marketplace card uses your first image.</p>
 					</div>
 				</div>
 			</div>

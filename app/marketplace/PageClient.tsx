@@ -17,6 +17,7 @@ type GigRow = {
   category: GigCategory;
   price_ngn: number;
   is_ai_assisted: boolean;
+  gallery_image_paths: string[];
   created_at: string;
   seller_profiles: {
     display_name: string;
@@ -134,7 +135,7 @@ export default function MarketplacePage() {
           supabase
             .from("gigs")
             .select(
-              "id, title, description, category, price_ngn, is_ai_assisted, created_at, seller_profiles ( display_name, verification_status )"
+              "id, title, description, category, price_ngn, is_ai_assisted, gallery_image_paths, created_at, seller_profiles ( display_name, verification_status )"
             )
             .eq("status", "active")
             .order("created_at", { ascending: false }),
