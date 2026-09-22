@@ -1,4 +1,5 @@
 import { notFound } from 'next/navigation';
+import Link from 'next/link';
 import SiteHeader from '@/components/SiteHeader';
 import { adminUser } from '@/lib/server/marketplace';
 import ReviewQueue from './review-queue';
@@ -18,6 +19,7 @@ export default async function AdminReviewPage() {
   return <main className="min-h-screen bg-ink text-bone">
     <SiteHeader />
     <section className="mx-auto max-w-5xl px-5 py-10 md:py-16">
+      <Link href="/admin" className="text-sm text-ember">← Admin overview</Link>
       <p className="text-xs font-semibold tracking-[.2em] text-ember">ADMIN / FULFILMENT</p>
       <h1 className="mt-3 font-display text-3xl font-bold md:text-5xl">Delivery review</h1>
       <p className="mt-3 max-w-2xl text-slate">Inspect each seller file before it becomes available to the buyer. Every decision is recorded.</p>
