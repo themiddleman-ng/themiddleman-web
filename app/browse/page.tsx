@@ -30,7 +30,10 @@ export default function BrowsePage() {
         <h1 className="mt-2 font-display text-3xl font-bold tracking-tight">What are you looking for?</h1>
 
         <form onSubmit={submit} className="mt-6">
+          <label htmlFor="browse-search" className="mb-2 block text-sm font-medium">Search the marketplace</label>
           <input
+            id="browse-search"
+            type="search"
             value={q}
             onChange={(e) => setQ(e.target.value)}
             placeholder="Search products, code, templates, sellers"
