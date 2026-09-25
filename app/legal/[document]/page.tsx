@@ -133,8 +133,18 @@ export default async function LegalPage({ params }: { params: Promise<{ document
 
   if (!doc) notFound();
 
+  const breadcrumbs = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://themiddleman.com.ng/' },
+      { '@type': 'ListItem', position: 2, name: doc.title, item: `https://themiddleman.com.ng/legal/${document}` },
+    ],
+  };
+
   return (
     <main className="min-h-screen bg-ink text-bone">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbs) }} />
       <header className="border-b border-line">
         <div className="mx-auto flex max-w-4xl items-center justify-between px-6 py-5">
           <Link href="/" className="font-display font-bold text-lg tracking-tight flex items-center gap-2">
@@ -146,6 +156,13 @@ export default async function LegalPage({ params }: { params: Promise<{ document
       </header>
 
       <div className="mx-auto max-w-4xl px-6 py-12">
+        <nav aria-label="Breadcrumb" className="mb-8 text-sm text-slate">
+          <ol className="flex flex-wrap items-center gap-2">
+            <li><Link href="/" className="underline underline-offset-4 hover:text-bone">Home</Link></li>
+            <li aria-hidden="true">/</li>
+            <li aria-current="page" className="text-bone">{doc.title}</li>
+          </ol>
+        </nav>
         <div className="mb-10">
           <p className="text-xs font-bold tracking-[.16em] text-ember uppercase">Legal Document</p>
           <h1 className="mt-2 font-display text-4xl font-bold">{doc.title}</h1>

@@ -1,0 +1,12 @@
+# The Middleman
+
+> A Nigerian marketplace for digital products and services. This file points to public information; it does not grant access to private accounts or orders.
+
+- [Home](https://themiddleman.com.ng/): Overview of the marketplace.
+- [Marketplace](https://themiddleman.com.ng/marketplace): Browse public listings.
+- [About](https://themiddleman.com.ng/about): Information about the project.
+- [Terms of Service](https://themiddleman.com.ng/legal/terms): Platform terms.
+- [Privacy Policy](https://themiddleman.com.ng/legal/privacy): How personal data is handled.
+- [Cookie Policy](https://themiddleman.com.ng/legal/cookies): Essential cookies and storage.
+- [Refund and Dispute Policy](https://themiddleman.com.ng/legal/refunds): Published refund information.
+- [Sitemap](https://themiddleman.com.ng/sitemap.xml): Public page index.
