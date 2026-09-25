@@ -4,6 +4,26 @@ import MobileTabBar from "@/components/layout/MobileTabBar";
 import CookieNotice from "@/components/legal/CookieNotice";
 
 const SITE_URL = "https://themiddleman.com.ng";
+const siteSchema = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      "@id": `${SITE_URL}/#organization`,
+      name: "The Middleman",
+      url: SITE_URL,
+      logo: `${SITE_URL}/brand/app-icon.png`,
+    },
+    {
+      "@type": "WebSite",
+      "@id": `${SITE_URL}/#website`,
+      name: "The Middleman",
+      url: SITE_URL,
+      publisher: { "@id": `${SITE_URL}/#organization` },
+      inLanguage: "en-NG",
+    },
+  ],
+};
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
@@ -61,6 +81,10 @@ export default function RootLayout({
   return (
     <html dir="ltr" lang="en" className="h-full antialiased">
       <body className="min-h-full flex flex-col bg-ink text-bone">
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(siteSchema) }}
+        />
         {children}
         <CookieNotice />
         <MobileTabBar />
