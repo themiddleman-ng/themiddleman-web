@@ -91,10 +91,10 @@ function PasswordChecklist({ value }) {
   );
 }
 
-function Field({ icon, label, children }) {
+function Field({ icon, label, id, children }) {
   return (
     <div className="field-shell">
-      <label className="field-label">{label}</label>
+      <label className="field-label" htmlFor={id}>{label}</label>
       <span className="field-icon">{icon}</span>
       {children}
     </div>
@@ -165,7 +165,6 @@ function AuthPageInner() {
         setState(saved.state || '');
         // Passwords must never persist in browser storage.
         window.localStorage.removeItem('mm_signup_draft');
-        if (typeof setAgreedToTerms === 'function') setAgreedToTerms(!!saved.agreedToTerms);
       }
     } catch (e) { /* ignore corrupt storage */ }
     setDraftLoaded(true);
@@ -173,8 +172,8 @@ function AuthPageInner() {
 
   useEffect(() => {
     if (typeof window === 'undefined' || !draftLoaded) return;
-    window.localStorage.setItem('mm_signup_draft', JSON.stringify({ fullName, email, phone, state, agreedToTerms }));
-  }, [fullName, email, phone, state, agreedToTerms, draftLoaded]);
+    window.localStorage.setItem('mm_signup_draft', JSON.stringify({ fullName, email, phone, state }));
+  }, [fullName, email, phone, state, draftLoaded]);
 
   const signupReady =
     fullName.trim().length > 0 &&
@@ -253,23 +252,23 @@ function AuthPageInner() {
             <p className="mt-2 text-sm text-slate">Buy or sell digital products and services with escrow protecting every transaction.</p>
 
             <form onSubmit={handleSignup} className="mt-7 space-y-4">
-              <Field icon={<UserIcon />} label="Full name">
-                <input type="text" placeholder="Ada Obi" value={fullName} onChange={(e) => setFullName(e.target.value)} required className="field-input" />
+              <Field icon={<UserIcon />} label="Full name" id="signup-name">
+                <input id="signup-name" type="text" autoComplete="name" placeholder="Ada Obi" value={fullName} onChange={(e) => setFullName(e.target.value)} required className="field-input" />
               </Field>
-              <Field icon={<MailIcon />} label="Email">
-                <input type="email" placeholder="you@example.com" value={email} onChange={(e) => setEmail(e.target.value)} required className="field-input" />
+              <Field icon={<MailIcon />} label="Email" id="signup-email">
+                <input id="signup-email" type="email" autoComplete="email" placeholder="you@example.com" value={email} onChange={(e) => setEmail(e.target.value)} required className="field-input" />
               </Field>
-              <Field icon={<PhoneIcon />} label="WhatsApp number">
-                <input type="tel" placeholder="080..." value={phone} onChange={(e) => setPhone(e.target.value)} required className="field-input" />
+              <Field icon={<PhoneIcon />} label="WhatsApp number" id="signup-phone">
+                <input id="signup-phone" type="tel" autoComplete="tel" placeholder="080..." value={phone} onChange={(e) => setPhone(e.target.value)} required className="field-input" />
               </Field>
-              <Field icon={<PinIcon />} label="State of residence">
-                <select value={state} onChange={(e) => setState(e.target.value)} required className="field-input field-select">
+              <Field icon={<PinIcon />} label="State of residence" id="signup-state">
+                <select id="signup-state" value={state} onChange={(e) => setState(e.target.value)} required className="field-input field-select">
                   <option value="" disabled>Select a state</option>
                   {NIGERIAN_STATES.map((s) => <option key={s} value={s}>{s}</option>)}
                 </select>
               </Field>
-              <Field icon={<LockIcon />} label="Password">
-                <input type="password" placeholder="9–15 characters" value={password} onChange={(e) => {
+              <Field icon={<LockIcon />} label="Password" id="signup-password">
+                <input id="signup-password" type="password" autoComplete="new-password" placeholder="9–15 characters" value={password} onChange={(e) => {
                   setPassword(e.target.value);
                   if (signupError) setSignupError('');
                 }} minLength={9} maxLength={15} required className="field-input" />
@@ -368,14 +367,14 @@ function AuthPageInner() {
                   <div className="auth-form-field">
                     <label htmlFor="login-email">Email address</label>
                     <div className="auth-input-shell">
-                      <input id="login-email" type="email" placeholder="you@example.com" value={loginEmail} onChange={(e) => setLoginEmail(e.target.value)} required />
+                      <input id="login-email" type="email" autoComplete="email" placeholder="you@example.com" value={loginEmail} onChange={(e) => setLoginEmail(e.target.value)} required />
                     </div>
                   </div>
 
                   <div className="auth-form-field">
                     <label htmlFor="login-password">Password</label>
                     <div className="auth-input-shell">
-                      <input id="login-password" type={showPassword ? 'text' : 'password'} placeholder="Enter your password" value={loginPassword} onChange={(e) => setLoginPassword(e.target.value)} required />
+                      <input id="login-password" type={showPassword ? 'text' : 'password'} autoComplete="current-password" placeholder="Enter your password" value={loginPassword} onChange={(e) => setLoginPassword(e.target.value)} required />
                       <button type="button" className="auth-toggle-pass" aria-label={showPassword ? 'Hide password' : 'Show password'} onClick={() => setShowPassword((value) => !value)}>
                         {showPassword ? 'HIDE' : 'SHOW'}
                       </button>
@@ -384,31 +383,10 @@ function AuthPageInner() {
 
                   {loginError && <p className="auth-error">{loginError}</p>}
 
-                  <div className="auth-row-between">
-                    <label className="auth-remember">
-                      <input type="checkbox" />
-                      Keep me signed in
-                    </label>
-                    <Link href="/signup?mode=signin">Forgot password?</Link>
-                  </div>
-
                   <button className="auth-primary-btn" type="submit" disabled={loginLoading}>
                     {loginLoading ? 'Signing in...' : 'Log in'}
                   </button>
                 </form>
-
-                <div className="auth-divider">or continue with</div>
-
-                <div className="auth-oauth-row">
-                  <button className="auth-social-btn" type="button" aria-label="Continue with Google">
-                    <svg width="16" height="16" viewBox="0 0 48 48"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.9 29.3 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.9 1.2 8 3.1l5.7-5.7C34.5 6.1 29.5 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.7-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.9 1.2 8 3.1l5.7-5.7C34.5 6.1 29.5 4 24 4c-7.7 0-14.3 4.4-17.7 10.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.4 26.7 36 24 36c-5.3 0-9.6-3.4-11.2-8.1l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.3-2.3 4.3-4.2 5.6l6.2 5.2C39.9 36.9 44 31 44 24c0-1.3-.1-2.7-.4-3.5z"/></svg>
-                    Google
-                  </button>
-                  <button className="auth-social-btn" type="button" aria-label="Continue with GitHub">
-                    <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg>
-                    GitHub
-                  </button>
-                </div>
 
                 <div className="auth-footer-line">
                   By continuing, you agree to our <Link href="/legal/terms">Terms</Link>
