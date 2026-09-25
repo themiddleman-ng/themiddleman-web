@@ -3,6 +3,7 @@ import { createClient } from '@supabase/supabase-js';
 import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
 import { authenticatedUser, privateJson, serviceClient } from '@/lib/server/marketplace';
+import { sameOriginMutation } from '@/lib/server/same-origin.mjs';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -45,6 +46,7 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
+  if (!sameOriginMutation(request)) return json({ error: 'Invalid request origin.' }, 403);
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
   const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;

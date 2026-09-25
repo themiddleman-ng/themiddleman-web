@@ -1,8 +1,10 @@
 import { adminUser, privateJson, uuidPattern } from '@/lib/server/marketplace';
+import { sameOriginMutation } from '@/lib/server/same-origin.mjs';
 
 export const runtime = 'nodejs';
 
 export async function POST(request: Request) {
+  if (!sameOriginMutation(request)) return privateJson({ error: 'Invalid request origin.' }, 403);
   const administrator = await adminUser();
   if (!administrator) return privateJson({ error: 'Admin access required.' }, 403);
   let body: { deliveryId?: string; decision?: string; notes?: string };
