@@ -1,4 +1,5 @@
 import { adminUser, authenticatedUser, ORDER_DELIVERIES_BUCKET, privateJson, serviceClient, uuidPattern } from '@/lib/server/marketplace';
+import { sameOriginMutation } from '@/lib/server/same-origin.mjs';
 
 export const runtime = 'nodejs';
 const allowed: Record<string, string> = {
@@ -28,6 +29,7 @@ export async function GET(_request: Request, { params }: { params: Promise<{ id:
 }
 
 export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
+  if (!sameOriginMutation(request)) return privateJson({ error: 'Invalid request origin.' }, 403);
   const { id } = await params;
   if (!uuidPattern.test(id)) return privateJson({ error: 'Invalid order.' }, 400);
   const user = await authenticatedUser();

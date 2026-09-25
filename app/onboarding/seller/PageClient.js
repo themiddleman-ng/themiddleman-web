@@ -100,6 +100,9 @@ export default function SellerOnboardingPage() {
     if (!idDocumentType) { setError('Select which document you are uploading.'); return; }
     if (!idFile) { setError('Upload an ID or business document to continue.'); return; }
     if (idFile.size > 10 * 1024 * 1024) { setError('Your document must be 10 MB or smaller.'); return; }
+    if (!['application/pdf', 'image/jpeg', 'image/png', 'image/webp'].includes(idFile.type)) {
+      setError('Upload a PDF, JPG, PNG or WebP document.'); return;
+    }
     if (!accepted) {
       setError('Confirm the checkbox to continue.');
       flashAgreement();
@@ -128,8 +131,7 @@ export default function SellerOnboardingPage() {
       gig_categories: selectedTypes,
       id_document_type: idDocumentType,
       id_document_url: filePath,
-      verification_status: 'pending',
-    });
+    }, { onConflict: 'user_id' });
     if (insertError) { setError(insertError.message); setLoading(false); return; }
 
     router.push('/onboarding/pending');
@@ -290,7 +292,7 @@ export default function SellerOnboardingPage() {
                   <input
                     required
                     type="file"
-                    accept="image/*,application/pdf"
+                    accept="image/jpeg,image/png,image/webp,application/pdf"
                     ref={fileInputRef}
                     onChange={(event) => setIdFile(event.target.files?.[0] || null)}
                     className="mt-4 block w-full text-xs file:mr-4 file:rounded-full file:border-0 file:bg-ember file:px-4 file:py-2 file:font-semibold file:text-ink"

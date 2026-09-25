@@ -1,4 +1,5 @@
 import { authenticatedUser, privateJson, serviceClient, uuidPattern } from '@/lib/server/marketplace';
+import { sameOriginMutation } from '@/lib/server/same-origin.mjs';
 
 export const runtime = 'nodejs';
 
@@ -27,6 +28,7 @@ export async function GET(_request: Request, { params }: { params: Promise<{ id:
 }
 
 export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
+  if (!sameOriginMutation(request)) return privateJson({ error: 'Invalid request origin.' }, 403);
   const { id } = await params;
   const session = await access(id);
   if (!session) return privateJson({ error: 'Conversation not found.' }, 404);

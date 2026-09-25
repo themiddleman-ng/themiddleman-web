@@ -109,7 +109,8 @@ function getInitialMode(searchParams) {
   if (fromUrl === 'signin') return true;
   if (fromUrl === 'signup') return false;
   if (typeof window !== 'undefined') {
-    return window.localStorage.getItem('mm_last_auth_mode') === 'signin';
+    try { return window.localStorage.getItem('mm_last_auth_mode') === 'signin'; }
+    catch { return false; }
   }
   return false;
 }
@@ -131,7 +132,8 @@ function AuthPageInner() {
   // straight to it instead of always defaulting to sign up.
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      window.localStorage.setItem('mm_last_auth_mode', flipped ? 'signin' : 'signup');
+      try { window.localStorage.setItem('mm_last_auth_mode', flipped ? 'signin' : 'signup'); }
+      catch { /* The auth form still works when preference storage is blocked. */ }
     }
   }, [flipped]);
 
@@ -152,29 +154,11 @@ function AuthPageInner() {
   const [loginError, setLoginError] = useState('');
   const [showPassword, setShowPassword] = useState(false);
 
-  const [draftLoaded, setDraftLoaded] = useState(false);
-
   useEffect(() => {
-    if (typeof window === 'undefined') return;
-    try {
-      const saved = JSON.parse(window.localStorage.getItem('mm_signup_draft') || 'null');
-      if (saved) {
-        setFullName(saved.fullName || '');
-        setEmail(saved.email || '');
-        setPhone(saved.phone || '');
-        setState(saved.state || '');
-        // Passwords must never persist in browser storage.
-        window.localStorage.removeItem('mm_signup_draft');
-      }
-    } catch (e) { /* ignore corrupt storage */ }
-    setDraftLoaded(true);
+    // Remove personal details and any consent value saved by earlier versions.
+    try { window.localStorage.removeItem('mm_signup_draft'); }
+    catch { /* Storage can be unavailable in private browsing. */ }
   }, []);
-
-  useEffect(() => {
-    if (typeof window === 'undefined' || !draftLoaded) return;
-    window.localStorage.setItem('mm_signup_draft', JSON.stringify({ fullName, email, phone, state }));
-  }, [fullName, email, phone, state, draftLoaded]);
-
   const signupReady =
     fullName.trim().length > 0 &&
     /^\S+@\S+\.\S+$/.test(email) &&
@@ -214,7 +198,6 @@ function AuthPageInner() {
       return;
     }
 
-    window.localStorage.removeItem('mm_signup_draft');
     router.push('/onboarding/role');
   }
 
