@@ -135,8 +135,23 @@ export default function GigPageClient({ gigId }: { gigId: string }) {
       const win = window as PaystackWindow;
       const handler = win.PaystackPop!.setup({
         key: publicKey, email: userEmail, amount: Number(order.amount) * 100, currency: "NGN", ref: `mm_${order.id}`,
-        // The browser cannot mark an order paid. The signed webhook does that.
-        callback: () => { router.push('/orders?payment=pending'); },
+        callback: (response) => {
+          fetch("/api/payments/verify", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ reference: response.reference, orderId: order.id }),
+          })
+            .then(async (res) => {
+              const result = await res.json();
+              if (!res.ok) throw new Error(result.error || "Payment verification is pending. Check My Orders shortly.");
+              return result;
+            })
+            .then(() => router.push("/orders"))
+            .catch(() => {
+              setActionError("We couldn't confirm payment yet — check My Orders shortly. Do not pay again.");
+              setPaying(false);
+            });
+        },
         onClose: () => setPaying(false),
       });
       handler.openIframe();
