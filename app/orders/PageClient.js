@@ -161,6 +161,25 @@ export default function OrdersPage() {
     finally { setBusyOrderId(null); }
   }
 
+  async function retryPaymentVerification(orderId) {
+    setBusyOrderId(orderId);
+    setActionError("");
+    try {
+      const response = await fetch("/api/payments/verify", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ reference: `mm_${orderId}`, orderId }),
+      });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || "Payment could not be verified yet.");
+      await loadOrders();
+    } catch (cause) {
+      setActionError(cause.message || "Payment could not be verified yet. Do not pay again.");
+    } finally {
+      setBusyOrderId(null);
+    }
+  }
+
   async function approveOrder(orderId) {
     setBusyOrderId(orderId);
     setActionError("");
@@ -241,6 +260,16 @@ export default function OrdersPage() {
                     </div>
                   )}
                   {!isBuyer && order.deliveries?.[0]?.status === 'pending_review' && <span className="text-sm text-slate">Awaiting admin review</span>}
+
+                  {isBuyer && order.status === "pending_payment" && (
+                    <button
+                      onClick={() => retryPaymentVerification(order.id)}
+                      disabled={busyOrderId === order.id}
+                      className="rounded-full bg-ember px-4 py-2 text-xs font-semibold text-ink hover:bg-ember/90 transition-colors disabled:opacity-50"
+                    >
+                      {busyOrderId === order.id ? "Checking payment…" : "Retry payment verification"}
+                    </button>
+                  )}
 
                   {isBuyer && order.status === "delivered" && (
                     <button
