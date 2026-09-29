@@ -4,6 +4,7 @@ import { readFile } from 'node:fs/promises';
 import test from 'node:test';
 import { PGlite } from '@electric-sql/pglite';
 import { createWebhookHandler } from '../lib/paystack-webhook.mjs';
+import { canonicalPaystackAmount } from '../lib/paystack-amount.mjs';
 import { POST as browserCallback } from '../app/api/payments/verify/route.js';
 
 const secret = 'sk_test_unit_test_only';
@@ -13,6 +14,15 @@ const event = { event: 'charge.success', data: { reference, amount: 500000, curr
 function request(body = JSON.stringify(event), signature = createHmac('sha512', secret).update(body).digest('hex')) {
   return new Request('https://example.test/api/payments/webhook', { method: 'POST', body, headers: { 'x-paystack-signature': signature } });
 }
+
+
+test('Paystack amount normalization preserves strict order pricing', () => {
+  assert.equal(canonicalPaystackAmount({ amount: 4500000 }), 4500000);
+  assert.equal(canonicalPaystackAmount({ amount: 4578681, requested_amount: 4500000 }), 4500000);
+  assert.equal(canonicalPaystackAmount({ amount: 4500000, requested_amount: 4578681 }), null);
+  assert.equal(canonicalPaystackAmount({ amount: -1, requested_amount: 4500000 }), null);
+  assert.equal(canonicalPaystackAmount({ amount: 4578681, requested_amount: '4500000' }), null);
+});
 
 test('HTTP signature, payload and callback boundaries', async () => {
   let writes = 0;
