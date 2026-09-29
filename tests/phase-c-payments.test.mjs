@@ -5,7 +5,7 @@ import test from 'node:test';
 import { PGlite } from '@electric-sql/pglite';
 import { createWebhookHandler } from '../lib/paystack-webhook.mjs';
 import { canonicalPaystackAmount } from '../lib/paystack-amount.mjs';
-import { POST as browserCallback } from '../app/api/payments/verify/route.js';
+import { createVerificationHandler } from '../lib/paystack-verify.mjs';
 
 const secret = 'sk_test_unit_test_only';
 const id = '10000000-0000-4000-8000-000000000001';
@@ -40,13 +40,47 @@ test('HTTP signature, payload and callback boundaries', async () => {
   }
   assert.equal((await handler(request(JSON.stringify({ event: 'transfer.success' })))).status, 200);
   assert.equal(writes, 0);
-  assert.equal((await browserCallback(request())).status, 202);
   assert.equal(writes, 0);
   assert.equal((await handler(request())).status, 200);
   assert.equal(writes, 1);
   const failing = createWebhookHandler({ secret, settle: async () => { throw new Error('database down'); } });
   assert.equal((await failing(request())).status, 500);
   assert.equal((await createWebhookHandler({ settle: async () => {} })(request())).status, 503);
+});
+
+test('browser verification accepts Paystack gross amount when requested_amount matches order', async () => {
+  let settled = null;
+  const verify = createVerificationHandler({
+    secret,
+    authenticate: async () => ({ id: 'buyer-1' }),
+    findOrder: async () => ({ id, buyer_id: 'buyer-1', amount: 45000, status: 'pending_payment' }),
+    settle: async (payment) => { settled = payment; return 'recorded'; },
+    verifyFetch: async () => Response.json({
+      status: true,
+      data: {
+        reference,
+        amount: 4578681,
+        requested_amount: 4500000,
+        currency: 'NGN',
+        status: 'success',
+        domain: 'test',
+      },
+    }),
+  });
+
+  const req = new Request('https://example.test/api/payments/verify', {
+    method: 'POST',
+    body: JSON.stringify({ reference, orderId: id }),
+    headers: {
+      'content-type': 'application/json',
+      origin: 'https://example.test',
+      'sec-fetch-site': 'same-origin',
+    },
+  });
+
+  const response = await verify(req);
+  assert.equal(response.status, 200);
+  assert.equal(settled.amount, 4500000);
 });
 
 test('PGlite: atomic recording, replay, rollback and direct access denial', async () => {
