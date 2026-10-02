@@ -68,6 +68,7 @@ function ReviewForm({ orderId, onSubmitted }) {
 
 function DisputeForm({ orderId, onSubmitted }) {
   const [reason, setReason] = useState("");
+  const [ground, setGround] = useState("not_as_described");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
 
@@ -77,7 +78,7 @@ function DisputeForm({ orderId, onSubmitted }) {
     setError("");
     const response = await fetch(`/api/orders/${orderId}/action`, {
       method: "POST", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ action: "dispute", reason: reason.trim() }),
+      body: JSON.stringify({ action: "dispute", ground, reason: reason.trim() }),
     });
     if (!response.ok) { const result = await response.json(); setError(result.error || "Could not open dispute."); setSubmitting(false); return; }
     onSubmitted();
@@ -86,6 +87,7 @@ function DisputeForm({ orderId, onSubmitted }) {
   return (
     <div className="mt-4 rounded-xl border border-line bg-ink p-4">
       <p className="text-xs text-slate mb-2">What went wrong?</p>
+      <label className="text-sm">Dispute ground<select className="auth-input my-3" value={ground} onChange={e=>setGround(e.target.value)}><option value="not_as_described">Does not match the listing</option><option value="broken_core_features">Core features do not work</option><option value="missing_core_features">Core features are missing</option><option value="repo_mismatch">Repository does not match the preview</option></select></label>
       <textarea
         value={reason}
         onChange={(e) => setReason(e.target.value)}
@@ -161,6 +163,25 @@ export default function OrdersPage() {
     finally { setBusyOrderId(null); }
   }
 
+  async function retryPaymentVerification(orderId) {
+    setBusyOrderId(orderId);
+    setActionError("");
+    try {
+      const response = await fetch("/api/payments/verify", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ reference: `mm_${orderId}`, orderId }),
+      });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || "Payment could not be verified yet.");
+      await loadOrders();
+    } catch (cause) {
+      setActionError(cause.message || "Payment could not be verified yet. Do not pay again.");
+    } finally {
+      setBusyOrderId(null);
+    }
+  }
+
   async function approveOrder(orderId) {
     setBusyOrderId(orderId);
     setActionError("");
@@ -194,7 +215,7 @@ export default function OrdersPage() {
 
       <section className="mx-auto max-w-4xl px-6 py-12">
         <p className="text-xs font-semibold tracking-[.2em] text-ember">MY ORDERS</p>
-        <h1 className="mt-3 font-display text-3xl font-bold">Orders &amp; escrow</h1>
+        <h1 className="mt-3 font-display text-3xl font-bold">Orders &amp; escrow</h1><Link href="/disputes" className="mt-4 inline-block text-ember">Respond to a dispute</Link>
 
         {loadError && <p className="mt-6 text-sm text-slate">{loadError}</p>}
         {actionError && <p role="alert" className="mt-6 text-sm text-red-300">{actionError}</p>}
@@ -227,11 +248,14 @@ export default function OrdersPage() {
                   </div>
                 </div>
 
+                {order.deliveries?.[0]?.review_notes && !isBuyer && <p className="mt-3 text-sm text-slate">Admin feedback: {order.deliveries[0].review_notes}</p>}
+                {order.deliveries?.[0]?.dispute_window_closes_at && isBuyer && <p className="mt-3 text-xs text-slate">Review ends {new Date(order.deliveries[0].dispute_window_closes_at).toLocaleString()}. Acceptance queues payout; provider confirmation completes it.</p>}
+                {order.deliveries?.[0]?.seller_due_at && !isBuyer && <p className="mt-3 text-xs text-slate">Submission due {new Date(order.deliveries[0].seller_due_at).toLocaleString()}</p>}
                 <div className="mt-4 flex flex-wrap gap-2">
                   {!isBuyer && order.status === "in_escrow" &&
-                    (!order.deliveries?.length || order.deliveries[0]?.status === 'needs_seller_edit') && (
+                    (!order.deliveries?.length || ['pending_upload','needs_seller_edit'].includes(order.deliveries[0]?.status)) && (
                     <div className="w-full rounded-xl border border-line p-4">
-                      <label className="block text-xs text-slate" htmlFor={`delivery-${order.id}`}>Upload the finished digital product (PDF, ZIP, image or text; max 10 MB)</label>
+                      <label className="block text-xs text-slate" htmlFor={`delivery-${order.id}`}>Upload the finished package (max 10 MB). Repository products require a ZIP without .git or secrets.</label>
                       <input id={`delivery-${order.id}`} type="file" accept=".pdf,.zip,.png,.jpg,.jpeg,.txt"
                         className="mt-2 block max-w-full text-sm" onChange={event => setFiles({ ...files, [order.id]: event.target.files?.[0] })} />
                       <button onClick={() => submitDelivery(order.id)} disabled={busyOrderId === order.id}
@@ -241,6 +265,16 @@ export default function OrdersPage() {
                     </div>
                   )}
                   {!isBuyer && order.deliveries?.[0]?.status === 'pending_review' && <span className="text-sm text-slate">Awaiting admin review</span>}
+
+                  {isBuyer && order.status === "pending_payment" && (
+                    <button
+                      onClick={() => retryPaymentVerification(order.id)}
+                      disabled={busyOrderId === order.id}
+                      className="rounded-full bg-ember px-4 py-2 text-xs font-semibold text-ink hover:bg-ember/90 transition-colors disabled:opacity-50"
+                    >
+                      {busyOrderId === order.id ? "Checking payment…" : "Retry payment verification"}
+                    </button>
+                  )}
 
                   {isBuyer && order.status === "delivered" && (
                     <button
