@@ -1,7 +1,6 @@
 import Link from 'next/link';
-import { notFound } from 'next/navigation';
 import SiteHeader from '@/components/SiteHeader';
-import { adminUser } from '@/lib/server/marketplace';
+import { requireAdminPage } from '@/lib/server/admin-page';
 import NotificationRetryButton from './notification-retry-button';
 
 export const dynamic = 'force-dynamic';
@@ -26,8 +25,7 @@ function StatusPill({ status }: { status: string }) {
 }
 
 export default async function AdminPage() {
-  const administrator = await adminUser();
-  if (!administrator) notFound();
+  const administrator = await requireAdminPage();
   const db = administrator.db;
 
   const [
@@ -77,6 +75,8 @@ export default async function AdminPage() {
           <Link href="/admin/review" className="rounded-full bg-ember px-5 py-2.5 text-sm font-bold text-ink">
             Open delivery review
           </Link>
+          <Link href="/admin/escrow" className="rounded-full border border-line px-5 py-2.5 text-sm font-semibold">Trust &amp; payouts</Link>
+          <Link href="/security" className="rounded-full border border-line px-5 py-2.5 text-sm font-semibold">Account security</Link>
           <Link href="/marketplace" className="rounded-full border border-line px-5 py-2.5 text-sm font-semibold">
             View marketplace
           </Link>

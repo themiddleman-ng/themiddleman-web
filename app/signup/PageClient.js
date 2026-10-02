@@ -54,7 +54,7 @@ function LockIcon() {
 }
 
 const PASSWORD_RULES = [
-  { key: 'length', label: '9–15 characters', test: (v) => v.length >= 9 && v.length <= 15 },
+  { key: 'length', label: '12–128 characters', test: (v) => v.length >= 12 && v.length <= 128 },
   { key: 'upper', label: 'One uppercase letter', test: (v) => /[A-Z]/.test(v) },
   { key: 'lower', label: 'One lowercase letter', test: (v) => /[a-z]/.test(v) },
   { key: 'number', label: 'One number', test: (v) => /\d/.test(v) },
@@ -172,7 +172,7 @@ function AuthPageInner() {
     setSignupError('');
 
     if (!passwordIsValid(password)) {
-      setSignupError('Password must be 9–15 characters and include an uppercase letter, a lowercase letter, a number, and a symbol.');
+      setSignupError('Password must be 12–128 characters and include an uppercase letter, a lowercase letter, a number, and a symbol.');
       return;
     }
 
@@ -218,7 +218,8 @@ function AuthPageInner() {
       return;
     }
 
-    router.push('/marketplace');
+    const assurance = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+    router.push(assurance.data?.nextLevel === 'aal2' && assurance.data?.currentLevel !== 'aal2' ? '/security' : '/marketplace');
   }
 
   return (
@@ -251,10 +252,10 @@ function AuthPageInner() {
                 </select>
               </Field>
               <Field icon={<LockIcon />} label="Password" id="signup-password">
-                <input id="signup-password" type="password" autoComplete="new-password" placeholder="9–15 characters" value={password} onChange={(e) => {
+                <input id="signup-password" type="password" autoComplete="new-password" placeholder="12–128 characters" value={password} onChange={(e) => {
                   setPassword(e.target.value);
                   if (signupError) setSignupError('');
-                }} minLength={9} maxLength={15} required className="field-input" />
+                }} minLength={12} maxLength={128} required className="field-input" />
               </Field>
               <PasswordChecklist value={password} />
               {/* Consent checkbox — REQUIRED */}
@@ -355,7 +356,7 @@ function AuthPageInner() {
                   </div>
 
                   <div className="auth-form-field">
-                    <label htmlFor="login-password">Password</label>
+                    <label htmlFor="login-password">Password</label><Link href="/reset-password" className="text-xs text-ember">Forgot password?</Link>
                     <div className="auth-input-shell">
                       <input id="login-password" type={showPassword ? 'text' : 'password'} autoComplete="current-password" placeholder="Enter your password" value={loginPassword} onChange={(e) => setLoginPassword(e.target.value)} required />
                       <button type="button" className="auth-toggle-pass" aria-label={showPassword ? 'Hide password' : 'Show password'} onClick={() => setShowPassword((value) => !value)}>

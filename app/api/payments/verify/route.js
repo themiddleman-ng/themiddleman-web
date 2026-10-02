@@ -1,5 +1,6 @@
 import { authenticatedUser, serviceClient } from '@/lib/server/marketplace';
 import { settlePaystackPayment } from '@/lib/server/paystack-settlement.mjs';
+import { escrowV2Enabled } from '@/lib/server/escrow-config.mjs';
 import { createVerificationHandler } from '../../../../lib/paystack-verify.mjs';
 
 export const runtime = 'nodejs';
@@ -19,6 +20,11 @@ export async function POST(request) {
         .eq('buyer_id', buyerId)
         .maybeSingle();
       if (error) throw new Error('Order lookup failed');
+      if (escrowV2Enabled() && data) {
+        const fees = await admin.from('order_fee_snapshots').select('buyer_total_kobo').eq('order_id', id).maybeSingle();
+        if (fees.error) throw new Error('Fee snapshot unavailable');
+        return { ...data, buyer_total_kobo: fees.data?.buyer_total_kobo };
+      }
       return data;
     },
     settle: async (payment) => {

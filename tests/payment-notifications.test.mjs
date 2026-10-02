@@ -74,3 +74,10 @@ test('payment email templates escape product markup and preserve buyer privacy',
   assert.match(templates.seller.text, /buyer/i);
   assert.doesNotMatch(templates.seller.text, /buyer@example\.com/i);
 });
+
+test('seller receipt exposes payout only, while buyer receipt shows their total', () => {
+  const templates = paymentSettledTemplates({title:'Repo package',amount:53225,sellerAmount:44625,orderId:'private-order'});
+  assert.match(templates.buyer.text,/53,225/);
+  assert.match(templates.seller.text,/44,625/);
+  assert.doesNotMatch(templates.seller.html,/53,225/);
+});

@@ -1,4 +1,6 @@
 import { adminUser, authenticatedUser, ORDER_DELIVERIES_BUCKET, privateJson, serviceClient, uuidPattern } from '@/lib/server/marketplace';
+import { escrowV2Enabled } from '@/lib/server/escrow-config.mjs';
+import { inspectPackage } from '@/lib/server/package-validation.mjs';
 import { sameOriginMutation } from '@/lib/server/same-origin.mjs';
 
 export const runtime = 'nodejs';
@@ -23,12 +25,11 @@ export async function GET(_request: Request, { params }: { params: Promise<{ id:
     (delivery.status !== 'delivered' || !['delivered','approved','disputed'].includes(order.status)))) {
     return privateJson({ error: 'File is not available.' }, 404);
   }
-  const { data, error } = await db.storage.from(ORDER_DELIVERIES_BUCKET)
-    .createSignedUrl(delivery.storage_path, 60);
-  return error || !data ? privateJson({ error: 'File is unavailable.' }, 404) : privateJson({ url: data.signedUrl });
+  return privateJson({ url: `/api/orders/${id}/delivery/download` });
 }
 
 export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
+  if (!escrowV2Enabled()) return privateJson({ error: 'Validated delivery needs an isolated preview database.' }, 503);
   if (!sameOriginMutation(request)) return privateJson({ error: 'Invalid request origin.' }, 403);
   const { id } = await params;
   if (!uuidPattern.test(id)) return privateJson({ error: 'Invalid order.' }, 400);
@@ -62,8 +63,14 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     if (fileError || !file || Number(file.size) > 10485760 || !allowed[file.contentType ?? '']) {
       return privateJson({ error: 'Upload a supported file before submitting.' }, 400);
     }
-    const { data, error } = await db.rpc('submit_order_delivery', {
+    const { data: uploaded, error: downloadError } = await db.storage.from(ORDER_DELIVERIES_BUCKET).download(path);
+    if (downloadError || !uploaded || uploaded.size > 10485760) return privateJson({ error: 'Package unavailable.' }, 400);
+    let metadata;
+    try { metadata = await inspectPackage(await uploaded.arrayBuffer(), file.contentType ?? ''); }
+    catch (cause) { return privateJson({ error: cause instanceof Error ? cause.message : 'Invalid package.' }, 400); }
+    const { data, error } = await db.rpc('submit_checked_order_delivery', {
       p_order_id: id, p_seller_uid: user.id, p_storage_path: path,
+      p_sha256: metadata.sha256, p_size: metadata.size, p_content_type: file.contentType,
     });
     return error ? privateJson({ error: error.message }, 409) : privateJson({ deliveryId: data }, 201);
   }

@@ -1,14 +1,23 @@
+import { createHash } from 'node:crypto';
 import { createServerClient } from '@supabase/ssr';
 import { createClient } from '@supabase/supabase-js';
 import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
 import { authenticatedUser, privateJson, serviceClient } from '@/lib/server/marketplace';
+import { escrowV2Enabled } from '@/lib/server/escrow-config.mjs';
 import { sameOriginMutation } from '@/lib/server/same-origin.mjs';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+function buyerDelivery(value: unknown): unknown {
+  if (Array.isArray(value)) return value.map(buyerDelivery);
+  if (!value || typeof value !== 'object') return value;
+  const { review_notes: _notes, ...delivery } = value as Record<string, unknown>;
+  return delivery;
+}
 
 function json(body: unknown, status = 200) {
   return NextResponse.json(body, {
@@ -28,17 +37,19 @@ export async function GET() {
   const { data: sellerProfile, error: profileError } = await db
     .from('seller_profiles').select('id').eq('user_id', user.id).maybeSingle();
   if (profileError) return privateJson({ error: 'Could not load your seller profile.' }, 500);
+  const deliveryFields = escrowV2Enabled() ? 'deliveries(id,status,review_notes,seller_due_at,dispute_window_closes_at)' : 'deliveries(id,status)';
   const [buyer, seller] = await Promise.all([
-    db.from('orders').select('id, gig_id, amount, status, created_at, gigs(title), seller_profiles!orders_seller_id_fkey(display_name), deliveries(id,status)')
+    db.from('orders').select(`id, gig_id, amount, status, created_at, gigs(title), seller_profiles!orders_seller_id_fkey(display_name), ${deliveryFields}`)
       .eq('buyer_id', user.id).order('created_at', { ascending: false }),
     sellerProfile?.id
-      ? db.from('orders').select('id, gig_id, amount, status, created_at, gigs(title), deliveries(id,status)')
+      ? db.from('orders').select(`id, gig_id, amount, status, created_at, gigs(title), ${deliveryFields}`)
         .eq('seller_id', sellerProfile.id).order('created_at', { ascending: false })
       : Promise.resolve({ data: [], error: null }),
   ]);
   if (buyer.error || seller.error) return privateJson({ error: 'Could not load orders.' }, 500);
   const buyerOrders = (buyer.data ?? []).map(row => ({ ...row, role: 'buyer',
-    counterpart: row.seller_profiles?.[0]?.display_name ?? 'Seller',
+    deliveries: buyerDelivery(row.deliveries),
+    counterpart: `Creator ${createHash('sha256').update(row.id).digest('hex').slice(0,8)}`,
     seller_profiles: undefined }));
   const sellerOrders = (seller.data ?? []).map(row => ({ ...row, role: 'seller', counterpart: 'Private buyer' }));
   return privateJson({ orders: [...buyerOrders, ...sellerOrders]
@@ -93,6 +104,23 @@ export async function POST(request: Request) {
     auth: { autoRefreshToken: false, persistSession: false },
   });
 
+  if (escrowV2Enabled()) {
+    if (!/^sk_test_/.test(process.env.PAYSTACK_SECRET_KEY ?? '') || !/^pk_test_/.test(process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY ?? '')) {
+      return json({ error: 'Isolated checkout requires Paystack test keys.' }, 503);
+    }
+    const rate = Number(process.env.ESCROW_FX_NGN_PER_USD);
+    const quotedAt = process.env.ESCROW_FX_QUOTED_AT;
+    const source = process.env.ESCROW_FX_SOURCE;
+    if (!Number.isFinite(rate) || rate <= 0 || !quotedAt || !source) return json({ error: 'Checkout FX quote is unavailable.' }, 503);
+    const { data, error } = await admin.rpc('create_escrow_order', {
+      p_buyer_uid: user.id, p_gig_id: gigId, p_key: idempotencyKey,
+      p_fx_rate: rate, p_fx_quoted_at: quotedAt, p_fx_source: source,
+    });
+    if (error || !data?.order) return json({ error: 'Checkout is unavailable, expired, or this exclusive product is reserved.' }, 409);
+    return json({ ...data, display: { currency: 'USD', buyer_total_minor:
+      Math.round(Number(data.fees.buyer_total_kobo) / Number(data.fees.fx_rate_ngn_per_usd)) } }, data.reused ? 200 : 201);
+  }
+
   const { data: existing, error: existingError } = await admin
     .from('orders')
     .select('id, gig_id, amount, status')
@@ -109,18 +137,18 @@ export async function POST(request: Request) {
 
   const { data: gig, error: gigError } = await admin
     .from('gigs')
-    .select('id, seller_id, price_ngn, status, seller_profiles ( user_id, verification_status )')
+    .select('id, seller_id, price_ngn, status, is_exclusive, is_sold, seller_profiles ( user_id, verification_status )')
     .eq('id', gigId)
     .maybeSingle();
   if (gigError) return json({ error: 'Could not load this product.' }, 500);
-  if (!gig || gig.status !== 'active') {
+  if (!gig || gig.status !== 'active' || gig.is_sold || gig.is_exclusive) {
     return json({ error: 'This product is not available for purchase.' }, 409);
   }
 
   const sellerProfile = Array.isArray(gig.seller_profiles)
     ? gig.seller_profiles[0]
     : gig.seller_profiles;
-  if (!sellerProfile?.user_id) {
+  if (!sellerProfile?.user_id || sellerProfile.verification_status !== 'approved') {
     return json({ error: 'This product does not have a valid seller account.' }, 409);
   }
   if (sellerProfile.user_id === user.id) {

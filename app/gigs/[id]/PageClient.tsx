@@ -16,6 +16,7 @@ type GigRow = {
   experience_tier: string | null; seller_profiles: SellerProfile | null;
   gallery_image_paths: string[]; demo_video_path: string | null; demo_links: string[];
 };
+type Checkout = { order: { id: string; amount: number; status: string }; fees: Record<string, number> | null; display?: {currency:string;buyer_total_minor:number} };
 type ReviewRow = { rating: number; comment: string | null; reviewer_name: string | null };
 type PaystackWindow = Window & { PaystackPop?: { setup: (options: {
   key: string; email: string | null; amount: number; currency: string; ref: string;
@@ -105,6 +106,8 @@ export default function GigPageClient({ gigId }: { gigId: string }) {
     finally { setMessaging(false); }
   }
 
+  const [checkout, setCheckout] = useState<Checkout | null>(null);
+
   async function handleBuyAndPay() {
     setActionError("");
     if (!userId) { router.push("/signup?mode=signin"); return; }
@@ -131,10 +134,22 @@ export default function GigPageClient({ gigId }: { gigId: string }) {
       }
       const order = orderResult.order as { id: string; amount: number; status: string };
       if (order.status !== 'pending_payment') { router.push('/orders'); return; }
+      setCheckout({ order, fees: orderResult.fees ?? null, display: orderResult.display });
+      setPaying(false);
+    } catch (err) { setActionError(err instanceof Error ? err.message : String(err)); setPaying(false); }
+  }
+
+  async function payReviewedCheckout() {
+    if (!checkout) return;
+    const { order, fees } = checkout;
+    const publicKey = process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY;
+    if (!publicKey) return;
+    setPaying(true);
+    try {
       await loadPaystackScript();
       const win = window as PaystackWindow;
       const handler = win.PaystackPop!.setup({
-        key: publicKey, email: userEmail, amount: Number(order.amount) * 100, currency: "NGN", ref: `mm_${order.id}`,
+        key: publicKey, email: userEmail, amount: fees?.buyer_total_kobo ?? Number(order.amount) * 100, currency: "NGN", ref: `mm_${order.id}`,
         callback: (response) => {
           fetch("/api/payments/verify", {
             method: "POST",
@@ -196,6 +211,14 @@ export default function GigPageClient({ gigId }: { gigId: string }) {
   const purchasePanel = <div className="rounded-2xl border border-line bg-paper p-6 shadow-[0_18px_50px_rgba(31,21,12,.08)]">
     <div className="flex items-baseline justify-between"><span className="text-sm text-slate">Price</span><span className="font-mono text-2xl font-semibold text-bone">₦{gig.price_ngn.toLocaleString()}</span></div>
     {isOwnGig ? <div className="mt-5 space-y-3"><p className="text-center text-xs text-slate">This is your product.{" "}<Link href="/gigs/mine" className="text-ember hover:underline">Manage it</Link></p><button onClick={handleDeleteGig} className="w-full rounded-full border border-red-900/20 bg-red-950/10 px-5 py-3 text-sm font-semibold text-red-500 transition-colors hover:border-red-900/40 hover:bg-red-950/20">Delete product</button></div> : <div className="mt-5 space-y-3"><button onClick={handleBuyAndPay} disabled={paying} className="auth-button w-full">{paying ? "Opening secure checkout…" : "Buy now — payment protected"}</button><button onClick={handleMessageSeller} disabled={messaging} className="w-full rounded-full border border-line px-5 py-3 text-sm font-medium text-bone transition-colors hover:border-slate">{messaging ? "Opening…" : "Message seller"}</button></div>}
+    {checkout && <section className="mt-5 border-t border-line pt-5" aria-label="Checkout summary">
+      <h2 className="font-semibold">Review your total</h2>
+      <dl className="mt-3 space-y-2 text-sm">{(checkout.fees ? [['Product',checkout.fees.price_kobo],['Service fee (3%)',checkout.fees.buyer_fee_kobo],['Platform fee ($1)',checkout.fees.flat_fee_kobo],['VAT on fees',checkout.fees.buyer_vat_kobo],['Total',checkout.fees.buyer_total_kobo]] : [['Total',Number(checkout.order.amount)*100]]).map(([label,value])=><div key={String(label)} className="flex justify-between gap-3"><dt>{label}</dt><dd>₦{(Number(value)/100).toLocaleString('en-NG',{minimumFractionDigits:2})}</dd></div>)}</dl>
+      {checkout.display && <p className="mt-3 text-sm text-slate">Estimated USD total: {new Intl.NumberFormat('en-US',{style:'currency',currency:'USD'}).format(checkout.display.buyer_total_minor/100)}</p>}
+      {checkout.fees && <p className="mt-3 text-xs text-slate">You pay in NGN. The USD-to-NGN rate used for the $1 platform fee is locked to this order. Your bank sets its own conversion rate.</p>}
+      <button onClick={payReviewedCheckout} disabled={paying} className="auth-button mt-4 w-full">{paying?'Opening payment…':'Continue to Paystack'}</button>
+      <button className="mt-3 text-sm text-slate underline" disabled={paying} onClick={()=>{setCheckout(null);orderRequestKey.current=null;}}>Close checkout</button>
+    </section>}
     {actionError && <p className="auth-error mt-4">{actionError}</p>}
   </div>;
 
