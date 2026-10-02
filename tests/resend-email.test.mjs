@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { createResendMailer, testEmailTemplate } from '../lib/server/email.mjs';
+import { createResendMailer } from '../lib/server/email.mjs';
 
 test('Resend mailer sends the expected server-side request', async () => {
   let captured;
@@ -15,7 +15,8 @@ test('Resend mailer sends the expected server-side request', async () => {
 
   const result = await mailer.send({
     to: 'buyer@example.com',
-    ...testEmailTemplate(),
+    subject: 'Payment confirmed',
+    text: 'Payment confirmed.',
   });
 
   assert.deepEqual(result, { ok: true, id: 'email_test_1' });
@@ -25,7 +26,7 @@ test('Resend mailer sends the expected server-side request', async () => {
   const payload = JSON.parse(captured.options.body);
   assert.equal(payload.from, 'The Middleman <notifications@mail.themiddleman.com.ng>');
   assert.deepEqual(payload.to, ['buyer@example.com']);
-  assert.equal(payload.subject, 'The Middleman email setup is working');
+  assert.equal(payload.subject, 'Payment confirmed');
 });
 
 test('Resend mailer fails closed when the API key is missing', async () => {

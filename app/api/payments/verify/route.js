@@ -1,4 +1,5 @@
 import { authenticatedUser, serviceClient } from '@/lib/server/marketplace';
+import { settlePaystackPayment } from '@/lib/server/paystack-settlement.mjs';
 import { createVerificationHandler } from '../../../../lib/paystack-verify.mjs';
 
 export const runtime = 'nodejs';
@@ -23,13 +24,7 @@ export async function POST(request) {
     settle: async (payment) => {
       const admin = serviceClient();
       if (!admin) throw new Error('Missing database configuration');
-      const { data, error } = await admin.rpc('record_paystack_payment', {
-        p_reference: payment.reference,
-        p_amount_kobo: payment.amount,
-        p_currency: payment.currency,
-      });
-      if (error) throw new Error('Payment recording failed');
-      return data;
+      return settlePaystackPayment({ admin, payment });
     },
   })(request);
 }
