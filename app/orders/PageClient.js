@@ -114,6 +114,7 @@ export default function OrdersPage() {
   const [files, setFiles] = useState({});
   const [actionError, setActionError] = useState("");
   const [openPanel, setOpenPanel] = useState(null); // { orderId, type: 'review' | 'dispute' }
+  const [emailTestState, setEmailTestState] = useState({ status: 'idle', message: '' });
 
   async function loadOrders() {
     setLoading(true);
@@ -134,6 +135,22 @@ export default function OrdersPage() {
   }
 
   useEffect(() => { loadOrders(); }, []);
+
+  async function sendTestEmail() {
+    setEmailTestState({ status: 'sending', message: '' });
+    try {
+      const response = await fetch('/api/email/test', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({}),
+      });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || 'Could not send test email.');
+      setEmailTestState({ status: 'success', message: 'Test email sent. Check your inbox.' });
+    } catch (cause) {
+      setEmailTestState({ status: 'error', message: cause.message || 'Could not send test email.' });
+    }
+  }
 
   async function submitDelivery(orderId) {
     const file = files[orderId];
@@ -214,6 +231,25 @@ export default function OrdersPage() {
       <section className="mx-auto max-w-4xl px-6 py-12">
         <p className="text-xs font-semibold tracking-[.2em] text-ember">MY ORDERS</p>
         <h1 className="mt-3 font-display text-3xl font-bold">Orders &amp; escrow</h1>
+
+        <div className="mt-5 flex flex-wrap items-center gap-3">
+          <button
+            type="button"
+            onClick={sendTestEmail}
+            disabled={emailTestState.status === 'sending'}
+            className="rounded-full border border-line px-4 py-2 text-xs font-semibold text-bone hover:border-slate transition-colors disabled:opacity-50"
+          >
+            {emailTestState.status === 'sending' ? 'Sending test email…' : 'Send test email'}
+          </button>
+          {emailTestState.message && (
+            <p
+              role={emailTestState.status === 'error' ? 'alert' : undefined}
+              className={`text-xs ${emailTestState.status === 'error' ? 'text-red-300' : 'text-slate'}`}
+            >
+              {emailTestState.message}
+            </p>
+          )}
+        </div>
 
         {loadError && <p className="mt-6 text-sm text-slate">{loadError}</p>}
         {actionError && <p role="alert" className="mt-6 text-sm text-red-300">{actionError}</p>}
