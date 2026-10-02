@@ -9,7 +9,7 @@ const payment = {
   currency: 'NGN',
 };
 
-test('recorded payment triggers notifications exactly once', async () => {
+test('recorded payment triggers notifications', async () => {
   let notifications = 0;
   const admin = {
     rpc: async () => ({ data: 'recorded', error: null }),
@@ -28,7 +28,7 @@ test('recorded payment triggers notifications exactly once', async () => {
   assert.equal(notifications, 1);
 });
 
-test('duplicate payment does not send duplicate notifications', async () => {
+test('duplicate verification retries durable notifications without changing payment state', async () => {
   let notifications = 0;
   const admin = {
     rpc: async () => ({ data: 'duplicate', error: null }),
@@ -44,7 +44,7 @@ test('duplicate payment does not send duplicate notifications', async () => {
   });
 
   assert.equal(outcome, 'duplicate');
-  assert.equal(notifications, 0);
+  assert.equal(notifications, 1);
 });
 
 test('email failure never rolls back a recorded payment', async () => {
