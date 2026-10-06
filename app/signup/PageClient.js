@@ -146,6 +146,7 @@ function AuthPageInner() {
   const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [signupLoading, setSignupLoading] = useState(false);
   const [signupError, setSignupError] = useState('');
+  const [signupNotice, setSignupNotice] = useState('');
 
   // Sign in state
   const [loginEmail, setLoginEmail] = useState('');
@@ -170,6 +171,7 @@ function AuthPageInner() {
   async function handleSignup(e) {
     e.preventDefault();
     setSignupError('');
+    setSignupNotice('');
 
     if (!passwordIsValid(password)) {
       setSignupError('Password must be 12–128 characters and include an uppercase letter, a lowercase letter, a number, and a symbol.');
@@ -181,7 +183,10 @@ function AuthPageInner() {
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
-      options: { data: { full_name: fullName, phone, state } },
+      options: {
+        data: { full_name: fullName, phone, state },
+        emailRedirectTo: `${window.location.origin}/auth/callback?next=/onboarding/role`,
+      },
     });
 
     if (error) {
@@ -194,6 +199,12 @@ function AuthPageInner() {
         (typeof error === 'string' ? error : 'Sign up failed. Please check your details and try again.');
 
       setSignupError(errorMsg);
+      setSignupLoading(false);
+      return;
+    }
+
+    if (!data.session) {
+      setSignupNotice(`We sent a confirmation link to ${email}. Open it to verify your email and continue setting up your account.`);
       setSignupLoading(false);
       return;
     }
@@ -276,13 +287,26 @@ function AuthPageInner() {
                 </label>
               </div>
               {signupError && <p className="auth-error">{signupError}</p>}
-              <button
-                className="auth-button disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-ember shadow-lg shadow-ember/20"
-                type="submit"
-                disabled={signupLoading || !signupReady}
-              >
-                {signupLoading ? 'Creating account...' : 'Sign Up'}
-              </button>
+              {signupNotice ? (
+                <div className="rounded-xl border border-ember/30 bg-ember/10 p-4 text-sm leading-relaxed text-bone" role="status">
+                  <p>{signupNotice}</p>
+                  <button
+                    type="button"
+                    onClick={() => setFlipped(true)}
+                    className="mt-3 font-semibold text-ember hover:underline"
+                  >
+                    Go to sign in
+                  </button>
+                </div>
+              ) : (
+                <button
+                  className="auth-button disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-ember shadow-lg shadow-ember/20"
+                  type="submit"
+                  disabled={signupLoading || !signupReady}
+                >
+                  {signupLoading ? 'Creating account...' : 'Sign Up'}
+                </button>
+              )}
             </form>
 
             <p className="mt-5 text-center text-xs text-slate">
