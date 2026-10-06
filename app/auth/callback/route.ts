@@ -4,10 +4,13 @@ import { NextResponse } from "next/server";
 export async function GET(request: Request) {
   const url = new URL(request.url),
     code = url.searchParams.get("code");
+  const requestedDestination = url.searchParams.get("next");
   const dest =
-    url.searchParams.get("next") === "/reset-password"
+    requestedDestination === "/reset-password"
       ? "/reset-password?recovery=true"
-      : "/security";
+      : requestedDestination === "/onboarding/role"
+        ? "/onboarding/role"
+        : "/security";
   if (
     code &&
     process.env.NEXT_PUBLIC_SUPABASE_URL &&
