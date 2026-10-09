@@ -22,8 +22,9 @@ export default function ResetPassword() {
       if (recovery) {
         const { error } = await supabase.auth.updateUser({ password });
         if (error) throw error;
-        setPassword("");
-        setMessage("Password updated. You can sign in.");
+        await supabase.auth.signOut({ scope: "local" });
+        window.location.replace("/signup?mode=signin&reset=success");
+        return;
       } else {
         const { error } = await supabase.auth.resetPasswordForEmail(email, {
           redirectTo: `${window.location.origin}/auth/callback?next=/reset-password`,
