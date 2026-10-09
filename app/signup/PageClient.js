@@ -54,7 +54,7 @@ function LockIcon() {
 }
 
 const PASSWORD_RULES = [
-  { key: 'length', label: '9–15 characters', test: (v) => v.length >= 9 && v.length <= 15 },
+  { key: 'length', label: '12–128 characters', test: (v) => v.length >= 12 && v.length <= 128 },
   { key: 'upper', label: 'One uppercase letter', test: (v) => /[A-Z]/.test(v) },
   { key: 'lower', label: 'One lowercase letter', test: (v) => /[a-z]/.test(v) },
   { key: 'number', label: 'One number', test: (v) => /\d/.test(v) },
@@ -146,13 +146,21 @@ function AuthPageInner() {
   const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [signupLoading, setSignupLoading] = useState(false);
   const [signupError, setSignupError] = useState('');
+  const [signupNotice, setSignupNotice] = useState('');
 
   // Sign in state
   const [loginEmail, setLoginEmail] = useState('');
   const [loginPassword, setLoginPassword] = useState('');
   const [loginLoading, setLoginLoading] = useState(false);
   const [loginError, setLoginError] = useState('');
+  const [loginNotice, setLoginNotice] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+
+  useEffect(() => {
+    if (searchParams.get('reset') === 'success') {
+      setLoginNotice('Your password has been updated. Sign in with your new password.');
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     // Remove personal details and any consent value saved by earlier versions.
@@ -170,9 +178,10 @@ function AuthPageInner() {
   async function handleSignup(e) {
     e.preventDefault();
     setSignupError('');
+    setSignupNotice('');
 
     if (!passwordIsValid(password)) {
-      setSignupError('Password must be 9–15 characters and include an uppercase letter, a lowercase letter, a number, and a symbol.');
+      setSignupError('Password must be 12–128 characters and include an uppercase letter, a lowercase letter, a number, and a symbol.');
       return;
     }
 
@@ -181,7 +190,10 @@ function AuthPageInner() {
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
-      options: { data: { full_name: fullName, phone, state } },
+      options: {
+        data: { full_name: fullName, phone, state },
+        emailRedirectTo: `${window.location.origin}/auth/callback?next=/onboarding/role`,
+      },
     });
 
     if (error) {
@@ -194,6 +206,12 @@ function AuthPageInner() {
         (typeof error === 'string' ? error : 'Sign up failed. Please check your details and try again.');
 
       setSignupError(errorMsg);
+      setSignupLoading(false);
+      return;
+    }
+
+    if (!data.session) {
+      setSignupNotice(`We sent a confirmation link to ${email}. Open it to verify your email and continue setting up your account.`);
       setSignupLoading(false);
       return;
     }
@@ -218,7 +236,8 @@ function AuthPageInner() {
       return;
     }
 
-    router.push('/marketplace');
+    const assurance = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+    router.push(assurance.data?.nextLevel === 'aal2' && assurance.data?.currentLevel !== 'aal2' ? '/security' : '/marketplace');
   }
 
   return (
@@ -251,10 +270,10 @@ function AuthPageInner() {
                 </select>
               </Field>
               <Field icon={<LockIcon />} label="Password" id="signup-password">
-                <input id="signup-password" type="password" autoComplete="new-password" placeholder="9–15 characters" value={password} onChange={(e) => {
+                <input id="signup-password" type="password" autoComplete="new-password" placeholder="12–128 characters" value={password} onChange={(e) => {
                   setPassword(e.target.value);
                   if (signupError) setSignupError('');
-                }} minLength={9} maxLength={15} required className="field-input" />
+                }} minLength={12} maxLength={128} required className="field-input" />
               </Field>
               <PasswordChecklist value={password} />
               {/* Consent checkbox — REQUIRED */}
@@ -275,13 +294,26 @@ function AuthPageInner() {
                 </label>
               </div>
               {signupError && <p className="auth-error">{signupError}</p>}
-              <button
-                className="auth-button disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-ember shadow-lg shadow-ember/20"
-                type="submit"
-                disabled={signupLoading || !signupReady}
-              >
-                {signupLoading ? 'Creating account...' : 'Sign Up'}
-              </button>
+              {signupNotice ? (
+                <div className="rounded-xl border border-ember/30 bg-ember/10 p-4 text-sm leading-relaxed text-bone" role="status">
+                  <p>{signupNotice}</p>
+                  <button
+                    type="button"
+                    onClick={() => setFlipped(true)}
+                    className="mt-3 font-semibold text-ember hover:underline"
+                  >
+                    Go to sign in
+                  </button>
+                </div>
+              ) : (
+                <button
+                  className="auth-button disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-ember shadow-lg shadow-ember/20"
+                  type="submit"
+                  disabled={signupLoading || !signupReady}
+                >
+                  {signupLoading ? 'Creating account...' : 'Sign Up'}
+                </button>
+              )}
             </form>
 
             <p className="mt-5 text-center text-xs text-slate">
@@ -346,6 +378,8 @@ function AuthPageInner() {
                   </button>
                 </p>
 
+                {loginNotice && <p role="status" className="mb-5 text-sm text-emerald-400">{loginNotice}</p>}
+
                 <form onSubmit={handleLogin} className="auth-form-grid">
                   <div className="auth-form-field">
                     <label htmlFor="login-email">Email address</label>
@@ -355,7 +389,7 @@ function AuthPageInner() {
                   </div>
 
                   <div className="auth-form-field">
-                    <label htmlFor="login-password">Password</label>
+                    <label htmlFor="login-password">Password</label><Link href="/reset-password" className="text-xs text-ember">Forgot password?</Link>
                     <div className="auth-input-shell">
                       <input id="login-password" type={showPassword ? 'text' : 'password'} autoComplete="current-password" placeholder="Enter your password" value={loginPassword} onChange={(e) => setLoginPassword(e.target.value)} required />
                       <button type="button" className="auth-toggle-pass" aria-label={showPassword ? 'Hide password' : 'Show password'} onClick={() => setShowPassword((value) => !value)}>

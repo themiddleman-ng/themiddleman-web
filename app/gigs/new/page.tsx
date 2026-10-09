@@ -41,6 +41,9 @@ export default function NewGigPage() {
 	const [images, setImages] = useState<File[]>([]);
 	const [video, setVideo] = useState<File | null>(null);
 	const [linksInput, setLinksInput] = useState('');
+	const [repoUrl,setRepoUrl] = useState('');
+	const [previewCommit,setPreviewCommit] = useState('');
+	const [exclusive,setExclusive] = useState(false);
 	const [previewImage, setPreviewImage] = useState<string | null>(null);
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState('');
@@ -79,6 +82,7 @@ export default function NewGigPage() {
 			setError('Demo videos must be MP4 or WebM under 20 MB.'); return;
 		}
 
+		if (repoUrl && (!/^https:\/\/github\.com\/[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/.test(repoUrl) || !/^[0-9a-f]{40}$/.test(previewCommit))) { setError('Use a GitHub repository URL and the exact 40-character preview commit.'); return; }
 		setLoading(true);
 
 		const { data: { user } } = await supabase.auth.getUser();
@@ -124,6 +128,7 @@ export default function NewGigPage() {
 			description: description.trim(),
 			category,
 			price_ngn: price,
+			...(repoUrl ? { repo_url:repoUrl, preview_commit_sha:previewCommit, is_exclusive:exclusive } : {}),
 			delivery_days: days,
 			experience_tier: experienceTier,
 			is_ai_assisted: isAiAssisted,
@@ -228,6 +233,13 @@ export default function NewGigPage() {
 							</label>
 						</div>
 
+<fieldset className="mt-6 rounded-xl border border-line p-5"><legend className="px-2 text-sm font-semibold">Repository preview provenance</legend>
+<label className="block text-sm">GitHub repository URL<input className="auth-input mt-2" type="url" placeholder="https://github.com/owner/repository" value={repoUrl} onChange={e=>setRepoUrl(e.target.value.trim())}/></label>
+<label className="mt-4 block text-sm">Exact preview commit (40 characters)<input className="auth-input mt-2 font-mono" maxLength={40} value={previewCommit} onChange={e=>setPreviewCommit(e.target.value.trim())}/></label>
+<label className="mt-4 flex items-center gap-3 text-sm"><input type="checkbox" checked={exclusive} onChange={e=>setExclusive(e.target.checked)}/>Exclusive product</label>
+<p className="mt-3 text-xs text-slate">Admin checks this repository and commit against the live preview before publication. Delivery must be a working-tree ZIP without Git history or secrets. Repo fields require the isolated escrow preview.</p>
+</fieldset>
+
 						{error && (
 							<div className="rounded-xl border border-red-900/40 bg-red-950/20 px-4 py-3 text-sm text-red-400 flex items-center gap-2">
 								<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
@@ -236,12 +248,13 @@ export default function NewGigPage() {
 						)}
 
 						<div className="flex flex-col-reverse gap-4 border-t border-line pt-8 sm:flex-row sm:items-center sm:justify-between">
-							<p className="text-xs text-slate">Your gig goes live immediately. You can pause it from My Gigs.</p>
+							<p className="text-xs text-slate">Repository listings await admin review before publication. You can track them in My Gigs.</p>
 							<button type="submit" disabled={loading || !formReady} className="btn-ripple auth-button w-full sm:w-auto sm:px-10 disabled:opacity-40 disabled:cursor-not-allowed">
 								{loading ? 'Publishing...' : 'Publish Manifest'}
 							</button>
 						</div>
-					</form>
+
+</form>
 
 					<div className="lg:sticky lg:top-24 h-fit">
 						<div className="flex items-center justify-between mb-4">

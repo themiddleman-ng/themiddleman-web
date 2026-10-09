@@ -1,14 +1,12 @@
-import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import SiteHeader from '@/components/SiteHeader';
-import { adminUser } from '@/lib/server/marketplace';
+import { requireAdminPage } from '@/lib/server/admin-page';
 import ReviewQueue from './review-queue';
 
 export const dynamic = 'force-dynamic';
 
 export default async function AdminReviewPage() {
-  const administrator = await adminUser();
-  if (!administrator) notFound();
+  const administrator = await requireAdminPage();
   const [queue, recent] = await Promise.all([
     administrator.db.from('deliveries')
       .select('id,order_id,created_at,status,orders(amount,gigs(title))')
@@ -26,8 +24,9 @@ export default async function AdminReviewPage() {
       {queue.error ? <p role="alert" className="mt-8 text-red-300">Review queue unavailable: {queue.error.message}</p>
         : <ReviewQueue deliveries={(queue.data ?? []).map(row => ({
           id: row.id, order_id: row.order_id, created_at: row.created_at,
-          orders: row.orders?.[0] ? { amount: row.orders[0].amount,
-            gigs: row.orders[0].gigs?.[0] ?? null } : null,
+          orders: (() => { const o = Array.isArray(row.orders) ? row.orders[0] : row.orders;
+            if (!o) return null; const g = Array.isArray(o.gigs) ? o.gigs[0] : o.gigs;
+            return { amount: Number(o.amount), gigs: g ?? null }; })(),
         }))} />}
       <section className="mt-12 border-t border-line pt-8">
         <h2 className="font-display text-xl font-semibold">Recent decisions</h2>

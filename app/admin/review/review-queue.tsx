@@ -42,10 +42,10 @@ export default function ReviewQueue({ deliveries }: { deliveries: Delivery[] }) 
           <p className="text-sm">₦{Number(delivery.orders?.amount ?? 0).toLocaleString('en-NG')}</p>
         </div>
         <button type="button" className="mt-5 text-sm font-semibold text-ember underline" onClick={() => viewFile(delivery.order_id)}>Open seller file</button>
-        <label className="mt-5 block text-sm text-slate" htmlFor={`notes-${delivery.id}`}>Review note</label>
+        <label className="mt-5 block text-sm text-slate" htmlFor={`notes-${delivery.id}`}>Package and repo parity findings (required)</label>
         <textarea id={`notes-${delivery.id}`} className="auth-input mt-2 w-full min-h-24" maxLength={2000}
           value={notes[delivery.id] || ''} onChange={event => setNotes({ ...notes, [delivery.id]: event.target.value })}
-          placeholder="Explain what the seller should fix if rejecting" />
+          placeholder="Confirm listing match, package checks and preview commit parity, or explain required changes" />
         <div className="mt-4 flex flex-wrap gap-3">
           <button disabled={busy === delivery.id} onClick={() => decide(delivery.id, 'approve')}
             className="rounded-full bg-ember px-5 py-2 text-sm font-semibold text-ink disabled:opacity-50">Approve delivery</button>

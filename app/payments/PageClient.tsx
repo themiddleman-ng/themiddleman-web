@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { supabase } from "@/lib/supabaseClient";
 import SiteHeader from "@/components/SiteHeader";
 
 const steps: [string, string, string][] = [
@@ -28,7 +27,9 @@ type PaymentRow = {
   amount: number;
   escrow_status: string;
   payout_status: string;
-  paystack_reference: string;
+  paystack_reference?: string;
+  role: string;
+  fees: Record<string,number> | null;
   created_at: string;
   orders: { gigs: { title: string } | null } | null;
 };
@@ -43,12 +44,10 @@ export default function PaymentsPage() {
 
     async function load() {
       setLoading(true);
-      // RLS on public.payments already scopes this to orders where the
-      // current user is the buyer or seller — no manual filter needed.
-      const { data, error } = await supabase
-        .from("payments")
-        .select("id, amount, escrow_status, payout_status, paystack_reference, created_at, orders ( gigs ( title ) )")
-        .order("created_at", { ascending: false });
+      const response = await fetch('/api/payments', { cache: 'no-store' });
+      const result = await response.json();
+      const data = result.payments;
+      const error = response.ok ? null : { message: result.error || 'Payments unavailable.' };
 
       if (cancelled) return;
       if (error) setLoadError(error.message);
@@ -108,7 +107,8 @@ export default function PaymentsPage() {
                 <div key={payment.id} className="flex items-center justify-between py-4 font-mono text-sm">
                   <div className="font-sans">
                     <p className="text-bone font-medium">{payment.orders?.gigs?.title ?? "Product"}</p>
-                    <p className="text-xs text-slate mt-0.5">{payment.paystack_reference}</p>
+                    <p className="text-xs text-slate mt-0.5">{payment.role === 'seller' ? 'Seller payout · buyer details private' : payment.paystack_reference}</p>
+                    {payment.fees && <dl className="mt-2 space-y-1 text-xs text-slate">{Object.entries(payment.fees).map(([label,kobo])=><div key={label}>{label.replace(/_kobo/g,'').replace(/_/g,' ')}: ₦{(kobo/100).toLocaleString('en-NG',{minimumFractionDigits:2})}</div>)}</dl>}
                   </div>
                   <div className="text-right">
                     <p className="text-bone">₦{payment.amount.toLocaleString()}</p>
