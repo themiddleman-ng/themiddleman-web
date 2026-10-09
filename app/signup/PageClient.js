@@ -153,7 +153,14 @@ function AuthPageInner() {
   const [loginPassword, setLoginPassword] = useState('');
   const [loginLoading, setLoginLoading] = useState(false);
   const [loginError, setLoginError] = useState('');
+  const [loginNotice, setLoginNotice] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+
+  useEffect(() => {
+    if (searchParams.get('reset') === 'success') {
+      setLoginNotice('Your password has been updated. Sign in with your new password.');
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     // Remove personal details and any consent value saved by earlier versions.
@@ -370,6 +377,8 @@ function AuthPageInner() {
                     Create an account
                   </button>
                 </p>
+
+                {loginNotice && <p role="status" className="mb-5 text-sm text-emerald-400">{loginNotice}</p>}
 
                 <form onSubmit={handleLogin} className="auth-form-grid">
                   <div className="auth-form-field">
