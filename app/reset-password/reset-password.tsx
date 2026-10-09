@@ -25,9 +25,10 @@ export default function ResetPassword() {
         setPassword("");
         setMessage("Password updated. You can sign in.");
       } else {
-        await supabase.auth.resetPasswordForEmail(email, {
+        const { error } = await supabase.auth.resetPasswordForEmail(email, {
           redirectTo: `${window.location.origin}/auth/callback?next=/reset-password`,
         });
+        if (error) throw error;
         setMessage(
           "If the account exists, a reset link has been requested. Check your email.",
         );
