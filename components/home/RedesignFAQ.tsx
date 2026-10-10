@@ -29,16 +29,19 @@ export default function RedesignFAQ() {
   const [open, setOpen] = useState(0);
 
   return (
-    <section className="border-t border-white/10 bg-[#0b0b0b] text-white">
+    <section className="border-t border-[#E4DED3] bg-[#F6F1E8] text-[#172033]">
       <div className="mx-auto grid max-w-7xl gap-10 px-5 py-16 sm:px-6 sm:py-20 lg:grid-cols-[0.85fr_1.15fr] lg:gap-20">
         <div>
-          <p className="text-xs font-medium uppercase tracking-[0.18em] text-[#8f8f8f]">Questions</p>
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#C85A19]">Questions</p>
           <h2 className="mt-5 max-w-md font-display text-4xl font-semibold leading-[1.02] tracking-[-0.035em] sm:text-5xl">
             Frequently asked questions
           </h2>
+          <p className="mt-5 max-w-sm text-sm leading-6 text-[#6D706F]">
+            Straight answers about buying, selling, reviews, and protected payments.
+          </p>
         </div>
 
-        <div className="divide-y divide-white/10 border-y border-white/10">
+        <div className="divide-y divide-[#DDD6CA] border-y border-[#DDD6CA]">
           {ITEMS.map((item, index) => {
             const isOpen = open === index;
             return (
@@ -49,11 +52,11 @@ export default function RedesignFAQ() {
                   className="flex w-full items-center justify-between gap-6 py-5 text-left"
                   aria-expanded={isOpen}
                 >
-                  <span className="text-base font-medium text-white sm:text-lg">{item.q}</span>
-                  <span className="text-xl font-light text-[#8f8f8f]">{isOpen ? "−" : "+"}</span>
+                  <span className="text-base font-medium text-[#172033] sm:text-lg">{item.q}</span>
+                  <span className="text-xl font-light text-[#8A8178]">{isOpen ? "−" : "+"}</span>
                 </button>
                 {isOpen && (
-                  <p className="max-w-2xl pb-6 pr-8 text-sm leading-7 text-[#a8a8a8] sm:text-base">
+                  <p className="max-w-2xl pb-6 pr-8 text-sm leading-7 text-[#62666A] sm:text-base">
                     {item.a}
                   </p>
                 )}
