@@ -18,8 +18,8 @@ export function LogoMark({ className = "h-7 w-7" }: { className?: string }) {
 export default function Logo({
   href = "/",
   className = "",
-  markClass = "h-6 w-6",
-  textClass = "text-lg",
+  markClass = "h-8 w-8",
+  textClass = "text-[15px]",
   variant = "responsive",
 }: {
   href?: string;
@@ -28,6 +28,25 @@ export default function Logo({
   textClass?: string;
   variant?: LogoVariant;
 }) {
+  if (variant === "horizontal") {
+    return (
+      <Link href={href} aria-label="The Middleman homepage" className={`inline-flex items-center gap-2.5 ${className}`}>
+        <Image
+          src="/brand/middleman-approved-master.png"
+          alt=""
+          aria-hidden="true"
+          width={1254}
+          height={1254}
+          priority
+          className={`${markClass} shrink-0 object-contain`}
+        />
+        <span className={`font-display font-extrabold tracking-[-.045em] text-[#172B45] ${textClass}`}>
+          The <span className="text-[#0B3D91]">Middleman</span>
+        </span>
+      </Link>
+    );
+  }
+
   return (
     <Link href={href} aria-label="The Middleman homepage" className={`flex items-center ${className}`}>
       <Image

@@ -1,106 +1,58 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
+import { useState } from "react";
 
-const TABS = ['General', 'For Buyers', 'For Sellers'] as const;
-type Tab = (typeof TABS)[number];
-
-const QUESTIONS: Record<Tab, { q: string; a: string }[]> = {
-  General: [
-    {
-      q: 'What is The Middleman?',
-      a: 'A Nigeria-wide marketplace for verified digital products, software, templates, creative assets, and legitimate digital services. Every order is protected by escrow — payment is held until the buyer approves delivery.',
-    },
-    {
-      q: 'Which currencies can I pay in?',
-      a: 'All prices are shown in Naira (₦) by default. Multi-currency payment support is on our roadmap for sellers and buyers working across borders.',
-    },
-    {
-      q: 'How is this different from buying a product through WhatsApp or Twitter?',
-      a: "Informal buying offers little protection. Here, your payment stays in escrow until you confirm delivery, and every seller is identity-verified before publishing a product listing.",
-    },
-  ],
-  'For Buyers': [
-    {
-      q: 'When does my payment actually reach the seller?',
-      a: 'Only after you approve the delivered work. Until then, it sits in escrow — if something goes wrong, you can raise a dispute instead of losing your money.',
-    },
-    {
-      q: 'Can I message a seller before ordering?',
-      a: "Yes. Messaging is built for exactly that — but links, phone numbers, and email addresses can't be shared in-thread, to keep your order (and your payment protection) inside the platform.",
-    },
-    {
-      q: "What if the delivered work isn't what I asked for?",
-      a: 'Open a dispute from your order. Our team reviews the agreed brief and the delivered work before releasing or refunding payment.',
-    },
-  ],
-  'For Sellers': [
-    {
-      q: 'How long does verification take?',
-      a: "It's reviewed by a person on our team, not an algorithm — most applications are reviewed within a few business days.",
-    },
-    {
-      q: 'What do I need to submit?',
-      a: 'A government ID or business registration document, a short profile describing what you offer, and the service categories you work in.',
-    },
-    {
-      q: 'When do I get paid?',
-      a: 'As soon as the buyer approves your delivery, escrow releases the payment to you. If a buyer goes silent, our team can step in to review the order.',
-    },
-  ],
-};
+const QUESTIONS = [
+  {
+    question: "What is The Middleman?",
+    answer: "A marketplace for digital products and services from Nigerian creators. Buyers can discover listings and keep the order, payment and delivery steps together.",
+  },
+  {
+    question: "How does payment protection work?",
+    answer: "Payment is held while the seller completes the agreed work. The buyer reviews the delivery before approving the order and releasing payment.",
+  },
+  {
+    question: "Can I buy and sell with one account?",
+    answer: "Yes. You can browse and buy, then set up your seller profile when you are ready to offer products or services.",
+  },
+  {
+    question: "How are AI-assisted listings shown?",
+    answer: "Listings that use AI assistance are labelled so buyers can see that before they choose.",
+  },
+  {
+    question: "What if I need help with an order?",
+    answer: "Use the order page to review its progress or raise an issue for the team to look into.",
+  },
+];
 
 export default function HomeFAQ() {
-  const [activeTab, setActiveTab] = useState<Tab>('General');
-  const [openIndex, setOpenIndex] = useState(0);
+  const [openIndex, setOpenIndex] = useState<number | null>(0);
 
   return (
-    <section className="border-t border-[#ded6ca] bg-[#f7f3ec] text-[#1c1b18]">
-      <div className="mx-auto max-w-4xl px-6 py-16 sm:py-20">
-        <p className="mb-3 text-sm font-medium tracking-[0.2em] text-[#c65318]">FAQS</p>
-        <h2 className="mb-4 font-display text-5xl font-bold tracking-tight sm:text-6xl">
-          Everything you need to know.
-        </h2>
-        <p className="mb-10 text-lg text-[#625c54] sm:text-xl">
-          Can&apos;t find what you&apos;re looking for?{' '}
-          <a href="mailto:hello@themiddleman.com.ng" className="text-[#1c1b18] underline decoration-[#f26419] underline-offset-4">Reach out to our team</a>.
-        </p>
-
-        <div className="mb-6 flex gap-2 overflow-x-auto border-b border-[#ded6ca]">
-          {TABS.map((tab) => (
-            <button
-              key={tab}
-              onClick={() => { setActiveTab(tab); setOpenIndex(0); }}
-              className={
-                'whitespace-nowrap border-b-2 px-4 py-3 text-base transition-colors ' +
-                (activeTab === tab
-                  ? 'border-ember font-medium text-[#1c1b18]'
-                  : 'border-transparent text-[#6f6a63] hover:text-[#1c1b18]')
-              }
-            >
-              {tab}
-            </button>
-          ))}
+    <section id="faq" className="border-t border-[#DCE2E5] bg-white">
+      <div className="mx-auto grid max-w-7xl gap-9 px-5 py-16 sm:px-8 sm:py-20 md:grid-cols-[.8fr_1.2fr] md:gap-16">
+        <div>
+          <p className="text-[11px] font-bold uppercase tracking-[.14em] text-[#0B3D91]">Frequently asked</p>
+          <h2 className="mt-4 max-w-sm font-display text-4xl font-bold leading-[1.08] tracking-[-.05em] text-[#172B45] sm:text-5xl">Good questions.<br />Clear answers.</h2>
+          <p className="mt-4 max-w-sm text-sm leading-6 text-[#6C7A87]">A few basics about finding work, paying safely and getting an order completed.</p>
+          <a href="mailto:hello@themiddleman.com.ng" className="mt-5 inline-flex text-xs font-semibold text-[#0B3D91] underline decoration-[#FF8A00] underline-offset-4">Talk to the team</a>
         </div>
 
-        <div className="space-y-3">
-          {QUESTIONS[activeTab].map((item, index) => {
+        <div className="border-t border-[#DCE2E5]">
+          {QUESTIONS.map((item, index) => {
             const isOpen = openIndex === index;
             return (
-              <div key={item.q} className="overflow-hidden rounded-xl border border-[#ded6ca] bg-white">
+              <div key={item.question} className="border-b border-[#DCE2E5]">
                 <button
-                  onClick={() => setOpenIndex(isOpen ? -1 : index)}
-                  className="flex w-full items-center justify-between gap-4 px-5 py-5 text-left"
+                  type="button"
+                  onClick={() => setOpenIndex(isOpen ? null : index)}
                   aria-expanded={isOpen}
+                  className="flex w-full items-center justify-between gap-4 py-5 text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0B3D91]"
                 >
-                  <span className="text-base font-medium text-[#1c1b18] sm:text-lg">{item.q}</span>
-                  <span className={`shrink-0 text-[#f26419] transition-transform duration-200 ${isOpen ? 'rotate-45' : ''}`}>
-                    +
-                  </span>
+                  <span className="text-sm font-semibold text-[#253E55] sm:text-[15px]">{item.question}</span>
+                  <span aria-hidden="true" className={`grid h-7 w-7 shrink-0 place-items-center rounded-full border border-[#DCE2E5] text-base font-normal text-[#496277] transition-transform ${isOpen ? "rotate-45 bg-[#0B3D91] text-white" : ""}`}>+</span>
                 </button>
-                {isOpen && (
-                  <p className="px-5 pb-5 text-base leading-relaxed text-[#625c54]">{item.a}</p>
-                )}
+                {isOpen && <p className="max-w-2xl pb-5 pr-10 text-sm leading-6 text-[#6B7A87]">{item.answer}</p>}
               </div>
             );
           })}
