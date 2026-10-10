@@ -1,0 +1,104 @@
+"use client";
+
+import { useEffect, useMemo, useState } from "react";
+import Link from "next/link";
+import { supabase } from "@/lib/supabaseClient";
+import GigCard, { type CardGig, type CardRating } from "@/components/marketplace/GigCard";
+
+type GigRow = CardGig & { created_at: string };
+
+function SkeletonCard() {
+  return (
+    <div className="overflow-hidden rounded-2xl border border-[#E3DED5] bg-white">
+      <div className="gm-skeleton aspect-[16/10]" />
+      <div className="space-y-3 p-5">
+        <div className="gm-skeleton h-2.5 w-24 rounded-full" />
+        <div className="gm-skeleton h-4 w-4/5 rounded-full" />
+        <div className="gm-skeleton h-3 w-2/3 rounded-full" />
+        <div className="border-t border-[#ECE7DE] pt-4">
+          <div className="gm-skeleton h-3 w-28 rounded-full" />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default function SelectedGigs() {
+  const [gigs, setGigs] = useState<GigRow[]>([]);
+  const [ratings, setRatings] = useState<Record<string, CardRating>>({});
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function load() {
+      const [{ data: gigData }, { data: ratingData }] = await Promise.all([
+        supabase
+          .from("gigs")
+          .select(
+            "id, title, description, category, price_ngn, is_ai_assisted, gallery_image_paths, created_at, seller_profiles ( display_name, verification_status )"
+          )
+          .eq("status", "active")
+          .order("created_at", { ascending: false })
+          .limit(12),
+        supabase.rpc("get_gig_ratings"),
+      ]);
+
+      if (cancelled) return;
+
+      const ratingMap: Record<string, CardRating> = {};
+      ((ratingData as Array<{ gig_id: string } & CardRating>) ?? []).forEach((row) => {
+        ratingMap[row.gig_id] = row;
+      });
+
+      setGigs((gigData as unknown as GigRow[]) ?? []);
+      setRatings(ratingMap);
+      setLoading(false);
+    }
+
+    void load();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const selected = useMemo(() => {
+    return [...gigs]
+      .sort((a, b) => {
+        const reviewDiff = (ratings[b.id]?.review_count ?? 0) - (ratings[a.id]?.review_count ?? 0);
+        if (reviewDiff !== 0) return reviewDiff;
+        return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+      })
+      .slice(0, 4);
+  }, [gigs, ratings]);
+
+  if (!loading && selected.length === 0) return null;
+
+  return (
+    <section className="border-y border-[#E6E0D7] bg-[#F6F1E8] text-[#172033]">
+      <div className="mx-auto max-w-7xl px-5 py-16 sm:px-6 sm:py-20">
+        <div className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#C85A19]">Selected from the marketplace</p>
+            <h2 className="mt-3 max-w-2xl font-display text-4xl font-semibold tracking-[-0.035em] sm:text-5xl">
+              A few things worth seeing.
+            </h2>
+          </div>
+          <Link
+            href="/marketplace"
+            className="w-fit text-sm font-semibold text-[#0B3D91] transition-colors hover:text-[#C85A19]"
+          >
+            Browse everything →
+          </Link>
+        </div>
+
+        <div className="mt-10 grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
+          {loading
+            ? Array.from({ length: 4 }).map((_, index) => <SkeletonCard key={index} />)
+            : selected.map((gig) => <GigCard key={gig.id} gig={gig} rating={ratings[gig.id]} />)}
+        </div>
+      </div>
+    </section>
+  );
+}
