@@ -70,21 +70,16 @@ export default function SelectedGigs() {
         if (reviewDiff !== 0) return reviewDiff;
         return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
       })
-      .slice(0, 4);
+      .slice(0, 3);
   }, [gigs, ratings]);
 
   if (!loading && selected.length === 0) return null;
 
   return (
-    <section className="border-y border-[#E6E0D7] bg-[#F6F1E8] text-[#172033]">
+    <section className="bg-[#F6F1E8] text-[#172033]">
       <div className="mx-auto max-w-7xl px-5 py-16 sm:px-6 sm:py-20">
-        <div className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#C85A19]">Selected from the marketplace</p>
-            <h2 className="mt-3 max-w-2xl font-display text-4xl font-semibold tracking-[-0.035em] sm:text-5xl">
-              A few things worth seeing.
-            </h2>
-          </div>
+        <div className="flex items-center justify-between gap-5">
+          <p className="text-sm font-medium text-[#6D706F]">Selected from the marketplace</p>
           <Link
             href="/marketplace"
             className="w-fit text-sm font-semibold text-[#0B3D91] transition-colors hover:text-[#C85A19]"
@@ -93,9 +88,9 @@ export default function SelectedGigs() {
           </Link>
         </div>
 
-        <div className="mt-10 grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
+        <div className="mt-7 grid gap-6 md:grid-cols-3">
           {loading
-            ? Array.from({ length: 4 }).map((_, index) => <SkeletonCard key={index} />)
+            ? Array.from({ length: 3 }).map((_, index) => <SkeletonCard key={index} />)
             : selected.map((gig) => <GigCard key={gig.id} gig={gig} rating={ratings[gig.id]} />)}
         </div>
       </div>
