@@ -5,6 +5,8 @@ import Image from 'next/image';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabaseClient';
+import { ProductPackageField } from '@/components/ProductPackageUploader';
+import { uploadProductPackage } from '@/lib/client/product-packages';
 
 const CATEGORIES = [
 	{ value: 'development', label: 'Development' },
@@ -38,6 +40,11 @@ export default function NewGigPage() {
 	const [previewImage, setPreviewImage] = useState<string | null>(null);
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState('');
+	const [packageFile, setPackageFile] = useState<File | null>(null);
+	const [packageEnabled, setPackageEnabled] = useState(false);
+	const [packageFeatureLoaded, setPackageFeatureLoaded] = useState(false);
+	const [createdGigId, setCreatedGigId] = useState<string | null>(null);
+	const [packageStage, setPackageStage] = useState('');
 	useEffect(() => {
 		if (!images[0]) { setPreviewImage(null); return; }
 		const url = URL.createObjectURL(images[0]);
@@ -45,7 +52,19 @@ export default function NewGigPage() {
 		return () => URL.revokeObjectURL(url);
 	}, [images]);
 
+	useEffect(() => {
+		let active = true;
+		fetch('/api/product-packages/status', { cache: 'no-store' })
+			.then((response) => response.json())
+			.then((result) => { if (active) setPackageEnabled(Boolean(result.enabled)); })
+			.catch(() => { if (active) setPackageEnabled(false); })
+			.finally(() => { if (active) setPackageFeatureLoaded(true); });
+		return () => { active = false; };
+	}, []);
+
 	const formReady =
+		packageFeatureLoaded &&
+		(!packageEnabled || Boolean(packageFile) || Boolean(createdGigId)) &&
 		title.trim().length > 0 &&
 		description.trim().length >= 30 &&
 		images.length > 0 &&
@@ -56,6 +75,19 @@ export default function NewGigPage() {
 	async function handleSubmit(e: React.FormEvent) {
 		e.preventDefault();
 		setError('');
+		if (!packageFeatureLoaded) { setError('Checking product file requirements…'); return; }
+		if (packageEnabled && createdGigId) {
+			if (!packageFile) { setError('Choose the product file before retrying.'); return; }
+			setLoading(true);
+			try {
+				await uploadProductPackage(createdGigId, packageFile, supabase, setPackageStage);
+				router.push('/gigs/mine');
+			} catch (cause) {
+				setError(cause instanceof Error ? cause.message : 'The product file still needs to be submitted.');
+			} finally { setLoading(false); }
+			return;
+		}
+		if (packageEnabled && !packageFile) { setError('Upload the product file buyers will receive.'); return; }
 		if (images.length === 0) { setError('Add at least one real product preview image.'); return; }
 		if (!formReady) return;
 
@@ -115,7 +147,7 @@ export default function NewGigPage() {
 			if (uploaded.length) await supabase.storage.from('gig-media').remove(uploaded);
 			setError(cause instanceof Error ? cause.message : 'Could not upload product media.'); setLoading(false); return;
 		}
-		const { error: insertError } = await supabase.from('gigs').insert({
+		const { data: createdGig, error: insertError } = await supabase.from('gigs').insert({
 			seller_id: profile.id,
 			title: title.trim(),
 			status: 'pending_review',
@@ -129,11 +161,23 @@ export default function NewGigPage() {
 			gallery_image_paths: imagePaths,
 			demo_video_path: videoPath,
 			demo_links: links,
-		});
+		}).select('id').single();
 
-		if (insertError) {
+		if (insertError || !createdGig) {
 			if (uploaded.length) await supabase.storage.from('gig-media').remove(uploaded);
-			setError(insertError.message); setLoading(false); return;
+			setError(insertError?.message || 'Could not save this listing.'); setLoading(false); return;
+		}
+		if (packageEnabled && packageFile) {
+			setCreatedGigId(createdGig.id);
+			try {
+				await uploadProductPackage(createdGig.id, packageFile, supabase, setPackageStage);
+			} catch (cause) {
+				setError(cause instanceof Error
+					? 'Your listing is saved. ' + cause.message + ' You can retry the package upload here or from My Products.'
+					: 'Your listing is saved, but the package needs to be uploaded again.');
+				setLoading(false);
+				return;
+			}
 		}
 		router.push('/gigs/mine');
 	}
@@ -227,6 +271,10 @@ export default function NewGigPage() {
 							</label>
 						</div>
 
+						{packageEnabled && (
+							<ProductPackageField file={packageFile} onChange={setPackageFile} required />
+						)}
+
 <fieldset className="mt-6 rounded-xl border border-line p-5"><legend className="px-2 text-sm font-semibold">Repository preview provenance</legend>
 <label className="block text-sm">GitHub repository URL<input className="auth-input mt-2" type="url" placeholder="https://github.com/owner/repository" value={repoUrl} onChange={e=>setRepoUrl(e.target.value.trim())}/></label>
 <label className="mt-4 block text-sm">Exact preview commit (40 characters)<input className="auth-input mt-2 font-mono" maxLength={40} value={previewCommit} onChange={e=>setPreviewCommit(e.target.value.trim())}/></label>
@@ -244,7 +292,7 @@ export default function NewGigPage() {
 						<div className="flex flex-col-reverse gap-4 border-t border-line pt-8 sm:flex-row sm:items-center sm:justify-between">
 							<p className="text-xs text-slate">Every product is reviewed before publication. Track its status in My Products.</p>
 							<button type="submit" disabled={loading || !formReady} className="btn-ripple auth-button w-full sm:w-auto sm:px-10 disabled:opacity-40 disabled:cursor-not-allowed">
-								{loading ? 'Submitting for review...' : 'Submit product for review'}
+								{loading ? (packageStage === 'uploading' ? 'Uploading product file...' : packageStage === 'checking' ? 'Checking product package...' : 'Submitting for review...') : createdGigId ? 'Retry product file submission' : 'Submit product for review'}
 							</button>
 						</div>
 
