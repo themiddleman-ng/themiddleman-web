@@ -27,21 +27,24 @@ export default function CookieNotice() {
   return (
     <aside
       aria-label="Cookie notice"
-      className="fixed bottom-4 left-4 right-4 z-50 mx-auto max-w-lg rounded-2xl border border-line bg-paper p-4 text-bone shadow-[0_20px_60px_rgba(28,27,24,.18)] sm:left-6 sm:right-auto sm:bottom-6"
+      className="fixed bottom-[calc(5.5rem+env(safe-area-inset-bottom))] left-3 right-3 z-50 mx-auto max-w-sm rounded-xl border border-line bg-paper px-3.5 py-3 text-bone shadow-[0_12px_36px_rgba(28,27,24,.16)] sm:bottom-4 sm:left-4 sm:right-auto"
     >
-      <p className="text-sm leading-relaxed text-slate">
-        We use essential cookies for sign-in and security. This notice saves only your dismissal preference; it does not turn on tracking. We do not use advertising cookies.
-      </p>
-      <div className="mt-3 flex items-center justify-between gap-4">
-        <Link href="/legal/cookies" className="text-sm font-semibold text-ember hover:underline">
-          Cookie policy
-        </Link>
+      <div className="flex items-center justify-between gap-4">
+        <div className="min-w-0">
+          <p className="text-xs font-semibold text-ink">Cookies</p>
+          <p className="mt-0.5 text-xs leading-relaxed text-slate">
+            Essential cookies help sign-in and security work.
+          </p>
+          <Link href="/legal/cookies" className="mt-1 inline-block text-xs font-semibold text-ember hover:underline">
+            Cookie policy
+          </Link>
+        </div>
         <button
           type="button"
           onClick={dismiss}
-          className="rounded-full bg-ember px-4 py-2 text-sm font-bold text-ink transition-colors hover:bg-ember/90"
+          className="shrink-0 rounded-full border border-line px-3 py-1.5 text-xs font-semibold text-ink transition-colors hover:border-ember/50"
         >
-          Dismiss notice
+          Got it
         </button>
       </div>
     </aside>
