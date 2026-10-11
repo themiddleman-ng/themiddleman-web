@@ -32,8 +32,8 @@ export default function Home() {
             <a href="#faq" className="transition-colors hover:text-[#0B3D91]">FAQ</a>
           </nav>
           <div className="flex items-center gap-2 sm:gap-4">
-            <Link href="/signup?mode=signin" className="rounded-md px-3 py-2 text-lg font-semibold text-[#334960] hover:bg-[#EAF0F3] sm:text-lg">Log in</Link>
-            <Link href="/marketplace" className="rounded-md bg-[#0B3D91] px-3.5 py-2.5 text-lg font-semibold text-white transition-colors hover:bg-[#12336C] sm:px-4 sm:text-lg">Explore marketplace <span aria-hidden="true">↗</span></Link>
+            <Link href="/signup?mode=signin" className="rounded-md px-3 py-2 text-base font-semibold text-[#334960] hover:bg-[#EAF0F3] sm:text-base">Log in</Link>
+            <Link href="/marketplace" className="rounded-md bg-[#0B3D91] px-3.5 py-2.5 text-base font-semibold text-white transition-colors hover:bg-[#12336C] sm:px-4 sm:text-base">Explore marketplace <span aria-hidden="true">↗</span></Link>
           </div>
         </div>
       </header>
@@ -49,8 +49,8 @@ export default function Home() {
               Discover digital products and services from Nigerian creators. Your payment stays protected while an order moves from agreement to delivery.
             </p>
             <div className="mt-7 flex flex-wrap gap-3">
-              <Link href="/marketplace" className="inline-flex items-center gap-2 rounded-md bg-[#FF8A00] px-5 py-3 text-lg font-bold text-[#182B40] transition hover:bg-[#F47C00]">Browse the marketplace <span aria-hidden="true">↗</span></Link>
-              <Link href="/signup" className="inline-flex items-center gap-2 rounded-md border border-[#CCD5DA] bg-white/70 px-5 py-3 text-lg font-semibold text-[#172B45] transition hover:border-[#9DABB4] hover:bg-white">Start selling <span aria-hidden="true">→</span></Link>
+              <Link href="/marketplace" className="inline-flex items-center gap-2 rounded-md bg-[#FF8A00] px-5 py-3 text-base font-bold text-[#182B40] transition hover:bg-[#F47C00]">Browse the marketplace <span aria-hidden="true">↗</span></Link>
+              <Link href="/signup" className="inline-flex items-center gap-2 rounded-md border border-[#CCD5DA] bg-white/70 px-5 py-3 text-base font-semibold text-[#172B45] transition hover:border-[#9DABB4] hover:bg-white">Start selling <span aria-hidden="true">→</span></Link>
             </div>
             <div className="mt-8 flex flex-wrap gap-x-5 gap-y-2 border-t border-[#DCE2E5] pt-4 text-[12px] font-bold uppercase tracking-[.1em] text-[#657587] sm:text-[13px]">
               <span><b className="mr-2 text-[#FF8A00]">✓</b>Naira pricing</span>
@@ -63,7 +63,7 @@ export default function Home() {
             <div aria-hidden="true" className="absolute -right-3 -top-3 h-24 w-24 border-r border-t border-[#E0A46D]" />
             <div className="relative rounded-xl border border-[#D7E0E4] bg-white p-4 shadow-[0_18px_48px_rgba(23,43,69,.10)] sm:p-6">
               <div className="flex items-start justify-between gap-3 border-b border-[#E7ECEE] pb-4">
-                <div><p className="text-[12px] font-bold uppercase tracking-[.14em] text-[#718091]">Order flow preview</p><h2 className="mt-1 text-lg font-bold text-[#172B45] sm:text-lg">One order, clear next steps</h2></div>
+                <div><p className="text-[12px] font-bold uppercase tracking-[.14em] text-[#718091]">Order flow preview</p><h2 className="mt-1 text-base font-bold text-[#172B45] sm:text-base">One order, clear next steps</h2></div>
                 <span className="inline-flex items-center gap-1.5 rounded-full bg-[#E8F2EC] px-2.5 py-1.5 text-[11px] font-bold text-[#397353] sm:text-[12px]"><span className="h-1.5 w-1.5 rounded-full bg-[#4D8A65]" />PAYMENT PROTECTED</span>
               </div>
               <div className="mt-6">
@@ -84,7 +84,7 @@ export default function Home() {
               </div>
               <div className="mt-6 flex items-center gap-3 rounded-lg bg-[#F2F5F6] p-3 sm:p-4">
                 <span className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-[#E1EAF4] text-[#0B3D91]" aria-hidden="true">↗</span>
-                <div><p className="text-lg font-bold text-[#233B54]">Your order stays in view</p><p className="mt-1 text-[12px] leading-4 text-[#6E7D8A] sm:text-[13px]">Follow payment, seller progress and delivery from one place.</p></div>
+                <div><p className="text-base font-bold text-[#233B54]">Your order stays in view</p><p className="mt-1 text-[12px] leading-4 text-[#6E7D8A] sm:text-[13px]">Follow payment, seller progress and delivery from one place.</p></div>
               </div>
               <p className="mt-4 flex items-center gap-2 text-[12px] text-[#73818D]"><span className="text-[#43805A]">✓</span> Payment releases after the buyer approves delivery.</p>
             </div>
@@ -99,14 +99,14 @@ export default function Home() {
           <div>
             <p className="text-[13px] font-bold uppercase tracking-[.14em] text-[#0B3D91]">From discovery to delivery</p>
             <h2 className="mt-4 max-w-md font-display text-3xl font-bold leading-tight tracking-[-.04em] text-[#172B45] sm:text-4xl">The work and the payment move together.</h2>
-            <p className="mt-4 max-w-md text-lg leading-6 text-[#617181]">The order keeps the agreement, payment, progress and delivery connected, so both sides can see what happens next.</p>
+            <p className="mt-4 max-w-md text-base leading-6 text-[#617181]">The order keeps the agreement, payment, progress and delivery connected, so both sides can see what happens next.</p>
           </div>
           <div className="grid gap-0 sm:grid-cols-3">
             {steps.map((step) => (
               <article key={step.number} className="border-t border-[#C9D4DA] py-5 sm:border-l sm:border-t-0 sm:pl-5 sm:pr-4 first:sm:border-l-0 first:sm:pl-0">
-                <span className="font-mono text-lg font-bold text-[#E57814]">{step.number}</span>
-                <h3 className="mt-5 text-lg font-bold text-[#203A53]">{step.title}</h3>
-                <p className="mt-2 text-lg leading-6 text-[#687886]">{step.body}</p>
+                <span className="font-mono text-base font-bold text-[#E57814]">{step.number}</span>
+                <h3 className="mt-5 text-base font-bold text-[#203A53]">{step.title}</h3>
+                <p className="mt-2 text-base leading-6 text-[#687886]">{step.body}</p>
               </article>
             ))}
           </div>
@@ -117,14 +117,14 @@ export default function Home() {
         <div className="mx-auto max-w-7xl px-5 py-16 sm:px-8 sm:py-20">
           <div className="grid items-end gap-5 md:grid-cols-[1.1fr_.9fr] md:gap-14">
             <div><p className="text-[13px] font-bold uppercase tracking-[.14em] text-[#0B3D91]">A clearer way to work</p><h2 className="mt-4 max-w-2xl font-display text-3xl font-bold leading-[1.08] tracking-[-.045em] text-[#172B45] sm:text-5xl">A listing is the start. A clear order is what gets the work done.</h2></div>
-            <p className="max-w-lg text-lg leading-7 text-[#637384]">When you arrange work directly, the payment, agreement and delivery can end up in separate places. The Middleman keeps the order together and protects payment through the review step.</p>
+            <p className="max-w-lg text-base leading-7 text-[#637384]">When you arrange work directly, the payment, agreement and delivery can end up in separate places. The Middleman keeps the order together and protects payment through the review step.</p>
           </div>
           <div className="mt-9 overflow-hidden rounded-lg border border-[#D8E0E4] bg-white">
             <div className="grid grid-cols-[1.08fr_1fr_1fr] bg-[#EDF2F4] text-[11px] font-bold uppercase tracking-[.08em] text-[#71808C] sm:text-[12px]">
               <div className="p-3 sm:p-4">The process</div><div className="p-3 sm:p-4">Direct arrangement</div><div className="bg-[#E6EDF4] p-3 text-[#0B3D91] sm:p-4">The Middleman</div>
             </div>
             {comparison.map(([label, direct, middleman]) => (
-              <div key={label} className="grid grid-cols-[1.08fr_1fr_1fr] border-t border-[#E6EBED] text-[12px] sm:text-lg">
+              <div key={label} className="grid grid-cols-[1.08fr_1fr_1fr] border-t border-[#E6EBED] text-[12px] sm:text-base">
                 <div className="p-3 font-semibold text-[#354C61] sm:p-4">{label}</div><div className="p-3 leading-5 text-[#788591] sm:p-4">{direct}</div><div className="bg-[#F5F8FA] p-3 leading-5 font-semibold text-[#244766] sm:p-4">{middleman}</div>
               </div>
             ))}
@@ -138,7 +138,7 @@ export default function Home() {
       <section className="bg-[#0B2F62] text-white">
         <div className="mx-auto flex max-w-7xl flex-col justify-between gap-6 px-5 py-12 sm:px-8 sm:py-14 md:flex-row md:items-center">
           <div><p className="text-[12px] font-bold uppercase tracking-[.15em] text-[#FFC17B]">Start with what you need</p><h2 className="mt-3 font-display text-2xl font-bold tracking-[-.03em] sm:text-3xl">Find the right digital work for your next step.</h2></div>
-          <Link href="/marketplace" className="inline-flex w-fit items-center gap-2 rounded-md bg-[#FF8A00] px-5 py-3 text-lg font-bold text-[#172B45] transition hover:bg-[#F47C00]">Explore the marketplace <span aria-hidden="true">↗</span></Link>
+          <Link href="/marketplace" className="inline-flex w-fit items-center gap-2 rounded-md bg-[#FF8A00] px-5 py-3 text-base font-bold text-[#172B45] transition hover:bg-[#F47C00]">Explore the marketplace <span aria-hidden="true">↗</span></Link>
         </div>
       </section>
 
