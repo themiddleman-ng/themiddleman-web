@@ -81,10 +81,12 @@ test("feature flags cannot authorize the production database or live gateway", (
     VERCEL_ENV: "preview",
     NEXT_PUBLIC_SUPABASE_URL: "https://isolated.supabase.co",
     PAYSTACK_SECRET_KEY: "sk_test_example",
+    NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY: "pk_test_example",
     ESCROW_GATEWAY_TEST_ENABLED: "true",
   };
   assert.equal(escrowV2Enabled(env), true);
   assert.equal(gatewayTestEnabled(env), true);
+  assert.equal(gatewayTestEnabled({ ...env, NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY: "pk_live_example" }), false);
   for (const extra of [
     { VERCEL_ENV: "production" },
     { NEXT_PUBLIC_SUPABASE_URL: "https://uwigyojtiudefnwjezhm.supabase.co" },
