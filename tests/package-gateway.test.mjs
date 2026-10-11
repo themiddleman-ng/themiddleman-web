@@ -1,6 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import {
+  detectPackageType,
   inspectPackage,
   validateArchivePath,
 } from "../lib/server/package-validation.mjs";
@@ -191,4 +192,23 @@ test("payout confirms reference, recipient, amount, currency and test domain bef
     assert.equal(r.status, "uncertain");
   }
   await assert.rejects(runGatewayOperation({ job, secret: "sk_live_example" }));
+});
+
+
+test("product packages verify actual file type and reject secrets and executables", () => {
+  assert.equal(detectPackageType(Buffer.from("%PDF-1.7"), "guide.pdf"), "application/pdf");
+  assert.equal(detectPackageType(Buffer.from("Read me\\n"), "readme.txt"), "text/plain");
+  assert.throws(() => detectPackageType(Buffer.from("%PDF-1.7"), "package.zip"), /contents do not match/);
+  assert.throws(() => detectPackageType(Buffer.from([0, 1, 2]), "notes.txt"), /contents do not match/);
+  for (const name of [
+    "keys/server.pem",
+    "keys/signing.p12",
+    "keys/private.key",
+    "build/installer.exe",
+    "build/library.dll",
+    "build/package.msi",
+  ]) {
+    assert.throws(() => validateArchivePath(name), /secrets|Executable/);
+  }
+  assert.equal(validateArchivePath(".env.example"), ".env.example");
 });
