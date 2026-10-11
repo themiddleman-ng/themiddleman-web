@@ -87,7 +87,7 @@ export default function HomeFeed() {
   }, []);
 
   const categoryItems = useMemo(() => {
-    const available = new Set(gigs.map((gig) => gig.category).filter((category) => Object.hasOwn(CATEGORY_DETAILS, category)));
+    const available = new Set(gigs.map((gig) => gig.category));
     return Object.entries(CATEGORY_DETAILS)
       .filter(([key]) => available.has(key))
       .map(([key, detail]) => ({ key, ...detail }));
