@@ -94,12 +94,15 @@ export default function MyGigsPage() {
             <p className="text-xs font-semibold tracking-[.2em] text-ember">SELLER DASHBOARD</p>
             <h1 className="mt-3 font-display text-3xl font-bold">My products</h1>
           </div>
-          <Link
-            href="/gigs/new"
-            className="rounded-full bg-ember px-5 py-2.5 text-sm font-semibold text-ink hover:bg-ember/90 transition-colors"
-          >
-            + List a new product
-          </Link>
+          <div className="flex flex-wrap gap-3">
+            <Link href="/analytics" className="rounded-full border border-line px-4 py-2.5 text-sm text-slate hover:text-bone">Analytics</Link>
+            <Link
+              href="/gigs/new"
+              className="rounded-full bg-ember px-5 py-2.5 text-sm font-semibold text-ink hover:bg-ember/90 transition-colors"
+            >
+              + List a new product
+            </Link>
+          </div>
         </div>
 
         {loading && <p className="mt-8 text-sm text-slate">Loading your products…</p>}
