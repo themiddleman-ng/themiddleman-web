@@ -172,7 +172,29 @@ export default function GigPageClient({ gigId, purchasesEnabled }: { gigId: stri
     setReportSuccess(true); setReportDetails(""); setReporting(false);
   }
 
-  if (loading) return <main className="grid min-h-screen place-items-center bg-ink text-bone"><p className="text-sm text-slate">Loading product…</p></main>;
+  if (loading) return (
+    <main className="min-h-screen bg-ink text-bone" aria-busy="true" aria-label="Loading product">
+      <SiteHeader />
+      <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 sm:py-12">
+        <div className="h-3 w-36 rounded bg-slate/20 motion-safe:animate-pulse" />
+        <div className="mt-6 grid grid-cols-1 gap-10 lg:grid-cols-12">
+          <div className="lg:col-span-8">
+            <div className="aspect-[16/9] rounded-2xl bg-paper/60 motion-safe:animate-pulse" />
+            <div className="mt-7 h-7 w-3/4 rounded bg-paper/60 motion-safe:animate-pulse" />
+            <div className="mt-4 h-4 w-full rounded bg-paper/40 motion-safe:animate-pulse" />
+            <div className="mt-2 h-4 w-5/6 rounded bg-paper/40 motion-safe:animate-pulse" />
+          </div>
+          <div className="lg:col-span-4">
+            <div className="rounded-2xl border border-line bg-paper/40 p-6">
+              <div className="h-7 w-2/3 rounded bg-paper/60 motion-safe:animate-pulse" />
+              <div className="mt-6 h-11 rounded-full bg-paper/60 motion-safe:animate-pulse" />
+              <div className="mt-5 h-4 w-1/2 rounded bg-paper/40 motion-safe:animate-pulse" />
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  );
   if (loadError || !gig) return <main className="grid min-h-screen place-items-center bg-ink px-6 text-bone"><div className="text-center"><p className="mb-4 text-sm text-slate">{loadError}</p><Link href="/marketplace" className="text-sm text-ember hover:underline">Back to marketplace</Link></div></main>;
 
   const verified = gig.seller_profiles?.verification_status === "approved";
