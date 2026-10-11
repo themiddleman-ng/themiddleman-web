@@ -7,7 +7,6 @@ import GigPreview from "./GigPreview";
 export type CardGig = { id: string; title: string; description: string; category: string; price_ngn: number; is_ai_assisted: boolean; gallery_image_paths?: string[]; seller_profiles: { display_name: string; verification_status: string } | null };
 export type CardRating = { average_rating: number; review_count: number };
 const LABELS: Record<string, string> = { development: "Development", design: "Design", marketing: "Marketing", writing: "Writing", ai_assisted: "AI-assisted" };
-function LockIcon() { return <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><rect x="3" y="11" width="18" height="10" rx="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></svg>; }
 export default function GigCard({ gig, rating }: { gig: CardGig; rating?: CardRating }) {
   const seller = gig.seller_profiles?.display_name ?? "Unknown seller";
   const verified = gig.seller_profiles?.verification_status === "approved";
