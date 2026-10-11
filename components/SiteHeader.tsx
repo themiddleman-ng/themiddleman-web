@@ -120,7 +120,7 @@ export default function SiteHeader({ isSeller = false, compact = false }: { isSe
           </Link>
           <button
             type="button"
-            onClick={() => setMenuOpen((open) => !open)
+            onClick={() => setMenuOpen((open) => !open)}
             aria-label={menuOpen ? 'Close menu' : 'Open menu'}
             aria-expanded={menuOpen}
             className="flex h-9 w-9 items-center justify-center rounded-full border border-line bg-white/80 text-slate shadow-sm transition-colors hover:text-bone"
