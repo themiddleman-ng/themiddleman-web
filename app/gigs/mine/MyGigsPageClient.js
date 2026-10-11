@@ -66,6 +66,7 @@ export default function MyGigsPage() {
   useEffect(() => { load(); }, []);
 
   async function toggleStatus(gig) {
+    if (!["active", "paused"].includes(gig.status)) return;
     setBusyId(gig.id);
     const nextStatus = gig.status === "active" ? "paused" : "active";
     await supabase.from("gigs").update({ status: nextStatus }).eq("id", gig.id);
@@ -136,13 +137,15 @@ export default function MyGigsPage() {
                 </div>
                 <div className="flex items-center gap-4 shrink-0">
                   <span className="font-mono text-sm">₦{gig.price_ngn.toLocaleString()}</span>
-                  <button
-                    onClick={() => toggleStatus(gig)}
-                    disabled={busyId === gig.id}
-                    className="rounded-full border border-line px-4 py-2 text-xs font-medium text-bone hover:border-slate transition-colors disabled:opacity-50"
-                  >
-                    {gig.status === "active" ? "Pause" : "Resume"}
-                  </button>
+                  {["active", "paused"].includes(gig.status) ? (
+                    <button
+                      onClick={() => toggleStatus(gig)}
+                      disabled={busyId === gig.id}
+                      className="rounded-full border border-line px-4 py-2 text-xs font-medium text-bone hover:border-slate transition-colors disabled:opacity-50"
+                    >
+                      {gig.status === "active" ? "Pause" : "Resume"}
+                    </button>
+                  ) : null}
                   <button
                     onClick={() => deleteGig(gig)}
                     disabled={busyId === gig.id || gig.status === "deleted"}
