@@ -28,32 +28,32 @@ const siteSchema = {
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: "The Middleman | Buy and Sell Digital Work Safely",
+    default: "The Middleman | Nigerian Digital Products Marketplace",
     template: "%s | The Middleman",
   },
   description:
-    "Discover verified Nigerian creators, buy digital products and services, and keep payments protected through escrow until delivery is approved.",
+    "Discover ready-made digital products from Nigerian creators. Browse creative resources and tools, and pay in naira through Paystack.",
   applicationName: "The Middleman",
   keywords: [
     "Nigeria digital marketplace",
-    "escrow marketplace",
     "digital products Nigeria",
-    "verified Nigerian creators",
+    "Nigerian creators",
+    "templates and creative resources",
   ],
   alternates: { canonical: "/" },
   openGraph: {
     type: "website",
     url: SITE_URL,
     siteName: "The Middleman",
-    title: "The Middleman | Buy and Sell Digital Work Safely",
+    title: "The Middleman | Nigerian Digital Products Marketplace",
     description:
-      "Verified Nigerian creators, clear prices, and escrow-protected payments from order to delivery.",
+      "Find ready-made digital products from Nigerian creators. Browse, compare listing details and pay in naira through Paystack.",
   },
   twitter: {
     card: "summary_large_image",
-    title: "The Middleman | Buy and Sell Digital Work Safely",
+    title: "The Middleman | Nigerian Digital Products Marketplace",
     description:
-      "Verified Nigerian creators, clear prices, and escrow-protected payments from order to delivery.",
+      "Find ready-made digital products from Nigerian creators. Browse, compare listing details and pay in naira through Paystack.",
   },
   robots: {
     index: true,
