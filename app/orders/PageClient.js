@@ -8,12 +8,18 @@ import SiteHeader from "@/components/SiteHeader";
 
 const STATUS_LABELS = {
   pending_payment: "Awaiting payment",
-  in_escrow: "In escrow",
-  delivered: "Delivered — awaiting your approval",
+  in_escrow: "Paid — awaiting delivery",
+  delivered: "Delivery ready — review it",
   approved: "Completed",
   disputed: "Disputed",
   refunded: "Refunded",
 };
+
+function formatBytes(bytes) {
+  if (!Number.isFinite(bytes) || bytes <= 0) return "";
+  if (bytes < 1024 * 1024) return `${Math.max(1, Math.round(bytes / 1024))} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
 
 function StatusBadge({ status }) {
   const tone =
@@ -215,7 +221,11 @@ export default function OrdersPage() {
 
       <section className="mx-auto max-w-4xl px-6 py-12">
         <p className="text-xs font-semibold tracking-[.2em] text-ember">MY ORDERS</p>
-        <h1 className="mt-3 font-display text-3xl font-bold">Orders &amp; escrow</h1><Link href="/disputes" className="mt-4 inline-block text-ember">Respond to a dispute</Link>
+        <h1 className="mt-3 font-display text-3xl font-bold">Orders &amp; delivery</h1>
+        <p className="mt-2 max-w-2xl text-sm leading-6 text-slate">
+          Buyers receive finished files here. Sellers submit one final delivery package for each paid order.
+        </p>
+        <Link href="/disputes" className="mt-4 inline-block text-ember">Respond to a dispute</Link>
 
         {loadError && <p className="mt-6 text-sm text-slate">{loadError}</p>}
         {actionError && <p role="alert" className="mt-6 text-sm text-red-300">{actionError}</p>}
@@ -251,20 +261,64 @@ export default function OrdersPage() {
                 {order.deliveries?.[0]?.review_notes && !isBuyer && <p className="mt-3 text-sm text-slate">Admin feedback: {order.deliveries[0].review_notes}</p>}
                 {order.deliveries?.[0]?.dispute_window_closes_at && isBuyer && <p className="mt-3 text-xs text-slate">Review ends {new Date(order.deliveries[0].dispute_window_closes_at).toLocaleString()}. Acceptance queues payout; provider confirmation completes it.</p>}
                 {order.deliveries?.[0]?.seller_due_at && !isBuyer && <p className="mt-3 text-xs text-slate">Submission due {new Date(order.deliveries[0].seller_due_at).toLocaleString()}</p>}
+
+                {isBuyer && order.status === "in_escrow" && (
+                  <div className="mt-4 rounded-xl border border-line bg-ink/40 p-4">
+                    <p className="text-sm font-medium text-bone">Payment confirmed. The seller is preparing your product.</p>
+                    <p className="mt-1 text-xs leading-5 text-slate">When the final package is approved for delivery, the download button will appear here.</p>
+                  </div>
+                )}
+                {!isBuyer && order.status === "delivered" && (
+                  <div className="mt-4 rounded-xl border border-line bg-ink/40 p-4">
+                    <p className="text-sm font-medium text-bone">Delivery approved.</p>
+                    <p className="mt-1 text-xs leading-5 text-slate">The buyer can now download the package and either accept it or report an issue.</p>
+                  </div>
+                )}
+                {isBuyer && order.status === "approved" && (
+                  <div className="mt-4 rounded-xl border border-line bg-ink/40 p-4">
+                    <p className="text-sm font-medium text-bone">Order complete.</p>
+                    <p className="mt-1 text-xs leading-5 text-slate">Your delivered package remains available from this order.</p>
+                  </div>
+                )}
+
                 <div className="mt-4 flex flex-wrap gap-2">
                   {!isBuyer && order.status === "in_escrow" &&
                     (!order.deliveries?.length || ['pending_upload','needs_seller_edit'].includes(order.deliveries[0]?.status)) && (
-                    <div className="w-full rounded-xl border border-line p-4">
-                      <label className="block text-xs text-slate" htmlFor={`delivery-${order.id}`}>Upload the finished package (max 10 MB). Repository products require a ZIP without .git or secrets.</label>
+                    <div className="w-full rounded-xl border border-line bg-ink/40 p-4">
+                      <p className="text-sm font-semibold text-bone">Deliver this product</p>
+                      <p className="mt-1 text-xs leading-5 text-slate">
+                        Upload one final package, up to 10 MB. For code, templates, design packs, image sets or folders, ZIP everything first. A single PDF, PNG, JPG or TXT file can be uploaded directly.
+                      </p>
+                      <p className="mt-2 text-xs leading-5 text-slate">
+                        Code ZIPs must not contain <code>.git</code>, environment secrets or private keys.
+                      </p>
+                      <label className="mt-4 block text-xs font-medium text-bone" htmlFor={`delivery-${order.id}`}>
+                        Final delivery file
+                      </label>
                       <input id={`delivery-${order.id}`} type="file" accept=".pdf,.zip,.png,.jpg,.jpeg,.txt"
-                        className="mt-2 block max-w-full text-sm" onChange={event => setFiles({ ...files, [order.id]: event.target.files?.[0] })} />
+                        className="mt-2 block max-w-full text-sm text-slate"
+                        onChange={event => setFiles({ ...files, [order.id]: event.target.files?.[0] })} />
+                      {files[order.id] && (
+                        <p className="mt-2 text-xs text-slate">
+                          Selected: <span className="text-bone">{files[order.id].name}</span>
+                          {files[order.id].size ? ` · ${formatBytes(files[order.id].size)}` : ""}
+                        </p>
+                      )}
                       <button onClick={() => submitDelivery(order.id)} disabled={busyOrderId === order.id}
-                        className="mt-3 rounded-full bg-ember px-4 py-2 text-xs font-semibold text-ink disabled:opacity-50">
-                        {busyOrderId === order.id ? 'Uploading…' : 'Submit for admin review'}
+                        className="mt-4 rounded-full bg-ember px-4 py-2 text-xs font-semibold text-ink disabled:opacity-50">
+                        {busyOrderId === order.id ? 'Uploading…' : 'Submit delivery'}
                       </button>
+                      <p className="mt-3 text-[11px] leading-5 text-slate">
+                        After submission: package check → admin review → buyer download → buyer accepts or reports an issue.
+                      </p>
                     </div>
                   )}
-                  {!isBuyer && order.deliveries?.[0]?.status === 'pending_review' && <span className="text-sm text-slate">Awaiting admin review</span>}
+                  {!isBuyer && order.deliveries?.[0]?.status === 'pending_review' && (
+                    <div className="w-full rounded-xl border border-line bg-ink/40 p-4">
+                      <p className="text-sm font-medium text-bone">Delivery submitted.</p>
+                      <p className="mt-1 text-xs leading-5 text-slate">It is being reviewed before the buyer receives access.</p>
+                    </div>
+                  )}
 
                   {isBuyer && order.status === "pending_payment" && (
                     <button
@@ -276,6 +330,12 @@ export default function OrdersPage() {
                     </button>
                   )}
 
+                  {isBuyer && ['delivered','approved','disputed'].includes(order.status) && order.deliveries?.[0]?.status === 'delivered' && (
+                    <button onClick={() => openDelivery(order.id)} className="rounded-full border border-line px-4 py-2 text-xs font-semibold text-ember">
+                      Download delivery
+                    </button>
+                  )}
+
                   {isBuyer && order.status === "delivered" && (
                     <button
                       onClick={() => approveOrder(order.id)}
@@ -284,10 +344,6 @@ export default function OrdersPage() {
                     >
                       Accept delivery
                     </button>
-                  )}
-
-                  {isBuyer && ['delivered','approved','disputed'].includes(order.status) && order.deliveries?.[0]?.status === 'delivered' && (
-                    <button onClick={() => openDelivery(order.id)} className="rounded-full border border-line px-4 py-2 text-xs font-medium text-ember">Download delivery</button>
                   )}
 
                   {isBuyer && order.status === "approved" && !alreadyReviewed && (
