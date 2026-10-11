@@ -89,6 +89,13 @@ export default function HomeFeed() {
     };
   }, []);
 
+  const categoryItems = useMemo(() => {
+    const available = new Set(gigs.map((gig) => gig.category).filter((category) => category in CATEGORY_DETAILS));
+    return Object.entries(CATEGORY_DETAILS)
+      .filter(([key]) => available.has(key))
+      .map(([key, detail]) => ({ key, ...detail }));
+  }, [gigs]);
+
   const imageGigs = useMemo(
     () => gigs.filter((gig) => Array.isArray(gig.gallery_image_paths) && gig.gallery_image_paths.length > 0),
     [gigs]
@@ -97,26 +104,30 @@ export default function HomeFeed() {
 
   return (
     <section id="categories" className="bg-[#F8F6F1]">
-      <div className="mx-auto max-w-7xl px-5 pb-12 pt-7 sm:px-8 sm:pb-16 sm:pt-9">
-        <div className="mb-2 flex items-center gap-3 px-1 text-[12px] font-medium tracking-[.01em] text-[#6D7B86] sm:text-[13px]">
-          <span className="h-px w-5 bg-[#E57814]" />
-          <span>Explore what people are selling</span>
-        </div>
-      </div>
-      <div className="marketplace-marquee overflow-hidden" aria-label="Marketplace categories">
-        <div className="marketplace-marquee-track flex w-max items-center" role="list">
-          <div className="flex items-center" role="listitem"><CategoryLinks /></div>
-          <div className="flex items-center" aria-hidden="true"><CategoryLinks duplicate /></div>
-        </div>
-      </div>
+      {categoryItems.length > 0 && (
+        <>
+          <div className="mx-auto max-w-7xl px-5 pb-2 pt-3 sm:px-8 sm:pt-5">
+            <div className="flex items-center gap-3 px-1 text-[13px] font-medium tracking-[.01em] text-[#6D7B86] sm:text-[14px]">
+              <span className="h-px w-5 bg-[#E57814]" />
+              <span>Explore the marketplace</span>
+            </div>
+          </div>
+          <div className="marketplace-marquee overflow-hidden" aria-label="Marketplace categories">
+            <div className="marketplace-marquee-track flex w-max items-center" role="list">
+              <div className="flex items-center">{<CategoryLinks items={categoryItems} />}</div>
+              <div className="flex items-center" aria-hidden="true">{<CategoryLinks items={categoryItems} duplicate />}</div>
+            </div>
+          </div>
+        </>
+      )}
 
       <div className="mx-auto max-w-7xl px-5 pb-16 pt-12 sm:px-8 sm:pb-20 sm:pt-16">
         <div className="mb-7 flex flex-col gap-4 sm:mb-8 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <p className="text-[12px] font-semibold tracking-[.01em] text-[#E07818] sm:text-[13px]">A small selection</p>
-            <h2 className="mt-2 font-display text-[32px] font-bold leading-[1.08] tracking-[-.045em] text-[#172B45] sm:text-[40px]">Featured marketplace listings</h2>
+            <h2 className="mt-2 font-display text-[32px] font-bold leading-[1.08] tracking-[-.045em] text-[#172B45] sm:text-[40px]">A few listings to explore</h2>
           </div>
-          <Link href="/marketplace" className="w-fit text-[15px] font-semibold text-[#0B3D91] hover:underline">See everything in the marketplace <span aria-hidden="true">↗</span></Link>
+          <Link href="/marketplace" className="w-fit text-[15px] font-semibold text-[#0B3D91] hover:underline">See all marketplace listings <span aria-hidden="true">↗</span></Link>
         </div>
 
         <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">

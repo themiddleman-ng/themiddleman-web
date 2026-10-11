@@ -4,24 +4,24 @@ import { useState } from "react";
 
 const QUESTIONS = [
   {
-    question: "What is The Middleman?",
-    answer: "A marketplace for digital products and services from Nigerian creators. Buyers can discover listings and keep the order, payment and delivery steps together.",
+    question: "What can I buy on The Middleman?",
+    answer: "The marketplace is being shaped around ready-made digital products such as templates, creative resources and tools. Check each listing for its exact contents, format and terms.",
   },
   {
-    question: "How does payment protection work?",
-    answer: "Payment is held while the seller completes the agreed work. The buyer reviews the delivery before approving the order and releasing payment.",
+    question: "How do payments work?",
+    answer: "Eligible purchases use Paystack checkout. The Middleman does not currently claim escrow, held funds or guaranteed refunds. Check the listing and purchase terms before paying.",
   },
   {
     question: "Can I buy and sell with one account?",
-    answer: "Yes. You can browse and buy, then set up your seller profile when you are ready to offer products or services.",
+    answer: "Yes. You can browse and buy, then set up your seller profile when you are ready to list a digital product.",
   },
   {
-    question: "How are AI-assisted listings shown?",
-    answer: "Listings that use AI assistance are labelled so buyers can see that before they choose.",
+    question: "Can a creator customize a product for me?",
+    answer: "Product-specific customization add-ons are in development. They will be available only when the product listing, checkout price and delivery flow are connected. If an option is not shown on the listing, it is not included in checkout.",
   },
   {
-    question: "What if I need help with an order?",
-    answer: "Use the order page to review its progress or raise an issue for the team to look into.",
+    question: "Where can I follow my purchase?",
+    answer: "Use the order page to check the payment state and the information available for that order. Seller-managed delivery is still being verified for production.",
   },
 ];
 
@@ -29,13 +29,13 @@ export default function HomeFAQ() {
   const [openIndex, setOpenIndex] = useState<number | null>(0);
 
   return (
-    <section id="faq" className="border-t border-[#DCE2E5] bg-white">
+    <section id="faq" className="bg-white">
       <div className="mx-auto grid max-w-7xl gap-9 px-5 py-16 sm:px-8 sm:py-20 md:grid-cols-[.8fr_1.2fr] md:gap-16">
         <div>
           <p className="text-[13px] font-bold uppercase tracking-[.14em] text-[#0B3D91]">Frequently asked</p>
-          <h2 className="mt-4 max-w-sm font-display text-4xl font-bold leading-[1.08] tracking-[-.05em] text-[#172B45] sm:text-5xl">Good questions.<br />Clear answers.</h2>
-          <p className="mt-4 max-w-sm text-base leading-7 text-[#6C7A87]">A few basics about finding work, paying safely and getting an order completed.</p>
-          <a href="mailto:hello@themiddleman.com.ng" className="mt-5 inline-flex text-base font-semibold text-[#0B3D91] underline decoration-[#FF8A00] underline-offset-4">Talk to the team</a>
+          <h2 className="mt-4 max-w-sm font-display text-[clamp(2.8rem,5vw,4.25rem)] font-semibold leading-[1.02] tracking-[-.055em] text-[#172B45]">Good questions.<br />Clear answers.</h2>
+          <p className="mt-4 max-w-sm text-[17px] leading-7 text-[#6C7A87]">What to expect when you shop or sell digital products here.</p>
+          <a href="mailto:hello@themiddleman.com.ng" className="mt-5 inline-flex text-[16px] font-semibold text-[#0B3D91] underline decoration-[#FF8A00] underline-offset-4">Talk to the team</a>
         </div>
 
         <div className="border-t border-[#DCE2E5]">
@@ -49,10 +49,10 @@ export default function HomeFAQ() {
                   aria-expanded={isOpen}
                   className="flex w-full items-center justify-between gap-4 py-5 text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0B3D91]"
                 >
-                  <span className="text-base font-semibold text-[#253E55] sm:text-[17px]">{item.question}</span>
+                  <span className="text-[17px] font-semibold text-[#253E55] sm:text-[18px]">{item.question}</span>
                   <span aria-hidden="true" className={`grid h-7 w-7 shrink-0 place-items-center rounded-full border border-[#DCE2E5] text-base font-normal text-[#496277] transition-transform ${isOpen ? "rotate-45 bg-[#0B3D91] text-white" : ""}`}>+</span>
                 </button>
-                {isOpen && <p className="max-w-2xl pb-5 pr-10 text-base leading-7 text-[#6B7A87]">{item.answer}</p>}
+                {isOpen && <p className="max-w-2xl pb-5 pr-10 text-[16px] leading-7 text-[#6B7A87] sm:text-[17px]">{item.answer}</p>}
               </div>
             );
           })}
