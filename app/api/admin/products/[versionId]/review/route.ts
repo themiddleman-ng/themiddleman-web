@@ -5,6 +5,7 @@ import {
 } from "@/lib/server/marketplace";
 import { productPackagesEnabled } from "@/lib/server/product-package-config.mjs";
 import { sameOriginMutation } from "@/lib/server/same-origin.mjs";
+import { sendProductReviewEmail } from "@/lib/server/product-review-emails.mjs";
 
 export const runtime = "nodejs";
 const REASONS = new Set([
@@ -49,5 +50,9 @@ export async function POST(request: Request, { params }: { params: Promise<{ ver
     p_notes: notes,
   });
   if (error || !data) return privateJson({ error: error?.message || "Could not save this review decision." }, 409);
-  return privateJson({ result: data });
+  const email = await sendProductReviewEmail({
+    admin: administrator.db,
+    eventKey: data.email_event_key,
+  });
+  return privateJson({ result: data, emailStatus: email.status || "failed" });
 }
