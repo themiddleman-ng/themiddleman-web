@@ -4,11 +4,11 @@ export default function manifest(): MetadataRoute.Manifest {
   return {
     name: "The Middleman",
     short_name: "Middleman",
-    description: "A safer Nigerian marketplace for digital products and services.",
-    start_url: "/",
+    description: "Browse digital products from independent creators and pay in Naira.",
+    start_url: "/marketplace",
     display: "standalone",
     background_color: "#f7f3ec",
-    theme_color: "#f26419",
+    theme_color: "#f7f3ec",
     icons: [
       {
         src: "/brand/app-icon.png",
