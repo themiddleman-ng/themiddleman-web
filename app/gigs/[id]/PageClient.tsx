@@ -61,6 +61,14 @@ export default function GigPageClient({ gigId, purchasesEnabled }: { gigId: stri
   const orderRequestKey = useRef<string | null>(null);
 
   useEffect(() => {
+    void fetch("/api/gigs/" + gigId + "/view", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: "{}",
+    }).catch(() => {});
+  }, [gigId]);
+
+  useEffect(() => {
     let cancelled = false;
     async function load() {
       setLoading(true); setLoadError("");
