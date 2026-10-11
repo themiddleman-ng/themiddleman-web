@@ -26,12 +26,12 @@ export default function Home() {
           </nav>
           <div className="flex items-center gap-2 sm:gap-4">
             <Link href="/signup?mode=signin" className="rounded-md px-3 py-2 text-[15px] font-semibold text-[#334960] hover:bg-[#EAF0F3]">Log in</Link>
-            <Link href="/marketplace" className="rounded-md bg-[#0B3D91] px-3.5 py-2.5 text-[15px] font-semibold text-white transition-colors hover:bg-[#12336C] sm:px-4">Browse products <span aria-hidden="true">↗</span></Link>
+            <Link href="/marketplace" className="rounded-md bg-[#0B3D91] px-3.5 py-2.5 text-[15px] font-semibold text-white transition-colors hover:bg-[#12336C] sm:px-4">Browse products</Link>
           </div>
         </div>
       </header>
 
-      <section className="mx-auto grid max-w-7xl items-center gap-10 px-5 pb-12 pt-14 sm:px-8 sm:pb-16 sm:pt-20 lg:grid-cols-[1fr_.9fr] lg:gap-16 lg:pb-20">
+      <section className="homepage-hero mx-auto grid max-w-7xl items-center gap-10 px-5 pb-12 pt-14 sm:px-8 sm:pb-16 sm:pt-20 lg:grid-cols-[1fr_.9fr] lg:gap-16 lg:pb-20">
         <div className="max-w-2xl">
           <p className="flex items-center gap-2 text-[13px] font-bold uppercase tracking-[.16em] text-[#0B3D91]"><span className="h-[2px] w-6 bg-[#FF8A00]" />A marketplace for digital products</p>
           <h1 className="mt-5 font-display text-[clamp(3.35rem,7vw,6.1rem)] font-bold leading-[.98] tracking-[-.065em] text-[#172B45]">
@@ -41,11 +41,10 @@ export default function Home() {
             Discover ready-made digital products from Nigerian creators. Check what each product includes, then purchase in naira through Paystack.
           </p>
           <div className="mt-8 flex flex-wrap gap-3">
-            <Link href="/marketplace" className="inline-flex items-center gap-2 rounded-md bg-[#FF8A00] px-5 py-3 text-[16px] font-bold text-[#182B40] transition hover:bg-[#F47C00]">Explore the marketplace <span aria-hidden="true">↗</span></Link>
-            <Link href="/signup" className="inline-flex items-center gap-2 rounded-md px-4 py-3 text-[16px] font-semibold text-[#172B45] transition hover:bg-[#EAF0F3]">Sell a digital product <span aria-hidden="true">→</span></Link>
+            <Link href="/marketplace" className="inline-flex items-center gap-2 rounded-md bg-[#FF8A00] px-5 py-3 text-[16px] font-bold text-[#182B40] transition hover:bg-[#F47C00]">Explore the marketplace</Link>
+            <Link href="/signup" className="inline-flex items-center gap-2 rounded-md px-4 py-3 text-[16px] font-semibold text-[#172B45] transition hover:bg-[#EAF0F3]">Sell a digital product</Link>
           </div>
           <div className="mt-8 flex flex-wrap gap-x-6 gap-y-2 text-[14px] font-semibold text-[#657587] sm:text-[15px]">
-            <span><b className="mr-2 text-[#E57814]">✓</b>Prices in naira</span>
             <span><b className="mr-2 text-[#E57814]">✓</b>Independent creators</span>
             <span><b className="mr-2 text-[#E57814]">✓</b>Paystack checkout</span>
           </div>
@@ -58,15 +57,11 @@ export default function Home() {
                 <span aria-hidden="true" className="grid h-7 w-7 place-items-center rounded-md bg-[#0B3D91] font-display text-[15px] text-white">M</span>
                 Marketplace
               </div>
-              <span className="text-[12px] font-semibold tracking-[.08em] text-[#6C7A87]">NIGERIA · NGN</span>
             </div>
             <div className="bg-[#F8F6F1] px-5 py-6 sm:px-7 sm:py-7">
               <p className="text-[11px] font-bold uppercase tracking-[.14em] text-[#0B3D91]">Find a useful starting point</p>
               <h2 className="mt-2 font-display text-[clamp(1.9rem,4vw,2.7rem)] font-semibold leading-[1.02] tracking-[-.05em] text-[#172B45]">Products built for work.</h2>
               <p className="mt-3 max-w-md text-[15px] leading-6 text-[#657587]">Browse creator-made digital resources, then check the preview and details on each listing.</p>
-              <Link href="/marketplace" className="mt-6 flex items-center justify-between rounded-lg border border-[#DCE2E5] bg-white px-4 py-3 text-[14px] font-semibold text-[#526577] transition hover:border-[#0B3D91] hover:text-[#0B3D91]">
-                Browse all products <span aria-hidden="true" className="text-[#0B3D91]">↗</span>
-              </Link>
               <div className="mt-5">
                 <p className="mb-3 text-[12px] font-semibold text-[#657587]">Browse by category</p>
                 <div className="flex flex-wrap gap-2">
@@ -78,7 +73,7 @@ export default function Home() {
                 </div>
               </div>
               <div className="mt-5 flex items-center gap-3 rounded-lg bg-[#EAF0F3] px-4 py-3">
-                <span aria-hidden="true" className="grid h-9 w-9 shrink-0 place-items-center rounded-md bg-white text-[18px] text-[#E57814]">↗</span>
+                <span aria-hidden="true" className="grid h-9 w-9 shrink-0 place-items-center rounded-md bg-white text-[18px] text-[#E57814]"></span>
                 <div>
                   <p className="text-[13px] font-semibold text-[#263E55]">Previews, files and listing details</p>
                   <p className="mt-0.5 text-[12px] leading-5 text-[#6C7A87]">Review each listing before you choose.</p>
