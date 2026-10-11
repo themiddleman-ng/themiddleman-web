@@ -84,14 +84,18 @@ const CATEGORIES: Array<{ value: GigCategory | "all"; label: string }> = [
 
 function LoadingState() {
   return (
-    <div className="receipt-loader" aria-label="Loading products">
-      <div className="receipt-loader-bar" />
-      <p className="text-sm text-slate flex items-center gap-2">
-        Printing receipts
-        <span className="typing-dot" />
-        <span className="typing-dot" />
-        <span className="typing-dot" />
-      </p>
+    <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3" aria-label="Loading products">
+      {Array.from({ length: 6 }).map((_, index) => (
+        <div key={index} className="overflow-hidden rounded-2xl bg-white/70">
+          <div className="gm-skeleton aspect-[4/3]" />
+          <div className="space-y-3 p-4 sm:p-5">
+            <div className="gm-skeleton h-2.5 w-24 rounded-full" />
+            <div className="gm-skeleton h-5 w-4/5 rounded-full" />
+            <div className="gm-skeleton h-3 w-2/3 rounded-full" />
+            <div className="gm-skeleton h-4 w-24 rounded-full" />
+          </div>
+        </div>
+      ))}
     </div>
   );
 }
@@ -181,47 +185,54 @@ export default function MarketplacePage() {
   // Only open the 4th column once there is enough stock to fill it.
   const gridClass =
     filteredGigs.length > 8
-      ? "grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
-      : "grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3";
+      ? "grid grid-cols-1 gap-x-6 gap-y-9 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+      : "grid grid-cols-1 gap-x-6 gap-y-9 sm:grid-cols-2 lg:grid-cols-3";
 
   return (
-    <div className="mp-shell">
-      <div className="mp-blob mp-blob-1" />
-      <div className="mp-blob mp-blob-2" />
-      <div className="mp-blob mp-blob-3" />
-
+    <div className="min-h-screen bg-[#F7F1E8] text-[#172033]">
       <SiteHeader />
 
-      <div className="mp-content mx-auto max-w-7xl px-4 py-8 sm:px-6 sm:py-14">
+      <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 sm:py-12">
         <FadeIn direction="up" duration={600}>
-          {/* Hero panel — stacks vertically on mobile, row on desktop */}
-          <div className="rounded-3xl border border-line bg-white/75 p-5 shadow-[0_18px_50px_rgba(31,21,12,.08)] backdrop-blur-sm sm:p-6">
-            <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-              <p className="max-w-md text-[13px] text-slate sm:text-sm">
-                Verified digital products and code, payment-protected, Nigeria-wide
+          <div className="grid gap-8 lg:grid-cols-[1fr_auto] lg:items-end">
+            <div>
+              <p className="text-sm font-medium text-[#B85B22]">Marketplace</p>
+              <h1 className="mt-3 max-w-3xl font-display text-4xl font-semibold tracking-[-0.04em] text-[#172033] sm:text-5xl">
+                Find digital products worth paying for.
+              </h1>
+              <p className="mt-4 max-w-2xl text-base leading-7 text-[#657083]">
+                Browse products from creators, check the listing details, then pay in Naira through The Middleman.
               </p>
-              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
-                <input
-                  type="text"
-                  value={query}
-                  onChange={(e) => setQuery(e.target.value)}
-                  placeholder="Search products, code, templates, sellers"
-                  className="w-full rounded-full border border-line bg-white px-4 py-2.5 text-sm text-bone placeholder-slate shadow-sm transition-colors focus:border-ember focus:outline-none sm:w-72 lg:w-80"
-                />
-                <Link
-                  href="/gigs/new"
-                  className="shrink-0 rounded-full bg-ember px-5 py-2.5 text-center text-[13px] font-semibold text-ink shadow-lg shadow-ember/20 transition-all hover:-translate-y-0.5 hover:bg-ember/90"
-                >
-                  List a product
-                </Link>
-              </div>
             </div>
+
+            <Link
+              href="/gigs/new"
+              className="w-fit rounded-lg bg-[#0B3D91] px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-transform hover:-translate-y-0.5"
+            >
+              Sell a digital product
+            </Link>
+          </div>
+
+          <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
+            <div className="relative flex-1">
+              <svg aria-hidden="true" className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[#7A8390]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <circle cx="11" cy="11" r="7" />
+                <path d="m20 20-3.5-3.5" />
+              </svg>
+              <input
+                type="text"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="Search products, creators, templates..."
+                className="w-full rounded-xl bg-white/80 py-3 pl-11 pr-4 text-sm text-[#172033] outline-none ring-1 ring-[#D9D2C7] transition focus:ring-[#0B3D91]/40"
+              />
+            </div>
+            <p className="text-xs text-[#7A746D] sm:pl-2">Pay in Naira · Verified sellers</p>
           </div>
         </FadeIn>
 
         <FadeIn direction="up" delay={100} duration={600}>
-          {/* Category tabs — hidden scrollbar on mobile */}
-          <div className="no-scrollbar mb-8 mt-6 flex gap-3 overflow-x-auto pb-1">
+          <div className="no-scrollbar mb-9 mt-5 flex gap-2 overflow-x-auto pb-1">
             {CATEGORIES.map((category) => {
               const active = activeCategory === category.value;
               return (
@@ -229,10 +240,10 @@ export default function MarketplacePage() {
                   key={category.value}
                   onClick={() => setActiveCategory(category.value)}
                   className={
-                    "mp-tab whitespace-nowrap rounded-full border px-4 py-2 text-[13px] transition-all " +
+                    "whitespace-nowrap rounded-lg px-4 py-2 text-[13px] font-medium transition-all " +
                     (active
-                      ? "border-ember bg-ember font-semibold text-ink shadow-sm"
-                      : "border-line bg-white/70 text-slate hover:border-ember/30 hover:text-bone")
+                      ? "bg-[#172033] text-white"
+                      : "bg-white/60 text-[#657083] hover:bg-white hover:text-[#172033]")
                   }
                 >
                   {category.label}
