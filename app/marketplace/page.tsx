@@ -23,6 +23,6 @@ export const metadata: Metadata = {
   },
 };
 
-export default function Page(props: Record<string, unknown>) {
-  return <PageClient {...props} />;
+export default function Page() {
+  return <PageClient />;
 }
