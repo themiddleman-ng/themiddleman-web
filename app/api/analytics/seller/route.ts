@@ -1,0 +1,92 @@
+import {
+  authenticatedUser,
+  privateJson,
+  serviceClient,
+} from "@/lib/server/marketplace";
+import { productPackagesEnabled } from "@/lib/server/product-package-config.mjs";
+
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
+const PAID_STATUSES = ["in_escrow", "delivered", "approved", "disputed"];
+
+export async function GET(request: Request) {
+  const user = await authenticatedUser();
+  if (!user) return privateJson({ error: "Sign in to view seller analytics." }, 401);
+  if (!productPackagesEnabled()) return privateJson({ error: "Seller analytics are not enabled here." }, 404);
+  const db = serviceClient();
+  if (!db) return privateJson({ error: "Analytics are unavailable." }, 503);
+  const url = new URL(request.url);
+  const requestedDays = Number(url.searchParams.get("days") || 7);
+  const days = [7, 30, 90, 0].includes(requestedDays) ? requestedDays : 7;
+
+  const { data: seller, error: sellerError } = await db.from("seller_profiles")
+    .select("id")
+    .eq("user_id", user.id)
+    .maybeSingle();
+  if (sellerError) return privateJson({ error: "Could not load seller analytics." }, 500);
+  if (!seller) return privateJson({ error: "Seller profile not found." }, 404);
+
+  const { data: gigs, error: gigsError } = await db.from("gigs")
+    .select("id,title,status")
+    .eq("seller_id", seller.id)
+    .order("created_at", { ascending: false });
+  if (gigsError) return privateJson({ error: "Could not load seller products." }, 500);
+  const products = gigs ?? [];
+  if (!products.length) return privateJson({ days, products: [], totals: { views: 0, sales: 0, salesValue: 0 }, trackingEnabled: Boolean(process.env.MARKETPLACE_ANALYTICS_PEPPER) });
+
+  const since = days ? new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString() : null;
+  let viewQuery = db.from("marketplace_events")
+    .select("gig_id,properties,created_at")
+    .eq("event_type", "product.viewed")
+    .in("gig_id", products.map((product) => product.id))
+    .order("created_at", { ascending: false })
+    .limit(10000);
+  if (since) viewQuery = viewQuery.gte("created_at", since);
+
+  let orderQuery = db.from("orders")
+    .select("gig_id,amount,created_at,status")
+    .eq("seller_id", seller.id)
+    .in("status", PAID_STATUSES)
+    .order("created_at", { ascending: false })
+    .limit(10000);
+  if (since) orderQuery = orderQuery.gte("created_at", since);
+
+  const [viewsResult, ordersResult, ratingsResult] = await Promise.all([
+    viewQuery,
+    orderQuery,
+    db.rpc("get_gig_ratings"),
+  ]);
+  if (viewsResult.error || ordersResult.error)
+    return privateJson({ error: "Could not load seller performance data." }, 500);
+
+  const productRows = products.map((product) => {
+    const productViews = (viewsResult.data ?? []).filter((row) => row.gig_id === product.id);
+    const productOrders = (ordersResult.data ?? []).filter((row) => row.gig_id === product.id);
+    const rating = (ratingsResult.data ?? []).find((row) => row.gig_id === product.id);
+    const salesValue = productOrders.reduce((total, row) => total + Number(row.amount || 0), 0);
+    const views = productViews.length;
+    const sales = productOrders.length;
+    return {
+      id: product.id,
+      title: product.title,
+      status: product.status,
+      views,
+      sales,
+      salesValue,
+      conversionRate: views ? Math.round((sales / views) * 10000) / 100 : 0,
+      averageRating: rating?.average_rating ?? null,
+      reviewCount: rating?.review_count ?? 0,
+    };
+  });
+
+  return privateJson({
+    days,
+    trackingEnabled: (process.env.MARKETPLACE_ANALYTICS_PEPPER || "").length >= 32,
+    products: productRows,
+    totals: {
+      views: productRows.reduce((sum, item) => sum + item.views, 0),
+      sales: productRows.reduce((sum, item) => sum + item.sales, 0),
+      salesValue: productRows.reduce((sum, item) => sum + item.salesValue, 0),
+    },
+  });
+}
