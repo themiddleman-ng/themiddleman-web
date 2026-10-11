@@ -1138,7 +1138,7 @@ body {
   background-size: 220% 100%;
   animation: marketplace-shimmer 1.8s ease-in-out infinite;
 }
-@keyframes marketplace-shimmer { to { background-position: -220% 0; }
+@keyframes marketplace-shimmer { to { background-position: -220% 0; } }
 
 /* ============================================================
    MARKETPLACE REDESIGN — CARD, PREVIEW & NAV MOTION
