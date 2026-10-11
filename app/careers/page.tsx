@@ -5,8 +5,17 @@ export const metadata = {
   title: "Careers",
   description: "Learn about working with The Middleman to build trust into Nigeria's digital commerce.",
   alternates: { canonical: "/careers" },
+  openGraph: {
+    title: "Careers at The Middleman",
+    description: "Learn about working with The Middleman to build the Nigerian digital product marketplace.",
+    url: "https://themiddleman.com.ng/careers",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Careers at The Middleman",
+    description: "Learn about working with The Middleman to build the Nigerian digital product marketplace.",
+  },
 };
-
 export default function CareersPage() {
   return (
     <main className="min-h-screen bg-ink text-bone">
