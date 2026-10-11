@@ -1,8 +1,28 @@
-export const dynamic = 'force-dynamic';
-export const metadata = {
-  title: 'Marketplace',
-  description: 'Browse digital products from Nigerian creators, compare listing details, and view prices in Naira.',
-  alternates: { canonical: '/marketplace' },
+import type { Metadata } from "next";
+import PageClient from "./PageClient";
+
+export const dynamic = "force-dynamic";
+
+const description =
+  "Browse digital products from independent Nigerian creators. Compare listing details and prices, then pay in Naira through Paystack.";
+
+export const metadata: Metadata = {
+  title: "Marketplace",
+  description,
+  alternates: { canonical: "/marketplace" },
+  openGraph: {
+    type: "website",
+    url: "https://themiddleman.com.ng/marketplace",
+    title: "Marketplace | The Middleman",
+    description,
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Marketplace | The Middleman",
+    description,
+  },
 };
-import PageClient from './PageClient';
-export default function Page(props: any) { return <PageClient {...props} />; }
+
+export default function Page(props: Record<string, unknown>) {
+  return <PageClient {...props} />;
+}
