@@ -80,15 +80,30 @@ security definer
 set search_path = ''
 as $function$
 begin
-  if new.current_product_version_id is distinct from
-      case when tg_op = 'INSERT' then null else old.current_product_version_id end
+  if tg_op = 'INSERT' then
+    if new.current_product_version_id is not null then
+      raise exception 'Only the product review workflow can set the current version';
+    end if;
+  elsif new.current_product_version_id is distinct from old.current_product_version_id
     and current_setting('middleman.product_version_review', true)
       is distinct from new.current_product_version_id::text then
     raise exception 'Only the product review workflow can change the current version';
   end if;
 
-  if new.status = 'active'
-    and (tg_op = 'INSERT' or old.status is distinct from new.status) then
+  if tg_op = 'INSERT' and new.status = 'active' then
+    if new.current_product_version_id is null or not exists (
+      select 1 from public.product_versions version
+      where version.id = new.current_product_version_id
+        and version.gig_id = new.id
+        and version.is_current
+        and version.review_status = 'approved'
+        and version.security_status = 'structural_pass'
+        and version.access_status = 'available'
+    ) then
+      raise exception 'A product needs an approved available package before publication';
+    end if;
+  elsif tg_op = 'UPDATE' and new.status = 'active'
+    and old.status is distinct from new.status then
     if new.current_product_version_id is null or not exists (
       select 1 from public.product_versions version
       where version.id = new.current_product_version_id
