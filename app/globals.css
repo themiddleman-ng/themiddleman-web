@@ -32,6 +32,8 @@
 
 
 /* Warm, restrained light field for the homepage hero. */
+.homepage-fonts .gm-arrow { display: none; }
+
 .homepage-hero {
   position: relative;
   isolation: isolate;
