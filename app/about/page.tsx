@@ -3,8 +3,10 @@ import { LogoMark } from "@/components/Logo";
 
 export const metadata = {
   title: "About",
-  description: "Learn why The Middleman is building a safer marketplace for Nigeria's digital economy.",
+  description: "Discover ready-made digital products from Nigerian creators and pay in Naira through Paystack.",
   alternates: { canonical: "/about" },
+  openGraph: { title: "About The Middleman", description: "A marketplace for ready-made digital products from independent creators.", url: "https://themiddleman.com.ng/about" },
+  twitter: { card: "summary_large_image", title: "About The Middleman", description: "Discover ready-made digital products from Nigerian creators." },
 };
 
 export default function AboutPage() {
@@ -22,12 +24,12 @@ export default function AboutPage() {
 
       <div className="mx-auto max-w-4xl px-6 py-12">
         <p className="text-xs font-bold uppercase tracking-[.16em] text-ember">About us</p>
-        <h1 className="mt-2 font-display text-4xl font-bold tracking-tight sm:text-5xl">The trust layer for Nigeria&apos;s digital economy.</h1>
+        <h1 className="mt-2 font-display text-4xl font-bold tracking-tight sm:text-5xl">A marketplace for useful digital products.</h1>
 
         <div className="mt-10 space-y-6 text-[15px] leading-relaxed text-slate">
-          <p>The Middleman is a marketplace for digital products and services - software, design, marketing, writing, and AI-assisted work - built for Nigeria first. Buyers find verified creators. Creators find serious buyers. Every payment is held securely and released only when the buyer approves the delivery.</p>
-          <p>We started because of a simple trust gap. Buyers are afraid to pay strangers online. Creators are afraid to work before payment. Both fears are rational, and together they suppress thousands of transactions that should happen every day in Nigeria&apos;s digital economy. Screenshots and promises don&apos;t close that gap. A payment that only releases on approval does.</p>
-          <p>The Middleman was founded by Samuel Oguntona and built at Obafemi Awolowo University, Ile-Ife. It began as a campus project, outgrew it, and became what it is now: a Nigeria-wide platform where every listing is verified, every price is clear in Naira, and every transaction has a human-readable paper trail.</p>
+          <p>The Middleman is a marketplace for ready-made digital products from independent creators, built with Nigeria first in mind. Buyers can review listing details and previews before purchasing, and pay in Naira through Paystack.</p>
+          <p>We started with a simple goal: make it easier to discover useful digital products and understand what is included before buying. Clear listing details help buyers compare products and creators.</p>
+          <p>The Middleman was founded by Samuel Oguntona and built at Obafemi Awolowo University, Ile-Ife. It began as a campus project and is growing into a marketplace for digital products from creators across Nigeria.</p>
         </div>
 
         <div className="relative mt-12 rounded-2xl border border-line bg-paper p-8">
@@ -36,10 +38,10 @@ export default function AboutPage() {
           <p className="text-xs font-bold uppercase tracking-[.16em] text-ember">What we hold to</p>
           <ul className="mt-5 space-y-4">
             {[
-              ["Protection by default", "Payments are held until the buyer approves the delivery. No exceptions, no fine print."],
-              ["Verification before listing", "Sellers complete identity verification before anything goes live."],
-              ["Clear pricing in Naira", "Every price on the platform is shown in NGN. No hidden conversion games."],
-              ["Humans in disputes", "When something goes wrong, a mediation team reviews the evidence and decides fairly."],
+              ["Ready-made products", "Browse digital products made by independent creators."],
+              ["Clear listing details", "Review product descriptions, previews and seller information before buying."],
+              ["Pay in Naira", "Checkout is in Naira through Paystack."],
+              ["Seller verification labels", "A verified mark appears only for sellers whose verification is approved."],
             ].map(([title, body]) => (
               <li key={title} className="flex items-start gap-3">
                 <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-ember" />
