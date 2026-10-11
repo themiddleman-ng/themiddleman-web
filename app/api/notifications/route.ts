@@ -22,7 +22,10 @@ export async function GET() {
     .order("created_at", { ascending: false })
     .limit(100);
   if (error) return privateJson({ error: "Could not load notifications." }, 500);
-  const notifications = data ?? [];
+  const notifications = (data ?? []).map((item) => ({
+    ...item,
+    href: typeof item.href === "string" && item.href.startsWith("/") && !item.href.startsWith("//") ? item.href : null,
+  }));
   return privateJson({
     notifications,
     unreadCount: notifications.filter((item) => !item.read_at).length,
