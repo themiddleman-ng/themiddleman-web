@@ -7,16 +7,13 @@ import GigCard, { type CardGig, type CardRating } from "./GigCard";
 
 type GigRow = CardGig & { created_at: string };
 
-const CATEGORIES = [
-  { label: "Web & Software", mark: "</>", href: "/marketplace?category=development" },
-  { label: "Design", mark: "◇", href: "/marketplace?category=design" },
-  { label: "Writing", mark: "Aa", href: "/marketplace?category=writing" },
-  { label: "Marketing", mark: "↗", href: "/marketplace?category=marketing" },
-  { label: "AI-assisted", mark: "✳", href: "/marketplace?category=ai_assisted" },
-  { label: "Templates", mark: "▤", href: "/marketplace?q=template" },
-  { label: "Digital Products", mark: "▧", href: "/marketplace" },
-  { label: "Business", mark: "＋", href: "/marketplace?q=business" },
-];
+const CATEGORY_DETAILS: Record<string, { label: string; mark: string }> = {
+  development: { label: "Web & Software", mark: "</>" },
+  design: { label: "Design", mark: "◇" },
+  writing: { label: "Writing", mark: "Aa" },
+  marketing: { label: "Marketing", mark: "↗" },
+  ai_assisted: { label: "AI-assisted", mark: "✳" },
+};
 
 function ListingSkeleton() {
   return (
@@ -32,11 +29,11 @@ function ListingSkeleton() {
   );
 }
 
-function CategoryLinks({ duplicate = false }: { duplicate?: boolean }) {
-  return CATEGORIES.map((item, index) => (
+function CategoryLinks({ items, duplicate = false }: { items: Array<{ key: string; label: string; mark: string }>; duplicate?: boolean }) {
+  return items.map((item, index) => (
     <Link
-      key={item.label + index}
-      href={item.href}
+      key={item.key + index}
+      href={`/marketplace?category=${encodeURIComponent(item.key)}`}
       tabIndex={duplicate ? -1 : undefined}
       className="group inline-flex shrink-0 items-center gap-3 px-5 py-3 text-[17px] font-semibold tracking-[-.025em] text-[#263E55] transition-colors hover:text-[#0B3D91] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-[#0B3D91] sm:px-7 sm:text-[19px]"
     >
@@ -90,7 +87,7 @@ export default function HomeFeed() {
   }, []);
 
   const categoryItems = useMemo(() => {
-    const available = new Set(gigs.map((gig) => gig.category).filter((category) => category in CATEGORY_DETAILS));
+    const available = new Set(gigs.map((gig) => gig.category).filter((category) => Object.hasOwn(CATEGORY_DETAILS, category)));
     return Object.entries(CATEGORY_DETAILS)
       .filter(([key]) => available.has(key))
       .map(([key, detail]) => ({ key, ...detail }));
@@ -112,22 +109,22 @@ export default function HomeFeed() {
               <span>Explore the marketplace</span>
             </div>
           </div>
-          <div className="marketplace-marquee overflow-hidden" aria-label="Marketplace categories">
-            <div className="marketplace-marquee-track flex w-max items-center" role="list">
-              <div className="flex items-center">{<CategoryLinks items={categoryItems} />}</div>
-              <div className="flex items-center" aria-hidden="true">{<CategoryLinks items={categoryItems} duplicate />}</div>
+          <nav aria-label="Marketplace categories" className="marketplace-marquee overflow-hidden">
+            <div className="marketplace-marquee-track flex w-max items-center">
+              <div className="flex items-center"><CategoryLinks items={categoryItems} /></div>
+              <div className="flex items-center" aria-hidden="true"><CategoryLinks items={categoryItems} duplicate /></div>
             </div>
-          </div>
+          </nav>
         </>
       )}
 
       <div className="mx-auto max-w-7xl px-5 pb-16 pt-12 sm:px-8 sm:pb-20 sm:pt-16">
         <div className="mb-7 flex flex-col gap-4 sm:mb-8 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <p className="text-[12px] font-semibold tracking-[.01em] text-[#E07818] sm:text-[13px]">A small selection</p>
-            <h2 className="mt-2 font-display text-[32px] font-bold leading-[1.08] tracking-[-.045em] text-[#172B45] sm:text-[40px]">A few listings to explore</h2>
+            <p className="text-[13px] font-semibold tracking-[.01em] text-[#E07818] sm:text-[14px]">A small selection</p>
+            <h2 className="mt-2 font-display text-[clamp(2rem,4vw,3rem)] font-semibold leading-[1.04] tracking-[-.05em] text-[#172B45]">A few listings to explore</h2>
           </div>
-          <Link href="/marketplace" className="w-fit text-[15px] font-semibold text-[#0B3D91] hover:underline">See all marketplace listings <span aria-hidden="true">↗</span></Link>
+          <Link href="/marketplace" className="w-fit text-[16px] font-semibold text-[#0B3D91] hover:underline">See all marketplace listings <span aria-hidden="true">↗</span></Link>
         </div>
 
         <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
@@ -137,12 +134,12 @@ export default function HomeFeed() {
         </div>
 
         {!loading && loadError && (
-          <div className="mt-5 px-1 py-4 text-[15px] text-[#657585]" role="status">
+          <div className="mt-5 px-1 py-4 text-[16px] text-[#657585]" role="status">
             Marketplace listings are unavailable right now. <Link href="/marketplace" className="font-semibold text-[#0B3D91] underline">Open the marketplace</Link>.
           </div>
         )}
         {!loading && !loadError && visibleGigs.length === 0 && (
-          <div className="mt-5 flex flex-col gap-3 py-4 text-[15px] text-[#657585] sm:flex-row sm:items-center sm:justify-between">
+          <div className="mt-5 flex flex-col gap-3 py-4 text-[16px] text-[#657585] sm:flex-row sm:items-center sm:justify-between">
             <p>{imageGigs.length === 0 ? "Listings with cover images will appear here." : "New pictured listings are on the way."}</p>
             <Link href="/marketplace" className="w-fit font-semibold text-[#0B3D91] underline">Browse all listings <span aria-hidden="true">↗</span></Link>
           </div>
