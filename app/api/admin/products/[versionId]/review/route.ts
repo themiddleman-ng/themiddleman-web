@@ -35,7 +35,8 @@ export async function POST(request: Request, { params }: { params: Promise<{ ver
   const decision = body.decision;
   const reasonCategory = body.reasonCategory;
   const notes = typeof body.notes === "string" ? body.notes.trim() : "";
-  if (!["approve", "request_changes", "reject"].includes(String(decision)))
+  const decisionValue = String(decision);
+  if (!["approve", "request_changes", "reject"].includes(decisionValue))
     return privateJson({ error: "Choose approve, request changes or reject." }, 400);
   if (typeof reasonCategory !== "string" || !REASONS.has(reasonCategory))
     return privateJson({ error: "Choose a review reason." }, 400);
@@ -45,7 +46,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ ver
   const { data, error } = await administrator.db.rpc("review_product_version", {
     p_version_id: versionId,
     p_admin_uid: administrator.user.id,
-    p_decision: decision,
+    p_decision: decisionValue,
     p_reason_category: reasonCategory,
     p_notes: notes,
   });
