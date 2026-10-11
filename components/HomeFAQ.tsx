@@ -32,10 +32,10 @@ export default function HomeFAQ() {
     <section id="faq" className="border-t border-[#DCE2E5] bg-white">
       <div className="mx-auto grid max-w-7xl gap-9 px-5 py-16 sm:px-8 sm:py-20 md:grid-cols-[.8fr_1.2fr] md:gap-16">
         <div>
-          <p className="text-[11px] font-bold uppercase tracking-[.14em] text-[#0B3D91]">Frequently asked</p>
+          <p className="text-[13px] font-bold uppercase tracking-[.14em] text-[#0B3D91]">Frequently asked</p>
           <h2 className="mt-4 max-w-sm font-display text-4xl font-bold leading-[1.08] tracking-[-.05em] text-[#172B45] sm:text-5xl">Good questions.<br />Clear answers.</h2>
-          <p className="mt-4 max-w-sm text-sm leading-6 text-[#6C7A87]">A few basics about finding work, paying safely and getting an order completed.</p>
-          <a href="mailto:hello@themiddleman.com.ng" className="mt-5 inline-flex text-xs font-semibold text-[#0B3D91] underline decoration-[#FF8A00] underline-offset-4">Talk to the team</a>
+          <p className="mt-4 max-w-sm text-lg leading-6 text-[#6C7A87]">A few basics about finding work, paying safely and getting an order completed.</p>
+          <a href="mailto:hello@themiddleman.com.ng" className="mt-5 inline-flex text-lg font-semibold text-[#0B3D91] underline decoration-[#FF8A00] underline-offset-4">Talk to the team</a>
         </div>
 
         <div className="border-t border-[#DCE2E5]">
@@ -49,10 +49,10 @@ export default function HomeFAQ() {
                   aria-expanded={isOpen}
                   className="flex w-full items-center justify-between gap-4 py-5 text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0B3D91]"
                 >
-                  <span className="text-sm font-semibold text-[#253E55] sm:text-[15px]">{item.question}</span>
+                  <span className="text-lg font-semibold text-[#253E55] sm:text-[15px]">{item.question}</span>
                   <span aria-hidden="true" className={`grid h-7 w-7 shrink-0 place-items-center rounded-full border border-[#DCE2E5] text-base font-normal text-[#496277] transition-transform ${isOpen ? "rotate-45 bg-[#0B3D91] text-white" : ""}`}>+</span>
                 </button>
-                {isOpen && <p className="max-w-2xl pb-5 pr-10 text-sm leading-6 text-[#6B7A87]">{item.answer}</p>}
+                {isOpen && <p className="max-w-2xl pb-5 pr-10 text-lg leading-6 text-[#6B7A87]">{item.answer}</p>}
               </div>
             );
           })}
