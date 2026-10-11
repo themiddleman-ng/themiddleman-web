@@ -12,7 +12,10 @@ function fileSize(bytes) {
     : (bytes / (1024 * 1024)).toFixed(1) + " MB";
 }
 
-function StageLabel({ stage }) {
+type Stage = "preparing" | "uploading" | "checking" | "complete" | "";
+type Version = { id: string; version_number: number; review_status: string; review_notes?: string | null };
+
+function StageLabel({ stage }: { stage: Stage }) {
   if (stage === "preparing") return "Preparing private upload…";
   if (stage === "uploading") return "Uploading securely…";
   if (stage === "checking") return "Checking package contents…";
@@ -20,8 +23,8 @@ function StageLabel({ stage }) {
   return "";
 }
 
-export function ProductPackageField({ file, onChange, required = true }) {
-  const inputRef = useRef(null);
+export function ProductPackageField({ file, onChange, required = true }: { file: File | null; onChange: (file: File | null) => void; required?: boolean }) {
+  const inputRef = useRef<HTMLInputElement | null>(null);
   const [dragging, setDragging] = useState(false);
   const [error, setError] = useState("");
 
@@ -29,7 +32,7 @@ export function ProductPackageField({ file, onChange, required = true }) {
     setError("");
     if (!candidate) return;
     try { productFileType(candidate); onChange(candidate); }
-    catch (cause) { onChange(null); setError(cause.message || "Choose a supported product file."); }
+    catch (cause) { onChange(null); setError(cause instanceof Error ? cause.message : "Choose a supported product file."); }
   }
 
   return (
@@ -80,11 +83,11 @@ export function ProductPackageField({ file, onChange, required = true }) {
   );
 }
 
-export default function ProductPackageManager({ gigId, compact = false, onComplete }) {
-  const [versions, setVersions] = useState([]);
+export default function ProductPackageManager({ gigId, compact = false, onComplete }: { gigId: string; compact?: boolean; onComplete?: () => void | Promise<void> }) {
+  const [versions, setVersions] = useState<Version[]>([]);
   const [currentVersionId, setCurrentVersionId] = useState(null);
   const [file, setFile] = useState(null);
-  const [stage, setStage] = useState("");
+  const [stage, setStage] = useState<Stage>("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -111,7 +114,7 @@ export default function ProductPackageManager({ gigId, compact = false, onComple
       await load();
       onComplete?.();
     } catch (cause) {
-      setError(cause.message || "The package upload did not finish.");
+      setError(cause instanceof Error ? cause.message : "The package upload did not finish.");
       setStage("");
     }
   }
