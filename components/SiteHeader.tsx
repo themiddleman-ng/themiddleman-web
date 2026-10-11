@@ -66,7 +66,7 @@ export default function SiteHeader({ isSeller = false, compact = false }: { isSe
   return (
     <header className={compact ? "sticky top-0 z-30 border-b border-[#E8E1D8] bg-[#FAF7F0]/90 backdrop-blur-xl" : "sticky top-0 z-30 border-b border-line bg-white/75 backdrop-blur-xl"}>
       <div className={"mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 sm:px-6 " + (compact ? "py-2" : "py-3 sm:py-4 lg:py-5")}>
-        <Logo className="text-lg" markClass="h-7 w-7" />
+        <Logo className="text-lg" markClass="h-7 w-7" variant={compact ? "horizontal" : "responsive"} textClass={compact ? "text-sm" : "text-[15px]"} />
 
         {/* Desktop nav — md and above */}
         <div className="hidden md:flex items-center gap-2 text-sm text-slate">
