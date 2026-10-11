@@ -73,7 +73,6 @@ export default function Home() {
                 </div>
               </div>
               <div className="mt-5 flex items-center gap-3 rounded-lg bg-[#EAF0F3] px-4 py-3">
-                <span aria-hidden="true" className="grid h-9 w-9 shrink-0 place-items-center rounded-md bg-white text-[18px] text-[#E57814]"></span>
                 <div>
                   <p className="text-[13px] font-semibold text-[#263E55]">Previews, files and listing details</p>
                   <p className="mt-0.5 text-[12px] leading-5 text-[#6C7A87]">Review each listing before you choose.</p>
@@ -82,7 +81,6 @@ export default function Home() {
             </div>
             <div className="flex items-center justify-between border-t border-[#E8ECEE] px-5 py-4 text-[12px] font-semibold text-[#526577] sm:px-6">
               <span>Paystack checkout</span>
-              <Link href="/marketplace" className="text-[#0B3D91] hover:underline">Explore </Link>
             </div>
           </div>
         </div>
