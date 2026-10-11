@@ -5,6 +5,7 @@ import Link from "next/link";
 import { supabase } from "@/lib/supabaseClient";
 import { StarRatingDisplay } from "@/components/StarRating";
 import SiteHeader from "@/components/SiteHeader";
+import ProductPackageManager from "@/components/ProductPackageUploader";
 
 const CATEGORY_LABELS = {
   development: "Development",
@@ -20,9 +21,15 @@ export default function MyGigsPage() {
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState("");
   const [busyId, setBusyId] = useState(null);
+  const [packageEnabled, setPackageEnabled] = useState(false);
 
   async function load() {
     setLoading(true);
+    try {
+      const feature = await fetch("/api/product-packages/status", { cache: "no-store" });
+      const featureState = await feature.json();
+      setPackageEnabled(Boolean(featureState.enabled));
+    } catch { setPackageEnabled(false); }
     setLoadError("");
 
     const { data: { user } } = await supabase.auth.getUser();
@@ -108,7 +115,7 @@ export default function MyGigsPage() {
             const rating = ratings[gig.id];
             return (
               <div key={gig.id} className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-line bg-paper p-5">
-                <div className="min-w-0">
+                <div className="min-w-0 flex-1 basis-full">
                   <div className="flex items-center gap-2 flex-wrap">
                     <Link href={`/gigs/${gig.id}`} className="font-display font-bold hover:text-ember transition-colors">
                       {gig.title}
@@ -125,6 +132,7 @@ export default function MyGigsPage() {
                   <div className="mt-2">
                     <StarRatingDisplay average={rating?.average_rating ?? 0} count={rating?.review_count ?? 0} />
                   </div>
+                  {packageEnabled ? <ProductPackageManager gigId={gig.id} compact onComplete={load} /> : null}
                 </div>
                 <div className="flex items-center gap-4 shrink-0">
                   <span className="font-mono text-sm">₦{gig.price_ngn.toLocaleString()}</span>
