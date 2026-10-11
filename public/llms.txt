@@ -1,15 +1,14 @@
 # The Middleman
 
-> A Nigerian-first marketplace for ready-made digital products from independent creators. Buyers can review listing details and pay in Naira through Paystack.
+> A Nigerian-first marketplace for ready-made digital products from independent creators. Buyers can review listing details and previews, then pay in Naira through Paystack.
 
-- [Home](https://themiddleman.com.ng/): Overview of The Middleman.
-- [Marketplace](https://themiddleman.com.ng/marketplace): Browse public digital-product listings.
-- [About](https://themiddleman.com.ng/about): Information about the project.
-- [Careers](https://themiddleman.com.ng/careers): Current team and careers information.
+- [Home](https://themiddleman.com.ng/): Overview of the marketplace.
+- [Marketplace](https://themiddleman.com.ng/marketplace): Browse public digital product listings.
+- [About](https://themiddleman.com.ng/about): Information about The Middleman.
 - [Terms of Service](https://themiddleman.com.ng/legal/terms): Platform terms.
 - [Privacy Policy](https://themiddleman.com.ng/legal/privacy): How personal data is handled.
-- [Cookie Policy](https://themiddleman.com.ng/legal/cookies): Cookie and browser-storage information.
+- [Cookie Policy](https://themiddleman.com.ng/legal/cookies): Information about cookies and browser storage.
 - [Refund and Dispute Policy](https://themiddleman.com.ng/legal/refunds): Published refund information.
-- [Sitemap](https://themiddleman.com.ng/sitemap.xml): Public page index.
+- [Sitemap](https://themiddleman.com.ng/sitemap.xml): Public page and active product URLs.
 
-This file is a concise guide for AI and other automated discovery tools. It is not a search-ranking signal and does not provide access to private accounts or orders.
+This file is a discovery aid. It does not describe private accounts or orders, and it is not a product ranking signal.
