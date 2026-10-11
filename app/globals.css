@@ -37,6 +37,18 @@
 .homepage-hero {
   position: relative;
   isolation: isolate;
+  background: none;
+}
+.homepage-hero::before {
+  content: "";
+  position: absolute;
+  z-index: -2;
+  pointer-events: none;
+  left: 50%;
+  top: 0;
+  width: 100vw;
+  height: 100%;
+  transform: translateX(-50%);
   background:
     radial-gradient(ellipse at 78% 48%, rgba(226, 151, 94, .13), transparent 43%),
     radial-gradient(ellipse at 20% 4%, rgba(255, 247, 227, .94), transparent 53%),
@@ -71,7 +83,7 @@
   to { transform: translate(5%, -48%) scale(1.03); opacity: .9; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .homepage-hero,
+  .homepage-hero::before,
   .homepage-hero::after { animation: none; }
 }
 
