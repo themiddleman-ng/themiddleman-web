@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabaseClient';
 import Logo from '@/components/Logo';
 
-export default function SiteHeader({ isSeller = false }: { isSeller?: boolean }) {
+export default function SiteHeader({ isSeller = false, compact = false }: { isSeller?: boolean; compact?: boolean }) {
   const router = useRouter();
   const [unreadCount, setUnreadCount] = useState(0);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -64,8 +64,8 @@ export default function SiteHeader({ isSeller = false }: { isSeller?: boolean })
   );
 
   return (
-    <header className="sticky top-0 z-30 border-b border-line bg-white/75 backdrop-blur-xl">
-      <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-3 sm:px-6 sm:py-4 lg:py-5">
+    <header className={compact ? "sticky top-0 z-30 border-b border-[#E8E1D8] bg-[#FAF7F0]/90 backdrop-blur-xl" : "sticky top-0 z-30 border-b border-line bg-white/75 backdrop-blur-xl"}>
+      <div className={"mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 sm:px-6 " + (compact ? "py-2" : "py-3 sm:py-4 lg:py-5")}>
         <Logo className="text-lg" markClass="h-7 w-7" />
 
         {/* Desktop nav — md and above */}
