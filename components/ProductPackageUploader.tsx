@@ -4,8 +4,6 @@ import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import { productFileType, uploadProductPackage } from "@/lib/client/product-packages";
 
-const MAX_BYTES = 10 * 1024 * 1024;
-
 function fileSize(bytes) {
   return bytes < 1024 * 1024
     ? Math.max(1, Math.round(bytes / 1024)) + " KB"
