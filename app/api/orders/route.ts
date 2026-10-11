@@ -25,6 +25,17 @@ function buyerDelivery(value: unknown): unknown {
   return delivery;
 }
 
+type OrderRow = {
+  id: string;
+  gig_id: string;
+  amount: number;
+  status: string;
+  created_at: string;
+  deliveries?: unknown;
+  product_version_id?: string | null;
+  [key: string]: unknown;
+};
+
 function json(body: unknown, status = 200) {
   return NextResponse.json(body, {
     status,
@@ -55,8 +66,10 @@ export async function GET() {
       : Promise.resolve({ data: [], error: null }),
   ]);
   if (buyer.error || seller.error) return privateJson({ error: 'Could not load orders.' }, 500);
-  const buyerRows = buyer.data ?? [];
-  const sellerRows = seller.data ?? [];
+  // The product_version_id column is introduced by a migration, so the
+  // generated PostgREST parser may not know it until types are regenerated.
+  const buyerRows = (buyer.data ?? []) as unknown as OrderRow[];
+  const sellerRows = (seller.data ?? []) as unknown as OrderRow[];
   const versionIds = packagesEnabled
     ? Array.from(new Set([...buyerRows, ...sellerRows]
       .map((row) => row.product_version_id)
