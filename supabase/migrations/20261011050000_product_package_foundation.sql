@@ -404,12 +404,24 @@ begin
   select * into gig_row from public.gigs where id = version_row.gig_id for update;
   select * into seller_row from public.seller_profiles where id = version_row.seller_profile_id for share;
   recipient := seller_row.user_id;
+  if recipient is null then
+    raise exception 'Seller account is unavailable';
+  end if;
+  if p_decision = 'approve' and seller_row.verification_status <> 'approved' then
+    raise exception 'Seller verification must be approved before publication';
+  end if;
 
   next_status := case p_decision
     when 'approve' then 'approved'
     when 'request_changes' then 'changes_requested'
     else 'rejected'
   end;
+
+  -- Release the partial unique index before marking a replacement version current.
+  if p_decision = 'approve' then
+    update public.product_versions set is_current = false
+    where gig_id = gig_row.id and id <> p_version_id and is_current;
+  end if;
 
   update public.product_versions
   set review_status = next_status,
@@ -421,8 +433,6 @@ begin
   where id = p_version_id;
 
   if p_decision = 'approve' then
-    update public.product_versions set is_current = false
-    where gig_id = gig_row.id and id <> p_version_id and is_current;
     update public.gigs
     set current_product_version_id = p_version_id, status = 'active', updated_at = now()
     where id = gig_row.id;
