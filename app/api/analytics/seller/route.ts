@@ -32,7 +32,7 @@ export async function GET(request: Request) {
     .order("created_at", { ascending: false });
   if (gigsError) return privateJson({ error: "Could not load seller products." }, 500);
   const products = gigs ?? [];
-  if (!products.length) return privateJson({ days, products: [], totals: { views: 0, sales: 0, salesValue: 0 }, trackingEnabled: Boolean(process.env.MARKETPLACE_ANALYTICS_PEPPER) });
+  if (!products.length) return privateJson({ days, products: [], totals: { views: 0, downloads: 0, sales: 0, salesValue: 0 }, trackingEnabled: (process.env.MARKETPLACE_ANALYTICS_PEPPER || "").length >= 32 });
 
   const since = days ? new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString() : null;
   let viewQuery = db.from("marketplace_events")
