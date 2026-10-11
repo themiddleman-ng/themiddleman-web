@@ -64,9 +64,9 @@ export default function Home() {
               <p className="text-[11px] font-bold uppercase tracking-[.14em] text-[#0B3D91]">Find a useful starting point</p>
               <h2 className="mt-2 font-display text-[clamp(1.9rem,4vw,2.7rem)] font-semibold leading-[1.02] tracking-[-.05em] text-[#172B45]">Products built for work.</h2>
               <p className="mt-3 max-w-md text-[15px] leading-6 text-[#657587]">Browse creator-made digital resources, then check the preview and details on each listing.</p>
-              <div className="mt-6 rounded-lg border border-[#DCE2E5] bg-white px-4 py-3 text-[14px] text-[#7A8792]">
-                Search the marketplace <span aria-hidden="true" className="float-right text-[#0B3D91]">⌕</span>
-              </div>
+              <Link href="/marketplace" className="mt-6 flex items-center justify-between rounded-lg border border-[#DCE2E5] bg-white px-4 py-3 text-[14px] font-semibold text-[#526577] transition hover:border-[#0B3D91] hover:text-[#0B3D91]">
+                Browse all products <span aria-hidden="true" className="text-[#0B3D91]">↗</span>
+              </Link>
               <div className="mt-5">
                 <p className="mb-3 text-[12px] font-semibold text-[#657587]">Browse by category</p>
                 <div className="flex flex-wrap gap-2">
@@ -80,8 +80,8 @@ export default function Home() {
               <div className="mt-5 flex items-center gap-3 rounded-lg bg-[#EAF0F3] px-4 py-3">
                 <span aria-hidden="true" className="grid h-9 w-9 shrink-0 place-items-center rounded-md bg-white text-[18px] text-[#E57814]">↗</span>
                 <div>
-                  <p className="text-[13px] font-semibold text-[#263E55]">Creator previews on every product</p>
-                  <p className="mt-0.5 text-[12px] leading-5 text-[#6C7A87]">See the actual product before you choose.</p>
+                  <p className="text-[13px] font-semibold text-[#263E55]">Previews, files and listing details</p>
+                  <p className="mt-0.5 text-[12px] leading-5 text-[#6C7A87]">Review each listing before you choose.</p>
                 </div>
               </div>
             </div>
