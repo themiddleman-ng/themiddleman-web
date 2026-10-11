@@ -39,7 +39,7 @@ export async function uploadProductPackage(
   onStage?.("uploading");
   const { error: uploadError } = await supabase.storage
     .from("product-packages")
-    .uploadToSignedUrl(signed.path, signed.token, file, { contentType, upsert: false });
+    .uploadToSignedUrl(signed.path, signed.token, file, { contentType });
   if (uploadError) {
     await fetch("/api/gigs/" + gigId + "/package", {
       method: "POST",
