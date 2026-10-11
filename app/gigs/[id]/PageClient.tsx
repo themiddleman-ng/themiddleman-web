@@ -7,7 +7,6 @@ import Image from "next/image";
 import { supabase } from "@/lib/supabaseClient";
 import { StarRatingDisplay } from "@/components/StarRating";
 import SiteHeader from "@/components/SiteHeader";
-import GigPreview from "@/components/marketplace/GigPreview";
 
 type SellerProfile = { user_id: string; display_name: string; bio: string | null; verification_status: string };
 type GigRow = {
@@ -24,7 +23,6 @@ type PaystackWindow = Window & { PaystackPop?: { setup: (options: {
 }) => { openIframe: () => void } } };
 
 const CATEGORY_LABELS: Record<string, string> = { development: "Development", design: "Design", marketing: "Marketing", writing: "Writing", ai_assisted: "AI-assisted" };
-const TIER_LABELS: Record<string, string> = { beginner: "Beginner", intermediate: "Intermediate", expert: "Expert" };
 
 function loadPaystackScript(): Promise<void> {
   return new Promise((resolve, reject) => {
@@ -45,7 +43,7 @@ function initialsFrom(name: string): string {
   return (parts[0][0] + parts[1][0]).toUpperCase();
 }
 
-export default function GigPageClient({ gigId }: { gigId: string }) {
+export default function GigPageClient({ gigId, purchasesEnabled }: { gigId: string; purchasesEnabled: boolean }) {
   const router = useRouter();
   const [userId, setUserId] = useState<string | null>(null);
   const [userEmail, setUserEmail] = useState<string | null>(null);
@@ -55,7 +53,6 @@ export default function GigPageClient({ gigId }: { gigId: string }) {
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState("");
   const [actionError, setActionError] = useState("");
-  const [messaging, setMessaging] = useState(false);
   const [paying, setPaying] = useState(false);
   const [reportReason, setReportReason] = useState("Spam or misleading content");
   const [reportDetails, setReportDetails] = useState("");
@@ -88,23 +85,6 @@ export default function GigPageClient({ gigId }: { gigId: string }) {
     load();
     return () => { cancelled = true; };
   }, [gigId]);
-
-  async function handleMessageSeller() {
-    setActionError("");
-    if (!userId) { router.push("/signup?mode=signin"); return; }
-    const sellerUserId = gig?.seller_profiles?.user_id;
-    if (!sellerUserId) { setActionError("We could not load the seller account for this product."); return; }
-    if (userId === sellerUserId) return;
-    setMessaging(true);
-    try {
-      const response = await fetch('/api/conversations', { method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ gigId: gig!.id }) });
-      const result = await response.json();
-      if (!response.ok) throw new Error(result.error || 'Could not start conversation.');
-      router.push(`/messages?conversation=${result.id}`);
-    } catch (cause) { setActionError(cause instanceof Error ? cause.message : 'Could not start conversation.'); }
-    finally { setMessaging(false); }
-  }
 
   const [checkout, setCheckout] = useState<Checkout | null>(null);
 
@@ -201,16 +181,13 @@ export default function GigPageClient({ gigId }: { gigId: string }) {
   const demoLinks = (gig.demo_links ?? []).filter(link => { try { return new URL(link).protocol === 'https:'; } catch { return false; } });
   const isOwnGig = userId === gig.seller_profiles?.user_id;
   const included = [
-    gig.delivery_days ? `Delivery within ${gig.delivery_days} day${gig.delivery_days > 1 ? "s" : ""}` : null,
-    gig.experience_tier ? `${TIER_LABELS[gig.experience_tier] ?? gig.experience_tier}-level delivery` : null,
-    gig.is_ai_assisted ? "AI-assisted workflow (clearly disclosed)" : "Fully human-crafted delivery",
-    verified ? "Verified seller on The Middleman" : "Seller completing verification",
-    "Delivery reviewed by an admin before you accept it",
+    gig.delivery_days ? `Seller's estimated delivery: ${gig.delivery_days} day${gig.delivery_days > 1 ? "s" : ""}` : null,
+    gig.is_ai_assisted ? "Seller disclosed that AI tools are used." : null,
   ].filter(Boolean) as string[];
 
   const purchasePanel = <div className="rounded-2xl border border-line bg-paper p-6 shadow-[0_18px_50px_rgba(31,21,12,.08)]">
     <div className="flex items-baseline justify-between"><span className="text-sm text-slate">Price</span><span className="font-mono text-2xl font-semibold text-bone">₦{gig.price_ngn.toLocaleString()}</span></div>
-    {isOwnGig ? <div className="mt-5 space-y-3"><p className="text-center text-xs text-slate">This is your product.{" "}<Link href="/gigs/mine" className="text-ember hover:underline">Manage it</Link></p><button onClick={handleDeleteGig} className="w-full rounded-full border border-red-900/20 bg-red-950/10 px-5 py-3 text-sm font-semibold text-red-500 transition-colors hover:border-red-900/40 hover:bg-red-950/20">Delete product</button></div> : <div className="mt-5 space-y-3"><button onClick={handleBuyAndPay} disabled={paying} className="auth-button w-full">{paying ? "Opening secure checkout…" : "Buy now — payment protected"}</button><button onClick={handleMessageSeller} disabled={messaging} className="w-full rounded-full border border-line px-5 py-3 text-sm font-medium text-bone transition-colors hover:border-slate">{messaging ? "Opening…" : "Message seller"}</button></div>}
+    {isOwnGig ? <div className="mt-5 space-y-3"><p className="text-center text-xs text-slate">This is your product.{" "}<Link href="/gigs/mine" className="text-ember hover:underline">Manage it</Link></p><button onClick={handleDeleteGig} className="w-full rounded-full border border-red-900/20 bg-red-950/10 px-5 py-3 text-sm font-semibold text-red-500 transition-colors hover:border-red-900/40 hover:bg-red-950/20">Delete product</button></div> : purchasesEnabled ? <div className="mt-5 space-y-3"><button onClick={handleBuyAndPay} disabled={paying} className="auth-button w-full">{paying ? "Opening Paystack…" : "Buy this product"}</button><p className="text-center text-xs text-slate">Checkout is enabled only in an isolated Paystack test environment.</p></div> : <div className="mt-5 rounded-xl bg-[#EFE7DB] p-4 text-center"><p className="text-sm font-semibold text-[#172B45]">Purchases are paused</p><p className="mt-2 text-xs leading-5 text-[#526577]">Payment and delivery are being verified before live checkout is enabled.</p></div>}
     {checkout && <section className="mt-5 border-t border-line pt-5" aria-label="Checkout summary">
       <h2 className="font-semibold">Review your total</h2>
       <dl className="mt-3 space-y-2 text-sm">{(checkout.fees ? [['Product',checkout.fees.price_kobo],['Service fee (3%)',checkout.fees.buyer_fee_kobo],['Platform fee ($1)',checkout.fees.flat_fee_kobo],['VAT on fees',checkout.fees.buyer_vat_kobo],['Total',checkout.fees.buyer_total_kobo]] : [['Total',Number(checkout.order.amount)*100]]).map(([label,value])=><div key={String(label)} className="flex justify-between gap-3"><dt>{label}</dt><dd>₦{(Number(value)/100).toLocaleString('en-NG',{minimumFractionDigits:2})}</dd></div>)}</dl>
@@ -233,7 +210,7 @@ export default function GigPageClient({ gigId }: { gigId: string }) {
   return <main className="min-h-screen bg-ink text-bone"><SiteHeader /><div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 sm:py-12">
     <Link href="/marketplace" className="text-xs font-semibold text-slate transition-colors hover:text-ember">← Back to marketplace</Link>
     <div className="mt-6 grid grid-cols-1 gap-10 lg:grid-cols-12"><div className="lg:col-span-8">
-      <div className="overflow-hidden rounded-2xl border border-line bg-paper shadow-[0_18px_50px_rgba(31,21,12,.08)]"><div className="relative aspect-[16/9]">{imageUrls[0] ? <Image unoptimized src={imageUrls[0]} fill sizes="(max-width: 1024px) 100vw, 800px" alt={`${gig.title} preview`} className="object-cover" /> : <GigPreview category={gig.category} seed={gig.id} />}</div></div>
+      <div className="overflow-hidden rounded-2xl border border-line bg-paper shadow-[0_18px_50px_rgba(31,21,12,.08)]"><div className="relative aspect-[16/9]">{imageUrls[0] ? <Image unoptimized src={imageUrls[0]} fill sizes="(max-width: 1024px) 100vw, 800px" alt={`${gig.title} preview`} className="object-cover" /> : <div className="grid h-full w-full place-items-center bg-[#EEF1F2] p-8 text-center"><p className="max-w-sm text-base font-medium text-[#526577]">The seller has not uploaded a product preview yet.</p></div>}</div></div>
       {imageUrls.length > 1 && <div className="mt-3 grid grid-cols-3 gap-3">{imageUrls.slice(1).map((url, index) => <a key={url} href={url} target="_blank" rel="noopener noreferrer" className="relative aspect-video overflow-hidden rounded-lg border border-line"><Image unoptimized src={url} fill sizes="250px" alt={`${gig.title} gallery image ${index + 2}`} className="object-cover" /></a>)}</div>}
       {videoUrl && <section className="mt-8"><h2 className="mb-3 font-display text-xl font-bold">Demo video</h2><video controls preload="none" className="w-full rounded-xl" src={videoUrl}>Your browser does not support video playback.</video></section>}
       {demoLinks.length > 0 && <section className="mt-8"><h2 className="mb-3 font-display text-xl font-bold">Explore the demo</h2><div className="flex flex-wrap gap-3">{demoLinks.map((url, index) => <a key={url} href={url} target="_blank" rel="noopener noreferrer" className="rounded-full border border-line px-4 py-2 text-sm text-ember hover:border-ember">Open demo {index + 1} ↗</a>)}</div></section>}
@@ -242,8 +219,8 @@ export default function GigPageClient({ gigId }: { gigId: string }) {
       <div className="mt-6 flex flex-wrap items-center gap-4 border-y border-line py-4"><div className="flex items-center gap-3"><div className="grid h-10 w-10 place-items-center rounded-full border border-line bg-[#FBF4EC] font-display text-sm font-bold text-bone">{initialsFrom(gig.seller_profiles?.display_name ?? "?")}</div><div><p className="text-sm font-medium">{gig.seller_profiles?.display_name ?? "Unknown seller"}</p>{verified ? <p className="text-xs font-semibold text-ember">Verified seller</p> : <p className="text-xs text-slate">Verification in progress</p>}</div></div><div className="sm:ml-auto"><StarRatingDisplay average={rating.average} count={rating.count} size={13} /></div></div>
       <div className="mt-8 lg:hidden">{purchasePanel}</div>
       <section className="mt-10"><h2 className="font-display text-xl font-bold">What you&apos;ll get</h2><p className="mt-3 whitespace-pre-wrap text-[15px] leading-relaxed text-slate">{gig.description}</p></section>
-      <section className="mt-8"><h2 className="font-display text-xl font-bold">What&apos;s included</h2><ul className="mt-4 space-y-3">{included.map((line) => <li key={line} className="flex items-start gap-3 text-[15px] text-bone"><svg className="mt-1 shrink-0" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#F26419" strokeWidth="2.5"><path d="M20 6L9 17l-5-5" /></svg>{line}</li>)}</ul></section>
-      <section className="mt-10 rounded-2xl bg-[#EFE7DB] p-6"><h2 className="font-display text-lg font-bold">Payment and delivery</h2><p className="mt-2 text-[13px] leading-relaxed text-slate">Payment and delivery have separate tracked states. An admin reviews the seller&apos;s delivery before you can accept it or raise a dispute. Seller payouts and refunds require separate processing.</p></section>
+      <section className="mt-8"><h2 className="font-display text-xl font-bold">Before you buy</h2><p className="mt-3 text-[15px] leading-relaxed text-slate">The seller&apos;s description is the source of truth for what the product includes, supported formats and any requirements. Confirm those details before checkout.</p>{included.length > 0 && <ul className="mt-4 space-y-3">{included.map((line) => <li key={line} className="flex items-start gap-3 text-[15px] text-bone"><span aria-hidden="true" className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-ember" />{line}</li>)}</ul>}<p className="mt-4 text-[14px] leading-6 text-slate">Optional customization is not included unless the listing says so. Paid product add-ons are not available yet.</p></section>
+      <section className="mt-10 rounded-2xl bg-[#EFE7DB] p-6"><h2 className="font-display text-lg font-bold text-[#172B45]">Payment and delivery</h2><p className="mt-2 text-[14px] leading-relaxed text-[#526577]">Paystack processes eligible payments. The Middleman does not currently hold funds in escrow or guarantee refunds. Payment confirmation and product delivery are separate steps; use your order page to check the status available for your purchase.</p></section>
       <section className="mt-10 border-t border-line pt-8"><h2 className="font-display text-xl font-bold">Reviews {rating.count > 0 && `(${rating.count})`}</h2>{reviews.length === 0 && <p className="mt-4 text-sm text-slate">No reviews yet for this product.</p>}<div className="mt-5 space-y-5">{reviews.map((review, i) => <div key={i} className="border-b border-line pb-5 last:border-0"><div className="mb-2 flex items-center justify-between"><StarRatingDisplay average={review.rating} count={1} size={12} /><span className="text-xs text-slate">{review.reviewer_name || "Buyer"}</span></div>{review.comment && <p className="text-sm leading-relaxed text-slate">{review.comment}</p>}</div>)}</div></section>
       <div className="mt-10 lg:hidden">{reportBox}</div>
     </div><div className="hidden lg:col-span-4 lg:block"><div className="sticky top-24 space-y-5">{purchasePanel}{reportBox}</div></div></div>

@@ -8,8 +8,13 @@ async function access(id: string) {
   const user = await authenticatedUser();
   const db = serviceClient();
   if (!user || !db) return null;
-  const { data: conversation } = await db.from('conversations').select('buyer_id,seller_id').eq('id', id).maybeSingle();
+  const { data: conversation } = await db.from('conversations')
+    .select('buyer_id,seller_id,gig_id').eq('id', id).maybeSingle();
   if (!conversation || (conversation.buyer_id !== user.id && conversation.seller_id !== user.id)) return null;
+  const { data: paidOrder } = await db.from('orders').select('id')
+    .eq('buyer_id', conversation.buyer_id).eq('seller_id', conversation.seller_id).eq('gig_id', conversation.gig_id)
+    .in('status', ['in_escrow', 'delivered', 'approved', 'disputed']).limit(1).maybeSingle();
+  if (!paidOrder) return null;
   return { user, db };
 }
 

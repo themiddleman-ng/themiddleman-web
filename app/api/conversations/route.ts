@@ -3,26 +3,49 @@ import { sameOriginMutation } from '@/lib/server/same-origin.mjs';
 
 export const runtime = 'nodejs';
 
+const paidOrderStatuses = ['in_escrow', 'delivered', 'approved', 'disputed'];
+
 export async function GET() {
   const user = await authenticatedUser();
   if (!user) return privateJson({ error: 'Sign in first.' }, 401);
   const db = serviceClient();
   if (!db) return privateJson({ error: 'Messages are not configured.' }, 503);
-  const { data, error } = await db.from('conversations')
-    .select('id,buyer_id,seller_id,gig_id,buyer_last_read_at,seller_last_read_at,gigs(title),seller:seller_profiles!conversations_seller_id_fkey(display_name),messages(sender_id,created_at)')
-    .or(`buyer_id.eq.${user.id},seller_id.eq.${user.id}`);
-  if (error) return privateJson({ error: 'Could not load conversations.' }, 500);
+
+  const { data: sellerProfile, error: profileError } = await db.from('seller_profiles')
+    .select('id').eq('user_id', user.id).maybeSingle();
+  if (profileError) return privateJson({ error: 'Could not load conversations.' }, 500);
+
+  const participantFilter = sellerProfile?.id
+    ? `buyer_id.eq.${user.id},seller_id.eq.${sellerProfile.id}`
+    : `buyer_id.eq.${user.id}`;
+  const [conversationsResult, ordersResult] = await Promise.all([
+    db.from('conversations')
+      .select('id,buyer_id,seller_id,gig_id,buyer_last_read_at,seller_last_read_at,gigs(title),seller:seller_profiles!conversations_seller_id_fkey(display_name),messages(sender_id,created_at)')
+      .or(participantFilter),
+    db.from('orders')
+      .select('buyer_id,seller_id,gig_id')
+      .or(participantFilter)
+      .in('status', paidOrderStatuses),
+  ]);
+  if (conversationsResult.error || ordersResult.error) return privateJson({ error: 'Could not load conversations.' }, 500);
+
+  const paidOrderKeys = new Set((ordersResult.data ?? []).map(order => `${order.buyer_id}:${order.seller_id}:${order.gig_id}`));
+  const paidConversations = (conversationsResult.data ?? []).filter(row =>
+    paidOrderKeys.has(`${row.buyer_id}:${row.seller_id}:${row.gig_id}`)
+  );
+
   let unreadCount = 0;
-  const conversations = (data ?? []).map(row => {
+  const conversations = paidConversations.map(row => {
     const lastReadAt = row.buyer_id === user.id ? row.buyer_last_read_at : row.seller_last_read_at;
     if ((row.messages ?? []).some(message => message.sender_id !== user.id &&
       (!lastReadAt || Date.parse(message.created_at) > Date.parse(lastReadAt)))) unreadCount++;
     return {
-    id: row.id, gig_id: row.gig_id, role: row.buyer_id === user.id ? 'buyer' : 'seller',
-    counterpartName: row.buyer_id === user.id ? row.seller?.[0]?.display_name ?? 'Seller' : 'Private buyer',
-    gigTitle: row.gigs?.[0]?.title ?? null,
-    lastReadAt,
-  }; });
+      id: row.id, gig_id: row.gig_id, role: row.buyer_id === user.id ? 'buyer' : 'seller',
+      counterpartName: row.buyer_id === user.id ? row.seller?.[0]?.display_name ?? 'Seller' : 'Private buyer',
+      gigTitle: row.gigs?.[0]?.title ?? null,
+      lastReadAt,
+    };
+  });
   return privateJson({ conversations, unreadCount });
 }
 
@@ -41,14 +64,21 @@ export async function POST(request: Request) {
   if (!gig || gig.status !== 'active' || !seller || seller === user.id) {
     return privateJson({ error: 'This seller is not available.' }, 409);
   }
+
+  const { data: paidOrder, error: orderError } = await db.from('orders').select('id')
+    .eq('buyer_id', user.id).eq('seller_id', gig.seller_id).eq('gig_id', gig.id)
+    .in('status', paidOrderStatuses).limit(1).maybeSingle();
+  if (orderError) return privateJson({ error: 'Could not verify the order.' }, 500);
+  if (!paidOrder) return privateJson({ error: 'Messaging is available only after a paid order for this product.' }, 403);
+
   const { data: existing } = await db.from('conversations').select('id')
-    .eq('buyer_id', user.id).eq('seller_id', seller).eq('gig_id', gig.id).maybeSingle();
+    .eq('buyer_id', user.id).eq('seller_id', gig.seller_id).eq('gig_id', gig.id).maybeSingle();
   if (existing) return privateJson({ id: existing.id });
   const { data: created, error } = await db.from('conversations')
-    .insert({ buyer_id: user.id, seller_id: seller, gig_id: gig.id }).select('id').single();
+    .insert({ buyer_id: user.id, seller_id: gig.seller_id, gig_id: gig.id }).select('id').single();
   if (error?.code === '23505') {
     const { data: raced } = await db.from('conversations').select('id')
-      .eq('buyer_id', user.id).eq('seller_id', seller).eq('gig_id', gig.id).maybeSingle();
+      .eq('buyer_id', user.id).eq('seller_id', gig.seller_id).eq('gig_id', gig.id).maybeSingle();
     if (raced) return privateJson({ id: raced.id });
   }
   return error || !created ? privateJson({ error: 'Could not start conversation.' }, 500)

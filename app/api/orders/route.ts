@@ -4,7 +4,7 @@ import { createClient } from '@supabase/supabase-js';
 import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
 import { authenticatedUser, privateJson, serviceClient } from '@/lib/server/marketplace';
-import { escrowV2Enabled } from '@/lib/server/escrow-config.mjs';
+import { escrowV2Enabled, gatewayTestEnabled } from '@/lib/server/escrow-config.mjs';
 import { sameOriginMutation } from '@/lib/server/same-origin.mjs';
 
 export const dynamic = 'force-dynamic';
@@ -52,8 +52,11 @@ export async function GET() {
     counterpart: `Creator ${createHash('sha256').update(row.id).digest('hex').slice(0,8)}`,
     seller_profiles: undefined }));
   const sellerOrders = (seller.data ?? []).map(row => ({ ...row, role: 'seller', counterpart: 'Private buyer' }));
-  return privateJson({ orders: [...buyerOrders, ...sellerOrders]
-    .sort((a, b) => Date.parse(b.created_at) - Date.parse(a.created_at)) });
+  return privateJson({
+    orders: [...buyerOrders, ...sellerOrders].sort((a, b) => Date.parse(b.created_at) - Date.parse(a.created_at)),
+    checkoutEnabled: gatewayTestEnabled(),
+    deliveryEnabled: gatewayTestEnabled(),
+  });
 }
 
 export async function POST(request: Request) {
@@ -99,12 +102,12 @@ export async function POST(request: Request) {
   if (userError || !user) {
     return json({ error: 'Sign in before creating an order.' }, 401);
   }
-
   const admin = createClient(supabaseUrl, serviceRoleKey, {
     auth: { autoRefreshToken: false, persistSession: false },
   });
 
   if (escrowV2Enabled()) {
+    if (!gatewayTestEnabled()) return json({ error: 'Isolated checkout requires both Paystack test keys and the test gateway flag.' }, 503);
     if (!/^sk_test_/.test(process.env.PAYSTACK_SECRET_KEY ?? '') || !/^pk_test_/.test(process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY ?? '')) {
       return json({ error: 'Isolated checkout requires Paystack test keys.' }, 503);
     }
@@ -133,6 +136,10 @@ export async function POST(request: Request) {
       return json({ error: 'This idempotency key belongs to another product.' }, 409);
     }
     return json({ order: existing, reused: true });
+  }
+
+  if (!gatewayTestEnabled()) {
+    return json({ error: 'Purchases are paused until payment and delivery pass isolated end-to-end testing.' }, 503);
   }
 
   const { data: gig, error: gigError } = await admin

@@ -1,5 +1,5 @@
 import { adminUser, authenticatedUser, ORDER_DELIVERIES_BUCKET, privateJson, serviceClient, uuidPattern } from '@/lib/server/marketplace';
-import { escrowV2Enabled } from '@/lib/server/escrow-config.mjs';
+import { gatewayTestEnabled } from '@/lib/server/escrow-config.mjs';
 import { inspectPackage } from '@/lib/server/package-validation.mjs';
 import { sameOriginMutation } from '@/lib/server/same-origin.mjs';
 
@@ -29,7 +29,7 @@ export async function GET(_request: Request, { params }: { params: Promise<{ id:
 }
 
 export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
-  if (!escrowV2Enabled()) return privateJson({ error: 'Validated delivery needs an isolated preview database.' }, 503);
+  if (!gatewayTestEnabled()) return privateJson({ error: 'Validated delivery needs an isolated preview database.' }, 503);
   if (!sameOriginMutation(request)) return privateJson({ error: 'Invalid request origin.' }, 403);
   const { id } = await params;
   if (!uuidPattern.test(id)) return privateJson({ error: 'Invalid order.' }, 400);

@@ -1,5 +1,5 @@
 import { authenticatedUser, privateJson, serviceClient, uuidPattern } from '@/lib/server/marketplace';
-import { escrowV2Enabled } from '@/lib/server/escrow-config.mjs';
+import { escrowV2Enabled, gatewayTestEnabled } from '@/lib/server/escrow-config.mjs';
 import { sameOriginMutation } from '@/lib/server/same-origin.mjs';
 
 export const runtime = 'nodejs';
@@ -10,6 +10,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   if (!uuidPattern.test(id)) return privateJson({ error: 'Invalid order.' }, 400);
   const user = await authenticatedUser();
   if (!user) return privateJson({ error: 'Sign in first.' }, 401);
+  if (!gatewayTestEnabled()) return privateJson({ error: 'Order actions are unavailable until the delivery flow is verified.' }, 503);
   const db = serviceClient();
   if (!db) return privateJson({ error: 'Orders are not configured.' }, 503);
   let body: { action?: string; reason?: string; ground?: string };
