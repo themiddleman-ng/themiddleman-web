@@ -38,7 +38,6 @@ export async function GET() {
 
   const gigs = new Map((gigsResult.data ?? []).map((gig) => [gig.id, gig]));
   const sellers = new Map((sellersResult.data ?? []).map((seller) => [seller.id, seller]));
-  const baseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
   const products = versions.map((version) => {
     const gig = gigs.get(version.gig_id);
     const seller = sellers.get(version.seller_profile_id);
@@ -66,9 +65,7 @@ export async function GET() {
         display_name: seller.display_name,
         verification_status: seller.verification_status,
       } : null,
-      // Kept to avoid accidentally treating this as a public preview link.
-      privatePackage: true,
     };
   });
-  return privateJson({ products, environment: new URL(baseUrl).hostname });
+  return privateJson({ products });
 }
