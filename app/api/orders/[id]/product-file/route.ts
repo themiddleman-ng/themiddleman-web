@@ -60,6 +60,10 @@ export async function GET(_request: Request, { params }: { params: Promise<{ id:
   if (!Number.isSafeInteger(Number(version.file_size)) || Number(version.file_size) < 1 ||
       Number(version.file_size) > MAX_BYTES || !/^[a-f0-9]{64}$/.test(version.sha256))
     return privateJson({ error: "Product file metadata is invalid." }, 409);
+  const extension = version.storage_path.split(".").pop()?.toLowerCase() || "";
+  const contentType = CONTENT_TYPES[extension];
+  if (!contentType || contentType !== version.content_type)
+    return privateJson({ error: "Product file type is invalid." }, 409);
 
   const { data: file, error: fileError } = await db.storage.from(BUCKET).download(version.storage_path);
   if (fileError || !file || file.size !== Number(version.file_size) || file.size > MAX_BYTES)
@@ -90,11 +94,6 @@ export async function GET(_request: Request, { params }: { params: Promise<{ id:
     package_sha256: version.sha256,
   });
   if (auditError) return privateJson({ error: "Could not record this download." }, 503);
-
-  const extension = version.storage_path.split(".").pop()?.toLowerCase() || "";
-  const contentType = CONTENT_TYPES[extension];
-  if (!contentType || contentType !== version.content_type)
-    return privateJson({ error: "Product file type is invalid." }, 409);
 
   return new Response(bytes, {
     headers: {
