@@ -423,6 +423,8 @@ begin
     where gig_id = gig_row.id and id <> p_version_id and is_current;
   end if;
 
+  perform set_config('middleman.product_version_review', p_version_id::text, true);
+
   update public.product_versions
   set review_status = next_status,
       review_category = p_reason_category,
