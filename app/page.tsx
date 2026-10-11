@@ -172,7 +172,7 @@ export default function Home() {
       <footer className="bg-[#F1F0EB]">
         <div className="mx-auto flex max-w-7xl flex-col gap-5 px-5 py-7 sm:px-8 md:flex-row md:items-center md:justify-between">
           <div><Logo variant="horizontal" /><p className="mt-2 text-[14px] text-[#74818D]">Digital products from independent Nigerian creators.</p></div>
-          <div className="flex flex-wrap gap-x-5 gap-y-2 text-[14px] text-[#647485]"><Link href="/marketplace" className="hover:text-[#0B3D91]">Marketplace</Link><Link href="/terms" className="hover:text-[#0B3D91]">Terms</Link><Link href="/privacy" className="hover:text-[#0B3D91]">Privacy</Link><a href="mailto:hello@themiddleman.com.ng" className="hover:text-[#0B3D91]">Contact</a></div>
+          <div className="flex flex-wrap gap-x-5 gap-y-2 text-[14px] text-[#647485]"><Link href="/marketplace" className="hover:text-[#0B3D91]">Marketplace</Link><Link href="/legal/terms" className="hover:text-[#0B3D91]">Terms</Link><Link href="/legal/privacy" className="hover:text-[#0B3D91]">Privacy</Link><a href="mailto:hello@themiddleman.com.ng" className="hover:text-[#0B3D91]">Contact</a></div>
         </div>
       </footer>
     </main>
