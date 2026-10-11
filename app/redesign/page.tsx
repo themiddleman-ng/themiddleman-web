@@ -14,7 +14,7 @@ const comparison = [
 export default function RedesignPreviewPage() {
   return (
     <main className="min-h-screen bg-[#F6F1E8] text-[#172033]">
-      <header className="sticky top-0 z-40 border-b border-white/10 bg-[#0E1828]/95 text-white backdrop-blur-xl">
+      <header className="sticky top-0 z-40 bg-[#0E1828]/92 text-white backdrop-blur-xl">
         <div className="mx-auto flex h-14 max-w-7xl items-center justify-between px-5 sm:px-6">
           <Link href="/" aria-label="The Middleman homepage" className="flex items-center gap-2.5">
             <span className="grid h-8 w-8 place-items-center overflow-hidden rounded-lg bg-white p-1 shadow-sm ring-1 ring-black/5">
@@ -133,31 +133,27 @@ export default function RedesignPreviewPage() {
 
       <SelectedGigs />
 
-      <section id="how" className="border-t border-[#DDE3EB] bg-[#EEF2F7]">
-        <div className="mx-auto max-w-7xl px-5 py-16 sm:px-6 sm:py-20">
-          <div className="grid gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:items-start">
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#0B3D91]">How it works</p>
-              <h2 className="mt-5 max-w-lg font-display text-4xl font-semibold leading-[1.02] tracking-[-0.04em] sm:text-5xl">
-                The deal stays clear from payment to delivery.
-              </h2>
-            </div>
+      <section id="how" className="bg-[#EEF2F7]">
+        <div className="mx-auto max-w-7xl px-5 py-16 sm:px-6 sm:py-24">
+          <div className="max-w-3xl">
+            <p className="text-sm font-medium text-[#0B3D91]">How it works</p>
+            <h2 className="mt-4 font-display text-4xl font-semibold leading-[1.02] tracking-[-0.04em] sm:text-6xl">
+              From finding the work to finishing the deal.
+            </h2>
+          </div>
 
-            <div className="divide-y divide-[#CCD5E1] border-y border-[#CCD5E1]">
-              {[
-                ["01", "Choose what you need", "Browse the marketplace and open the gig that fits what you are looking for."],
-                ["02", "Pay through The Middleman", "The order and payment stay connected instead of becoming an informal deal outside the platform."],
-                ["03", "Receive and complete the order", "The seller delivers through the order flow and the transaction moves forward from there."],
-              ].map(([number, title, body]) => (
-                <div key={number} className="grid gap-4 py-6 sm:grid-cols-[72px_1fr]">
-                  <span className="font-mono text-sm text-[#C85A19]">{number}</span>
-                  <div>
-                    <h3 className="text-lg font-medium text-[#172033]">{title}</h3>
-                    <p className="mt-2 max-w-xl text-sm leading-6 text-[#667085] sm:text-base">{body}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
+          <div className="mt-14 grid gap-10 lg:grid-cols-3 lg:gap-14">
+            {[
+              ["01", "Find it", "Browse the marketplace and open the product or service that fits what you need."],
+              ["02", "Pay safely", "The order and payment stay together inside The Middleman instead of becoming a scattered DM deal."],
+              ["03", "Finish the order", "The seller delivers through the order flow and the transaction moves forward from there."],
+            ].map(([number, title, body]) => (
+              <div key={number} className="min-w-0">
+                <span className="font-mono text-sm text-[#C85A19]">{number}</span>
+                <h3 className="mt-8 font-display text-3xl font-semibold tracking-[-0.03em] text-[#172033]">{title}</h3>
+                <p className="mt-4 max-w-sm text-base leading-7 text-[#667085]">{body}</p>
+              </div>
+            ))}
           </div>
         </div>
       </section>
