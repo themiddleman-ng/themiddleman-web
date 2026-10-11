@@ -7,6 +7,9 @@ alter table public.product_versions
 alter table public.notifications
   add column if not exists action_required boolean not null default false;
 
+create unique index if not exists product_versions_one_pending_per_gig
+  on public.product_versions (gig_id) where review_status = 'awaiting_review';
+
 create table if not exists public.product_downloads (
   id uuid primary key default gen_random_uuid(),
   order_id uuid not null references public.orders(id) on delete cascade,
@@ -67,6 +70,46 @@ drop trigger if exists product_version_identity_immutable on public.product_vers
 create trigger product_version_identity_immutable
   before update on public.product_versions
   for each row execute function public.prevent_product_version_identity_change();
+
+-- Sellers cannot publish a product or move the current-version pointer around the
+-- review workflow. Only the review RPC sets this transaction-local marker.
+create or replace function public.prevent_unreviewed_gig_activation()
+returns trigger
+language plpgsql
+security definer
+set search_path = ''
+as $function$
+begin
+  if new.current_product_version_id is distinct from
+      case when tg_op = 'INSERT' then null else old.current_product_version_id end
+    and current_setting('middleman.product_version_review', true)
+      is distinct from new.current_product_version_id::text then
+    raise exception 'Only the product review workflow can change the current version';
+  end if;
+
+  if new.status = 'active'
+    and (tg_op = 'INSERT' or old.status is distinct from new.status) then
+    if new.current_product_version_id is null or not exists (
+      select 1 from public.product_versions version
+      where version.id = new.current_product_version_id
+        and version.gig_id = new.id
+        and version.is_current
+        and version.review_status = 'approved'
+        and version.security_status = 'structural_pass'
+        and version.access_status = 'available'
+    ) then
+      raise exception 'A product needs an approved available package before publication';
+    end if;
+  end if;
+
+  return new;
+end
+$function$;
+
+drop trigger if exists gigs_require_approved_product_version on public.gigs;
+create trigger gigs_require_approved_product_version
+  before insert or update of status, current_product_version_id on public.gigs
+  for each row execute function public.prevent_unreviewed_gig_activation();
 
 -- Preserve pre-package listings during migration. New products that have an
 -- approved current version snapshot it at order creation; legacy listings with
