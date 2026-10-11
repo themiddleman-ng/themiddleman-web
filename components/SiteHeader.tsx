@@ -9,6 +9,7 @@ import Logo from '@/components/Logo';
 export default function SiteHeader({ isSeller = false, compact = false }: { isSeller?: boolean; compact?: boolean }) {
   const router = useRouter();
   const [unreadCount, setUnreadCount] = useState(0);
+  const [notificationCount, setNotificationCount] = useState(0);
   const [menuOpen, setMenuOpen] = useState(false);
 
   useEffect(() => {
@@ -18,7 +19,7 @@ export default function SiteHeader({ isSeller = false, compact = false }: { isSe
       const { data: { user } } = await supabase.auth.getUser();
 
       if (!user) {
-        if (!cancelled) setUnreadCount(0);
+        if (!cancelled) { setUnreadCount(0); setNotificationCount(0); }
         return;
       }
 
@@ -26,12 +27,17 @@ export default function SiteHeader({ isSeller = false, compact = false }: { isSe
 
       if (cancelled) return;
 
-      if (!response.ok) {
-        setUnreadCount(0);
-        return;
-      }
-      const result = await response.json();
-      setUnreadCount(result.unreadCount ?? 0);
+      if (response.ok) {
+        const result = await response.json();
+        if (!cancelled) setUnreadCount(result.unreadCount ?? 0);
+      } else if (!cancelled) setUnreadCount(0);
+
+      const notificationResponse = await fetch('/api/notifications', { cache: 'no-store' });
+      if (cancelled) return;
+      if (notificationResponse.ok) {
+        const result = await notificationResponse.json();
+        setNotificationCount(result.unreadCount ?? 0);
+      } else setNotificationCount(0);
     }
 
     loadUnreadCount();
@@ -41,10 +47,14 @@ export default function SiteHeader({ isSeller = false, compact = false }: { isSe
     };
 
     window.addEventListener('messages:read-updated', handleRefresh);
+    window.addEventListener('notifications:updated', handleRefresh);
+    window.addEventListener('focus', handleRefresh);
 
     return () => {
       cancelled = true;
       window.removeEventListener('messages:read-updated', handleRefresh);
+      window.removeEventListener('notifications:updated', handleRefresh);
+      window.removeEventListener('focus', handleRefresh);
     };
   }, []);
 
@@ -60,6 +70,11 @@ export default function SiteHeader({ isSeller = false, compact = false }: { isSe
   const unreadBadge = unreadCount > 0 && (
     <span className="inline-flex min-w-5 items-center justify-center rounded-full bg-ember px-1.5 py-0.5 text-[11px] font-semibold leading-none text-ink">
       {unreadCount > 99 ? '99+' : unreadCount}
+    </span>
+  );
+  const notificationBadge = notificationCount > 0 && (
+    <span className="inline-flex min-w-5 items-center justify-center rounded-full bg-ember px-1.5 py-0.5 text-[11px] font-semibold leading-none text-ink">
+      {notificationCount > 99 ? '99+' : notificationCount}
     </span>
   );
 
@@ -80,6 +95,7 @@ export default function SiteHeader({ isSeller = false, compact = false }: { isSe
                 {unreadBadge}
               </span>
             </Link>
+            <Link href="/notifications" className={desktopLink}><span className="inline-flex items-center gap-2">Notifications{notificationBadge}</span></Link>
             <Link href="/payments" className={desktopLink}>Payments</Link>
             <Link href="/profile" className={desktopLink}>Profile</Link>
           </nav>
@@ -99,9 +115,12 @@ export default function SiteHeader({ isSeller = false, compact = false }: { isSe
               {unreadBadge}
             </span>
           </Link>
+          <Link href="/notifications" className="rounded-full px-3 py-2 text-sm text-slate transition-colors hover:bg-ember/8 hover:text-bone">
+            <span className="inline-flex items-center gap-2">Alerts{notificationBadge}</span>
+          </Link>
           <button
             type="button"
-            onClick={() => setMenuOpen((open) => !open)}
+            onClick={() => setMenuOpen((open) => !open)
             aria-label={menuOpen ? 'Close menu' : 'Open menu'}
             aria-expanded={menuOpen}
             className="flex h-9 w-9 items-center justify-center rounded-full border border-line bg-white/80 text-slate shadow-sm transition-colors hover:text-bone"
@@ -126,6 +145,7 @@ export default function SiteHeader({ isSeller = false, compact = false }: { isSe
             <Link href="/marketplace" onClick={() => setMenuOpen(false)} className={mobileLink}>Marketplace</Link>
             <Link href="/orders" onClick={() => setMenuOpen(false)} className={mobileLink}>My Orders</Link>
             {isSeller && <Link href="/gigs/mine" onClick={() => setMenuOpen(false)} className={mobileLink}>My Products</Link>}
+            <Link href="/notifications" onClick={() => setMenuOpen(false)} className={mobileLink}>Notifications {notificationBadge}</Link>
             <Link href="/payments" onClick={() => setMenuOpen(false)} className={mobileLink}>Payments</Link>
             <Link href="/profile" onClick={() => setMenuOpen(false)} className={mobileLink}>Profile</Link>
             <button
