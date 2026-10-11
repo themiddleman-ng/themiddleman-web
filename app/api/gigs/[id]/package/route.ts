@@ -176,14 +176,21 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     return privateJson({ error: "Uploaded size does not match the inspected file." }, 400);
   }
 
+  const archiveReport = inspected.archive as unknown as {
+    entryCount: number;
+    fileCount: number;
+    expandedSize: number;
+    paths: string[];
+    truncated: boolean;
+  } | null;
   const report = {
     detectedType: inspected.detectedType,
-    archive: inspected.archive ? {
-      entryCount: inspected.archive.entryCount,
-      fileCount: inspected.archive.fileCount,
-      expandedSize: inspected.archive.expandedSize,
-      paths: inspected.archive.paths.slice(0, 80).map((item) => item.slice(0, 240)),
-      truncated: inspected.archive.truncated || inspected.archive.paths.length > 80,
+    archive: archiveReport ? {
+      entryCount: archiveReport.entryCount,
+      fileCount: archiveReport.fileCount,
+      expandedSize: archiveReport.expandedSize,
+      paths: archiveReport.paths.slice(0, 80).map((item) => item.slice(0, 240)),
+      truncated: archiveReport.truncated || archiveReport.paths.length > 80,
     } : null,
     security: inspected.security,
   };
