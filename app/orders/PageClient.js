@@ -111,6 +111,7 @@ export default function OrdersPage() {
   const [orders, setOrders] = useState([]);
   const [reviewedOrderIds, setReviewedOrderIds] = useState(new Set());
   const [deliveryEnabled, setDeliveryEnabled] = useState(false);
+  const [productDownloadEnabled, setProductDownloadEnabled] = useState(false);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState("");
   const [busyOrderId, setBusyOrderId] = useState(null);
@@ -131,6 +132,7 @@ export default function OrdersPage() {
     if (!response.ok) { setLoadError(result.error || 'Could not load orders.'); setLoading(false); return; }
     setOrders(result.orders || []);
     setDeliveryEnabled(Boolean(result.deliveryEnabled));
+    setProductDownloadEnabled(Boolean(result.productDownloadEnabled));
 
     const { data: myReviews } = await supabase.from("reviews").select("order_id").eq("reviewer_id", user.id);
     setReviewedOrderIds(new Set((myReviews || []).map((r) => r.order_id)));
@@ -255,6 +257,16 @@ export default function OrdersPage() {
                 {order.deliveries?.[0]?.dispute_window_closes_at && isBuyer && <p className="mt-3 text-xs text-slate">Review ends {new Date(order.deliveries[0].dispute_window_closes_at).toLocaleString()}. Review the delivery before the stated deadline.</p>}
                 {order.deliveries?.[0]?.seller_due_at && !isBuyer && <p className="mt-3 text-xs text-slate">Submission due {new Date(order.deliveries[0].seller_due_at).toLocaleString()}</p>}
                 <div className="mt-4 flex flex-wrap gap-2">
+                  {productDownloadEnabled && isBuyer && order.productVersion?.review_status === "approved" &&
+                    order.productVersion?.access_status === "available" &&
+                    ["in_escrow", "delivered", "approved", "disputed"].includes(order.status) && (
+                    <a
+                      href={"/api/orders/" + order.id + "/product-file"}
+                      className="rounded-full bg-ember px-4 py-2 text-xs font-semibold text-ink hover:bg-ember/90 transition-colors"
+                    >
+                      Download product · v{order.productVersion.version_number}
+                    </a>
+                  )}
                   {deliveryEnabled && !isBuyer && order.status === "in_escrow" &&
                     (!order.deliveries?.length || ['pending_upload','needs_seller_edit'].includes(order.deliveries[0]?.status)) && (
                     <div className="w-full rounded-xl border border-line p-4">
