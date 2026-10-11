@@ -1,15 +1,8 @@
 import Link from "next/link";
 import { LogoMark } from "@/components/Logo";
 import SelectedGigs from "@/components/home/SelectedGigs";
+import CategoryMarquee from "@/components/home/CategoryMarquee";
 import RedesignFAQ from "@/components/home/RedesignFAQ";
-
-const categories = [
-  { label: "Web & Software", value: "development" },
-  { label: "Design", value: "design" },
-  { label: "Marketing", value: "marketing" },
-  { label: "Writing", value: "writing" },
-  { label: "AI-assisted", value: "ai_assisted" },
-];
 
 const comparison = [
   ["Payment protection", "Protected through the order", "Depends on trust"],
@@ -136,30 +129,7 @@ export default function RedesignPreviewPage() {
         </div>
       </section>
 
-      <section className="border-b border-[#E4DED3] bg-[#F6F1E8]">
-        <div className="mx-auto max-w-7xl px-5 py-16 sm:px-6 sm:py-20">
-          <div className="grid gap-8 lg:grid-cols-[0.85fr_1.15fr] lg:items-end">
-            <h2 className="max-w-xl font-display text-4xl font-semibold leading-[1.02] tracking-[-0.04em] sm:text-5xl">
-              Find the kind of work you need.
-            </h2>
-            <p className="max-w-2xl text-base leading-7 text-[#6D706F] lg:justify-self-end">
-              The categories should help people move into the marketplace quickly, not sit there as decoration.
-            </p>
-          </div>
-
-          <div className="mt-10 flex flex-wrap gap-2">
-            {categories.map((category) => (
-              <Link
-                key={category.value}
-                href={`/marketplace?category=${category.value}`}
-                className="rounded-lg border border-[#D9D2C7] bg-white px-4 py-2.5 text-sm font-medium text-[#455066] shadow-sm transition-all hover:-translate-y-0.5 hover:border-[#0B3D91]/35 hover:text-[#0B3D91]"
-              >
-                {category.label}
-              </Link>
-            ))}
-          </div>
-        </div>
-      </section>
+      <CategoryMarquee />
 
       <SelectedGigs />
 
