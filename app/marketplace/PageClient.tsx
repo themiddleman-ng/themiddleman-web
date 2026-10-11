@@ -151,7 +151,9 @@ export default function MarketplacePage() {
         setGigs((gigsResult.data as unknown as GigRow[]) ?? []);
 
         const ratingsMap: Record<string, GigRating> = {};
-        if (!ratingsResult.error) {
+        if (ratingsResult.error) {
+          console.warn("[marketplace] Ratings could not be loaded", ratingsResult.error);
+        } else {
           ((ratingsResult.data as GigRating[]) ?? []).forEach((row) => {
             ratingsMap[row.gig_id] = row;
           });
