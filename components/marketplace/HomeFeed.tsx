@@ -11,7 +11,7 @@ const CATEGORY_DETAILS: Record<string, { label: string; mark: string }> = {
   development: { label: "Web & Software", mark: "</>" },
   design: { label: "Design", mark: "◇" },
   writing: { label: "Writing", mark: "Aa" },
-  marketing: { label: "Marketing", mark: "↗" },
+  marketing: { label: "Marketing", mark: "M" },
   ai_assisted: { label: "AI-assisted", mark: "✳" },
 };
 
@@ -124,7 +124,7 @@ export default function HomeFeed() {
             <p className="text-[13px] font-semibold tracking-[.01em] text-[#E07818] sm:text-[14px]">A small selection</p>
             <h2 className="mt-2 font-display text-[clamp(2rem,4vw,3rem)] font-semibold leading-[1.04] tracking-[-.05em] text-[#172B45]">A few listings to explore</h2>
           </div>
-          <Link href="/marketplace" className="w-fit text-[16px] font-semibold text-[#0B3D91] hover:underline">See all marketplace listings <span aria-hidden="true">↗</span></Link>
+          <Link href="/marketplace" className="w-fit text-[16px] font-semibold text-[#0B3D91] hover:underline">See all marketplace listings</Link>
         </div>
 
         <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
@@ -141,7 +141,7 @@ export default function HomeFeed() {
         {!loading && !loadError && visibleGigs.length === 0 && (
           <div className="mt-5 flex flex-col gap-3 py-4 text-[16px] text-[#657585] sm:flex-row sm:items-center sm:justify-between">
             <p>{imageGigs.length === 0 ? "No product previews yet. Browse the marketplace to see current listings." : "New product previews are on the way."}</p>
-            <Link href="/marketplace" className="w-fit font-semibold text-[#0B3D91] underline">Browse all listings <span aria-hidden="true">↗</span></Link>
+            <Link href="/marketplace" className="w-fit font-semibold text-[#0B3D91] underline">Browse all listings</Link>
           </div>
         )}
       </div>
