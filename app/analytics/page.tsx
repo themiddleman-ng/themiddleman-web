@@ -9,6 +9,7 @@ type Row = {
   title: string;
   status: string;
   views: number;
+  downloads: number;
   sales: number;
   salesValue: number;
   conversionRate: number;
@@ -19,7 +20,7 @@ type Data = {
   days: number;
   trackingEnabled: boolean;
   products: Row[];
-  totals: { views: number; sales: number; salesValue: number };
+  totals: { views: number; downloads: number; sales: number; salesValue: number };
 };
 
 function money(value: number) {
@@ -72,23 +73,26 @@ export default function SellerAnalyticsPage() {
         {!loading && data ? (
           <>
             {!data.trackingEnabled ? <p className="mt-6 rounded-xl border border-line p-4 text-sm text-slate">View tracking will start when the isolated preview has an analytics secret configured. Sales still come from paid order records.</p> : null}
-            <div className="mt-6 grid gap-3 sm:grid-cols-3">
+            <div className="mt-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
               <div className="rounded-xl bg-paper p-5"><p className="text-xs text-slate">Daily unique-ish views</p><strong className="mt-2 block font-display text-3xl">{data.totals.views}</strong></div>
               <div className="rounded-xl bg-paper p-5"><p className="text-xs text-slate">Paid orders</p><strong className="mt-2 block font-display text-3xl">{data.totals.sales}</strong></div>
+              <div className="rounded-xl bg-paper p-5"><p className="text-xs text-slate">Downloads</p><strong className="mt-2 block font-display text-3xl">{data.totals.downloads}</strong></div>
               <div className="rounded-xl bg-paper p-5"><p className="text-xs text-slate">Sales value</p><strong className="mt-2 block font-display text-3xl">{money(data.totals.salesValue)}</strong></div>
             </div>
             <p className="mt-4 text-xs leading-5 text-slate">View estimates use a daily rotating, one-way network hash. No raw IP address or visitor identity is stored or shown. Sales value is the canonical order amount; payout and fees are shown in Payments.</p>
-            <div className="mt-7 overflow-hidden rounded-xl border border-line">
-              <div className="grid grid-cols-[minmax(0,2fr)_repeat(4,minmax(4rem,1fr))] gap-2 bg-paper/60 px-4 py-3 text-[11px] text-slate">
-                <span>Product</span><span>Views</span><span>Sales</span><span>Conversion</span><span>Rating</span>
-              </div>
-              {data.products.map((row) => (
-                <div key={row.id} className="grid grid-cols-[minmax(0,2fr)_repeat(4,minmax(4rem,1fr))] items-center gap-2 border-t border-line px-4 py-4 text-xs">
-                  <span className="min-w-0 truncate font-medium">{row.title}<span className="block text-[10px] text-slate">{row.status}</span></span>
-                  <span>{row.views}</span><span>{row.sales}</span><span>{row.conversionRate}%</span>
-                  <span>{row.reviewCount ? (row.averageRating ?? 0).toFixed(1) + " · " + row.reviewCount : "—"}</span>
+            <div className="mt-7 overflow-x-auto rounded-xl border border-line">
+              <div className="min-w-[620px]">
+                <div className="grid grid-cols-[minmax(0,2fr)_repeat(5,minmax(4rem,1fr))] gap-2 bg-paper/60 px-4 py-3 text-[11px] text-slate">
+                  <span>Product</span><span>Views</span><span>Downloads</span><span>Sales</span><span>Conversion</span><span>Rating</span>
                 </div>
-              ))}
+                {data.products.map((row) => (
+                  <div key={row.id} className="grid grid-cols-[minmax(0,2fr)_repeat(5,minmax(4rem,1fr))] items-center gap-2 border-t border-line px-4 py-4 text-xs">
+                    <span className="min-w-0 truncate font-medium">{row.title}<span className="block text-[10px] text-slate">{row.status}</span></span>
+                    <span>{row.views}</span><span>{row.downloads}</span><span>{row.sales}</span><span>{row.conversionRate}%</span>
+                    <span>{row.reviewCount ? (row.averageRating ?? 0).toFixed(1) + " · " + row.reviewCount : "—"}</span>
+                  </div>
+                ))}
+              </div>
             </div>
             {!data.products.length ? <p className="mt-6 text-sm text-slate">Your product activity will show here once your products are listed.</p> : null}
           </>
