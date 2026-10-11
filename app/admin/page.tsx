@@ -75,6 +75,7 @@ export default async function AdminPage() {
           <Link href="/admin/review" className="rounded-full bg-ember px-5 py-2.5 text-sm font-bold text-ink">
             Open delivery review
           </Link>
+          <Link href="/admin/products" className="rounded-full border border-line px-5 py-2.5 text-sm font-semibold">Review product packages</Link>
           <Link href="/admin/escrow" className="rounded-full border border-line px-5 py-2.5 text-sm font-semibold">Trust &amp; payouts</Link>
           <Link href="/security" className="rounded-full border border-line px-5 py-2.5 text-sm font-semibold">Account security</Link>
           <Link href="/marketplace" className="rounded-full border border-line px-5 py-2.5 text-sm font-semibold">
