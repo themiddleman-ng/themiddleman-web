@@ -126,7 +126,7 @@ export default function Home() {
       <section className="bg-[#0B2F62] text-white">
         <div className="mx-auto flex max-w-7xl flex-col justify-between gap-6 px-5 py-12 sm:px-8 sm:py-14 md:flex-row md:items-center">
           <div><p className="text-[12px] font-bold uppercase tracking-[.15em] text-[#FFC17B]">Start with what you need</p><h2 className="mt-3 max-w-2xl font-display text-[clamp(1.9rem,3.4vw,2.8rem)] font-semibold leading-tight tracking-[-.04em]">Find a ready-made digital product for your next step.</h2></div>
-          <Link href="/marketplace" className="inline-flex w-fit items-center gap-2 rounded-md bg-[#FF8A00] px-5 py-3 text-[16px] font-bold text-[#172B45] transition hover:bg-[#F47C00]">Explore products </Link>
+          <Link href="/marketplace" className="inline-flex w-fit items-center gap-2 rounded-md bg-[#FF8A00] px-5 py-3 text-[16px] font-bold text-[#172B45] transition hover:bg-[#F47C00]">Explore products</Link>
         </div>
       </section>
 
