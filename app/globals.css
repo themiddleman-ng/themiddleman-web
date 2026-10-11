@@ -1112,26 +1112,33 @@ body {
 .field-input:focus { border-color: var(--ember); background: #ffffff; box-shadow: 0 0 0 4px rgba(242,100,25,.14); }
 .field-shell:focus-within .field-icon { color: var(--ember); }
 
-/* ============================================================
-   Marketplace homepage — light theme, scoped under .mp- so the
-   rest of the app (still Ink/dark) is untouched.
-   ============================================================ */
-.mp-shell { position: relative; min-height: 100vh; background: #ffffff; color: #171717; overflow: hidden; }
-
-/* Slow-drifting soft blobs behind the content — very low opacity so they
-   never fight the ticket/receipt cards, just give the white page some life. */
-.mp-blob { position: absolute; border-radius: 999px; filter: blur(60px); opacity: .16; pointer-events: none; z-index: 0; }
-.mp-blob-1 { width: 32rem; height: 32rem; top: -10rem; right: -8rem; background: var(--ember); animation: mp-drift-1 22s ease-in-out infinite; }
-.mp-blob-2 { width: 24rem; height: 24rem; bottom: -6rem; left: -6rem; background: #F2A619; animation: mp-drift-2 26s ease-in-out infinite; }
-.mp-blob-3 { width: 18rem; height: 18rem; top: 40%; left: 55%; background: var(--ember); animation: mp-drift-3 30s ease-in-out infinite; }
-@keyframes mp-drift-1 { 0%, 100% { transform: translate(0, 0) scale(1); } 50% { transform: translate(-2.5rem, 2rem) scale(1.08); } }
-@keyframes mp-drift-2 { 0%, 100% { transform: translate(0, 0) scale(1); } 50% { transform: translate(2rem, -1.5rem) scale(1.05); } }
-@keyframes mp-drift-3 { 0%, 100% { transform: translate(0, 0) scale(1); } 50% { transform: translate(-1.5rem, -2rem) scale(1.1); } }
-@media (prefers-reduced-motion: reduce) {
-  .mp-blob-1, .mp-blob-2, .mp-blob-3 { animation: none; }
+/* Compact, warm marketplace surface. */
+.mp-shell {
+  position: relative;
+  min-height: 100vh;
+  overflow-x: clip;
+  color: #172B45;
+  background:
+    radial-gradient(ellipse at 88% -8%, rgba(216, 123, 54, .055), transparent 34%),
+    #F8F6F1;
 }
-
 .mp-content { position: relative; z-index: 1; }
+
+.marketplace-skeleton { min-width: 0; }
+.mp-skeleton-image {
+  aspect-ratio: 4 / 3;
+  border-radius: .375rem;
+  background: linear-gradient(100deg, #EAE3D9 25%, #F2ECE4 45%, #EAE3D9 65%);
+  background-size: 220% 100%;
+  animation: marketplace-shimmer 1.8s ease-in-out infinite;
+}
+.mp-skeleton-line {
+  border-radius: .2rem;
+  background: linear-gradient(100deg, #E4DDD3 25%, #EFE9E0 45%, #E4DDD3 65%);
+  background-size: 220% 100%;
+  animation: marketplace-shimmer 1.8s ease-in-out infinite;
+}
+@keyframes marketplace-shimmer { to { background-position: -220% 0; }
 
 /* ============================================================
    MARKETPLACE REDESIGN — CARD, PREVIEW & NAV MOTION
@@ -1768,4 +1775,28 @@ html, body {
     position: relative;
     inset: auto;
   }
+}
+
+
+/* Product-led marketplace cards stay light; hover motion is limited to the preview. */
+.mp-shell .gm-card {
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  transform: none;
+}
+.mp-shell .gm-card:hover {
+  border-color: transparent;
+  box-shadow: none;
+  transform: none;
+}
+.mp-shell .gm-card:hover .gm-preview-inner,
+.mp-shell .gm-preview:hover .gm-preview-inner {
+  transform: scale(1.015);
+}
+@media (prefers-reduced-motion: reduce) {
+  .mp-skeleton-image,
+  .mp-skeleton-line { animation: none; }
+  .mp-shell .gm-card,
+  .mp-shell .gm-preview-inner { transition: none; }
 }
