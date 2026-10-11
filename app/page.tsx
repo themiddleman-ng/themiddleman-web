@@ -52,15 +52,44 @@ export default function Home() {
         </div>
 
         <div className="relative mx-auto w-full max-w-[560px]">
-          <div className="relative overflow-hidden rounded-[1.5rem] bg-[#0B2F62] px-7 py-8 text-white sm:px-10 sm:py-10">
-            <p className="text-[12px] font-bold uppercase tracking-[.16em] text-[#FFC17B]">Made for real work</p>
-            <p className="mt-8 max-w-sm font-display text-[clamp(2.5rem,5vw,4.5rem)] font-semibold leading-[.98] tracking-[-.055em]">Ready-made.<br /><span className="text-[#FFB052]">Ready for you.</span></p>
-            <p className="mt-7 max-w-sm text-[17px] leading-7 text-[#D8E3EF]">Find useful digital goods, creative resources and tools built by people who know their craft.</p>
-            <div className="mt-10 flex items-center justify-between border-t border-white/20 pt-4 text-[13px] font-medium text-[#D8E3EF]">
-              <span>The Middleman</span><span>Nigeria · NGN</span>
+          <div className="overflow-hidden rounded-[1.25rem] border border-[#DCE2E5] bg-white shadow-[0_18px_60px_-32px_rgba(23,43,69,.28)]">
+            <div className="flex items-center justify-between border-b border-[#E8ECEE] px-5 py-4 sm:px-6">
+              <div className="inline-flex items-center gap-2 text-[14px] font-bold text-[#172B45]">
+                <span aria-hidden="true" className="grid h-7 w-7 place-items-center rounded-md bg-[#0B3D91] font-display text-[15px] text-white">M</span>
+                Marketplace
+              </div>
+              <span className="text-[12px] font-semibold tracking-[.08em] text-[#6C7A87]">NIGERIA · NGN</span>
+            </div>
+            <div className="bg-[#F8F6F1] px-5 py-6 sm:px-7 sm:py-7">
+              <p className="text-[11px] font-bold uppercase tracking-[.14em] text-[#0B3D91]">Find a useful starting point</p>
+              <h2 className="mt-2 font-display text-[clamp(1.9rem,4vw,2.7rem)] font-semibold leading-[1.02] tracking-[-.05em] text-[#172B45]">Products built for work.</h2>
+              <p className="mt-3 max-w-md text-[15px] leading-6 text-[#657587]">Browse creator-made digital resources, then check the preview and details on each listing.</p>
+              <div className="mt-6 rounded-lg border border-[#DCE2E5] bg-white px-4 py-3 text-[14px] text-[#7A8792]">
+                Search the marketplace <span aria-hidden="true" className="float-right text-[#0B3D91]">⌕</span>
+              </div>
+              <div className="mt-5">
+                <p className="mb-3 text-[12px] font-semibold text-[#657587]">Browse by category</p>
+                <div className="flex flex-wrap gap-2">
+                  <Link href="/marketplace?category=development" className="rounded-full bg-white px-3 py-2 text-[12px] font-semibold text-[#263E55] ring-1 ring-[#DCE2E5] transition hover:text-[#0B3D91]">Web & Software</Link>
+                  <Link href="/marketplace?category=design" className="rounded-full bg-white px-3 py-2 text-[12px] font-semibold text-[#263E55] ring-1 ring-[#DCE2E5] transition hover:text-[#0B3D91]">Design</Link>
+                  <Link href="/marketplace?category=writing" className="rounded-full bg-white px-3 py-2 text-[12px] font-semibold text-[#263E55] ring-1 ring-[#DCE2E5] transition hover:text-[#0B3D91]">Writing</Link>
+                  <Link href="/marketplace?category=marketing" className="rounded-full bg-white px-3 py-2 text-[12px] font-semibold text-[#263E55] ring-1 ring-[#DCE2E5] transition hover:text-[#0B3D91]">Marketing</Link>
+                  <Link href="/marketplace?category=ai_assisted" className="rounded-full bg-white px-3 py-2 text-[12px] font-semibold text-[#263E55] ring-1 ring-[#DCE2E5] transition hover:text-[#0B3D91]">AI-assisted</Link>
+                </div>
+              </div>
+              <div className="mt-5 flex items-center gap-3 rounded-lg bg-[#EAF0F3] px-4 py-3">
+                <span aria-hidden="true" className="grid h-9 w-9 shrink-0 place-items-center rounded-md bg-white text-[18px] text-[#E57814]">↗</span>
+                <div>
+                  <p className="text-[13px] font-semibold text-[#263E55]">Creator previews on every product</p>
+                  <p className="mt-0.5 text-[12px] leading-5 text-[#6C7A87]">See the actual product before you choose.</p>
+                </div>
+              </div>
+            </div>
+            <div className="flex items-center justify-between border-t border-[#E8ECEE] px-5 py-4 text-[12px] font-semibold text-[#526577] sm:px-6">
+              <span>Pay in naira with Paystack</span>
+              <Link href="/marketplace" className="text-[#0B3D91] hover:underline">Explore <span aria-hidden="true">↗</span></Link>
             </div>
           </div>
-          <span aria-hidden="true" className="absolute -bottom-3 -left-3 h-16 w-16 rounded-br-[1.5rem] border-b-2 border-l-2 border-[#E57814]" />
         </div>
       </section>
 
