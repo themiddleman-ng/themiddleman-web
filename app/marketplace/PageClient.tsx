@@ -5,7 +5,6 @@ import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { isSupabaseConfigured, supabase } from "@/lib/supabaseClient";
 import SiteHeader from "@/components/SiteHeader";
-import FadeIn from "@/components/motion/FadeIn";
 import GigCard, { type CardGig, type CardRating } from "@/components/marketplace/GigCard";
 
 type GigCategory = "development" | "design" | "marketing" | "writing" | "ai_assisted";
@@ -75,7 +74,7 @@ function describeMarketplaceError(error: unknown): MarketplaceError {
 
 const CATEGORIES: Array<{ value: GigCategory | "all"; label: string }> = [
   { value: "all", label: "All" },
-  { value: "development", label: "Development" },
+  { value: "development", label: "Web & Software" },
   { value: "design", label: "Design" },
   { value: "marketing", label: "Marketing" },
   { value: "writing", label: "Writing" },
@@ -84,14 +83,18 @@ const CATEGORIES: Array<{ value: GigCategory | "all"; label: string }> = [
 
 function LoadingState() {
   return (
-    <div className="receipt-loader" aria-label="Loading products">
-      <div className="receipt-loader-bar" />
-      <p className="text-sm text-slate flex items-center gap-2">
-        Printing receipts
-        <span className="typing-dot" />
-        <span className="typing-dot" />
-        <span className="typing-dot" />
-      </p>
+    <div role="status" aria-label="Loading products" className="grid grid-cols-1 gap-x-7 gap-y-9 sm:grid-cols-2 lg:grid-cols-3">
+      <span className="sr-only">Loading products</span>
+      {Array.from({ length: 6 }, (_, index) => (
+        <div key={index} aria-hidden="true" className="marketplace-skeleton">
+          <div className="mp-skeleton-image" />
+          <div className="pt-3">
+            <div className="mp-skeleton-line h-4 w-4/5" />
+            <div className="mp-skeleton-line mt-2 h-3 w-2/5" />
+            <div className="mp-skeleton-line mt-3 h-4 w-1/4" />
+          </div>
+        </div>
+      ))}
     </div>
   );
 }
@@ -173,113 +176,109 @@ export default function MarketplacePage() {
   const filteredGigs = gigs.filter((gig) => {
     const matchesCategory = activeCategory === "all" || gig.category === activeCategory;
     const haystack = `${gig.title} ${gig.seller_profiles?.display_name ?? ""}`.toLowerCase();
-    const matchesQuery = query.trim() === "" || haystack.includes(query.toLowerCase());
+    const matchesQuery = query.trim() === "" || haystack.includes(query.trim().toLowerCase());
     return matchesCategory && matchesQuery;
   });
 
   // With sparse inventory, a 4-column grid leaves a dead empty slot.
   // Only open the 4th column once there is enough stock to fill it.
   const gridClass =
-    filteredGigs.length > 8
-      ? "grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
-      : "grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3";
+    filteredGigs.length >= 12
+      ? "grid grid-cols-1 gap-x-7 gap-y-9 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+      : "grid grid-cols-1 gap-x-7 gap-y-9 sm:grid-cols-2 lg:grid-cols-3";
 
   return (
     <div className="mp-shell">
-      <div className="mp-blob mp-blob-1" />
-      <div className="mp-blob mp-blob-2" />
-      <div className="mp-blob mp-blob-3" />
-
-      <SiteHeader />
-
-      <div className="mp-content mx-auto max-w-7xl px-4 py-8 sm:px-6 sm:py-14">
-        <FadeIn direction="up" duration={600}>
-          {/* Hero panel — stacks vertically on mobile, row on desktop */}
-          <div className="rounded-3xl border border-line bg-white/75 p-5 shadow-[0_18px_50px_rgba(31,21,12,.08)] backdrop-blur-sm sm:p-6">
-            <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-              <p className="max-w-md text-[13px] text-slate sm:text-sm">
-                Verified digital products and code, payment-protected, Nigeria-wide
-              </p>
-              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
-                <input
-                  type="text"
-                  value={query}
-                  onChange={(e) => setQuery(e.target.value)}
-                  placeholder="Search products, code, templates, sellers"
-                  className="w-full rounded-full border border-line bg-white px-4 py-2.5 text-sm text-bone placeholder-slate shadow-sm transition-colors focus:border-ember focus:outline-none sm:w-72 lg:w-80"
-                />
-                <Link
-                  href="/gigs/new"
-                  className="shrink-0 rounded-full bg-ember px-5 py-2.5 text-center text-[13px] font-semibold text-ink shadow-lg shadow-ember/20 transition-all hover:-translate-y-0.5 hover:bg-ember/90"
-                >
-                  List a product
-                </Link>
-              </div>
-            </div>
+      <SiteHeader compact />
+      <main className="mp-content mx-auto max-w-7xl px-4 pb-12 pt-5 sm:px-6 sm:pb-16 sm:pt-7 lg:px-8">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h1 className="font-display text-[26px] font-semibold leading-tight tracking-[-.035em] text-[#172B45] sm:text-[30px]">
+              Find digital products worth paying for.
+            </h1>
+            <p className="mt-1.5 max-w-2xl text-[14px] leading-6 text-[#526273]">
+              Browse creator-made products, preview what’s included, and pay in Naira through Paystack.
+            </p>
           </div>
-        </FadeIn>
+          <Link
+            href="/gigs/new"
+            className="inline-flex w-fit shrink-0 items-center justify-center rounded-md px-3.5 py-2.5 text-sm font-semibold text-[#263E55] transition-colors hover:bg-[#F1E7DA] hover:text-[#0B3D91] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0B3D91]"
+          >
+            Sell a digital product
+          </Link>
+        </div>
 
-        <FadeIn direction="up" delay={100} duration={600}>
-          {/* Category tabs — hidden scrollbar on mobile */}
-          <div className="no-scrollbar mb-8 mt-6 flex gap-3 overflow-x-auto pb-1">
-            {CATEGORIES.map((category) => {
-              const active = activeCategory === category.value;
-              return (
-                <button
-                  key={category.value}
-                  onClick={() => setActiveCategory(category.value)}
-                  className={
-                    "mp-tab whitespace-nowrap rounded-full border px-4 py-2 text-[13px] transition-all " +
-                    (active
-                      ? "border-ember bg-ember font-semibold text-ink shadow-sm"
-                      : "border-line bg-white/70 text-slate hover:border-ember/30 hover:text-bone")
-                  }
-                >
-                  {category.label}
-                </button>
-              );
-            })}
-          </div>
-        </FadeIn>
+        <div className="relative mt-4">
+          <svg className="pointer-events-none absolute left-4 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-[#71808B]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
+            <circle cx="10.8" cy="10.8" r="6.8" />
+            <path d="m16 16 4.5 4.5" strokeLinecap="round" />
+          </svg>
+          <input
+            type="search"
+            value={query}
+            onChange={(event) => setQuery(event.target.value)}
+            placeholder="Search products, creators, templates..."
+            aria-label="Search products, creators, and templates"
+            className="h-12 w-full rounded-lg border border-[#E7DED3] bg-[#FFFEFC] pl-11 pr-4 text-[15px] text-[#172B45] shadow-[0_2px_10px_rgba(39,30,20,.035)] placeholder:text-[#7C8790] focus:border-[#D87B36] focus:outline-none focus:ring-2 focus:ring-[#E89A5C]/20"
+          />
+        </div>
 
-        {loading && <LoadingState />}
+        <nav aria-label="Product categories" className="no-scrollbar mt-3 flex gap-1 overflow-x-auto border-b border-[#E8E1D8] pb-1">
+          {CATEGORIES.map((category) => {
+            const active = activeCategory === category.value;
+            return (
+              <button
+                key={category.value}
+                type="button"
+                aria-pressed={active}
+                onClick={() => setActiveCategory(category.value)}
+                className={
+                  "mp-tab shrink-0 whitespace-nowrap rounded-md px-3 py-2 text-[13px] font-medium transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-[#0B3D91] " +
+                  (active
+                    ? "bg-[#172B45] text-white"
+                    : "text-[#5D6B78] hover:bg-[#F2E9DE] hover:text-[#172B45]")
+                }
+              >
+                {category.label}
+              </button>
+            );
+          })}
+        </nav>
 
-        {!loading && fetchError && (
-          <FadeIn direction="up">
-            <div className="rounded-2xl border border-line bg-white/80 p-5 text-sm text-slate shadow-sm" role="alert">
-              <p className="font-semibold text-bone">{fetchError.title}</p>
+        <div className="mt-5">
+          {loading && <LoadingState />}
+
+          {!loading && fetchError && (
+            <div className="text-sm text-[#596B7A]" role="alert">
+              <p className="font-semibold text-[#172B45]">{fetchError.title}</p>
               <p className="mt-1 leading-relaxed">{fetchError.message}</p>
               {fetchError.canRetry && (
                 <button
                   type="button"
                   onClick={() => setRetryCount((count) => count + 1)}
-                  className="mt-4 rounded-full bg-ember px-4 py-2 font-semibold text-ink transition-transform hover:-translate-y-0.5"
+                  className="mt-3 rounded-md bg-[#172B45] px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-[#24466B] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#D87B36]"
                 >
                   Try again
                 </button>
               )}
             </div>
-          </FadeIn>
-        )}
+          )}
 
-        {!loading && !fetchError && filteredGigs.length === 0 && (
-          <FadeIn direction="up">
-            <p className="text-sm text-slate">
-              No products match that search yet. Try a different term or category.
+          {!loading && !fetchError && filteredGigs.length === 0 && (
+            <p className="py-2 text-sm text-[#596B7A]" role="status">
+              No products match that search yet. Try another term or category.
             </p>
-          </FadeIn>
-        )}
+          )}
 
-        {!loading && !fetchError && filteredGigs.length > 0 && (
-          <div className={gridClass}>
-            {filteredGigs.map((gig, index) => (
-              <FadeIn key={gig.id} delay={index * 75} direction="up" duration={600}>
-                <GigCard gig={gig as CardGig} rating={ratings[gig.id] as CardRating | undefined} />
-              </FadeIn>
-            ))}
-          </div>
-        )}
-      </div>
+          {!loading && !fetchError && filteredGigs.length > 0 && (
+            <div className={gridClass}>
+              {filteredGigs.map((gig) => (
+                <GigCard key={gig.id} gig={gig as CardGig} rating={ratings[gig.id] as CardRating | undefined} />
+              ))}
+            </div>
+          )}
+        </div>
+      </main>
     </div>
   );
 }
