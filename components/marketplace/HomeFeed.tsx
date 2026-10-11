@@ -32,13 +32,12 @@ function ListingSkeleton() {
   );
 }
 
-function CategoryLinks() {
+function CategoryLinks({ duplicate = false }: { duplicate?: boolean }) {
   return CATEGORIES.map((item, index) => (
     <Link
       key={item.label + index}
       href={item.href}
-      tabIndex={index >= CATEGORIES.length ? -1 : undefined}
-      aria-hidden={index >= CATEGORIES.length ? true : undefined}
+      tabIndex={duplicate ? -1 : undefined}
       className="group inline-flex shrink-0 items-center gap-3 px-5 py-3 text-[17px] font-semibold tracking-[-.025em] text-[#263E55] transition-colors hover:text-[#0B3D91] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-[#0B3D91] sm:px-7 sm:text-[19px]"
     >
       <span aria-hidden="true" className="text-[15px] font-bold text-[#E57814] transition-transform group-hover:scale-110 sm:text-base">{item.mark}</span>
@@ -107,7 +106,7 @@ export default function HomeFeed() {
       <div className="marketplace-marquee overflow-hidden" aria-label="Marketplace categories">
         <div className="marketplace-marquee-track flex w-max items-center" role="list">
           <div className="flex items-center" role="listitem"><CategoryLinks /></div>
-          <div className="flex items-center" aria-hidden="true"><CategoryLinks /></div>
+          <div className="flex items-center" aria-hidden="true"><CategoryLinks duplicate /></div>
         </div>
       </div>
 
