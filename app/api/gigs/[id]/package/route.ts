@@ -22,8 +22,13 @@ const MIME_BY_EXTENSION: Record<string, string> = {
   jpeg: "image/jpeg",
   txt: "text/plain",
 };
-const STORAGE_PATH = (gigId: string, versionId: string) =>
-  new RegExp("^" + gigId + "/" + versionId + "/package[.](zip|pdf|png|jpg|jpeg|txt)$");
+function isPackagePath(gigId: string, path: string) {
+  const parts = path.split("/");
+  return parts.length === 3 &&
+    parts[0] === gigId &&
+    uuidPattern.test(parts[1]) &&
+    /^package[.](zip|pdf|png|jpg|jpeg|txt)$/.test(parts[2]);
+}
 
 function safeFilename(input: unknown) {
   if (typeof input !== "string") return null;
@@ -111,7 +116,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     if (typeof body.storagePath !== "string") return privateJson({ error: "Invalid upload path." }, 400);
     const path = body.storagePath;
     const parts = path.split("/");
-    if (!STORAGE_PATH(id, parts[1] || "").test(path))
+    if (!isPackagePath(id, path))
       return privateJson({ error: "Invalid upload path." }, 400);
     const { data: existing, error: lookupError } = await context.db.from("product_versions")
       .select("id").eq("storage_path", path).maybeSingle();
@@ -126,7 +131,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
 
   const path = body.storagePath;
   const parts = path.split("/");
-  if (!STORAGE_PATH(id, parts[1] || "").test(path) || !uuidPattern.test(parts[1] || ""))
+  if (!isPackagePath(id, path))
     return privateJson({ error: "Invalid upload path." }, 400);
 
   const { data: existingVersion, error: existingVersionError } = await context.db.from("product_versions")
@@ -156,8 +161,10 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   }
 
   let inspected;
+  let packageBytes: Buffer;
   try {
-    inspected = await inspectPackage(await uploaded.arrayBuffer(), contentType);
+    packageBytes = Buffer.from(await uploaded.arrayBuffer());
+    inspected = await inspectPackage(packageBytes, contentType);
   } catch (cause) {
     await context.db.storage.from(BUCKET).remove([path]);
     return privateJson({
@@ -194,7 +201,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     p_original_filename: filename,
     p_content_type: contentType,
     p_file_size: inspected.size,
-    p_sha256: createHash("sha256").update(Buffer.from(await uploaded.arrayBuffer())).digest("hex"),
+    p_sha256: createHash("sha256").update(packageBytes).digest("hex"),
     p_validation_report: report,
   });
   if (error || !data) {
