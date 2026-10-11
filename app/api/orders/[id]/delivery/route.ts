@@ -29,7 +29,7 @@ export async function GET(_request: Request, { params }: { params: Promise<{ id:
 }
 
 export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
-  if (!escrowV2Enabled()) return privateJson({ error: 'Validated delivery needs an isolated preview database.' }, 503);
+  const v2 = escrowV2Enabled();
   if (!sameOriginMutation(request)) return privateJson({ error: 'Invalid request origin.' }, 403);
   const { id } = await params;
   if (!uuidPattern.test(id)) return privateJson({ error: 'Invalid order.' }, 400);
@@ -68,11 +68,23 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     let metadata;
     try { metadata = await inspectPackage(await uploaded.arrayBuffer(), file.contentType ?? ''); }
     catch (cause) { return privateJson({ error: cause instanceof Error ? cause.message : 'Invalid package.' }, 400); }
-    const { data, error } = await db.rpc('submit_checked_order_delivery', {
-      p_order_id: id, p_seller_uid: user.id, p_storage_path: path,
-      p_sha256: metadata.sha256, p_size: metadata.size, p_content_type: file.contentType,
-    });
-    return error ? privateJson({ error: error.message }, 409) : privateJson({ deliveryId: data }, 201);
+    const submission = v2
+      ? await db.rpc('submit_checked_order_delivery', {
+          p_order_id: id,
+          p_seller_uid: user.id,
+          p_storage_path: path,
+          p_sha256: metadata.sha256,
+          p_size: metadata.size,
+          p_content_type: file.contentType,
+        })
+      : await db.rpc('submit_order_delivery', {
+          p_order_id: id,
+          p_seller_uid: user.id,
+          p_storage_path: path,
+        });
+    return submission.error
+      ? privateJson({ error: submission.error.message }, 409)
+      : privateJson({ deliveryId: submission.data }, 201);
   }
   return privateJson({ error: 'Unknown action.' }, 400);
 }
