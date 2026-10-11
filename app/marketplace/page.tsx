@@ -1,7 +1,7 @@
 export const dynamic = 'force-dynamic';
 export const metadata = {
   title: 'Marketplace',
-  description: 'Browse digital products and services from verified Nigerian creators.',
+  description: 'Browse digital products from Nigerian creators, compare listing details, and view prices in Naira.',
   alternates: { canonical: '/marketplace' },
 };
 import PageClient from './PageClient';
