@@ -51,13 +51,27 @@ export async function GET(request: Request) {
     .limit(10000);
   if (since) orderQuery = orderQuery.gte("created_at", since);
 
-  const [viewsResult, ordersResult, ratingsResult] = await Promise.all([
+  const [viewsResult, ordersResult, ratingsResult, versionsResult] = await Promise.all([
     viewQuery,
     orderQuery,
     db.rpc("get_gig_ratings"),
+    db.from("product_versions").select("id,gig_id").in("gig_id", products.map((product) => product.id)),
   ]);
-  if (viewsResult.error || ordersResult.error)
+  if (viewsResult.error || ordersResult.error || versionsResult.error)
     return privateJson({ error: "Could not load seller performance data." }, 500);
+  const versionToGig = new Map((versionsResult.data ?? []).map((version) => [version.id, version.gig_id]));
+  const versionIds = [...versionToGig.keys()];
+  let downloadsQuery = versionIds.length
+    ? db.from("product_downloads").select("product_version_id,downloaded_at").in("product_version_id", versionIds).limit(10000)
+    : null;
+  if (downloadsQuery && since) downloadsQuery = downloadsQuery.gte("downloaded_at", since);
+  const downloadsResult = downloadsQuery ? await downloadsQuery : { data: [], error: null };
+  if (downloadsResult.error) return privateJson({ error: "Could not load download activity." }, 500);
+  const downloadsByGig = new Map();
+  for (const download of downloadsResult.data ?? []) {
+    const gigId = versionToGig.get(download.product_version_id);
+    if (gigId) downloadsByGig.set(gigId, (downloadsByGig.get(gigId) ?? 0) + 1);
+  }
 
   const productRows = products.map((product) => {
     const productViews = (viewsResult.data ?? []).filter((row) => row.gig_id === product.id);
@@ -71,6 +85,7 @@ export async function GET(request: Request) {
       title: product.title,
       status: product.status,
       views,
+      downloads: downloadsByGig.get(product.id) ?? 0,
       sales,
       salesValue,
       conversionRate: views ? Math.round((sales / views) * 10000) / 100 : 0,
@@ -87,6 +102,7 @@ export async function GET(request: Request) {
       views: productRows.reduce((sum, item) => sum + item.views, 0),
       sales: productRows.reduce((sum, item) => sum + item.sales, 0),
       salesValue: productRows.reduce((sum, item) => sum + item.salesValue, 0),
+      downloads: productRows.reduce((sum, item) => sum + item.downloads, 0),
     },
   });
 }
