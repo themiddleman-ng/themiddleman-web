@@ -76,7 +76,8 @@ export async function GET(request: Request) {
   const productRows = products.map((product) => {
     const productViews = (viewsResult.data ?? []).filter((row) => row.gig_id === product.id);
     const productOrders = (ordersResult.data ?? []).filter((row) => row.gig_id === product.id);
-    const rating = (ratingsResult.data ?? []).find((row) => row.gig_id === product.id);
+    const ratingRows = (ratingsResult.data ?? []) as Array<{ gig_id: string; average_rating: number | null; review_count: number | null }>;
+    const rating = ratingRows.find((row) => row.gig_id === product.id);
     const salesValue = productOrders.reduce((total, row) => total + Number(row.amount || 0), 0);
     const views = productViews.length;
     const sales = productOrders.length;

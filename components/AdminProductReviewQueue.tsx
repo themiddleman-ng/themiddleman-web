@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 type ProductReview = {
   id: string;
@@ -52,7 +52,7 @@ function bytes(value: number) {
   return value < 1024 * 1024 ? Math.round(value / 1024) + " KB" : (value / (1024 * 1024)).toFixed(1) + " MB";
 }
 
-function ReviewCard({ item, onReviewed }: { item: ProductReview; onReviewed: () => void }) {
+function ReviewCard({ item, onReviewed }: { item: ProductReview; onReviewed: (emailStatus: string, versionId: string) => void }) {
   const [decision, setDecision] = useState("approve");
   const [reasonCategory, setReasonCategory] = useState("product_package");
   const [notes, setNotes] = useState("");
@@ -77,7 +77,7 @@ function ReviewCard({ item, onReviewed }: { item: ProductReview; onReviewed: () 
       });
       const result = await response.json();
       if (!response.ok) throw new Error(result.error || "Could not save this decision.");
-      onReviewed();
+      onReviewed(typeof result.emailStatus === "string" ? result.emailStatus : "failed", item.id);
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : "Could not save this decision.");
     } finally { setBusy(false); }
@@ -130,7 +130,7 @@ function ReviewCard({ item, onReviewed }: { item: ProductReview; onReviewed: () 
         </div>
         <p className="mt-3 break-all font-mono text-[11px] text-slate">SHA-256: {item.sha256}</p>
         <p className="mt-3 text-xs text-amber-200">{report.security?.adminNotice || "Structural checks only. Malware scanner is not configured."}</p>
-        <p className="mt-2 text-xs text-slate">Package status: {item.security_status.replaceAll("_", " ")}. Static checks do not guarantee that a file is safe. Never execute seller code.</p>
+        <p className="mt-2 text-xs text-slate">Package status: {item.security_status.split("_").join(" ")}. Static checks do not guarantee that a file is safe. Never execute seller code.</p>
         {archive ? (
           <div className="mt-4">
             <p className="text-xs font-medium text-bone">
@@ -176,8 +176,11 @@ export default function AdminProductReviewQueue() {
   const [items, setItems] = useState<ProductReview[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [emailNotice, setEmailNotice] = useState<{ versionId: string; message: string; retryable: boolean } | null>(null);
+  const [retryBusy, setRetryBusy] = useState(false);
+  const [retryError, setRetryError] = useState("");
 
-  async function load() {
+  const load = useCallback(async () => {
     setLoading(true);
     setError("");
     try {
@@ -188,13 +191,55 @@ export default function AdminProductReviewQueue() {
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : "Could not load the review queue.");
     } finally { setLoading(false); }
+  }, []);
+
+  useEffect(() => { void load(); }, [load]);
+
+  async function retryReviewEmail() {
+    if (!emailNotice) return;
+    setRetryBusy(true);
+    setRetryError("");
+    try {
+      const response = await fetch("/api/admin/products/" + emailNotice.versionId + "/email", { method: "POST" });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || "The email is still pending.");
+      setEmailNotice({ ...emailNotice, message: "The seller email was sent.", retryable: false });
+    } catch (cause) {
+      setRetryError(cause instanceof Error ? cause.message : "The seller email could not be sent.");
+    } finally { setRetryBusy(false); }
   }
 
-  useEffect(() => { load(); }, []);
+  function onReviewed(emailStatus: string, versionId: string) {
+    if (emailStatus === "sent") setEmailNotice(null);
+    else {
+      setEmailNotice({ versionId, message: "The review decision was saved, but the seller email is still pending.", retryable: true });
+      setRetryError("");
+    }
+    void load();
+  }
 
-  if (loading) return <p className="mt-8 text-sm text-slate">Loading product reviews…</p>;
-  if (error) return <p role="alert" className="mt-8 text-sm text-red-300">{error}</p>;
-  if (!items.length) return <p className="mt-8 text-sm text-slate">No product packages are awaiting review.</p>;
+  const emailNoticeView = emailNotice ? (
+    <div className="mt-5 rounded-xl border border-amber-300/20 bg-amber-200/5 p-4 text-sm text-amber-100">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <p>{emailNotice.message}</p>
+        <div className="flex items-center gap-3">
+          {emailNotice.retryable ? <button type="button" disabled={retryBusy} onClick={retryReviewEmail} className="rounded-full border border-amber-200/30 px-3 py-2 text-xs disabled:opacity-50">{retryBusy ? "Retrying…" : "Retry email"}</button> : null}
+          <button type="button" onClick={() => setEmailNotice(null)} className="text-xs underline underline-offset-2">Dismiss</button>
+        </div>
+      </div>
+      {retryError ? <p role="alert" className="mt-2 text-xs text-red-200">{retryError}</p> : null}
+    </div>
+  ) : null;
 
-  return <div className="mt-8 space-y-5">{items.map((item) => <ReviewCard key={item.id} item={item} onReviewed={load} />)}</div>;
+  if (loading) return <>{emailNoticeView}<p className="mt-8 text-sm text-slate">Loading product reviews…</p></>;
+  if (error) return <>{emailNoticeView}<p role="alert" className="mt-8 text-sm text-red-300">{error}</p></>;
+
+  return (
+    <div className="mt-8 space-y-5">
+      {emailNoticeView}
+      {items.length
+        ? items.map((item) => <ReviewCard key={item.id} item={item} onReviewed={onReviewed} />)
+        : <p className="text-sm text-slate">No product packages are awaiting review.</p>}
+    </div>
+  );
 }

@@ -35,7 +35,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   const day = new Date().toISOString().slice(0, 10);
   const dailyHash = createHmac("sha256", pepper).update(day + ":" + address).digest("hex");
   const idempotencyKey = "product-view:" + id + ":" + day + ":" + dailyHash;
-  const { error } = await db.from("marketplace_events").insert({
+  const { error } = await db.from("marketplace_events").upsert({
     event_type: "product.viewed",
     gig_id: id,
     idempotency_key: idempotencyKey,

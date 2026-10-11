@@ -44,7 +44,8 @@ export async function GET() {
     .from('seller_profiles').select('id').eq('user_id', user.id).maybeSingle();
   if (profileError) return privateJson({ error: 'Could not load your seller profile.' }, 500);
   const deliveryFields = escrowV2Enabled() ? 'deliveries(id,status,review_notes,seller_due_at,dispute_window_closes_at)' : 'deliveries(id,status)';
-  const productVersionFields = productPackagesEnabled() ? ', product_versions!orders_product_version_id_fkey(version_number,review_status,access_status)' : '';
+  const packagesEnabled = productPackagesEnabled();
+  const productVersionFields = packagesEnabled ? ', product_version_id' : '';
   const [buyer, seller] = await Promise.all([
     db.from('orders').select(`id, gig_id, amount, status, created_at, gigs(title), seller_profiles!orders_seller_id_fkey(display_name), ${deliveryFields}${productVersionFields}`)
       .eq('buyer_id', user.id).order('created_at', { ascending: false }),
@@ -54,13 +55,37 @@ export async function GET() {
       : Promise.resolve({ data: [], error: null }),
   ]);
   if (buyer.error || seller.error) return privateJson({ error: 'Could not load orders.' }, 500);
-  const buyerOrders = (buyer.data ?? []).map(row => ({ ...row, role: 'buyer',
-    deliveries: buyerDelivery(row.deliveries),
-    productVersion: one(row.product_versions),
-    product_versions: undefined,
-    counterpart: `Creator ${createHash('sha256').update(row.id).digest('hex').slice(0,8)}`,
-    seller_profiles: undefined }));
-  const sellerOrders = (seller.data ?? []).map(row => ({ ...row, role: 'seller', product_versions: undefined, counterpart: 'Private buyer' }));
+  const buyerRows = buyer.data ?? [];
+  const sellerRows = seller.data ?? [];
+  const versionIds = packagesEnabled
+    ? Array.from(new Set([...buyerRows, ...sellerRows]
+      .map((row) => row.product_version_id)
+      .filter((id): id is string => typeof id === 'string')))
+    : [];
+  const versionsById = new Map<string, { version_number: number; review_status: string; access_status: string }>();
+  if (versionIds.length) {
+    const { data: versions, error: versionsError } = await db
+      .from('product_versions')
+      .select('id,version_number,review_status,access_status')
+      .in('id', versionIds);
+    if (versionsError) return privateJson({ error: 'Could not load product versions.' }, 500);
+    for (const version of versions ?? []) versionsById.set(version.id, version);
+  }
+  const buyerOrders = buyerRows.map(row => {
+    const { product_version_id: versionId, ...order } = row;
+    return {
+      ...order,
+      role: 'buyer',
+      deliveries: buyerDelivery(row.deliveries),
+      productVersion: versionId ? versionsById.get(versionId) ?? null : null,
+      counterpart: `Creator ${createHash('sha256').update(row.id).digest('hex').slice(0,8)}`,
+      seller_profiles: undefined,
+    };
+  });
+  const sellerOrders = sellerRows.map(row => {
+    const { product_version_id: _versionId, ...order } = row;
+    return { ...order, role: 'seller', counterpart: 'Private buyer' };
+  });
   return privateJson({
     orders: [...buyerOrders, ...sellerOrders].sort((a, b) => Date.parse(b.created_at) - Date.parse(a.created_at)),
     checkoutEnabled: gatewayTestEnabled(),

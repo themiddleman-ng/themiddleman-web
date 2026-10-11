@@ -1,10 +1,10 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import { productFileType, uploadProductPackage } from "@/lib/client/product-packages";
 
-function fileSize(bytes) {
+function fileSize(bytes: number) {
   return bytes < 1024 * 1024
     ? Math.max(1, Math.round(bytes / 1024)) + " KB"
     : (bytes / (1024 * 1024)).toFixed(1) + " MB";
@@ -26,7 +26,7 @@ export function ProductPackageField({ file, onChange, required = true }: { file:
   const [dragging, setDragging] = useState(false);
   const [error, setError] = useState("");
 
-  function choose(candidate) {
+  function choose(candidate: File | null) {
     setError("");
     if (!candidate) return;
     try { productFileType(candidate); onChange(candidate); }
@@ -83,13 +83,13 @@ export function ProductPackageField({ file, onChange, required = true }: { file:
 
 export default function ProductPackageManager({ gigId, compact = false, onComplete }: { gigId: string; compact?: boolean; onComplete?: () => void | Promise<void> }) {
   const [versions, setVersions] = useState<Version[]>([]);
-  const [currentVersionId, setCurrentVersionId] = useState(null);
-  const [file, setFile] = useState(null);
+  const [currentVersionId, setCurrentVersionId] = useState<string | null>(null);
+  const [file, setFile] = useState<File | null>(null);
   const [stage, setStage] = useState<Stage>("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  async function load() {
+  const load = useCallback(async () => {
     setLoading(true);
     const response = await fetch("/api/gigs/" + gigId + "/package", { cache: "no-store" });
     const result = await response.json();
@@ -98,9 +98,9 @@ export default function ProductPackageManager({ gigId, compact = false, onComple
     setCurrentVersionId(result.currentVersionId || null);
     setError("");
     setLoading(false);
-  }
+  }, [gigId]);
 
-  useEffect(() => { load(); }, [gigId]);
+  useEffect(() => { void load(); }, [load]);
 
   async function submit() {
     if (!file) { setError("Choose a product file to upload."); return; }
@@ -126,7 +126,7 @@ export default function ProductPackageManager({ gigId, compact = false, onComple
         <div>
           <h3 className="text-sm font-semibold text-bone">Product package</h3>
           <p className="mt-1 text-xs text-slate">
-            {loading ? "Loading package status…" : current ? "Current version v" + current.version_number + " · approved" : latest ? "Latest version v" + latest.version_number + " · " + latest.review_status.replaceAll("_", " ") : "No product package submitted yet"}
+            {loading ? "Loading package status…" : current ? "Current version v" + current.version_number + " · approved" : latest ? "Latest version v" + latest.version_number + " · " + latest.review_status.split("_").join(" ") : "No product package submitted yet"}
           </p>
         </div>
         {current ? <span className="rounded-full bg-emerald-500/10 px-2.5 py-1 text-[11px] text-emerald-300">Live</span> : null}
