@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { DM_Sans, Outfit } from "next/font/google";
 import HomeFAQ from "@/components/HomeFAQ";
 import HomeFeed from "@/components/marketplace/HomeFeed";
@@ -6,6 +7,33 @@ import Logo from "@/components/Logo";
 
 const homepageBody = DM_Sans({ subsets: ["latin"], variable: "--home-body", display: "swap" });
 const homepageDisplay = Outfit({ subsets: ["latin"], variable: "--home-display", display: "swap" });
+
+const featuredProducts = [
+  {
+    id: "ebe2fdfe-6072-4521-873f-796ba38a3ca8",
+    title: "Build a lightweight spreadsheet automation plan",
+    creator: "Samuel Digital Studio",
+    price: 70000,
+    imageSrc: null as string | null,
+    verified: true,
+  },
+  {
+    id: "4c12722a-33fa-4c78-8f17-0081d2a6ce5d",
+    title: "Write launch copy for your digital product",
+    creator: "Samuel Digital Studio",
+    price: 45000,
+    imageSrc: null as string | null,
+    verified: true,
+  },
+  {
+    id: "5061455c-d3f5-4a90-8e8e-a946675fda24",
+    title: "Prepare a 14-day content calendar for your offer",
+    creator: "Samuel Digital Studio",
+    price: 55000,
+    imageSrc: null as string | null,
+    verified: true,
+  },
+];
 
 const steps = [
   { number: "01", title: "Explore the marketplace", body: "Browse ready-made digital products from independent creators." },
@@ -33,18 +61,17 @@ export default function Home() {
 
       <section className="homepage-hero mx-auto grid max-w-7xl items-center gap-10 px-5 pb-12 pt-14 sm:px-8 sm:pb-16 sm:pt-20 lg:grid-cols-[1fr_.9fr] lg:gap-16 lg:pb-20">
         <div className="max-w-2xl">
-          <p className="flex items-center gap-2 text-[13px] font-bold uppercase tracking-[.16em] text-[#0B3D91]"><span className="h-[2px] w-6 bg-[#FF8A00]" />A marketplace for digital products</p>
-          <h1 className="mt-5 font-display text-[clamp(3.35rem,7vw,6.1rem)] font-bold leading-[.98] tracking-[-.065em] text-[#172B45]">
+          <h1 className="font-display text-[clamp(3.35rem,7vw,6.1rem)] font-bold leading-[.98] tracking-[-.045em] text-[#172B45]">
             Find the tools you need. <span className="text-[#0B3D91]">Make them yours.</span>
           </h1>
-          <p className="mt-6 max-w-xl text-[19px] leading-8 text-[#5E6E7F] sm:text-[21px] sm:leading-9">
-            Discover ready-made digital products from Nigerian creators. Check what each product includes, then purchase in naira through Paystack.
+          <p className="mt-6 max-w-xl text-[19px] leading-8 text-[#435465] sm:text-[21px] sm:leading-9">
+            Discover digital products from Nigerian creators. Preview what’s included, then pay in Naira through Paystack. Optional paid customization from the creator is coming to select products.
           </p>
           <div className="mt-8 flex flex-wrap gap-3">
             <Link href="/marketplace" className="inline-flex items-center gap-2 rounded-md bg-[#FF8A00] px-5 py-3 text-[16px] font-bold text-[#182B40] transition hover:bg-[#F47C00]">Explore the marketplace</Link>
             <Link href="/signup" className="inline-flex items-center gap-2 rounded-md px-4 py-3 text-[16px] font-semibold text-[#172B45] transition hover:bg-[#EAF0F3]">Sell a digital product</Link>
           </div>
-          <div className="mt-8 flex flex-wrap gap-x-6 gap-y-2 text-[14px] font-semibold text-[#657587] sm:text-[15px]">
+          <div className="mt-8 flex flex-wrap gap-x-6 gap-y-2 text-[14px] font-semibold text-[#526273] sm:text-[15px]">
             <span><b className="mr-2 text-[#E57814]">✓</b>Independent creators</span>
             <span><b className="mr-2 text-[#E57814]">✓</b>Paystack checkout</span>
           </div>
@@ -52,35 +79,49 @@ export default function Home() {
 
         <div className="relative mx-auto w-full max-w-[560px]">
           <div className="overflow-hidden rounded-[1.25rem] border border-[#DCE2E5] bg-white shadow-[0_18px_60px_-32px_rgba(23,43,69,.28)]">
-            <div className="flex items-center justify-between border-b border-[#E8ECEE] px-5 py-4 sm:px-6">
-              <div className="inline-flex items-center gap-2 text-[14px] font-bold text-[#172B45]">
-                <span aria-hidden="true" className="grid h-7 w-7 place-items-center rounded-md bg-[#0B3D91] font-display text-[15px] text-white">M</span>
-                Marketplace
-              </div>
+            <div className="flex items-center gap-2 border-b border-[#E8ECEE] px-5 py-4 sm:px-6">
+              <span aria-hidden="true" className="grid h-7 w-7 place-items-center rounded-md bg-[#0B3D91] font-display text-[15px] text-white">M</span>
+              <span className="text-[14px] font-bold text-[#172B45]">Marketplace</span>
             </div>
-            <div className="bg-[#F8F6F1] px-5 py-6 sm:px-7 sm:py-7">
-              <p className="text-[11px] font-bold uppercase tracking-[.14em] text-[#0B3D91]">Find a useful starting point</p>
-              <h2 className="mt-2 font-display text-[clamp(1.9rem,4vw,2.7rem)] font-semibold leading-[1.02] tracking-[-.05em] text-[#172B45]">Products built for work.</h2>
-              <p className="mt-3 max-w-md text-[15px] leading-6 text-[#657587]">Browse creator-made digital resources, then check the preview and details on each listing.</p>
-              <div className="mt-5">
-                <p className="mb-3 text-[12px] font-semibold text-[#657587]">Browse by category</p>
-                <div className="flex flex-wrap gap-2">
-                  <Link href="/marketplace?category=development" className="rounded-full bg-white px-3 py-2 text-[12px] font-semibold text-[#263E55] ring-1 ring-[#DCE2E5] transition hover:text-[#0B3D91]">Web & Software</Link>
-                  <Link href="/marketplace?category=design" className="rounded-full bg-white px-3 py-2 text-[12px] font-semibold text-[#263E55] ring-1 ring-[#DCE2E5] transition hover:text-[#0B3D91]">Design</Link>
-                  <Link href="/marketplace?category=writing" className="rounded-full bg-white px-3 py-2 text-[12px] font-semibold text-[#263E55] ring-1 ring-[#DCE2E5] transition hover:text-[#0B3D91]">Writing</Link>
-                  <Link href="/marketplace?category=marketing" className="rounded-full bg-white px-3 py-2 text-[12px] font-semibold text-[#263E55] ring-1 ring-[#DCE2E5] transition hover:text-[#0B3D91]">Marketing</Link>
-                  <Link href="/marketplace?category=ai_assisted" className="rounded-full bg-white px-3 py-2 text-[12px] font-semibold text-[#263E55] ring-1 ring-[#DCE2E5] transition hover:text-[#0B3D91]">AI-assisted</Link>
-                </div>
-              </div>
-              <div className="mt-5 flex items-center gap-3 rounded-lg bg-[#EAF0F3] px-4 py-3">
-                <div>
-                  <p className="text-[13px] font-semibold text-[#263E55]">Previews, files and listing details</p>
-                  <p className="mt-0.5 text-[12px] leading-5 text-[#6C7A87]">Review each listing before you choose.</p>
-                </div>
-              </div>
+            <div className="grid gap-4 px-5 py-5 sm:grid-cols-3 sm:gap-0 sm:px-6 sm:py-6">
+              {featuredProducts.map((product, index) => (
+                <Link
+                  key={product.id}
+                  href={`/gigs/${product.id}`}
+                  className="group flex min-w-0 gap-3 border-t border-[#ECE8E1] pt-4 first:border-t-0 first:pt-0 sm:flex-col sm:border-l sm:border-t-0 sm:pl-4 sm:pt-0 sm:first:border-l-0 sm:first:pl-0"
+                >
+                  <div
+                    data-product-image-slot={index + 1}
+                    className="relative h-20 w-24 shrink-0 overflow-hidden rounded-md bg-[#E9E0D6] sm:aspect-[4/3] sm:h-auto sm:w-full"
+                    aria-label={product.imageSrc ? undefined : `Image placeholder for ${product.title}`}
+                  >
+                    {product.imageSrc ? (
+                      <Image
+                        src={product.imageSrc}
+                        alt={`${product.title} preview`}
+                        fill
+                        sizes="(max-width: 640px) 96px, 180px"
+                        className="object-cover"
+                      />
+                    ) : (
+                      <span className="absolute inset-0 grid place-items-center text-[10px] font-medium text-[#75695E]">Product image</span>
+                    )}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <h2 className="line-clamp-2 text-[13px] font-semibold leading-5 text-[#263E55] transition-colors group-hover:text-[#0B3D91] sm:mt-3 sm:min-h-10">
+                      {product.title}
+                    </h2>
+                    <p className="mt-1 flex items-center gap-1 text-[11px] text-[#667381]">
+                      <span className="truncate">{product.creator}</span>
+                      {product.verified && <span aria-label="Verified seller" title="Verified seller" className="shrink-0 font-bold text-[#0B3D91]">✓</span>}
+                    </p>
+                    <p className="mt-2 text-[14px] font-bold text-[#172B45]">₦{product.price.toLocaleString("en-NG")}</p>
+                  </div>
+                </Link>
+              ))}
             </div>
-            <div className="flex items-center justify-between border-t border-[#E8ECEE] px-5 py-4 text-[12px] font-semibold text-[#526577] sm:px-6">
-              <span>Paystack checkout</span>
+            <div className="border-t border-[#E8ECEE] px-5 py-3 text-[12px] font-semibold text-[#526577] sm:px-6">
+              Pay in Naira · Paystack checkout
             </div>
           </div>
         </div>
