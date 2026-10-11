@@ -140,7 +140,7 @@ export default function HomeFeed() {
         )}
         {!loading && !loadError && visibleGigs.length === 0 && (
           <div className="mt-5 flex flex-col gap-3 py-4 text-[16px] text-[#657585] sm:flex-row sm:items-center sm:justify-between">
-            <p>{imageGigs.length === 0 ? "Listings with cover images will appear here." : "New pictured listings are on the way."}</p>
+            <p>{imageGigs.length === 0 ? "No product previews yet. Browse the marketplace to see current listings." : "New product previews are on the way."}</p>
             <Link href="/marketplace" className="w-fit font-semibold text-[#0B3D91] underline">Browse all listings <span aria-hidden="true">↗</span></Link>
           </div>
         )}
