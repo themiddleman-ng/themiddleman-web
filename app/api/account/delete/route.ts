@@ -136,6 +136,7 @@ export async function POST(request: Request) {
   const emailResult = await mail.send({
     to: accountEmail,
     subject: 'Your Middleman account has been deleted',
+    attachments: [],
     ...message,
   });
 
