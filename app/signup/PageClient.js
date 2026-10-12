@@ -310,7 +310,23 @@ function AuthPageInner() {
                       <button type="button" className="absolute right-3 top-1/2 -translate-y-1/2 rounded-md px-2 py-1 text-xs font-semibold text-[#5d6874] hover:text-[#d7601e]" aria-label={showPassword ? 'Hide password' : 'Show password'} onClick={() => setShowPassword((value) => !value)}>{showPassword ? 'Hide' : 'Show'}</button>
                     </span>
                   </div>
-                  {loginError && <p className="rounded-xl bg-[#fff0e8] px-3.5 py-3 text-sm leading-5 text-[#9d3e16]" role="alert">{loginError}</p>}
+                  {loginError && (
+                    <div
+                      className="flex gap-3.5 rounded-2xl border border-[#f0c6ad] bg-[#fff8f3] p-4 shadow-[0_8px_24px_-20px_rgba(120,53,20,0.45)]"
+                      role="alert"
+                      aria-live="assertive"
+                    >
+                      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#fbe5d7] text-[#a94417]" aria-hidden="true">
+                        <svg viewBox="0 0 20 20" fill="none" className="h-[18px] w-[18px]">
+                          <path d="M10 6.25v4.5m0 3h.01M17 10a7 7 0 1 1-14 0 7 7 0 0 1 14 0Z" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" />
+                        </svg>
+                      </span>
+                      <div className="min-w-0 pt-0.5">
+                        <p className="text-sm font-semibold leading-5 text-[#713516]">We couldn’t sign you in</p>
+                        <p className="mt-1 text-[13px] leading-5 text-[#765b4d]">{loginError}</p>
+                      </div>
+                    </div>
+                  )}
                   <button className="w-full rounded-xl bg-[#de641e] px-5 py-3.5 text-sm font-bold text-white transition hover:bg-[#c95415] focus:outline-none focus:ring-4 focus:ring-[#de641e]/20 disabled:cursor-not-allowed disabled:opacity-50" type="submit" disabled={loginLoading}>
                     {loginLoading ? 'Logging in…' : 'Log in'}
                   </button>
