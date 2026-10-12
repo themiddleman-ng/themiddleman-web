@@ -148,6 +148,13 @@ export default function ProfilePage() {
               </div>
             </div>
             <div className="flex gap-3">
+              <button
+                type="button"
+                onClick={() => window.dispatchEvent(new Event("middleman:onboarding-replay"))}
+                className="rounded-full border border-line px-5 py-3 text-sm font-semibold text-bone transition-colors hover:border-ember/40 hover:text-ember"
+              >
+                Replay the quick tour
+              </button>
               <Link
                 href="/onboarding/role"
                 className="rounded-full border border-line px-5 py-3 text-sm font-semibold text-bone hover:border-slate transition-colors"

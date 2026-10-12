@@ -34,10 +34,20 @@ export default function SellerOnboardingPage() {
   const [selectedTypes, setSelectedTypes] = useState([]);
   const [idDocumentType, setIdDocumentType] = useState('');
   const [idFile, setIdFile] = useState(null);
+  const [uploadedDocumentPath, setUploadedDocumentPath] = useState('');
   const [accepted, setAccepted] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [pageReady, setPageReady] = useState(false);
+  const [banks, setBanks] = useState([]);
+  const [banksLoading, setBanksLoading] = useState(false);
+  const [payoutSetupEnabled, setPayoutSetupEnabled] = useState(false);
+  const [banksError, setBanksError] = useState('');
+  const [bankCode, setBankCode] = useState('');
+  const [accountNumber, setAccountNumber] = useState('');
+  const [verifiedAccountName, setVerifiedAccountName] = useState('');
+  const [payoutConfirmed, setPayoutConfirmed] = useState(false);
+  const [verifyingPayout, setVerifyingPayout] = useState(false);
   const [agreementHighlighted, setAgreementHighlighted] = useState(false);
   const agreementRef = useRef(null);
   const fileInputRef = useRef(null);
@@ -72,6 +82,30 @@ export default function SellerOnboardingPage() {
     guardSellerAccess();
   }, [router]);
 
+  useEffect(() => {
+    if (!pageReady) return;
+    let active = true;
+    setBanksLoading(true);
+    fetch('/api/seller/payout-account', { cache: 'no-store' })
+      .then(async (response) => {
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.error || 'Bank verification is not available.');
+        return result;
+      })
+      .then((result) => {
+        if (active) {
+          const rows = Array.isArray(result.banks) ? result.banks : [];
+          setBanks(rows);
+          setPayoutSetupEnabled(rows.length > 0);
+        }
+      })
+      .catch((loadError) => {
+        if (active) setBanksError(loadError.message || 'Could not load banks.');
+      })
+      .finally(() => { if (active) setBanksLoading(false); });
+    return () => { active = false; };
+  }, [pageReady]);
+
   const toggleType = (type) =>
     setSelectedTypes((current) =>
       current.includes(type) ? current.filter((item) => item !== type) : [...current, type]
@@ -85,9 +119,33 @@ export default function SellerOnboardingPage() {
 
   function clearSelectedDocument() {
     setIdFile(null);
+    setUploadedDocumentPath('');
     setError('');
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
+    }
+  }
+
+  async function verifyPayoutAccount() {
+    setError('');
+    setVerifiedAccountName('');
+    setPayoutConfirmed(false);
+    if (!bankCode) { setError('Choose your bank first.'); return; }
+    if (!/^\d{10}$/.test(accountNumber)) { setError('Enter a 10-digit Nigerian bank account number.'); return; }
+    setVerifyingPayout(true);
+    try {
+      const response = await fetch('/api/seller/payout-account', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'resolve', bankCode, accountNumber }),
+      });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || 'Could not verify this bank account.');
+      setVerifiedAccountName(result.accountName || '');
+    } catch (verifyError) {
+      setError(verifyError.message || 'Could not verify this bank account.');
+    } finally {
+      setVerifyingPayout(false);
     }
   }
 
@@ -96,6 +154,9 @@ export default function SellerOnboardingPage() {
     setError('');
 
     if (!selectedTypes.length) { setError('Choose at least one service category.'); return; }
+    if (payoutSetupEnabled && (!bankCode || !/^\d{10}$/.test(accountNumber))) { setError('Add your Nigerian bank and 10-digit account number.'); return; }
+    if (payoutSetupEnabled && !verifiedAccountName) { setError('Verify your bank account before submitting.'); return; }
+    if (payoutSetupEnabled && !payoutConfirmed) { setError('Confirm that the verified payout account belongs to you.'); return; }
     if (!experience) { setError('Let us know your experience level.'); return; }
     if (!idDocumentType) { setError('Select which document you are uploading.'); return; }
     if (!idFile) { setError('Upload an ID or business document to continue.'); return; }
@@ -113,12 +174,16 @@ export default function SellerOnboardingPage() {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) { setError('You must be logged in to continue.'); setLoading(false); return; }
 
-    const filePath = `${user.id}/${Date.now()}-${idFile.name}`;
-    const { error: uploadError } = await supabase.storage.from('verification-docs').upload(filePath, idFile, {
-      contentType: idFile.type || undefined,
-      upsert: false,
-    });
-    if (uploadError) { setError(getUploadErrorMessage(uploadError)); setLoading(false); return; }
+    let filePath = uploadedDocumentPath;
+    if (!filePath) {
+      filePath = `${user.id}/${Date.now()}-${idFile.name}`;
+      const { error: uploadError } = await supabase.storage.from('verification-docs').upload(filePath, idFile, {
+        contentType: idFile.type || undefined,
+        upsert: false,
+      });
+      if (uploadError) { setError(getUploadErrorMessage(uploadError)); setLoading(false); return; }
+      setUploadedDocumentPath(filePath);
+    }
 
     const { error: insertError } = await supabase.from('seller_profiles').upsert({
       user_id: user.id,
@@ -133,6 +198,20 @@ export default function SellerOnboardingPage() {
       id_document_url: filePath,
     }, { onConflict: 'user_id' });
     if (insertError) { setError(insertError.message); setLoading(false); return; }
+
+    if (payoutSetupEnabled) {
+      const payoutResponse = await fetch('/api/seller/payout-account', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'save', bankCode, accountNumber, verifiedAccountName }),
+      });
+      const payoutResult = await payoutResponse.json();
+      if (!payoutResponse.ok) {
+        setError(payoutResult.error || 'Could not save your payout account. Please try again.');
+        setLoading(false);
+        return;
+      }
+    }
 
     router.push('/onboarding/pending');
   }
@@ -161,7 +240,7 @@ export default function SellerOnboardingPage() {
             <p className="text-xs font-semibold tracking-[.2em] text-ember">SELLER VERIFICATION</p>
             <h1 className="mt-3 font-display text-3xl font-bold text-bone sm:text-5xl">Show buyers what you deliver.</h1>
             <p className="mt-4 max-w-2xl text-sm leading-relaxed text-slate sm:text-base">
-              Complete your creator profile and securely submit one verification document. A member of our team
+              Complete your creator profile, verify your payout account and securely submit one identity document. A member of our team
               reviews every application by hand before you can publish products.
             </p>
             <div className="mt-6 inline-flex items-center gap-2 rounded-full border border-ember/30 bg-ember/10 px-4 py-2 text-xs font-medium text-ember">
@@ -294,7 +373,10 @@ export default function SellerOnboardingPage() {
                     type="file"
                     accept="image/jpeg,image/png,image/webp,application/pdf"
                     ref={fileInputRef}
-                    onChange={(event) => setIdFile(event.target.files?.[0] || null)}
+                    onChange={(event) => {
+                    setIdFile(event.target.files?.[0] || null);
+                    setUploadedDocumentPath('');
+                  }}
                     className="mt-4 block w-full text-xs file:mr-4 file:rounded-full file:border-0 file:bg-ember file:px-4 file:py-2 file:font-semibold file:text-ink"
                   />
                   {idFile && (
@@ -312,6 +394,94 @@ export default function SellerOnboardingPage() {
                     </div>
                   )}
                 </label>
+              </section>
+
+              <section className="border-t border-line pt-6">
+                <p className="text-xs font-bold tracking-[.16em] text-ember">04 · PAYOUT ACCOUNT</p>
+                <p className="mt-3 max-w-2xl text-sm leading-relaxed text-slate">
+                  Add the Nigerian bank account where approved seller payouts should go. Paystack checks the account name before we save it.
+                </p>
+                {payoutSetupEnabled ? (
+                  <>
+                <div className="mt-4 grid gap-4 sm:grid-cols-2">
+                  <label className="text-sm font-medium text-bone">
+                    Bank
+                    <select
+                      value={bankCode}
+                      onChange={(event) => {
+                        setBankCode(event.target.value);
+                        setVerifiedAccountName('');
+                        setPayoutConfirmed(false);
+                      }}
+                      className="auth-input mt-2 text-bone"
+                      required
+                      disabled={banksLoading || banks.length === 0}
+                    >
+                      <option value="">{banksLoading ? 'Loading banks…' : 'Choose your bank'}</option>
+                      {banks.map((bank) => (
+                        <option key={bank.code} value={bank.code}>{bank.name}</option>
+                      ))}
+                    </select>
+                  </label>
+                  <label className="text-sm font-medium text-bone">
+                    Account number
+                    <input
+                      value={accountNumber}
+                      onChange={(event) => {
+                        setAccountNumber(event.target.value.replace(/\D/g, '').slice(0, 10));
+                        setVerifiedAccountName('');
+                        setPayoutConfirmed(false);
+                      }}
+                      className="auth-input mt-2 text-bone"
+                      inputMode="numeric"
+                      autoComplete="off"
+                      maxLength={10}
+                      pattern="[0-9]{10}"
+                      placeholder="10 digits"
+                      required
+                    />
+                  </label>
+                </div>
+                {banksError && (
+                  <p className="mt-3 rounded-xl border border-ember/25 bg-ember/8 px-4 py-3 text-xs leading-relaxed text-slate">
+                    Bank verification is not available in this environment yet. Your account details are not being saved.
+                  </p>
+                )}
+                <div className="mt-4 flex flex-wrap items-center gap-3">
+                  <button
+                    type="button"
+                    onClick={verifyPayoutAccount}
+                    disabled={verifyingPayout || !bankCode || accountNumber.length !== 10 || banks.length === 0}
+                    className="rounded-full border border-ember/40 px-4 py-2 text-sm font-semibold text-ember transition hover:bg-ember/10 disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    {verifyingPayout ? 'Checking account…' : 'Verify account name'}
+                  </button>
+                  {verifiedAccountName && (
+                    <span className="rounded-full bg-emerald-100 px-3 py-2 text-sm font-semibold text-emerald-900">
+                      ✓ {verifiedAccountName}
+                    </span>
+                  )}
+                </div>
+                {verifiedAccountName && (
+                  <label className="mt-4 flex cursor-pointer gap-3 text-xs leading-relaxed text-slate">
+                    <input
+                      checked={payoutConfirmed}
+                      onChange={(event) => setPayoutConfirmed(event.target.checked)}
+                      type="checkbox"
+                      className="mt-0.5 h-4 w-4 rounded border-line text-ember focus:ring-ember"
+                    />
+                    <span>I recognise this name and confirm this is the account I want payouts sent to.</span>
+                  </label>
+                )}
+                <p className="mt-4 text-xs leading-relaxed text-slate">
+                  Verification uses Paystack’s bank lookup. The full account number is sent to Paystack to create a payout recipient and is not stored in The Middleman’s database.
+                </p>
+                  </>
+                ) : (
+                  <p className="mt-4 rounded-xl border border-line bg-ink/20 px-4 py-3 text-xs leading-relaxed text-slate">
+                    Bank verification is not enabled in this environment yet. You can finish seller setup; account details will be collected before payouts are available.
+                  </p>
+                )}
               </section>
             </div>
 

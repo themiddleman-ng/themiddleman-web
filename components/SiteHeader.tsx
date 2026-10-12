@@ -86,10 +86,10 @@ export default function SiteHeader({ isSeller = false, compact = false }: { isSe
         {/* Desktop nav — md and above */}
         <div className="hidden md:flex items-center gap-2 text-sm text-slate">
           <nav className="hidden md:flex items-center gap-2">
-            <Link href="/marketplace" className={desktopLink}>Marketplace</Link>
-            <Link href="/orders" className={desktopLink}>My Orders</Link>
+            <Link href="/marketplace" data-onboarding-target="marketplace" className={desktopLink}>Marketplace</Link>
+            <Link href="/orders" data-onboarding-target="orders" className={desktopLink}>My Orders</Link>
             {isSeller && <Link href="/gigs/mine" className={desktopLink}>My Products</Link>}
-            <Link href="/messages" className={desktopLink}>
+            <Link href="/messages" data-onboarding-target="messages" className={desktopLink}>
               <span className="inline-flex items-center gap-2">
                 Messages
                 {unreadBadge}
@@ -97,7 +97,7 @@ export default function SiteHeader({ isSeller = false, compact = false }: { isSe
             </Link>
             <Link href="/notifications" className={desktopLink}><span className="inline-flex items-center gap-2">Notifications{notificationBadge}</span></Link>
             <Link href="/payments" className={desktopLink}>Payments</Link>
-            <Link href="/profile" className={desktopLink}>Profile</Link>
+            <Link href="/profile" data-onboarding-target="profile" className={desktopLink}>Profile</Link>
           </nav>
           <button
             onClick={handleSignOut}
@@ -109,7 +109,7 @@ export default function SiteHeader({ isSeller = false, compact = false }: { isSe
 
         {/* Mobile actions — below md */}
         <div className="flex items-center gap-1 md:hidden">
-          <Link href="/messages" className="rounded-full px-3 py-2 text-sm text-slate transition-colors hover:bg-ember/8 hover:text-bone">
+          <Link href="/messages" data-onboarding-target="messages" className="rounded-full px-3 py-2 text-sm text-slate transition-colors hover:bg-ember/8 hover:text-bone">
             <span className="inline-flex items-center gap-2">
               Messages
               {unreadBadge}
@@ -123,6 +123,7 @@ export default function SiteHeader({ isSeller = false, compact = false }: { isSe
             onClick={() => setMenuOpen((open) => !open)}
             aria-label={menuOpen ? 'Close menu' : 'Open menu'}
             aria-expanded={menuOpen}
+            data-onboarding-target="menu"
             className="flex h-9 w-9 items-center justify-center rounded-full border border-line bg-white/80 text-slate shadow-sm transition-colors hover:text-bone"
           >
             {menuOpen ? (
@@ -142,12 +143,12 @@ export default function SiteHeader({ isSeller = false, compact = false }: { isSe
       {menuOpen && (
         <div className="border-t border-line bg-white/95 backdrop-blur-xl md:hidden">
           <nav className="mx-auto flex max-w-7xl flex-col px-4 py-3 sm:px-6">
-            <Link href="/marketplace" onClick={() => setMenuOpen(false)} className={mobileLink}>Marketplace</Link>
-            <Link href="/orders" onClick={() => setMenuOpen(false)} className={mobileLink}>My Orders</Link>
+            <Link href="/marketplace" data-onboarding-target="marketplace" onClick={() => setMenuOpen(false)} className={mobileLink}>Marketplace</Link>
+            <Link href="/orders" data-onboarding-target="orders" onClick={() => setMenuOpen(false)} className={mobileLink}>My Orders</Link>
             {isSeller && <Link href="/gigs/mine" onClick={() => setMenuOpen(false)} className={mobileLink}>My Products</Link>}
             <Link href="/notifications" onClick={() => setMenuOpen(false)} className={mobileLink}>Notifications {notificationBadge}</Link>
             <Link href="/payments" onClick={() => setMenuOpen(false)} className={mobileLink}>Payments</Link>
-            <Link href="/profile" onClick={() => setMenuOpen(false)} className={mobileLink}>Profile</Link>
+            <Link href="/profile" data-onboarding-target="profile" onClick={() => setMenuOpen(false)} className={mobileLink}>Profile</Link>
             <button
               onClick={handleSignOut}
               className="mt-2 rounded-full border border-line bg-white px-4 py-2 text-xs font-semibold text-slate shadow-sm transition-colors hover:border-ember/40 hover:text-ember"

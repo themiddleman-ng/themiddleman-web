@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import MobileTabBar from "@/components/layout/MobileTabBar";
 import CookieNotice from "@/components/legal/CookieNotice";
+import FirstRunExperience from "@/components/onboarding/FirstRunExperience";
 
 const SITE_URL = "https://themiddleman.com.ng";
 const siteSchema = {
@@ -86,6 +87,7 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{ __html: JSON.stringify(siteSchema) }}
         />
         {children}
+        <FirstRunExperience />
         <CookieNotice />
         <MobileTabBar />
       </body>
