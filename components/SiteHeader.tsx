@@ -93,7 +93,7 @@ export default function SiteHeader({ isSeller: sellerHint = false, compact = fal
       window.removeEventListener('notifications:updated', refresh);
       window.removeEventListener('focus', refresh);
     };
-  }, []);
+  }, [sellerHint]);
 
   useEffect(() => setMenuOpen(false), [pathname]);
 
