@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { usePathname } from "next/navigation";
 import { supabase } from "@/lib/supabaseClient";
 
 type Stage = "hidden" | "choice" | "tour";
@@ -15,6 +16,12 @@ type PreferenceRow = {
   walkthrough_status: "in_progress" | "completed" | "skipped";
   current_step: number;
 };
+
+const TOUR_READY_ROUTES = ["/marketplace", "/browse", "/gigs", "/orders", "/payments", "/messages", "/profile", "/notifications", "/settings"];
+
+function isTourReadyRoute(pathname: string) {
+  return TOUR_READY_ROUTES.some((route) => pathname === route || pathname.startsWith(`${route}/`));
+}
 
 const TOUR_STEPS: TourStep[] = [
   {
@@ -60,6 +67,7 @@ function saveTargetStyle(element: HTMLElement) {
 }
 
 export default function FirstRunExperience() {
+  const pathname = usePathname();
   const [stage, setStage] = useState<Stage>("hidden");
   const [userId, setUserId] = useState<string | null>(null);
   const [tourIndex, setTourIndex] = useState(0);
@@ -85,6 +93,10 @@ export default function FirstRunExperience() {
 
   const loadPreference = useCallback(async (id: string) => {
     const show = (row: PreferenceRow | null) => {
+      if (!isTourReadyRoute(pathname)) {
+        setStage("hidden");
+        return;
+      }
       if (!row) {
         setTourIndex(0);
         setStage("choice");
@@ -95,6 +107,12 @@ export default function FirstRunExperience() {
         setStage("hidden");
       }
     };
+    try {
+      if (localStorage.getItem("middleman-onboarding-reset:" + id) === "yes") {
+        show(null);
+        return;
+      }
+    } catch { /* Continue with the saved database preference. */ }
     const { data, error } = await supabase
       .from("user_onboarding_preferences")
       .select("experience_choice,walkthrough_status,current_step")
@@ -110,7 +128,7 @@ export default function FirstRunExperience() {
       return;
     }
     show(data as PreferenceRow | null);
-  }, []);
+  }, [pathname]);
 
   useEffect(() => {
     let active = true;
@@ -137,7 +155,7 @@ export default function FirstRunExperience() {
       active = false;
       authListener.subscription.unsubscribe();
     };
-  }, [loadPreference]);
+  }, [loadPreference, pathname]);
 
   useEffect(() => {
     if (stage !== "tour") {
@@ -198,6 +216,7 @@ export default function FirstRunExperience() {
     let cached = false;
     try {
       localStorage.setItem("middleman-onboarding:" + userId, JSON.stringify(preference));
+      localStorage.removeItem("middleman-onboarding-reset:" + userId);
       cached = true;
     } catch { /* The database remains the primary store. */ }
     setSaving(false);
@@ -233,6 +252,14 @@ export default function FirstRunExperience() {
   }
 
   useEffect(() => {
+    const resetWelcome = () => {
+      if (!userId) return;
+      try { localStorage.setItem("middleman-onboarding-reset:" + userId, "yes"); }
+      catch { /* The current welcome choice can still be replayed this visit. */ }
+      setTourIndex(0);
+      setSaveError("");
+      setStage("choice");
+    };
     const replay = async () => {
       if (!userId) return;
       if (await persist("new", "in_progress", 0)) {
@@ -240,8 +267,12 @@ export default function FirstRunExperience() {
         setStage("tour");
       }
     };
+    window.addEventListener("middleman:onboarding-reset", resetWelcome);
     window.addEventListener("middleman:onboarding-replay", replay);
-    return () => window.removeEventListener("middleman:onboarding-replay", replay);
+    return () => {
+      window.removeEventListener("middleman:onboarding-reset", resetWelcome);
+      window.removeEventListener("middleman:onboarding-replay", replay);
+    };
   }, [userId, persist]);
 
   if (stage === "hidden") return null;
@@ -348,3 +379,4 @@ export default function FirstRunExperience() {
     </>
   );
 }
+

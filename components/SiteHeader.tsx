@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
+import Image from 'next/image';
 import { supabase } from '@/lib/supabaseClient';
 import Logo from '@/components/Logo';
 
@@ -24,10 +25,11 @@ function initials(user: HeaderUser | null) {
   return parts[0]?.slice(0, 2).toUpperCase() ?? 'MM';
 }
 
-export default function SiteHeader({ isSeller = false, compact = false }: { isSeller?: boolean; compact?: boolean }) {
+export default function SiteHeader({ isSeller = false, compact = false, hideOnMobile = false }: { isSeller?: boolean; compact?: boolean; hideOnMobile?: boolean }) {
   const router = useRouter();
   const pathname = usePathname();
   const [user, setUser] = useState<HeaderUser | null>(null);
+  const [avatarUrl, setAvatarUrl] = useState('');
   const [authResolved, setAuthResolved] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
   const [notificationCount, setNotificationCount] = useState(0);
@@ -68,7 +70,8 @@ export default function SiteHeader({ isSeller = false, compact = false }: { isSe
     window.addEventListener('notifications:updated', refresh);
     window.addEventListener('focus', refresh);
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser((session?.user as HeaderUser | null) ?? null);
+      const nextUser = (session?.user as HeaderUser | null) ?? null;
+      setUser(nextUser);
       setAuthResolved(true);
       if (!session?.user) {
         setUnreadCount(0);
@@ -86,6 +89,19 @@ export default function SiteHeader({ isSeller = false, compact = false }: { isSe
   }, []);
 
   useEffect(() => setMenuOpen(false), [pathname]);
+
+  useEffect(() => {
+    let active = true;
+    const path = user?.user_metadata?.profile_avatar_path;
+    if (typeof path !== 'string' || !path) {
+      setAvatarUrl('');
+      return () => { active = false; };
+    }
+    void supabase.storage.from('profile-avatars').createSignedUrl(path, 3600).then(({ data }) => {
+      if (active) setAvatarUrl(data?.signedUrl ?? '');
+    });
+    return () => { active = false; };
+  }, [user?.id, user?.user_metadata?.profile_avatar_path]);
 
   async function handleSignOut() {
     await supabase.auth.signOut();
@@ -113,7 +129,7 @@ export default function SiteHeader({ isSeller = false, compact = false }: { isSe
   ) : null;
 
   return (
-    <header className={`sticky top-0 z-30 border-b border-[#e9e2d9] backdrop-blur-xl ${compact ? 'bg-[#faf7f0]/95' : 'bg-[#fbf8f2]/95'}`}>
+    <header className={`${hideOnMobile ? 'hidden md:block ' : ''}sticky top-0 z-30 border-b border-[#e9e2d9] backdrop-blur-xl ${compact ? 'bg-[#faf7f0]/95' : 'bg-[#fbf8f2]/95'}`}>
       <div className="relative mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-2.5 sm:px-6">
         <Link href="/marketplace" aria-label="The Middleman home" className="shrink-0">
           <Logo className="text-lg" markClass="h-7 w-7" variant="horizontal" textClass="text-sm" />
@@ -142,7 +158,11 @@ export default function SiteHeader({ isSeller = false, compact = false }: { isSe
             className="relative grid h-10 w-10 place-items-center rounded-full border border-[#e5ddd3] bg-white text-[#23384d] shadow-sm transition hover:border-[#dc6b2e]/60 hover:bg-[#fffaf3] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#dc6b2e]/15"
           >
             {user ? (
-              <span className="text-xs font-bold">{initials(user)}</span>
+              avatarUrl ? (
+                <Image src={avatarUrl} alt="" width={40} height={40} unoptimized className="h-10 w-10 rounded-full object-cover" />
+              ) : (
+                <span className="text-xs font-bold">{initials(user)}</span>
+              )
             ) : (
               <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" aria-hidden="true">
                 <circle cx="12" cy="8" r="3.5" /><path d="M4.5 20c.8-3.4 3.3-5.2 7.5-5.2s6.7 1.8 7.5 5.2" />
@@ -161,12 +181,12 @@ export default function SiteHeader({ isSeller = false, compact = false }: { isSe
                     {user.email && <p className="mt-0.5 truncate text-xs text-[#6d7883]">{user.email}</p>}
                   </div>
                   <nav aria-label="Account navigation" className="space-y-0.5">
-                    <Link role="menuitem" href="/profile" data-onboarding-target="profile" className={mobileLink}>Profile</Link>
+                    <Link role="menuitem" href="/profile" data-onboarding-target="profile" className="hidden min-h-11 items-center justify-between rounded-xl px-3 py-2.5 text-sm text-[#273544] transition-colors hover:bg-[#f5efe7] md:flex">Profile</Link>
                     <Link role="menuitem" href="/orders" data-onboarding-target="orders" className={mobileLink}>My orders</Link>
                     {isSeller && <Link role="menuitem" href="/gigs/mine" className={mobileLink}>My products</Link>}
-                    <Link role="menuitem" href="/messages" data-onboarding-target="messages" className={mobileLink}><span>Messages</span>{unreadBadge}</Link>
                     <Link role="menuitem" href="/notifications" className={mobileLink}><span>Notifications</span>{notificationBadge}</Link>
                     <Link role="menuitem" href="/payments" className={mobileLink}>Payments</Link>
+                    <Link role="menuitem" href="/settings" className={mobileLink}>Settings</Link>
                   </nav>
                   <div className="my-2 border-t border-[#eee7de] pt-2">
                     <button type="button" role="menuitem" onClick={openCookieSettings} className={`${mobileLink} w-full text-left`}>Cookie settings</button>

@@ -13,6 +13,7 @@ const APP_PREFIXES = [
   "/payments",
   "/messages",
   "/profile",
+  "/settings",
 ];
 
 function IconHome() {
@@ -136,11 +137,14 @@ export default function MobileTabBar() {
                   </div>
                 );
               }
-              const active = tab.href === "/" ? pathname === "/" : pathname.startsWith(tab.href);
+              const active = pathname.startsWith("/settings")
+                ? tab.href === "/profile"
+                : tab.href === "/" ? pathname === "/" : pathname.startsWith(tab.href);
               return (
                 <Link
                   key={tab.href}
                   href={tab.href}
+                  data-onboarding-target={tab.href === "/profile" || tab.href === "/messages" ? tab.href.slice(1) : undefined}
                   aria-current={active ? "page" : undefined}
                   className={`flex h-16 flex-col items-center justify-center gap-1 text-[10px] font-semibold tracking-wide transition-colors ${
                     active ? "text-[#c65316]" : "text-[#71808d]"

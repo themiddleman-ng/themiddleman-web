@@ -70,7 +70,7 @@ function formatTime(iso: string): string {
 
 function Avatar({ initials }: { initials: string }) {
   return (
-    <div className="w-9 h-9 shrink-0 rounded-full bg-white border border-line flex items-center justify-center font-display font-bold text-xs text-bone shadow-sm">
+    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#e9e1d6] font-display text-xs font-bold text-[#29435a]">
       {initials}
     </div>
   );
@@ -87,35 +87,36 @@ function ConversationRowItem({
 }) {
   return (
     <button
+      type="button"
       onClick={onClick}
-      className={
-        "w-full text-left px-4 py-3.5 flex gap-3 border-l-2 transition-colors " +
-        (active
-          ? "border-ember bg-ember/8"
-          : "border-transparent hover:bg-white/80")
-      }
+      aria-current={active ? "true" : undefined}
+      className={`flex w-full gap-3 border-b border-[#f0ece5] px-4 py-4 text-left transition-colors ${active ? "bg-[#f7f0e7]" : "hover:bg-[#faf8f4]"}`}
     >
       <Avatar initials={conversation.counterpartInitials} />
       <div className="min-w-0 flex-1">
-        <p className="text-[13px] font-medium text-bone truncate">
+        <p className="truncate text-sm font-semibold text-[#25384a]">
           {conversation.counterpartName}
         </p>
-        <p className="text-[11px] text-slate">
+        <p className="mt-1 truncate text-xs text-[#75808a]">
           {conversation.gigTitle ?? "General inquiry"}
         </p>
       </div>
+      {active && <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-[#de641e]" aria-label="Selected conversation" />}
     </button>
   );
 }
 
 function MessageEntry({ isYou, senderName, message }: { isYou: boolean; senderName: string; message: MessageRow }) {
   return (
-    <div className={"max-w-[75%] " + (isYou ? "ml-auto text-right" : "")}>
-      <div className={"flex items-baseline gap-2 mb-1 " + (isYou ? "justify-end" : "")}>
-        <span className="text-[12px] font-medium text-bone">{senderName}</span>
-        <span className="text-[11px] text-slate">{formatTime(message.created_at)}</span>
+    <div className={`flex w-full items-end gap-2.5 ${isYou ? "justify-end" : "justify-start"}`}>
+      {!isYou && <Avatar initials={initialsFrom(senderName)} />}
+      <div className={`max-w-[82%] sm:max-w-[72%] ${isYou ? "items-end" : "items-start"}`}>
+        <p className={`mb-1 px-1 text-[11px] font-medium ${isYou ? "text-right text-[#78838d]" : "text-[#657482]"}`}>{senderName}</p>
+        <div className={`whitespace-pre-wrap break-words rounded-2xl px-3.5 py-2.5 text-sm leading-6 shadow-[0_2px_7px_rgba(30,40,50,.04)] ${isYou ? "rounded-br-md bg-[#1c3851] text-white" : "rounded-bl-md bg-[#f1efeb] text-[#273849]"}`}>
+          {message.body}
+        </div>
+        <time className={`mt-1 block px-1 text-[10px] text-[#89929a] ${isYou ? "text-right" : ""}`} dateTime={message.created_at}>{formatTime(message.created_at)}</time>
       </div>
-      <p className="text-[13px] text-bone leading-relaxed">{message.body}</p>
     </div>
   );
 }
@@ -294,72 +295,90 @@ function MessagesPageInner() {
     if (refreshed.ok) setMessages((await refreshed.json()).messages);
   }
 
-  function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
-    if (e.key === "Enter") {
+  function handleKeyDown(e: React.KeyboardEvent<HTMLTextAreaElement>) {
+    if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       handleSend();
     }
   }
 
   return (
-    <div className="flex min-h-[100svh] flex-col bg-[radial-gradient(circle_at_top_right,_rgba(242,100,25,.08),_transparent_35%),linear-gradient(180deg,#fbf8f3,#f7f3ec)] text-bone">
-      <SiteHeader />
-      <div className="mx-auto flex min-h-0 w-full max-w-5xl flex-1 flex-col md:px-6">
-
-        <div className="border-b border-line px-4 py-4 sm:px-6 sm:py-5">
+    <main className="flex min-h-[calc(100svh-4rem)] flex-col bg-[radial-gradient(ellipse_at_88%_0%,rgba(227,127,72,.12),transparent_28%),#f7f3ec] text-[#273849]">
+      <SiteHeader hideOnMobile />
+      <div className="mx-auto flex min-h-0 w-full max-w-6xl flex-1 flex-col px-0 pb-4 md:px-6">
+        <div className="flex items-end justify-between gap-3 px-4 py-4 sm:px-6 md:px-0 md:py-6">
           <div>
-            <h1 className="font-display text-2xl font-semibold tracking-tight text-[#23384d] sm:text-[1.75rem]">Messages</h1>
-            <p className="mt-1 text-[13px] text-slate">Conversations about your orders and products</p>
+            <p className="text-sm font-medium text-[#a95320]">Your conversations</p>
+            <h1 className="mt-1 font-display text-2xl font-semibold tracking-[-.03em] text-[#1b3044] sm:text-3xl">Messages</h1>
+            <p className="mt-1 text-sm text-[#74808a]">Keep product conversations in one place.</p>
           </div>
+          {!loading && !loadError && conversations.length > 0 && (
+            <span className="mb-1 rounded-full bg-white/80 px-3 py-1.5 text-xs font-medium text-[#62717e]">
+              {conversations.length} {conversations.length === 1 ? "conversation" : "conversations"}
+            </span>
+          )}
         </div>
 
         {!noticeDismissed && (
-          <div className="flex items-start gap-3 border-b border-line bg-white/75 px-4 py-3 backdrop-blur-sm sm:px-6">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6F6A63" strokeWidth="2" className="mt-0.5 shrink-0">
+          <div className="mx-3 mb-3 flex items-start gap-3 rounded-2xl border border-[#ecd9c8] bg-[#fffaf4] px-4 py-3 text-[#5e5a54] sm:mx-6 md:mx-0">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#b5632b" strokeWidth="1.8" className="mt-0.5 shrink-0" aria-hidden="true">
               <path d="M12 9v4m0 4h.01M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z" />
             </svg>
-            <p className="text-[12px] text-slate leading-relaxed flex-1">
-              For your safety and to resolve disputes fairly, The Middleman may review conversations tied to an order. Please keep messages related to the product — links, phone numbers, and email addresses can&apos;t be sent here.
+            <p className="flex-1 text-xs leading-5">
+              Keep messages about the product. Links, phone numbers and email addresses are blocked to help protect order conversations.
             </p>
-            <button
-              onClick={() => setNoticeDismissed(true)}
-              aria-label="Dismiss notice"
-              className="text-slate hover:text-bone text-[13px] shrink-0"
-            >
-              ✕
+            <button type="button" onClick={() => setNoticeDismissed(true)} aria-label="Dismiss safety note" className="-mr-1 grid h-7 w-7 shrink-0 place-items-center rounded-full text-sm text-[#75808a] transition hover:bg-[#f5e9dc] hover:text-[#26384a]">
+              ×
             </button>
           </div>
         )}
 
         {loading && (
-          <div className="flex-1 flex items-center justify-center">
-            <p className="text-sm text-slate">Loading conversations…</p>
+          <div className="mx-3 flex-1 overflow-hidden rounded-[24px] bg-[#fffdf9] p-4 shadow-[0_12px_40px_rgba(48,40,31,.05)] sm:mx-6 md:mx-0 md:p-6" aria-label="Loading conversations">
+            <div className="flex animate-pulse gap-4">
+              <div className="h-11 w-11 rounded-full bg-[#eee8df]" />
+              <div className="flex-1 space-y-2 pt-1"><div className="h-3 w-1/3 rounded bg-[#eee8df]" /><div className="h-3 w-2/3 rounded bg-[#f3eee7]" /></div>
+            </div>
+            <div className="mt-6 h-px bg-[#f0ece5]" />
+            <div className="mt-6 h-14 w-3/5 animate-pulse rounded-2xl bg-[#f3eee7]" />
+            <div className="ml-auto mt-5 h-14 w-1/2 animate-pulse rounded-2xl bg-[#e9edf0]" />
           </div>
         )}
 
         {!loading && loadError && (
-          <div className="flex-1 flex items-center justify-center px-6">
-            <p className="text-sm text-slate text-center max-w-md">
-              {loadError}
-              {loadError.includes("relation") && (
-                <> This usually means <code className="text-[#F26419]">supabase/messages_schema.sql</code> hasn&apos;t been run against your project yet.</>
-              )}
-            </p>
+          <div className="mx-3 flex flex-1 items-center justify-center rounded-[24px] bg-[#fffdf9] px-6 py-12 text-center shadow-[0_12px_40px_rgba(48,40,31,.05)] sm:mx-6 md:mx-0">
+            <div className="max-w-md">
+              <p className="font-display text-xl font-semibold text-[#26384a]">We couldn’t load your messages</p>
+              <p className="mt-2 text-sm leading-6 text-[#6a7783]">{loadError}
+                {loadError.includes("relation") && (
+                  <> This may mean <code className="rounded bg-[#f3eee7] px-1.5 py-0.5 text-xs text-[#a95320]">supabase/messages_schema.sql</code> hasn’t been run against your project yet.</>
+                )}
+              </p>
+              {loadError.includes("Sign in") && <Link href="/signup?mode=signin" className="mt-4 inline-flex min-h-10 items-center rounded-full bg-[#de641e] px-4 text-sm font-semibold text-white">Log in</Link>}
+            </div>
           </div>
         )}
 
         {!loading && !loadError && conversations.length === 0 && (
-          <div className="flex-1 flex items-center justify-center px-6">
-            <p className="text-sm text-slate text-center max-w-sm">
-              No conversations yet. Once you order a product or a buyer reaches out about one of yours, it&apos;ll show up here.
-            </p>
+          <div className="mx-3 flex flex-1 items-center justify-center rounded-[24px] bg-[#fffdf9] px-6 py-12 text-center shadow-[0_12px_40px_rgba(48,40,31,.05)] sm:mx-6 md:mx-0">
+            <div className="max-w-sm">
+              <div className="mx-auto grid h-12 w-12 place-items-center rounded-full bg-[#f2e8dc] text-[#a95320]" aria-hidden="true">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d="M21 11.5a8.5 8.5 0 0 1-8.5 8.5H3l1.8-3.6A8.5 8.5 0 1 1 21 11.5Z" /></svg>
+              </div>
+              <h2 className="mt-4 font-display text-xl font-semibold text-[#26384a]">No conversations yet</h2>
+              <p className="mt-2 text-sm leading-6 text-[#6a7783]">Messages about a paid product order will appear here, so you and the creator can keep everything together.</p>
+              <Link href="/marketplace" className="mt-4 inline-flex min-h-10 items-center rounded-full px-4 text-sm font-semibold text-[#a95320] transition hover:bg-[#f7f1e9]">Explore products</Link>
+            </div>
           </div>
         )}
 
         {!loading && !loadError && conversations.length > 0 && activeConversation && (
-          <div className="flex flex-1 min-h-0 overflow-hidden">
-
-            <div className={`${mobileThreadOpen ? "hidden" : "flex"} w-full shrink-0 flex-col overflow-y-auto bg-white/60 md:flex md:w-[300px] md:border-r md:border-line`}>
+          <div className="mx-3 flex min-h-[31rem] flex-1 overflow-hidden rounded-[24px] bg-[#fffdf9] shadow-[0_12px_40px_rgba(48,40,31,.07)] sm:mx-6 md:mx-0">
+            <section className={`${mobileThreadOpen ? "hidden" : "flex"} w-full shrink-0 flex-col overflow-y-auto md:flex md:w-[320px] md:border-r md:border-[#eee7de]`} aria-label="Conversation list">
+              <div className="flex items-center justify-between border-b border-[#eee7de] px-4 py-3.5">
+                <h2 className="text-sm font-semibold text-[#26384a]">Inbox</h2>
+                <span className="text-xs text-[#89929a]">{conversations.length}</span>
+              </div>
               {conversations.map((conversation) => (
                 <ConversationRowItem
                   key={conversation.id}
@@ -373,79 +392,75 @@ function MessagesPageInner() {
                   }}
                 />
               ))}
-            </div>
+            </section>
 
-            <div className={`${mobileThreadOpen ? "flex" : "hidden"} min-w-0 flex-1 flex-col md:flex`}>
-              <div className="flex items-center gap-3 border-b border-line bg-white/70 px-4 py-3 sm:px-6 sm:py-4">
-                <button type="button" onClick={() => setMobileThreadOpen(false)} aria-label="Back to conversations" className="grid h-9 w-9 shrink-0 place-items-center rounded-full text-[#516170] hover:bg-[#f4eee6] md:hidden">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6" /><path d="M9 12h12" /></svg>
+            <section className={`${mobileThreadOpen ? "flex" : "hidden"} min-w-0 flex-1 flex-col md:flex`} aria-label="Active conversation">
+              <div className="flex min-h-[4.5rem] items-center gap-3 border-b border-[#eee7de] px-3 py-3 sm:px-5">
+                <button type="button" onClick={() => setMobileThreadOpen(false)} aria-label="Back to conversations" className="grid h-9 w-9 shrink-0 place-items-center rounded-full text-[#516170] transition hover:bg-[#f4eee6] md:hidden">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6" /></svg>
                 </button>
                 <Avatar initials={activeConversation.counterpartInitials} />
-                <div className="min-w-0">
-                  <p className="text-[13px] font-medium text-bone">
-                    {activeConversation.counterpartName}
-                  </p>
-                  <p className="truncate text-[11px] text-slate">
-                    Re: {activeConversation.gigTitle ?? "General inquiry"}
-                  </p>
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-sm font-semibold text-[#24384b]">{activeConversation.counterpartName}</p>
+                  <p className="truncate text-xs text-[#79838c]">{activeConversation.gigTitle ?? "Product conversation"}</p>
                 </div>
+                <span className="hidden rounded-full bg-[#f5f0e8] px-3 py-1.5 text-[11px] font-medium text-[#61717d] sm:inline-flex">Order conversation</span>
               </div>
 
-              <div ref={scrollRef} className="flex-1 min-h-0 overflow-y-auto bg-[linear-gradient(180deg,rgba(255,255,255,.40),rgba(255,255,255,.70))] px-4 py-5 sm:px-6 sm:py-6">
-                <div className="flex min-h-full flex-col gap-5">
-                {messages.map((message) => (
-                  <MessageEntry
-                    key={message.id}
-                    message={message}
-                    isYou={message.mine}
-                    senderName={message.mine ? "You" : activeConversation.counterpartName}
-                  />
-                ))}
-                {otherTyping && (
-                  <div className="flex items-center gap-2">
-                    <Avatar initials={activeConversation.counterpartInitials} />
-                    <div className="flex items-center gap-1 rounded-full bg-white border border-line px-3 py-2 shadow-sm">
-                      <span className="typing-dot" />
-                      <span className="typing-dot" />
-                      <span className="typing-dot" />
+              <div ref={scrollRef} className="min-h-0 flex-1 overflow-y-auto bg-[linear-gradient(180deg,#fffdf9,#fbfaf7)] px-3 py-5 sm:px-5 sm:py-6">
+                <div className="flex min-h-full flex-col justify-end gap-4">
+                  {messages.length === 0 && (
+                    <p className="my-auto text-center text-sm text-[#87919a]">Your conversation starts here.</p>
+                  )}
+                  {messages.map((message) => (
+                    <MessageEntry
+                      key={message.id}
+                      message={message}
+                      isYou={message.mine}
+                      senderName={message.mine ? "You" : activeConversation.counterpartName}
+                    />
+                  ))}
+                  {otherTyping && (
+                    <div className="flex items-end gap-2.5" aria-label="The other person is typing">
+                      <Avatar initials={activeConversation.counterpartInitials} />
+                      <div className="flex items-center gap-1 rounded-2xl rounded-bl-md bg-[#f1efeb] px-3.5 py-3">
+                        <span className="typing-dot" /><span className="typing-dot" /><span className="typing-dot" />
+                      </div>
                     </div>
-                  </div>
-                )}
+                  )}
                 </div>
               </div>
 
-              <div className="border-t border-line bg-white/90 px-3 py-3 sm:px-5 sm:py-4">
-                {warning && (
-                  <p className="text-[12px] text-ember mb-2">{warning}</p>
-                )}
-                <div className="flex items-center gap-3">
-                  <input
-                    type="text"
+              <div className="border-t border-[#eee7de] bg-[#fffdf9] px-3 py-3 sm:px-5 sm:py-4">
+                {warning && <p role="alert" className="mb-2 rounded-xl bg-[#fff2e8] px-3 py-2 text-xs leading-5 text-[#9a4b1e]">{warning}</p>}
+                <div className="flex items-end gap-2 rounded-2xl border border-[#e7e1d8] bg-[#faf8f4] p-2 focus-within:border-[#d8895e] focus-within:ring-4 focus-within:ring-[#de641e]/10">
+                  <textarea
+                    rows={1}
+                    maxLength={2000}
                     value={draft}
                     onChange={(e) => handleDraftChange(e.target.value)}
                     onKeyDown={handleKeyDown}
-                    placeholder="Write a message about this product"
-                    className="flex-1 bg-transparent border-0 border-b border-line text-sm text-bone placeholder-slate py-1.5 focus:outline-none focus:border-ember"
+                    placeholder="Write a message…"
+                    aria-label="Write a message"
+                    className="max-h-28 min-h-10 flex-1 resize-y border-0 bg-transparent px-2 py-2 text-sm leading-5 text-[#273849] outline-none placeholder:text-[#89929a]"
                   />
                   <button
+                    type="button"
                     onClick={handleSend}
                     disabled={!draft.trim()}
-                    className="w-9 h-9 shrink-0 rounded-full bg-ember flex items-center justify-center shadow-md shadow-ember/20 disabled:opacity-40 disabled:cursor-not-allowed"
+                    className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-[#de641e] text-white transition hover:bg-[#c95415] disabled:cursor-not-allowed disabled:bg-[#e8dfd7] disabled:text-[#9b968f]"
                     aria-label="Send message"
                   >
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1C1B18" strokeWidth="2">
-                      <path d="M5 12h14M13 6l6 6-6 6" />
-                    </svg>
+                    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="m21 3-7.2 18-3.9-7.9L2 9.2 21 3Z" /><path d="M21 3 9.9 13.1" /></svg>
                   </button>
                 </div>
+                <p className="mt-2 px-1 text-[10px] text-[#89929a]">Enter to send · Shift + Enter for a new line</p>
               </div>
-            </div>
-
+            </section>
           </div>
         )}
-
       </div>
-    </div>
+    </main>
   );
 }
 
