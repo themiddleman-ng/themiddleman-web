@@ -110,7 +110,8 @@ export default function ProfilePage() {
   if (loading) {
     return (
       <main className="min-h-screen bg-ink text-bone">
-        <div className="mx-auto max-w-6xl px-6 py-24 text-center text-sm text-slate">Loading your profile...</div>
+        <SiteHeader />
+        <div className="mx-auto max-w-6xl px-4 py-16 text-center text-sm text-slate sm:px-6">Loading your profile...</div>
       </main>
     );
   }
@@ -125,16 +126,16 @@ export default function ProfilePage() {
     <main className="min-h-screen bg-ink text-bone">
       <SiteHeader isSeller={user?.is_seller} />
 
-      <div className="mx-auto max-w-6xl px-6 py-10">
-        <div className="rounded-2xl border border-line bg-paper p-8 sm:p-10">
+      <div className="mx-auto max-w-6xl px-4 py-5 sm:px-6 sm:py-9">
+        <div className="rounded-2xl border border-line bg-paper p-5 sm:p-8">
           <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
-            <div className="flex items-center gap-5">
-              <div className="grid h-16 w-16 place-items-center rounded-2xl bg-ember/15 border border-ember/30 font-display text-2xl font-bold text-ember">
+            <div className="flex min-w-0 items-center gap-4 sm:gap-5">
+              <div className="grid h-14 w-14 shrink-0 place-items-center rounded-2xl border border-ember/30 bg-ember/15 font-display text-xl font-bold text-ember sm:h-16 sm:w-16 sm:text-2xl">
                 {initials(user?.full_name ?? null, user?.email ?? '')}
               </div>
-              <div>
+              <div className="min-w-0">
                 <p className="text-sm text-slate">Your profile</p>
-                <h1 className="font-display text-3xl font-bold">
+                <h1 className="break-words font-display text-2xl font-bold leading-tight sm:text-3xl">
                   {user?.full_name?.trim() ? user.full_name : user?.email}
                 </h1>
                 <div className="mt-2 flex flex-wrap items-center gap-2">
@@ -147,31 +148,31 @@ export default function ProfilePage() {
                 </div>
               </div>
             </div>
-            <div className="flex gap-3">
+            <div className="grid grid-cols-1 gap-2 sm:flex sm:flex-wrap sm:justify-end sm:gap-2.5">
               <button
                 type="button"
                 onClick={() => window.dispatchEvent(new Event("middleman:onboarding-replay"))}
-                className="rounded-full border border-line px-5 py-3 text-sm font-semibold text-bone transition-colors hover:border-ember/40 hover:text-ember"
+                className="min-h-11 rounded-xl border border-line px-4 py-2.5 text-sm font-semibold text-bone transition-colors hover:border-ember/40 hover:text-ember sm:rounded-full"
               >
                 Replay the quick tour
               </button>
               {user?.is_seller && (
                 <Link
                   href="/seller-support"
-                  className="rounded-full border border-line px-5 py-3 text-sm font-semibold text-bone transition-colors hover:border-ember/40 hover:text-ember"
+                  className="min-h-11 rounded-xl border border-line px-4 py-2.5 text-sm font-semibold text-bone transition-colors hover:border-ember/40 hover:text-ember sm:rounded-full"
                 >
                   Operations messages
                 </Link>
               )}
               <Link
                 href="/onboarding/role"
-                className="rounded-full border border-line px-5 py-3 text-sm font-semibold text-bone hover:border-slate transition-colors"
+                className="min-h-11 rounded-xl border border-line px-4 py-2.5 text-center text-sm font-semibold text-bone transition-colors hover:border-slate sm:rounded-full"
               >
                 Edit account preferences
               </Link>
               <button
                 onClick={handleSignOut}
-                className="rounded-full border border-line px-5 py-3 text-sm font-semibold text-slate hover:border-red-900/50 hover:text-red-400 transition-colors"
+                className="min-h-11 rounded-xl border border-line px-4 py-2.5 text-sm font-semibold text-slate transition-colors hover:border-red-900/50 hover:text-red-400 sm:rounded-full"
               >
                 Sign out
               </button>
@@ -179,8 +180,8 @@ export default function ProfilePage() {
           </div>
         </div>
 
-        <div className="mt-8 grid gap-6 lg:grid-cols-[1.4fr_.6fr]">
-          <section className="rounded-2xl border border-line bg-paper p-6">
+        <div className="mt-5 grid gap-4 sm:mt-7 sm:gap-6 lg:grid-cols-[1.4fr_.6fr]">
+          <section className="min-w-0 rounded-2xl border border-line bg-paper p-5 sm:p-6">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-xs font-bold tracking-[.16em] text-ember">RECENT ORDERS</p>
@@ -201,7 +202,7 @@ export default function ProfilePage() {
             ) : (
               <div className="mt-5 divide-y divide-line">
                 {orders.map((order, index) => (
-                  <div key={order.id} className="flex items-center justify-between py-4">
+              <div key={order.id} className="flex min-w-0 flex-col gap-2 py-4 sm:flex-row sm:items-center sm:justify-between">
                     <div className="flex items-center gap-3">
                       <span className="grid h-9 w-9 place-items-center rounded-xl bg-ink border border-line font-mono text-sm text-ember">
                         0{index + 1}
@@ -220,15 +221,15 @@ export default function ProfilePage() {
             )}
           </section>
 
-          <aside className="rounded-2xl border border-line bg-paper p-6">
+          <aside className="rounded-2xl border border-line bg-paper p-5 sm:p-6">
             <p className="text-xs font-bold tracking-[.16em] text-ember">ACCOUNT STATUS</p>
             <h2 className="mt-2 font-display text-2xl font-bold">
               {user?.is_seller ? 'Selling on The Middleman' : 'Ready to buy'}
             </h2>
             <p className="mt-3 text-sm leading-relaxed text-slate">
               {user?.is_seller
-                ? 'Every delivery is protected by escrow — funds only release once you approve the work.'
-                : 'Your next order will be protected by The Middleman\u2019s escrow-backed payment process.'}
+                ? 'Manage your products, verification details and account preferences here.'
+                : 'Browse product details before you buy. Checkout is in Naira through Paystack.'}
             </p>
             {!user?.is_seller && (
               <Link
@@ -246,7 +247,16 @@ export default function ProfilePage() {
             </Link>
           </aside>
         </div>
+
+        <section className="mt-5 flex flex-col gap-4 rounded-2xl border border-[#e8d8cb] bg-[#fffaf5] p-5 sm:mt-7 sm:flex-row sm:items-center sm:justify-between sm:p-6">
+          <div>
+            <h2 className="font-display text-lg font-semibold text-[#26384a]">Account and privacy</h2>
+            <p className="mt-1 max-w-2xl text-sm leading-6 text-[#66717b]">You can permanently remove your account and personal profile details. Order and payment records may be retained in de-identified form.</p>
+          </div>
+          <Link href="/account/delete" className="inline-flex min-h-11 shrink-0 items-center justify-center rounded-xl border border-[#d8bca9] px-4 py-2.5 text-sm font-semibold text-[#8b4025] transition hover:bg-[#faeee6]">Delete account</Link>
+        </section>
       </div>
     </main>
   );
 }
+

@@ -1,11 +1,8 @@
 'use client';
 
-import Link from 'next/link';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabaseClient';
-import ShaderBackground from '@/components/ShaderBackground';
-import Logo from '@/components/Logo';
 
 export default function RoleSelectionPage() {
   const router = useRouter();
@@ -65,18 +62,20 @@ export default function RoleSelectionPage() {
   ];
 
   return (
-    <main className="auth-shell-shader">
-      <ShaderBackground variant="silk" />
-      <section className="relative z-10 w-full max-w-4xl">
-        <div className="mb-8 flex items-center justify-between">
-          <Logo variant="vertical" />
+    <main className="grid min-h-[100svh] place-items-center overflow-hidden bg-ink px-4 py-6 sm:px-6 sm:py-10">
+      <section className="w-full max-w-4xl">
+        <div className="mb-5 flex items-center justify-between gap-3 sm:mb-8">
+          <div className="flex min-w-0 items-center gap-2 font-display text-sm font-bold tracking-tight text-bone sm:text-base">
+            <span className="h-2 w-2 shrink-0 rounded-full bg-ember shadow-[0_0_0_4px_rgba(242,100,25,.14)]" />
+            <span className="truncate">The Middleman</span>
+          </div>
           <span className="rounded-full border border-ember/20 bg-white/70 px-3 py-1 text-xs font-medium text-slate shadow-sm">Step 1 of 2</span>
         </div>
 
-        <div className="auth-glass-card overflow-hidden">
-          <div className="border-b border-line bg-[radial-gradient(circle_at_top_right,_rgba(242,100,25,.18),_transparent_42%),linear-gradient(180deg,rgba(255,255,255,.88),rgba(247,243,236,.92))] px-6 py-10 sm:px-10">
+        <div className="overflow-hidden rounded-2xl border border-line bg-[#fffdf9] shadow-[0_20px_70px_rgba(31,21,12,.12)]">
+          <div className="border-b border-line bg-[radial-gradient(circle_at_top_right,_rgba(242,100,25,.18),_transparent_42%),linear-gradient(180deg,rgba(255,255,255,.88),rgba(247,243,236,.92))] px-5 py-6 sm:px-10 sm:py-10">
             <p className="text-xs font-semibold tracking-[.2em] text-ember">MAKE IT YOURS</p>
-            <h1 className="mt-3 font-display text-3xl font-bold tracking-tight sm:text-5xl">
+            <h1 className="mt-2 font-display text-3xl font-bold tracking-tight sm:mt-3 sm:text-5xl">
               How would you like to use<br className="hidden sm:block" /> The Middleman?
             </h1>
             <p className="mt-4 max-w-xl text-sm leading-relaxed text-slate sm:text-base">
@@ -85,14 +84,14 @@ export default function RoleSelectionPage() {
             </p>
           </div>
 
-          <div className="p-6 sm:p-10">
+          <div className="p-4 sm:p-10">
             <div className="grid gap-4 sm:grid-cols-2">
               {choices.map((choice) => (
                 <button
                   type="button"
                   key={choice.tag}
                   onClick={() => choice.setActive(!choice.active)}
-                  className={`group relative rounded-2xl border p-6 text-left transition duration-200 ${
+                  className={`group relative rounded-2xl border p-4 text-left transition duration-200 sm:p-6 ${
                     choice.active
                       ? 'border-ember bg-ember/10 shadow-[0_18px_40px_rgba(242,100,25,.15)] ring-1 ring-ember/30'
                       : 'border-line bg-[rgba(255,255,255,0.68)] hover:-translate-y-0.5 hover:border-ember/30 hover:shadow-[0_14px_30px_rgba(31,21,12,.08)]'
@@ -106,7 +105,7 @@ export default function RoleSelectionPage() {
                   >
                     ✓
                   </span>
-                  <h2 className="mt-8 font-display text-xl font-bold tracking-tight text-bone">{choice.title}</h2>
+                  <h2 className="mt-7 font-display text-base font-bold tracking-tight text-bone sm:mt-8 sm:text-xl">{choice.title}</h2>
                   <p className="mt-3 text-sm leading-relaxed text-slate">{choice.text}</p>
                   <span className="mt-6 inline-flex items-center rounded-full border border-line bg-white px-3 py-1 text-xs font-medium text-slate shadow-sm">
                     {choice.tag}
@@ -133,3 +132,4 @@ export default function RoleSelectionPage() {
     </main>
   );
 }
+

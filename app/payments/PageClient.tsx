@@ -5,9 +5,9 @@ import Link from "next/link";
 import SiteHeader from "@/components/SiteHeader";
 
 const steps: [string, string, string][] = [
-  ["1", "Pay into escrow", "Confirm your order in ₦. The exact amount is visible before you proceed, and held securely until delivery."],
-  ["2", "Seller delivers", "The seller provides the product, files, access, or finished deliverable included in the listing."],
-  ["3", "You accept", "Review the admin-approved delivery and accept it, or raise a dispute if it isn't as promised. Payout is a separate step."],
+  ["1", "Pay in Naira", "Checkout uses Paystack. The total is shown in Naira before you confirm a payment."],
+  ["2", "Track your order", "View the product and order status from My Orders when an order is recorded."],
+  ["3", "Review payment activity", "Check payment references, amounts, fees and settlement status here. Some order actions may be paused while the flow is verified."],
 ];
 
 const ESCROW_STATUS_LABELS: Record<string, string> = {
@@ -63,24 +63,24 @@ export default function PaymentsPage() {
     <main className="min-h-screen bg-ink text-bone">
       <SiteHeader />
 
-      <div className="mx-auto max-w-5xl px-6 py-10">
+      <div className="mx-auto max-w-5xl px-4 py-5 sm:px-6 sm:py-9">
         <p className="text-xs font-bold tracking-[.2em] text-ember">PAYMENTS</p>
-        <h1 className="mt-3 font-display text-4xl font-bold">Escrow-protected payments, in Naira.</h1>
-        <p className="mt-4 max-w-2xl text-slate">
-          Every price on The Middleman is shown in Nigerian Naira (₦). You can review your payment and delivery status here. Accepting a delivery does not by itself send a seller payout.
+        <h1 className="mt-2 font-display text-3xl font-bold leading-tight tracking-tight sm:text-4xl">Payment activity</h1>
+        <p className="mt-3 max-w-2xl text-sm leading-6 text-slate sm:text-base">
+          Payments are made in Naira through Paystack. Review payment status and order records here. A buyer accepting delivery does not by itself send a seller payout.
         </p>
 
-        <div className="mt-8 grid gap-5 md:grid-cols-3">
+        <div className="mt-5 grid gap-3 sm:mt-7 sm:gap-4 md:grid-cols-3">
           {steps.map(([number, title, text]) => (
-            <div key={number} className="rounded-2xl border border-line bg-paper p-6">
+            <div key={number} className="rounded-2xl border border-line bg-paper p-4 sm:p-5">
               <span className="font-mono text-sm text-ember">0{number}</span>
-              <h2 className="mt-5 font-display text-xl font-bold">{title}</h2>
+              <h2 className="mt-3 font-display text-lg font-bold sm:mt-4 sm:text-xl">{title}</h2>
               <p className="mt-3 text-sm leading-relaxed text-slate">{text}</p>
             </div>
           ))}
         </div>
 
-        <section className="mt-8 rounded-2xl border border-line bg-paper p-7">
+        <section className="mt-5 rounded-2xl border border-line bg-paper p-4 sm:mt-7 sm:p-6">
           <p className="text-xs font-bold tracking-[.16em] text-ember">PAYMENT ACTIVITY</p>
 
           {loading && <p className="mt-4 text-sm text-slate">Loading…</p>}
@@ -90,7 +90,7 @@ export default function PaymentsPage() {
             <div className="mt-2 flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
               <div>
                 <h2 className="mt-2 font-display text-2xl font-bold">No payments yet</h2>
-                <p className="mt-2 text-sm text-slate">Your protected payment history will appear here after your first order.</p>
+                <p className="mt-2 text-sm text-slate">Your payment history will appear here when a payment is recorded.</p>
               </div>
               <Link
                 href="/marketplace"
@@ -104,14 +104,14 @@ export default function PaymentsPage() {
           {!loading && !loadError && payments.length > 0 && (
             <div className="mt-4 divide-y divide-line">
               {payments.map((payment) => (
-                <div key={payment.id} className="flex items-center justify-between py-4 font-mono text-sm">
-                  <div className="font-sans">
-                    <p className="text-bone font-medium">{payment.orders?.gigs?.title ?? "Product"}</p>
-                    <p className="text-xs text-slate mt-0.5">{payment.role === 'seller' ? 'Seller payout · buyer details private' : payment.paystack_reference}</p>
+                <div key={payment.id} className="flex flex-col gap-3 py-4 sm:flex-row sm:items-start sm:justify-between">
+                  <div className="min-w-0">
+                    <p className="break-words text-sm font-medium text-bone">{payment.orders?.gigs?.title ?? "Product"}</p>
+                    <p className="mt-0.5 break-all text-xs text-slate">{payment.role === 'seller' ? 'Seller payout · buyer details private' : payment.paystack_reference}</p>
                     {payment.fees && <dl className="mt-2 space-y-1 text-xs text-slate">{Object.entries(payment.fees).map(([label,kobo])=><div key={label}>{label.replace(/_kobo/g,'').replace(/_/g,' ')}: ₦{(kobo/100).toLocaleString('en-NG',{minimumFractionDigits:2})}</div>)}</dl>}
                   </div>
-                  <div className="text-right">
-                    <p className="text-bone">₦{payment.amount.toLocaleString()}</p>
+                  <div className="flex shrink-0 items-center justify-between gap-3 sm:block sm:text-right">
+                    <p className="font-mono text-sm text-bone">₦{payment.amount.toLocaleString()}</p>
                     <p className="text-xs text-ember font-sans">{ESCROW_STATUS_LABELS[payment.escrow_status] ?? payment.escrow_status}</p>
                   </div>
                 </div>
@@ -123,3 +123,4 @@ export default function PaymentsPage() {
     </main>
   );
 }
+

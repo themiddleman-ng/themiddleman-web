@@ -6,16 +6,12 @@ import { useSearchParams } from "next/navigation";
 import { supabase } from "@/lib/supabaseClient";
 import SiteHeader from "@/components/SiteHeader";
 
-// Design note: message threads are rendered as correspondence entries
-// (sender + timestamp, then message text, separated by a thin dashed
-// rule) rather than colored chat bubbles. This keeps continuity with
-// the marketplace's paper-trail language (escrow, receipts, tickets)
-// instead of introducing an unrelated chat-app visual pattern.
+// Design note: message threads use a calm correspondence layout with a
+// sender, timestamp and message text separated by a thin rule.
 //
-// Platform rule: conversations here are for coordinating an active or
-// prospective gig only. To keep every transaction inside escrow, we
-// don't allow links or contact details (phone numbers, emails, social
-// handles) to be shared in-thread — see containsRestrictedContent().
+// Platform rule: conversations are for coordinating a product or order.
+// Links and contact details are blocked here; see
+// containsRestrictedContent() and the matching server validation.
 // This check runs here for instant feedback, and is enforced again by
 // a check constraint on public.messages (see supabase/messages_schema.sql)
 // since client-side validation alone can be bypassed.
@@ -53,10 +49,10 @@ function containsRestrictedContent(text: string): string | null {
     return "Links can't be sent here. Share files through the order flow instead.";
   }
   if (EMAIL_PATTERN.test(text)) {
-    return "Email addresses can't be shared in messages. Keep communication on The Middleman so your order stays protected.";
+    return "Email addresses can't be shared in messages. Keep product conversations on The Middleman.";
   }
   if (PHONE_PATTERN.test(text)) {
-    return "Phone numbers can't be shared in messages. Keep communication on The Middleman so your order stays protected.";
+    return "Phone numbers can't be shared in messages. Keep product conversations on The Middleman.";
   }
   return null;
 }
@@ -130,6 +126,7 @@ function MessagesPageInner() {
   const [userId, setUserId] = useState<string | null>(null);
   const [conversations, setConversations] = useState<ConversationRow[]>([]);
   const [activeId, setActiveId] = useState<string | null>(null);
+  const [mobileThreadOpen, setMobileThreadOpen] = useState(false);
   const [messages, setMessages] = useState<MessageRow[]>([]);
   const [draft, setDraft] = useState("");
   const [warning, setWarning] = useState<string | null>(null);
@@ -182,6 +179,7 @@ function MessagesPageInner() {
         ? requestedConversationId
         : rows[0]?.id ?? null;
       setActiveId(preferredId);
+      setMobileThreadOpen(Boolean(requestedConversationId && preferredId === requestedConversationId));
       setLoading(false);
     }
 
@@ -304,20 +302,19 @@ function MessagesPageInner() {
   }
 
   return (
-    <div className="min-h-screen bg-[radial-gradient(circle_at_top_right,_rgba(242,100,25,.10),_transparent_35%),linear-gradient(180deg,#fbf8f3,#f7f3ec)] text-bone">
+    <div className="flex min-h-[100svh] flex-col bg-[radial-gradient(circle_at_top_right,_rgba(242,100,25,.08),_transparent_35%),linear-gradient(180deg,#fbf8f3,#f7f3ec)] text-bone">
       <SiteHeader />
-      <div className="max-w-5xl mx-auto h-screen flex flex-col">
+      <div className="mx-auto flex min-h-0 w-full max-w-5xl flex-1 flex-col md:px-6">
 
-        <div className="px-6 pt-8 pb-5 border-b border-dashed border-line flex items-end justify-between">
+        <div className="border-b border-line px-4 py-4 sm:px-6 sm:py-5">
           <div>
-            <p className="text-[13px] text-slate mt-1">
-              Conversations tied to your active and past products
-            </p>
+            <h1 className="font-display text-2xl font-semibold tracking-tight text-[#23384d] sm:text-[1.75rem]">Messages</h1>
+            <p className="mt-1 text-[13px] text-slate">Conversations about your orders and products</p>
           </div>
         </div>
 
         {!noticeDismissed && (
-          <div className="px-6 py-3 bg-white/75 border-b border-line flex items-start gap-3 backdrop-blur-sm">
+          <div className="flex items-start gap-3 border-b border-line bg-white/75 px-4 py-3 backdrop-blur-sm sm:px-6">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6F6A63" strokeWidth="2" className="mt-0.5 shrink-0">
               <path d="M12 9v4m0 4h.01M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z" />
             </svg>
@@ -360,9 +357,9 @@ function MessagesPageInner() {
         )}
 
         {!loading && !loadError && conversations.length > 0 && activeConversation && (
-          <div className="flex flex-1 min-h-0">
+          <div className="flex flex-1 min-h-0 overflow-hidden">
 
-            <div className="w-[300px] shrink-0 border-r border-line overflow-y-auto bg-white/60">
+            <div className={`${mobileThreadOpen ? "hidden" : "flex"} w-full shrink-0 flex-col overflow-y-auto bg-white/60 md:flex md:w-[300px] md:border-r md:border-line`}>
               {conversations.map((conversation) => (
                 <ConversationRowItem
                   key={conversation.id}
@@ -372,25 +369,30 @@ function MessagesPageInner() {
                     setActiveId(conversation.id);
                     setDraft("");
                     setWarning(null);
+                    setMobileThreadOpen(true);
                   }}
                 />
               ))}
             </div>
 
-            <div className="flex-1 flex flex-col min-w-0">
-              <div className="px-6 py-4 border-b border-line flex items-center gap-3 bg-white/70">
+            <div className={`${mobileThreadOpen ? "flex" : "hidden"} min-w-0 flex-1 flex-col md:flex`}>
+              <div className="flex items-center gap-3 border-b border-line bg-white/70 px-4 py-3 sm:px-6 sm:py-4">
+                <button type="button" onClick={() => setMobileThreadOpen(false)} aria-label="Back to conversations" className="grid h-9 w-9 shrink-0 place-items-center rounded-full text-[#516170] hover:bg-[#f4eee6] md:hidden">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6" /><path d="M9 12h12" /></svg>
+                </button>
                 <Avatar initials={activeConversation.counterpartInitials} />
-                <div>
+                <div className="min-w-0">
                   <p className="text-[13px] font-medium text-bone">
                     {activeConversation.counterpartName}
                   </p>
-                  <p className="text-[11px] text-slate">
+                  <p className="truncate text-[11px] text-slate">
                     Re: {activeConversation.gigTitle ?? "General inquiry"}
                   </p>
                 </div>
               </div>
 
-              <div ref={scrollRef} className="flex-1 overflow-y-auto px-6 py-6 flex flex-col gap-5 bg-[linear-gradient(180deg,rgba(255,255,255,.40),rgba(255,255,255,.70))]">
+              <div ref={scrollRef} className="flex-1 min-h-0 overflow-y-auto bg-[linear-gradient(180deg,rgba(255,255,255,.40),rgba(255,255,255,.70))] px-4 py-5 sm:px-6 sm:py-6">
+                <div className="flex min-h-full flex-col gap-5">
                 {messages.map((message) => (
                   <MessageEntry
                     key={message.id}
@@ -409,9 +411,10 @@ function MessagesPageInner() {
                     </div>
                   </div>
                 )}
+                </div>
               </div>
 
-              <div className="px-6 py-4 border-t border-dashed border-line bg-white/70">
+              <div className="border-t border-line bg-white/90 px-3 py-3 sm:px-5 sm:py-4">
                 {warning && (
                   <p className="text-[12px] text-ember mb-2">{warning}</p>
                 )}
@@ -453,3 +456,4 @@ export default function MessagesPage() {
     </Suspense>
   );
 }
+

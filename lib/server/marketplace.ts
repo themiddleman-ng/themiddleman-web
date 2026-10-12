@@ -13,7 +13,7 @@ export function serviceClient() {
   return createClient(url, key, { auth: { persistSession: false, autoRefreshToken: false } });
 }
 
-export async function authenticatedContext() {
+export async function authenticatedContext(allowPreparedDeletion = false) {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
   if (!url || !key) return null;
@@ -30,7 +30,23 @@ export async function authenticatedContext() {
     },
   });
   const { data: { user }, error } = await client.auth.getUser();
-  return error || !user ? null : { user, client };
+  if (error || !user || (user as typeof user & { deleted_at?: string | null }).deleted_at) return null;
+
+  const db = serviceClient();
+  if (db) {
+    const { data: account, error: accountError } = await db
+      .from('users')
+      .select('account_deleted_at')
+      .eq('id', user.id)
+      .maybeSingle();
+    // The column is introduced with the account-deletion migration. Keep
+    // previews on the prior schema working, but fail closed for other DB errors.
+    const markerNotInstalled = accountError?.code === '42703' || accountError?.code === 'PGRST204';
+    if (accountError && !markerNotInstalled) return null;
+    if (!accountError && account?.account_deleted_at && !allowPreparedDeletion) return null;
+  }
+
+  return { user, client };
 }
 
 export async function authenticatedUser() {
@@ -62,3 +78,4 @@ export const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9
 export function privateJson(body: unknown, status = 200) {
   return Response.json(body, { status, headers: { 'Cache-Control': 'private, no-store' } });
 }
+

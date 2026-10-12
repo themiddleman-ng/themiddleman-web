@@ -52,9 +52,9 @@ export default function DisputeResponses() {
       {rows.map((d) => (
         <article
           key={d.id}
-          className="rounded-2xl border border-line bg-paper p-6"
+          className="rounded-2xl border border-line bg-paper p-4 sm:p-6"
         >
-          <h2 className="font-semibold">
+          <h2 className="break-words font-semibold">
             Order {d.order_id.slice(0, 8)} · {d.ground.replace(/_/g, " ")}
           </h2>
           <p className="mt-3 text-sm">{d.reason}</p>
@@ -95,3 +95,4 @@ export default function DisputeResponses() {
     </div>
   );
 }
+

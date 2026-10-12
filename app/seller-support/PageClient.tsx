@@ -9,12 +9,18 @@ type Thread = { id: string; subject: string; status: "open" | "closed"; updated_
 export default function SellerSupportPage() {
   const [threads, setThreads] = useState<Thread[]>([]);
   const [activeId, setActiveId] = useState("");
+  const [mobileThreadOpen, setMobileThreadOpen] = useState(false);
   const [reply, setReply] = useState("");
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
 
   const activeThread = useMemo(() => threads.find((thread) => thread.id === activeId) ?? null, [threads, activeId]);
+
+  useEffect(() => {
+    if (mobileThreadOpen && !activeThread) setMobileThreadOpen(false);
+  }, [activeThread, mobileThreadOpen]);
+
   const load = useCallback(async () => {
     setLoading(true);
     setError("");
@@ -62,14 +68,14 @@ export default function SellerSupportPage() {
   return (
     <main className="min-h-screen bg-ink text-bone">
       <SiteHeader />
-      <div className="mx-auto max-w-6xl px-5 py-8 md:py-12">
+      <div className="mx-auto max-w-6xl px-4 py-6 sm:px-5 sm:py-8 md:py-12">
         <p className="text-xs font-bold uppercase tracking-[.16em] text-ember">Seller support</p>
         <h1 className="mt-2 font-display text-3xl font-bold md:text-4xl">Operations messages</h1>
         <p className="mt-2 max-w-2xl text-sm leading-6 text-slate">Private notes from The Middleman team about your seller account and product operations.</p>
 
         {error && <p role="alert" className="mt-5 rounded-xl border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-200">{error}</p>}
-        <div className="mt-7 grid min-h-[32rem] gap-5 lg:grid-cols-[.7fr_1.3fr]">
-          <aside className="rounded-2xl border border-line bg-paper p-4">
+        <div className="mt-5 grid min-h-[28rem] gap-4 sm:mt-7 sm:min-h-[32rem] sm:gap-5 lg:grid-cols-[.7fr_1.3fr]">
+          <aside className={`${mobileThreadOpen ? "hidden" : "block"} rounded-2xl border border-line bg-paper p-4 lg:block`}>
             <div className="flex items-center justify-between">
               <h2 className="font-display text-xl font-semibold">Your conversations</h2>
               <button type="button" onClick={() => void load()} className="text-xs font-semibold text-ember hover:underline">Refresh</button>
@@ -80,7 +86,7 @@ export default function SellerSupportPage() {
                   <button
                     type="button"
                     key={thread.id}
-                    onClick={() => setActiveId(thread.id)}
+                    onClick={() => { setActiveId(thread.id); setMobileThreadOpen(true); }}
                     className={"w-full rounded-xl border p-3 text-left transition " + (thread.id === activeId ? "border-ember/50 bg-ember/8" : "border-line hover:border-slate")}
                   >
                     <span className="block truncate text-sm font-semibold">{thread.subject}</span>
@@ -91,14 +97,17 @@ export default function SellerSupportPage() {
             ) : <p className="mt-4 text-sm leading-6 text-slate">No operations messages yet. If the team needs to contact you, the conversation will appear here.</p>}
           </aside>
 
-          <section className="flex min-h-[32rem] flex-col rounded-2xl border border-line bg-paper">
+          <section className={`${mobileThreadOpen ? "flex" : "hidden"} min-h-[28rem] min-w-0 flex-col rounded-2xl border border-line bg-paper sm:min-h-[32rem] lg:flex`}>
             {activeThread ? (
               <>
-                <header className="border-b border-line px-5 py-4">
-                  <h2 className="font-display text-xl font-semibold">{activeThread.subject}</h2>
+                <header className="flex items-start gap-3 border-b border-line px-4 py-3 sm:px-5 sm:py-4">
+                  <button type="button" onClick={() => setMobileThreadOpen(false)} aria-label="Back to conversations" className="grid h-9 w-9 shrink-0 place-items-center rounded-full text-slate hover:bg-ink lg:hidden">←</button>
+                  <div className="min-w-0">
+                    <h2 className="break-words font-display text-lg font-semibold sm:text-xl">{activeThread.subject}</h2>
                   <p className="mt-1 text-xs capitalize text-slate">Seller account · {activeThread.status}</p>
+                  </div>
                 </header>
-                <div className="flex-1 space-y-5 overflow-y-auto p-5">
+                <div className="flex-1 space-y-5 overflow-y-auto p-4 sm:p-5">
                   {activeThread.messages.map((message) => (
                     <article key={message.id} className="border-b border-dashed border-line pb-4">
                       <p className="text-xs text-slate">
@@ -110,7 +119,7 @@ export default function SellerSupportPage() {
                   ))}
                 </div>
                 {activeThread.status === "open" ? (
-                  <form onSubmit={sendReply} className="border-t border-line p-5">
+                  <form onSubmit={sendReply} className="border-t border-line p-4 sm:p-5">
                     <label className="block text-sm">
                       Reply
                       <textarea value={reply} onChange={(event) => setReply(event.target.value)} maxLength={5000} className="auth-input mt-2 min-h-24" placeholder="Write a reply to The Middleman team." />
@@ -119,7 +128,7 @@ export default function SellerSupportPage() {
                       {busy ? "Sending…" : "Send reply"}
                     </button>
                   </form>
-                ) : <p className="border-t border-line p-5 text-sm text-slate">This conversation is closed.</p>}
+                ) : <p className="border-t border-line p-4 text-sm text-slate sm:p-5">This conversation is closed.</p>}
               </>
             ) : (
               <div className="grid flex-1 place-items-center p-8 text-center">
@@ -132,3 +141,4 @@ export default function SellerSupportPage() {
     </main>
   );
 }
+

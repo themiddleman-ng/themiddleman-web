@@ -87,9 +87,9 @@ export default function NotificationsPage() {
         {error ? <p role="alert" className="mt-7 text-sm text-red-300">{error}</p> : null}
         {!loading && !items.length ? <p className="mt-7 text-sm text-slate">You’re all caught up. Important product and order updates will appear here.</p> : null}
 
-        <div className="mt-6 divide-y divide-white/10">
+        <div className="mt-5 divide-y divide-white/10 sm:mt-6">
           {items.map((item) => (
-            <button key={item.id} onClick={() => openItem(item)} className={"block w-full py-5 text-left " + (!item.read_at ? "border-l-2 border-ember pl-4" : "pl-[18px]")}>
+            <button key={item.id} onClick={() => openItem(item)} className={"block w-full py-4 text-left sm:py-5 " + (!item.read_at ? "border-l-2 border-ember pl-3 sm:pl-4" : "pl-[14px] sm:pl-[18px]")}>
               <span className="flex flex-wrap items-center gap-2">
                 <span className="font-semibold">{item.title}</span>
                 {!item.read_at ? <span className="rounded-full bg-ember/10 px-2 py-0.5 text-[10px] text-ember">Unread</span> : null}
@@ -106,3 +106,4 @@ export default function NotificationsPage() {
     </main>
   );
 }
+

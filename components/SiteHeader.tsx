@@ -2,12 +2,33 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabaseClient';
 import Logo from '@/components/Logo';
 
+type HeaderUser = {
+  id: string;
+  email?: string;
+  user_metadata?: Record<string, unknown>;
+};
+
+function userLabel(user: HeaderUser) {
+  const name = user.user_metadata?.full_name;
+  return typeof name === 'string' && name.trim() ? name.trim() : user.email ?? 'Your account';
+}
+
+function initials(user: HeaderUser | null) {
+  if (!user) return '';
+  const parts = userLabel(user).split(/[\s@._-]+/).filter(Boolean);
+  if (parts.length > 1) return (parts[0][0] + parts[1][0]).toUpperCase();
+  return parts[0]?.slice(0, 2).toUpperCase() ?? 'MM';
+}
+
 export default function SiteHeader({ isSeller = false, compact = false }: { isSeller?: boolean; compact?: boolean }) {
   const router = useRouter();
+  const pathname = usePathname();
+  const [user, setUser] = useState<HeaderUser | null>(null);
+  const [authResolved, setAuthResolved] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
   const [notificationCount, setNotificationCount] = useState(0);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -15,149 +36,164 @@ export default function SiteHeader({ isSeller = false, compact = false }: { isSe
   useEffect(() => {
     let cancelled = false;
 
-    async function loadUnreadCount() {
-      const { data: { user } } = await supabase.auth.getUser();
-
-      if (!user) {
-        if (!cancelled) { setUnreadCount(0); setNotificationCount(0); }
+    async function loadCounts() {
+      const { data: { user: authUser } } = await supabase.auth.getUser();
+      if (cancelled) return;
+      setUser(authUser as HeaderUser | null);
+      setAuthResolved(true);
+      if (!authUser) {
+        setUnreadCount(0);
+        setNotificationCount(0);
         return;
       }
 
-      const response = await fetch('/api/conversations', { cache: 'no-store' });
-
+      const [messagesResponse, notificationsResponse] = await Promise.all([
+        fetch('/api/conversations', { cache: 'no-store' }),
+        fetch('/api/notifications', { cache: 'no-store' }),
+      ]);
       if (cancelled) return;
-
-      if (response.ok) {
-        const result = await response.json();
+      if (messagesResponse.ok) {
+        const result = await messagesResponse.json();
         if (!cancelled) setUnreadCount(result.unreadCount ?? 0);
-      } else if (!cancelled) setUnreadCount(0);
-
-      const notificationResponse = await fetch('/api/notifications', { cache: 'no-store' });
-      if (cancelled) return;
-      if (notificationResponse.ok) {
-        const result = await notificationResponse.json();
-        setNotificationCount(result.unreadCount ?? 0);
+      } else setUnreadCount(0);
+      if (notificationsResponse.ok) {
+        const result = await notificationsResponse.json();
+        if (!cancelled) setNotificationCount(result.unreadCount ?? 0);
       } else setNotificationCount(0);
     }
 
-    loadUnreadCount();
-
-    const handleRefresh = () => {
-      void loadUnreadCount();
-    };
-
-    window.addEventListener('messages:read-updated', handleRefresh);
-    window.addEventListener('notifications:updated', handleRefresh);
-    window.addEventListener('focus', handleRefresh);
+    void loadCounts();
+    const refresh = () => { void loadCounts(); };
+    window.addEventListener('messages:read-updated', refresh);
+    window.addEventListener('notifications:updated', refresh);
+    window.addEventListener('focus', refresh);
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser((session?.user as HeaderUser | null) ?? null);
+      setAuthResolved(true);
+      if (!session?.user) {
+        setUnreadCount(0);
+        setNotificationCount(0);
+      }
+    });
 
     return () => {
       cancelled = true;
-      window.removeEventListener('messages:read-updated', handleRefresh);
-      window.removeEventListener('notifications:updated', handleRefresh);
-      window.removeEventListener('focus', handleRefresh);
+      subscription.unsubscribe();
+      window.removeEventListener('messages:read-updated', refresh);
+      window.removeEventListener('notifications:updated', refresh);
+      window.removeEventListener('focus', refresh);
     };
   }, []);
 
+  useEffect(() => setMenuOpen(false), [pathname]);
+
   async function handleSignOut() {
     await supabase.auth.signOut();
+    setUser(null);
     setMenuOpen(false);
-    router.push('/signup?mode=signin');
+    router.push('/marketplace');
   }
 
-  const desktopLink = 'rounded-full px-3 py-2 transition-colors hover:bg-ember/8 hover:text-bone';
-  const mobileLink = 'rounded-lg px-3 py-2.5 text-sm text-bone transition-colors hover:bg-ember/8';
+  function openCookieSettings() {
+    window.dispatchEvent(new Event('middleman:cookies-open'));
+    setMenuOpen(false);
+  }
 
-  const unreadBadge = unreadCount > 0 && (
-    <span className="inline-flex min-w-5 items-center justify-center rounded-full bg-ember px-1.5 py-0.5 text-[11px] font-semibold leading-none text-ink">
+  const desktopLink = 'rounded-full px-3 py-2 text-sm transition-colors hover:bg-[#f4eee6] hover:text-[#182d41]';
+  const mobileLink = 'flex min-h-11 items-center justify-between rounded-xl px-3 py-2.5 text-sm text-[#273544] transition-colors hover:bg-[#f5efe7]';
+  const unreadBadge = unreadCount > 0 ? (
+    <span className="inline-flex min-w-5 items-center justify-center rounded-full bg-[#e56b27] px-1.5 py-0.5 text-[11px] font-semibold leading-none text-white">
       {unreadCount > 99 ? '99+' : unreadCount}
     </span>
-  );
-  const notificationBadge = notificationCount > 0 && (
-    <span className="inline-flex min-w-5 items-center justify-center rounded-full bg-ember px-1.5 py-0.5 text-[11px] font-semibold leading-none text-ink">
+  ) : null;
+  const notificationBadge = notificationCount > 0 ? (
+    <span className="inline-flex min-w-5 items-center justify-center rounded-full bg-[#e56b27] px-1.5 py-0.5 text-[11px] font-semibold leading-none text-white">
       {notificationCount > 99 ? '99+' : notificationCount}
     </span>
-  );
+  ) : null;
 
   return (
-    <header className={compact ? "sticky top-0 z-30 border-b border-[#E8E1D8] bg-[#FAF7F0]/90 backdrop-blur-xl" : "sticky top-0 z-30 border-b border-line bg-white/75 backdrop-blur-xl"}>
-      <div className={"mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 sm:px-6 " + (compact ? "py-2" : "py-3 sm:py-4 lg:py-5")}>
-        <Logo className="text-lg" markClass="h-7 w-7" variant={compact ? "horizontal" : "responsive"} textClass={compact ? "text-sm" : "text-[15px]"} />
+    <header className={`sticky top-0 z-30 border-b border-[#e9e2d9] backdrop-blur-xl ${compact ? 'bg-[#faf7f0]/95' : 'bg-[#fbf8f2]/95'}`}>
+      <div className="relative mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-2.5 sm:px-6">
+        <Link href="/marketplace" aria-label="The Middleman home" className="shrink-0">
+          <Logo className="text-lg" markClass="h-7 w-7" variant="horizontal" textClass="text-sm" />
+        </Link>
 
-        {/* Desktop nav — md and above */}
-        <div className="hidden md:flex items-center gap-2 text-sm text-slate">
-          <nav className="hidden md:flex items-center gap-2">
-            <Link href="/marketplace" data-onboarding-target="marketplace" className={desktopLink}>Marketplace</Link>
+        <nav className="hidden items-center gap-1 md:flex" aria-label="Main navigation">
+          <Link href="/marketplace" className={desktopLink}>Marketplace</Link>
+          {user && <>
             <Link href="/orders" data-onboarding-target="orders" className={desktopLink}>My Orders</Link>
             {isSeller && <Link href="/gigs/mine" className={desktopLink}>My Products</Link>}
-            <Link href="/messages" data-onboarding-target="messages" className={desktopLink}>
-              <span className="inline-flex items-center gap-2">
-                Messages
-                {unreadBadge}
-              </span>
-            </Link>
-            <Link href="/notifications" className={desktopLink}><span className="inline-flex items-center gap-2">Notifications{notificationBadge}</span></Link>
+            <Link href="/messages" data-onboarding-target="messages" className={desktopLink}><span className="inline-flex items-center gap-2">Messages{unreadBadge}</span></Link>
+            <Link href="/notifications" className={desktopLink}><span className="inline-flex items-center gap-2">Alerts{notificationBadge}</span></Link>
             <Link href="/payments" className={desktopLink}>Payments</Link>
-            <Link href="/profile" data-onboarding-target="profile" className={desktopLink}>Profile</Link>
-          </nav>
-          <button
-            onClick={handleSignOut}
-            className="hidden md:inline-flex rounded-full border border-line bg-white px-4 py-2 text-xs font-semibold text-slate shadow-sm transition-colors hover:border-ember/40 hover:text-ember"
-          >
-            Sign out
-          </button>
-        </div>
+          </>}
+        </nav>
 
-        {/* Mobile actions — below md */}
-        <div className="flex items-center gap-1 md:hidden">
-          <Link href="/messages" data-onboarding-target="messages" className="rounded-full px-3 py-2 text-sm text-slate transition-colors hover:bg-ember/8 hover:text-bone">
-            <span className="inline-flex items-center gap-2">
-              Messages
-              {unreadBadge}
-            </span>
-          </Link>
-          <Link href="/notifications" className="rounded-full px-3 py-2 text-sm text-slate transition-colors hover:bg-ember/8 hover:text-bone">
-            <span className="inline-flex items-center gap-2">Alerts{notificationBadge}</span>
-          </Link>
+        <div className="relative flex shrink-0 items-center gap-2">
           <button
             type="button"
             onClick={() => setMenuOpen((open) => !open)}
-            aria-label={menuOpen ? 'Close menu' : 'Open menu'}
+            aria-label={user ? `Open account menu for ${userLabel(user)}` : 'Open account menu'}
             aria-expanded={menuOpen}
+            aria-haspopup="menu"
+            aria-controls="account-menu"
             data-onboarding-target="menu"
-            className="flex h-9 w-9 items-center justify-center rounded-full border border-line bg-white/80 text-slate shadow-sm transition-colors hover:text-bone"
+            className="relative grid h-10 w-10 place-items-center rounded-full border border-[#e5ddd3] bg-white text-[#23384d] shadow-sm transition hover:border-[#dc6b2e]/60 hover:bg-[#fffaf3] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#dc6b2e]/15"
           >
-            {menuOpen ? (
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M18 6L6 18M6 6l12 12" />
-              </svg>
+            {user ? (
+              <span className="text-xs font-bold">{initials(user)}</span>
             ) : (
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M4 7h16M4 12h16M4 17h16" />
+              <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" aria-hidden="true">
+                <circle cx="12" cy="8" r="3.5" /><path d="M4.5 20c.8-3.4 3.3-5.2 7.5-5.2s6.7 1.8 7.5 5.2" />
               </svg>
             )}
+            {!authResolved && <span className="absolute inset-0 rounded-full ring-2 ring-[#e8e0d6]" aria-hidden="true" />}
+            {(unreadCount + notificationCount) > 0 && <span className="absolute -right-0.5 -top-0.5 h-2.5 w-2.5 rounded-full border-2 border-[#fbf8f2] bg-[#e56b27]" aria-label="You have unread updates" />}
           </button>
+
+          {menuOpen && (
+            <div id="account-menu" role="menu" className="absolute right-0 top-[calc(100%+0.65rem)] z-50 max-h-[min(78svh,36rem)] w-[min(20rem,calc(100vw-1.5rem))] overflow-y-auto rounded-2xl border border-[#e7dfd5] bg-[#fffdf9] p-2.5 text-[#243344] shadow-[0_18px_55px_rgba(32,39,45,.18)]">
+              {user ? (
+                <>
+                  <div className="mb-1 border-b border-[#eee7de] px-3 pb-3 pt-2">
+                    <p className="truncate text-sm font-semibold">{userLabel(user)}</p>
+                    {user.email && <p className="mt-0.5 truncate text-xs text-[#6d7883]">{user.email}</p>}
+                  </div>
+                  <nav aria-label="Account navigation" className="space-y-0.5">
+                    <Link role="menuitem" href="/profile" data-onboarding-target="profile" className={mobileLink}>Profile</Link>
+                    <Link role="menuitem" href="/orders" data-onboarding-target="orders" className={mobileLink}>My orders</Link>
+                    {isSeller && <Link role="menuitem" href="/gigs/mine" className={mobileLink}>My products</Link>}
+                    <Link role="menuitem" href="/messages" data-onboarding-target="messages" className={mobileLink}><span>Messages</span>{unreadBadge}</Link>
+                    <Link role="menuitem" href="/notifications" className={mobileLink}><span>Notifications</span>{notificationBadge}</Link>
+                    <Link role="menuitem" href="/payments" className={mobileLink}>Payments</Link>
+                  </nav>
+                  <div className="my-2 border-t border-[#eee7de] pt-2">
+                    <button type="button" role="menuitem" onClick={openCookieSettings} className={`${mobileLink} w-full text-left`}>Cookie settings</button>
+                    <button type="button" role="menuitem" onClick={handleSignOut} className={`${mobileLink} w-full text-left text-[#8e3b28] hover:bg-[#fff0ea]`}>Sign out</button>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="px-3 pb-3 pt-2">
+                    <p className="font-display text-lg font-semibold">Welcome to The Middleman</p>
+                    <p className="mt-1 text-xs leading-5 text-[#697581]">Browse products now, then sign in when you’re ready to buy or sell.</p>
+                  </div>
+                  <nav aria-label="Guest account menu" className="space-y-0.5">
+                    <Link role="menuitem" href="/marketplace" className={mobileLink}>Browse products</Link>
+                    <Link role="menuitem" href="/about" className={mobileLink}>About The Middleman</Link>
+                    <button type="button" role="menuitem" onClick={openCookieSettings} className={`${mobileLink} w-full text-left`}>Cookie settings</button>
+                  </nav>
+                  <div className="mt-2 grid gap-2 border-t border-[#eee7de] px-1 pt-3">
+                    <Link role="menuitem" href="/signup?mode=signin" className="flex min-h-11 items-center justify-center rounded-xl border border-[#ddd3c8] px-3 text-sm font-semibold text-[#25384b] transition hover:bg-[#f5efe7]">Log in</Link>
+                    <Link role="menuitem" href="/signup?mode=signup" className="flex min-h-11 items-center justify-center rounded-xl bg-[#de641e] px-3 text-sm font-semibold text-white transition hover:bg-[#c95415]">Create an account</Link>
+                  </div>
+                </>
+              )}
+            </div>
+          )}
         </div>
       </div>
-
-      {/* Mobile menu sheet */}
-      {menuOpen && (
-        <div className="border-t border-line bg-white/95 backdrop-blur-xl md:hidden">
-          <nav className="mx-auto flex max-w-7xl flex-col px-4 py-3 sm:px-6">
-            <Link href="/marketplace" data-onboarding-target="marketplace" onClick={() => setMenuOpen(false)} className={mobileLink}>Marketplace</Link>
-            <Link href="/orders" data-onboarding-target="orders" onClick={() => setMenuOpen(false)} className={mobileLink}>My Orders</Link>
-            {isSeller && <Link href="/gigs/mine" onClick={() => setMenuOpen(false)} className={mobileLink}>My Products</Link>}
-            <Link href="/notifications" onClick={() => setMenuOpen(false)} className={mobileLink}>Notifications {notificationBadge}</Link>
-            <Link href="/payments" onClick={() => setMenuOpen(false)} className={mobileLink}>Payments</Link>
-            <Link href="/profile" data-onboarding-target="profile" onClick={() => setMenuOpen(false)} className={mobileLink}>Profile</Link>
-            <button
-              onClick={handleSignOut}
-              className="mt-2 rounded-full border border-line bg-white px-4 py-2 text-xs font-semibold text-slate shadow-sm transition-colors hover:border-ember/40 hover:text-ember"
-            >
-              Sign out
-            </button>
-          </nav>
-        </div>
-      )}
     </header>
   );
 }

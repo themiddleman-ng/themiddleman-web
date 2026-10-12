@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabaseClient";
 
 const APP_PREFIXES = [
@@ -14,17 +14,6 @@ const APP_PREFIXES = [
   "/messages",
   "/profile",
 ];
-
-function fabAction(pathname: string): { href: string; label: string } {
-  if (
-    pathname.startsWith("/gigs") ||
-    pathname.startsWith("/orders") ||
-    pathname.startsWith("/payments")
-  ) {
-    return { href: "/marketplace", label: "Find a product" };
-  }
-  return { href: "/gigs/new", label: "List a product" };
-}
 
 function IconHome() {
   return (
@@ -66,34 +55,8 @@ function IconPlus() {
 export default function MobileTabBar() {
   const pathname = usePathname();
   const shouldShow = APP_PREFIXES.some((prefix) => pathname.startsWith(prefix));
-  const [visible, setVisible] = useState(true);
   const [unread, setUnread] = useState(0);
-  const lastScrollY = useRef(0);
-
-  useEffect(() => {
-    if (!shouldShow) return;
-
-    setVisible(true);
-    lastScrollY.current = window.scrollY;
-
-    function handleScroll() {
-      const currentScrollY = window.scrollY;
-      const difference = currentScrollY - lastScrollY.current;
-
-      if (currentScrollY < 24) {
-        setVisible(true);
-      } else if (difference > 6) {
-        setVisible(false);
-      } else if (difference < -6) {
-        setVisible(true);
-      }
-
-      lastScrollY.current = currentScrollY;
-    }
-
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, [shouldShow]);
+  const [userId, setUserId] = useState<string | null>(null);
 
   useEffect(() => {
     if (!shouldShow) return;
@@ -101,6 +64,8 @@ export default function MobileTabBar() {
 
     async function loadUnreadCount() {
       const { data: { user } } = await supabase.auth.getUser();
+      if (cancelled) return;
+      setUserId(user?.id ?? null);
       if (!user) {
         if (!cancelled) setUnread(0);
         return;
@@ -114,15 +79,21 @@ export default function MobileTabBar() {
     loadUnreadCount();
     const refresh = () => { void loadUnreadCount(); };
     window.addEventListener("messages:read-updated", refresh);
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUserId(session?.user.id ?? null);
+      if (!session?.user) setUnread(0);
+    });
     return () => {
       cancelled = true;
+      subscription.unsubscribe();
       window.removeEventListener("messages:read-updated", refresh);
     };
   }, [shouldShow]);
 
   if (!shouldShow) return null;
 
-  const fab = fabAction(pathname);
+  const creatingProduct = pathname.startsWith("/gigs/new");
+  const showCreateButton = Boolean(userId) && !creatingProduct;
 
   const tabs: Array<
     | { href: string; label: string; icon: React.ReactNode; badge?: number }
@@ -130,7 +101,7 @@ export default function MobileTabBar() {
   > = [
     { href: "/marketplace", label: "Home", icon: <IconHome /> },
     { href: "/browse", label: "Browse", icon: <IconBrowse /> },
-    null,
+    ...(showCreateButton ? [null] : []),
     { href: "/messages", label: "Messages", icon: <IconMessages />, badge: unread },
     { href: "/profile", label: "Profile", icon: <IconProfile /> },
   ];
@@ -138,25 +109,27 @@ export default function MobileTabBar() {
   return (
     <>
       {/* In-flow spacer so the fixed bar never covers content */}
-      <div className="h-20 md:hidden" aria-hidden="true" />
+      <div
+        className="md:hidden"
+        style={{ height: "calc(4rem + env(safe-area-inset-bottom))" }}
+        aria-hidden="true"
+      />
 
       <nav
-        className={`fixed inset-x-0 bottom-0 z-40 transition-transform duration-300 ease-out md:hidden ${
-          visible ? "translate-y-0" : "translate-y-full"
-        }`}
+        className="fixed inset-x-0 bottom-0 z-40 md:hidden"
         style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
         aria-label="Mobile navigation"
       >
-        <div className="border-t border-[#2A2A2A] bg-[#141414]/95 backdrop-blur-xl">
-          <div className="grid grid-cols-5">
-            {tabs.map((tab, i) => {
+        <div className="border-t border-[#e8e0d6] bg-[#fffdf9]/96 shadow-[0_-8px_24px_rgba(35,40,45,.06)] backdrop-blur-xl">
+          <div className={`grid ${showCreateButton ? "grid-cols-5" : "grid-cols-4"}`}>
+            {tabs.map((tab) => {
               if (tab === null) {
                 return (
                   <div key="fab" className="relative flex justify-center">
                     <Link
-                      href={fab.href}
-                      aria-label={fab.label}
-                      className="absolute -top-6 flex h-14 w-14 items-center justify-center rounded-full border-4 border-[#141414] bg-ember text-ink shadow-[0_10px_30px_rgba(242,100,25,.45)] transition-transform active:scale-95"
+                      href="/gigs/new"
+                      aria-label="List a product"
+                      className="absolute -top-5 flex h-12 w-12 items-center justify-center rounded-full border-[3px] border-[#fffdf9] bg-[#de641e] text-white shadow-[0_8px_22px_rgba(214,94,28,.28)] transition-transform active:scale-95"
                     >
                       <IconPlus />
                     </Link>
@@ -170,7 +143,7 @@ export default function MobileTabBar() {
                   href={tab.href}
                   aria-current={active ? "page" : undefined}
                   className={`flex h-16 flex-col items-center justify-center gap-1 text-[10px] font-semibold tracking-wide transition-colors ${
-                    active ? "text-ember" : "text-slate"
+                    active ? "text-[#c65316]" : "text-[#71808d]"
                   }`}
                 >
                   <span className="relative">
@@ -191,3 +164,4 @@ export default function MobileTabBar() {
     </>
   );
 }
+

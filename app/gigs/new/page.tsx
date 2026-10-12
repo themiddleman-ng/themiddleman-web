@@ -187,27 +187,27 @@ export default function NewGigPage() {
 	return (
 		<main className="min-h-screen bg-ink text-bone">
 			<header className="border-b border-line bg-paper/50 backdrop-blur sticky top-0 z-20">
-				<div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
+				<div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-3 sm:px-6 sm:py-4">
 					<Link href="/" className="font-display font-bold text-lg tracking-tight flex items-center gap-2">
 						<span className="h-2.5 w-2.5 rounded-full bg-ember shadow-[0_0_0_4px_rgba(242,100,25,.15)]" />
-						The Middleman
+						<span className="truncate">The Middleman</span>
 					</Link>
-					<Link href="/gigs/mine" className="text-sm text-slate hover:text-bone transition-colors flex items-center gap-2">
+					<Link href="/gigs/mine" className="inline-flex shrink-0 items-center gap-1.5 text-xs text-slate transition-colors hover:text-bone sm:gap-2 sm:text-sm">
 						<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M15 18l-6-6 6-6" /></svg>
 						My Products
 					</Link>
 				</div>
 			</header>
 
-			<div className="mx-auto max-w-7xl px-6 py-10">
-				<div className="mb-10">
+			<div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-8 lg:py-10">
+				<div className="mb-6 sm:mb-10">
 					<p className="text-xs font-bold tracking-[.2em] text-ember uppercase">New digital product</p>
-					<h1 className="mt-2 font-display text-4xl font-bold">List a ready-made product</h1>
+					<h1 className="mt-2 font-display text-3xl font-bold sm:text-4xl">List a ready-made product</h1>
 					<p className="mt-3 text-sm text-slate max-w-xl">Describe the ready-made product, what it includes, supported formats and any requirements. Every submission is reviewed before it appears in the marketplace.</p>
 				</div>
 
-				<div className="grid gap-12 lg:grid-cols-[1.3fr_.7fr]">
-					<form onSubmit={handleSubmit} className="space-y-8">
+				<div className="grid min-w-0 gap-8 lg:grid-cols-[1.3fr_.7fr] lg:gap-12">
+					<form onSubmit={handleSubmit} className="min-w-0 space-y-6 sm:space-y-8">
 						<div className="field-shell">
 							<label className="field-label">Product title</label>
 							<span className="field-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg></span>
@@ -346,3 +346,4 @@ export default function NewGigPage() {
 		</main>
 	);
 }
+

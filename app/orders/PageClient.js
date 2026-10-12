@@ -210,16 +210,16 @@ export default function OrdersPage() {
   }
 
   if (loading) {
-    return <main className="min-h-screen bg-ink text-bone grid place-items-center"><p className="text-sm text-slate">Loading orders…</p></main>;
+    return <main className="min-h-screen bg-ink text-bone"><SiteHeader /><div className="mx-auto max-w-4xl px-4 py-16 text-center text-sm text-slate sm:px-6">Loading orders…</div></main>;
   }
 
   return (
     <main className="min-h-screen bg-ink text-bone">
       <SiteHeader />
 
-      <section className="mx-auto max-w-4xl px-6 py-12">
+      <section className="mx-auto max-w-4xl px-4 py-5 sm:px-6 sm:py-10">
         <p className="text-xs font-semibold tracking-[.2em] text-ember">MY ORDERS</p>
-        <h1 className="mt-3 font-display text-3xl font-bold">My orders</h1><Link href="/disputes" className="mt-4 inline-block text-ember">Respond to a dispute</Link>
+        <h1 className="mt-2 font-display text-2xl font-bold sm:text-3xl">My orders</h1><Link href="/disputes" className="mt-3 inline-block min-h-10 text-sm font-medium text-ember hover:underline">Respond to a dispute</Link>
 
         {loadError && <p className="mt-6 text-sm text-slate">{loadError}</p>}
         {actionError && <p role="alert" className="mt-6 text-sm text-red-300">{actionError}</p>}
@@ -230,7 +230,7 @@ export default function OrdersPage() {
           </p>
         )}
 
-        <div className="mt-8 space-y-4">
+        <div className="mt-5 space-y-3 sm:mt-7 sm:space-y-4">
           {orders.map((order) => {
             const isBuyer = order.role === 'buyer';
             const counterpart = order.counterpart;
@@ -238,10 +238,10 @@ export default function OrdersPage() {
             const panelOpen = openPanel?.orderId === order.id ? openPanel.type : null;
 
             return (
-              <div key={order.id} className="rounded-2xl border border-line bg-paper p-6">
+              <div key={order.id} className="rounded-2xl border border-line bg-paper p-4 sm:p-6">
                 <div className="flex flex-wrap items-start justify-between gap-3">
-                  <div>
-                    <p className="font-display font-bold">{order.gigs?.title ?? "Product"}</p>
+                  <div className="min-w-0 flex-1">
+                    <p className="break-words font-display font-bold">{order.gigs?.title ?? "Product"}</p>
                     <p className="text-xs text-slate mt-1">
                       {isBuyer ? "Seller" : "Buyer"}: {counterpart ?? "—"}
                     </p>
@@ -348,3 +348,4 @@ export default function OrdersPage() {
     </main>
   );
 }
+

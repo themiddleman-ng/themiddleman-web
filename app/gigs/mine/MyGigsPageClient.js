@@ -88,17 +88,17 @@ export default function MyGigsPage() {
     <main className="min-h-screen bg-ink text-bone">
       <SiteHeader isSeller />
 
-      <section className="mx-auto max-w-4xl px-6 py-12">
+      <section className="mx-auto max-w-4xl px-4 py-6 sm:px-6 sm:py-10">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div>
             <p className="text-xs font-semibold tracking-[.2em] text-ember">SELLER DASHBOARD</p>
-            <h1 className="mt-3 font-display text-3xl font-bold">My products</h1>
+            <h1 className="mt-2 font-display text-3xl font-bold">My products</h1>
           </div>
-          <div className="flex flex-wrap gap-3">
-            <Link href="/analytics" className="rounded-full border border-line px-4 py-2.5 text-sm text-slate hover:text-bone">Analytics</Link>
+          <div className="flex w-full flex-wrap gap-2 sm:w-auto sm:gap-3">
+            <Link href="/analytics" className="inline-flex min-h-10 items-center rounded-full border border-line px-4 py-2 text-sm text-slate hover:text-bone">Analytics</Link>
             <Link
               href="/gigs/new"
-              className="rounded-full bg-ember px-5 py-2.5 text-sm font-semibold text-ink hover:bg-ember/90 transition-colors"
+              className="inline-flex min-h-10 flex-1 items-center justify-center rounded-full bg-ember px-4 py-2 text-center text-sm font-semibold text-ink transition-colors hover:bg-ember/90 sm:flex-none sm:px-5"
             >
               + List a new product
             </Link>
@@ -114,11 +114,11 @@ export default function MyGigsPage() {
           </p>
         )}
 
-        <div className="mt-8 space-y-4">
+        <div className="mt-6 space-y-3 sm:mt-8 sm:space-y-4">
           {gigs.map((gig) => {
             const rating = ratings[gig.id];
             return (
-              <div key={gig.id} className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-line bg-paper p-5">
+              <div key={gig.id} className="flex min-w-0 flex-wrap items-center justify-between gap-3 rounded-2xl border border-line bg-paper p-4 sm:gap-4 sm:p-5">
                 <div className="min-w-0 flex-1 basis-full">
                   <div className="flex items-center gap-2 flex-wrap">
                     <Link href={`/gigs/${gig.id}`} className="font-display font-bold hover:text-ember transition-colors">
@@ -138,13 +138,13 @@ export default function MyGigsPage() {
                   </div>
                   {packageEnabled ? <ProductPackageManager gigId={gig.id} compact onComplete={load} /> : null}
                 </div>
-                <div className="flex items-center gap-4 shrink-0">
+                <div className="flex w-full flex-wrap items-center justify-between gap-2 sm:w-auto sm:justify-end sm:gap-3">
                   <span className="font-mono text-sm">₦{gig.price_ngn.toLocaleString()}</span>
                   {["active", "paused"].includes(gig.status) ? (
                     <button
                       onClick={() => toggleStatus(gig)}
                       disabled={busyId === gig.id}
-                      className="rounded-full border border-line px-4 py-2 text-xs font-medium text-bone hover:border-slate transition-colors disabled:opacity-50"
+                      className="min-h-10 rounded-full border border-line px-3 py-2 text-xs font-medium text-bone transition-colors hover:border-slate disabled:opacity-50 sm:px-4"
                     >
                       {gig.status === "active" ? "Pause" : "Resume"}
                     </button>
@@ -152,7 +152,7 @@ export default function MyGigsPage() {
                   <button
                     onClick={() => deleteGig(gig)}
                     disabled={busyId === gig.id || gig.status === "deleted"}
-                    className="rounded-full border border-red-900/20 bg-red-950/10 px-4 py-2 text-xs font-medium text-red-500 transition-colors hover:border-red-900/40 hover:bg-red-950/20 disabled:opacity-50"
+                    className="min-h-10 rounded-full border border-red-900/20 bg-red-950/10 px-3 py-2 text-xs font-medium text-red-500 transition-colors hover:border-red-900/40 hover:bg-red-950/20 disabled:opacity-50 sm:px-4"
                   >
                     {gig.status === "deleted" ? "Deleted" : "Delete"}
                   </button>
@@ -165,3 +165,4 @@ export default function MyGigsPage() {
     </main>
   );
 }
+

@@ -225,18 +225,18 @@ export default function SellerOnboardingPage() {
   }
 
   return (
-    <main className="auth-shell text-bone">
-      <section className="w-full max-w-4xl">
-        <div className="mb-8 flex items-center justify-between">
+    <main className="min-h-[100svh] bg-ink px-4 py-5 text-bone sm:px-6 sm:py-10">
+      <section className="mx-auto w-full max-w-4xl">
+        <div className="mb-5 flex items-center justify-between gap-3 sm:mb-8">
           <Link href="/" className="font-display text-lg font-bold tracking-tight text-bone">
             <span className="mr-2 inline-block h-2 w-2 rounded-full bg-ember shadow-[0_0_0_6px_rgba(242,100,25,.14)]" />
             The Middleman
           </Link>
-          <span className="rounded-full border border-ember/30 bg-ember/10 px-3 py-1 text-xs font-medium text-ember shadow-[0_0_0_1px_rgba(242,100,25,.08)]">Step 2 of 2</span>
+          <span className="shrink-0 rounded-full border border-ember/30 bg-ember/10 px-3 py-1 text-xs font-medium text-ember shadow-[0_0_0_1px_rgba(242,100,25,.08)]">Step 2 of 2</span>
         </div>
 
         <form onSubmit={handleSubmit} className="overflow-hidden rounded-3xl border border-line bg-paper text-bone shadow-2xl shadow-black/25">
-          <header className="border-b border-line bg-[radial-gradient(circle_at_top_right,_rgba(242,100,25,.2),_transparent_42%),linear-gradient(180deg,rgba(23,23,23,.92),rgba(17,17,17,1))] px-6 py-10 sm:px-10">
+          <header className="border-b border-line bg-[radial-gradient(circle_at_top_right,_rgba(242,100,25,.2),_transparent_42%),linear-gradient(180deg,rgba(23,23,23,.92),rgba(17,17,17,1))] px-5 py-7 sm:px-10 sm:py-10">
             <p className="text-xs font-semibold tracking-[.2em] text-ember">SELLER VERIFICATION</p>
             <h1 className="mt-3 font-display text-3xl font-bold text-bone sm:text-5xl">Show buyers what you deliver.</h1>
             <p className="mt-4 max-w-2xl text-sm leading-relaxed text-slate sm:text-base">
@@ -249,7 +249,7 @@ export default function SellerOnboardingPage() {
             </div>
           </header>
 
-          <div className="grid gap-8 p-6 sm:p-10 lg:grid-cols-[1.3fr_.7fr]">
+          <div className="grid min-w-0 gap-6 p-4 sm:gap-8 sm:p-10 lg:grid-cols-[1.3fr_.7fr]">
             <div className="space-y-6">
               <section>
                 <p className="text-xs font-bold tracking-[.16em] text-ember">01 · CREATOR PROFILE</p>
@@ -485,7 +485,7 @@ export default function SellerOnboardingPage() {
               </section>
             </div>
 
-            <aside className="h-fit rounded-2xl border border-ember/15 bg-[radial-gradient(circle_at_top,_rgba(242,100,25,.12),_transparent_50%),linear-gradient(180deg,rgba(23,23,23,.82),rgba(13,13,13,.96))] p-6 shadow-[0_18px_50px_rgba(0,0,0,.22)]">
+            <aside className="h-fit rounded-2xl border border-ember/15 bg-[radial-gradient(circle_at_top,_rgba(242,100,25,.12),_transparent_50%),linear-gradient(180deg,rgba(23,23,23,.82),rgba(13,13,13,.96))] p-4 shadow-[0_18px_50px_rgba(0,0,0,.22)] sm:p-6">
               <p className="text-xs font-bold tracking-[.16em] text-ember">WHAT HAPPENS NEXT</p>
               <ol className="mt-5 space-y-5 text-sm text-slate">
                 <li><span className="mr-3 font-mono text-ember">01</span>A person on our team reviews your profile and document by hand.</li>
@@ -520,7 +520,7 @@ export default function SellerOnboardingPage() {
             </div>
           )}
 
-          <footer className="mt-8 flex flex-col-reverse gap-4 border-t border-line px-6 py-6 sm:mt-10 sm:flex-row sm:items-center sm:justify-between sm:px-10">
+          <footer className="mt-6 flex flex-col-reverse gap-4 border-t border-line px-4 py-5 sm:mt-10 sm:flex-row sm:items-center sm:justify-between sm:px-10 sm:py-6">
             <p className="text-xs text-slate">Your document is only used for verification and reviewed by a person, not an algorithm.</p>
             <button
               disabled={loading}
@@ -535,3 +535,4 @@ export default function SellerOnboardingPage() {
     </main>
   );
 }
+

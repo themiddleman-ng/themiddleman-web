@@ -7,7 +7,8 @@ export default function ResetPassword() {
     [password, setPassword] = useState(""),
     [message, setMessage] = useState(""),
     [recovery, setRecovery] = useState(false),
-    [busy, setBusy] = useState(false);
+    [busy, setBusy] = useState(false),
+    [showPassword, setShowPassword] = useState(false);
   useEffect(() => {
     const { data } = supabase.auth.onAuthStateChange((event) => {
       if (event === "PASSWORD_RECOVERY") setRecovery(true);
@@ -53,19 +54,31 @@ export default function ResetPassword() {
       <label htmlFor="reset-value">
         {recovery ? "New password (12–128 characters)" : "Email address"}
       </label>
-      <input
-        id="reset-value"
-        type={recovery ? "password" : "email"}
-        className="auth-input mt-2"
-        value={recovery ? password : email}
-        onChange={(e) =>
-          recovery ? setPassword(e.target.value) : setEmail(e.target.value)
-        }
-        autoComplete={recovery ? "new-password" : "email"}
-        minLength={recovery ? 12 : undefined}
-        maxLength={recovery ? 128 : 254}
-        required
-      />
+      <span className="relative mt-2 block">
+        <input
+          id="reset-value"
+          type={recovery ? (showPassword ? "text" : "password") : "email"}
+          className={`auth-input ${recovery ? "pr-20" : ""}`}
+          value={recovery ? password : email}
+          onChange={(e) =>
+            recovery ? setPassword(e.target.value) : setEmail(e.target.value)
+          }
+          autoComplete={recovery ? "new-password" : "email"}
+          minLength={recovery ? 12 : undefined}
+          maxLength={recovery ? 128 : 254}
+          required
+        />
+        {recovery && (
+          <button
+            type="button"
+            onClick={() => setShowPassword((visible) => !visible)}
+            aria-label={showPassword ? "Hide password" : "Show password"}
+            className="absolute right-3 top-1/2 -translate-y-1/2 rounded-md px-2 py-1 text-xs font-semibold text-slate hover:text-ember focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ember"
+          >
+            {showPassword ? "Hide" : "Show"}
+          </button>
+        )}
+      </span>
       <button disabled={busy} className="auth-button mt-4">
         {busy
           ? "Please wait…"
@@ -84,3 +97,4 @@ export default function ResetPassword() {
     </form>
   );
 }
+
