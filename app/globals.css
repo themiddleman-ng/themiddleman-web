@@ -1119,7 +1119,8 @@ body {
   overflow-x: clip;
   color: #172B45;
   background:
-    radial-gradient(ellipse at 88% -8%, rgba(216, 123, 54, .055), transparent 34%),
+    radial-gradient(ellipse at 88% -8%, rgba(216, 123, 54, .10), transparent 34%),
+    radial-gradient(ellipse at 12% 22%, rgba(70, 139, 146, .075), transparent 28%),
     #F8F6F1;
 }
 .mp-content { position: relative; z-index: 1; }

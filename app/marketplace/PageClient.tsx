@@ -196,7 +196,7 @@ export default function MarketplacePage() {
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h1 className="font-display text-[26px] font-semibold leading-tight tracking-[-.035em] text-[#172B45] sm:text-[30px]">
-              Find digital products worth paying for.
+              Find digital products <span className="text-[#c95b1d]">worth paying for.</span>
             </h1>
             <p className="mt-1.5 max-w-2xl text-[14px] leading-6 text-[#526273]">
               Browse creator-made products, preview what’s included, and pay in Naira through Paystack.
@@ -204,7 +204,7 @@ export default function MarketplacePage() {
           </div>
           <Link
             href="/gigs/new"
-            className="inline-flex w-fit shrink-0 items-center justify-center rounded-md px-3.5 py-2.5 text-sm font-semibold text-[#263E55] transition-colors hover:bg-[#F1E7DA] hover:text-[#0B3D91] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0B3D91]"
+            className="inline-flex w-fit shrink-0 items-center justify-center rounded-full bg-[#fff0e5] px-4 py-2.5 text-sm font-semibold text-[#b64d18] transition-colors hover:bg-[#fbe1cf] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#de641e]"
           >
             Sell a digital product
           </Link>
@@ -221,11 +221,11 @@ export default function MarketplacePage() {
             onChange={(event) => setQuery(event.target.value)}
             placeholder="Search products, creators, templates..."
             aria-label="Search products, creators, and templates"
-            className="h-12 w-full rounded-lg border border-[#E7DED3] bg-[#FFFEFC] pl-11 pr-4 text-[15px] text-[#172B45] shadow-[0_2px_10px_rgba(39,30,20,.035)] placeholder:text-[#7C8790] focus:border-[#D87B36] focus:outline-none focus:ring-2 focus:ring-[#E89A5C]/20"
+            className="h-12 w-full rounded-lg border border-[#dce6e5] bg-[#fffefd] pl-11 pr-4 text-[15px] text-[#172B45] shadow-[0_2px_10px_rgba(39,30,20,.035)] placeholder:text-[#7C8790] focus:border-[#D87B36] focus:outline-none focus:ring-2 focus:ring-[#E89A5C]/20"
           />
         </div>
 
-        <nav aria-label="Product categories" className="no-scrollbar mt-3 flex gap-1 overflow-x-auto border-b border-[#E8E1D8] pb-1">
+        <nav aria-label="Product categories" className="no-scrollbar mt-3 flex gap-1 overflow-x-auto border-b border-[#dce6e5] pb-1">
           {CATEGORIES.map((category) => {
             const active = activeCategory === category.value;
             return (
@@ -237,8 +237,8 @@ export default function MarketplacePage() {
                 className={
                   "mp-tab shrink-0 whitespace-nowrap rounded-md px-3 py-2 text-[13px] font-medium transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-[#0B3D91] " +
                   (active
-                    ? "bg-[#172B45] text-white"
-                    : "text-[#5D6B78] hover:bg-[#F2E9DE] hover:text-[#172B45]")
+                    ? "bg-[#de641e] text-white shadow-[0_2px_8px_rgba(190,81,25,.18)]"
+                    : "text-[#526777] hover:bg-[#e8f2ef] hover:text-[#244f57]")
                 }
               >
                 {category.label}
@@ -284,3 +284,4 @@ export default function MarketplacePage() {
     </div>
   );
 }
+

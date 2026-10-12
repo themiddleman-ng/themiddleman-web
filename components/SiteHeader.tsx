@@ -25,7 +25,7 @@ function initials(user: HeaderUser | null) {
   return parts[0]?.slice(0, 2).toUpperCase() ?? 'MM';
 }
 
-export default function SiteHeader({ isSeller = false, compact = false, hideOnMobile = false }: { isSeller?: boolean; compact?: boolean; hideOnMobile?: boolean }) {
+export default function SiteHeader({ isSeller: sellerHint = false, compact = false, hideOnMobile = false }: { isSeller?: boolean; compact?: boolean; hideOnMobile?: boolean }) {
   const router = useRouter();
   const pathname = usePathname();
   const [user, setUser] = useState<HeaderUser | null>(null);
@@ -34,6 +34,7 @@ export default function SiteHeader({ isSeller = false, compact = false, hideOnMo
   const [unreadCount, setUnreadCount] = useState(0);
   const [notificationCount, setNotificationCount] = useState(0);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [sellerAccount, setSellerAccount] = useState(sellerHint);
 
   useEffect(() => {
     let cancelled = false;
@@ -49,11 +50,13 @@ export default function SiteHeader({ isSeller = false, compact = false, hideOnMo
         return;
       }
 
-      const [messagesResponse, notificationsResponse] = await Promise.all([
+      const [sellerResponse, messagesResponse, notificationsResponse] = await Promise.all([
+        supabase.from('users').select('is_seller').eq('id', authUser.id).maybeSingle(),
         fetch('/api/conversations', { cache: 'no-store' }),
         fetch('/api/notifications', { cache: 'no-store' }),
       ]);
       if (cancelled) return;
+      setSellerAccount(Boolean(sellerResponse.data?.is_seller || sellerHint));
       if (messagesResponse.ok) {
         const result = await messagesResponse.json();
         if (!cancelled) setUnreadCount(result.unreadCount ?? 0);
@@ -74,8 +77,12 @@ export default function SiteHeader({ isSeller = false, compact = false, hideOnMo
       setUser(nextUser);
       setAuthResolved(true);
       if (!session?.user) {
+        setSellerAccount(false);
         setUnreadCount(0);
         setNotificationCount(0);
+      } else {
+        void supabase.from('users').select('is_seller').eq('id', session.user.id).maybeSingle()
+          .then(({ data }) => setSellerAccount(Boolean(data?.is_seller || sellerHint)));
       }
     });
 
@@ -139,7 +146,7 @@ export default function SiteHeader({ isSeller = false, compact = false, hideOnMo
           <Link href="/marketplace" className={desktopLink}>Marketplace</Link>
           {user && <>
             <Link href="/orders" data-onboarding-target="orders" className={desktopLink}>My Orders</Link>
-            {isSeller && <Link href="/gigs/mine" className={desktopLink}>My Products</Link>}
+            {sellerAccount && <Link href="/gigs/mine" className={desktopLink}>My Products</Link>}
             <Link href="/messages" data-onboarding-target="messages" className={desktopLink}><span className="inline-flex items-center gap-2">Messages{unreadBadge}</span></Link>
             <Link href="/notifications" className={desktopLink}><span className="inline-flex items-center gap-2">Alerts{notificationBadge}</span></Link>
             <Link href="/payments" className={desktopLink}>Payments</Link>
@@ -182,14 +189,13 @@ export default function SiteHeader({ isSeller = false, compact = false, hideOnMo
                   </div>
                   <nav aria-label="Account navigation" className="space-y-0.5">
                     <Link role="menuitem" href="/profile" data-onboarding-target="profile" className="hidden min-h-11 items-center justify-between rounded-xl px-3 py-2.5 text-sm text-[#273544] transition-colors hover:bg-[#f5efe7] md:flex">Profile</Link>
-                    <Link role="menuitem" href="/orders" data-onboarding-target="orders" className={mobileLink}>My orders</Link>
-                    {isSeller && <Link role="menuitem" href="/gigs/mine" className={mobileLink}>My products</Link>}
-                    <Link role="menuitem" href="/notifications" className={mobileLink}><span>Notifications</span>{notificationBadge}</Link>
-                    <Link role="menuitem" href="/payments" className={mobileLink}>Payments</Link>
+                    <Link role="menuitem" href="/orders" data-onboarding-target="orders" className={`${mobileLink} md:hidden`}>My orders</Link>
+                    {sellerAccount && <Link role="menuitem" href="/gigs/mine" className={`${mobileLink} md:hidden`}>My products</Link>}
+                    <Link role="menuitem" href="/notifications" className={`${mobileLink} md:hidden`}><span>Notifications</span>{notificationBadge}</Link>
+                    <Link role="menuitem" href="/payments" className={`${mobileLink} md:hidden`}>Payments</Link>
                     <Link role="menuitem" href="/settings" className={mobileLink}>Settings</Link>
                   </nav>
                   <div className="my-2 border-t border-[#eee7de] pt-2">
-                    <button type="button" role="menuitem" onClick={openCookieSettings} className={`${mobileLink} w-full text-left`}>Cookie settings</button>
                     <button type="button" role="menuitem" onClick={handleSignOut} className={`${mobileLink} w-full text-left text-[#8e3b28] hover:bg-[#fff0ea]`}>Sign out</button>
                   </div>
                 </>

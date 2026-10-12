@@ -62,6 +62,15 @@ function VerificationBadge({ status }: { status: SellerProfile['verification_sta
   return <span className={`inline-flex rounded-full px-3 py-1.5 text-xs font-semibold ${classes[status]}`}>{labels[status]}</span>;
 }
 
+function orderStatusStyle(status: string) {
+  const normalized = status.toLowerCase();
+  if (['completed', 'approved', 'delivered'].includes(normalized)) return 'bg-[#e5f2ea] text-[#3c704e]';
+  if (['in_progress', 'in_escrow', 'paid'].includes(normalized)) return 'bg-[#e7eff8] text-[#365d83]';
+  if (['pending_payment', 'pending'].includes(normalized)) return 'bg-[#fff0e5] text-[#a6531e]';
+  if (['cancelled', 'canceled', 'refunded', 'rejected'].includes(normalized)) return 'bg-[#f8e9e7] text-[#9b493d]';
+  return 'bg-[#f0f1f3] text-[#5c6874]';
+}
+
 function PhotoAvatar({ url, name, email }: { url: string; name: string | null; email: string }) {
   return (
     <div className="relative grid h-24 w-24 shrink-0 place-items-center overflow-hidden rounded-full bg-[#e9e1d6] text-2xl font-semibold text-[#23384d] ring-4 ring-white shadow-[0_4px_18px_rgba(29,39,51,.10)] sm:h-28 sm:w-28 sm:text-3xl">
@@ -206,14 +215,9 @@ export default function ProfilePage() {
     setAvatarLoading(false);
   }
 
-  async function handleSignOut() {
-    await supabase.auth.signOut();
-    router.push('/signup?mode=signin');
-  }
-
   if (loading) {
     return (
-      <main className="min-h-screen bg-[#f7f3ec] text-[#1d2733]">
+      <main className="min-h-screen bg-[#f6f4ef] text-[#1d2733]">
         <SiteHeader />
         <div className="mx-auto max-w-6xl px-4 py-16 text-center text-sm text-[#687581] sm:px-6">Loading your profile…</div>
       </main>
@@ -227,27 +231,23 @@ export default function ProfilePage() {
       : 'Buyer';
 
   return (
-    <main className="min-h-screen bg-[radial-gradient(ellipse_at_88%_4%,rgba(227,127,72,.12),transparent_28%),#f7f3ec] text-[#1d2733]">
+    <main className="min-h-screen bg-[radial-gradient(ellipse_at_88%_4%,rgba(227,127,72,.15),transparent_28%),radial-gradient(ellipse_at_8%_42%,rgba(76,143,153,.09),transparent_30%),#f6f4ef] text-[#1d2733]">
       <SiteHeader isSeller={user?.is_seller} />
 
       <div className="mx-auto max-w-6xl px-4 pb-12 pt-7 sm:px-6 sm:pt-10">
-        <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
+        <div className="mb-6">
           <div>
-            <p className="text-sm font-medium text-[#a95320]">Account</p>
+            <p className="text-sm font-semibold text-[#2e7776]">Account</p>
             <h1 className="mt-1 font-display text-3xl font-semibold tracking-[-.035em] text-[#1b3044] sm:text-4xl">Your profile</h1>
           </div>
-          <Link href="/settings" className="inline-flex min-h-10 items-center rounded-full border border-[#ddd5c9] bg-white/70 px-4 text-sm font-semibold text-[#304458] transition hover:border-[#dc7a45] hover:bg-white">
-            Settings
-          </Link>
         </div>
 
-        <section className="rounded-[28px] bg-[#fffdf9] p-5 shadow-[0_12px_40px_rgba(48,40,31,.06)] sm:p-8">
+        <section className="rounded-[28px] border border-white/80 bg-[linear-gradient(115deg,#fffaf3_0%,#fffdf9_58%,#edf5f3_100%)] p-5 shadow-[0_12px_40px_rgba(48,40,31,.06)] sm:p-8">
           <div className="flex flex-col gap-6 sm:flex-row sm:items-center">
             <PhotoAvatar url={avatarUrl} name={user?.full_name ?? null} email={user?.email ?? ''} />
             <div className="min-w-0 flex-1">
               <div className="flex flex-wrap items-center gap-2">
                 <p className="text-sm font-medium text-[#687581]">{roleLabel}{user?.state ? ` · ${user.state}` : ''}</p>
-                {user?.is_seller && sellerProfile && <VerificationBadge status={sellerProfile.verification_status} />}
               </div>
               <h2 className="mt-2 break-words font-display text-2xl font-semibold tracking-[-.025em] text-[#1b3044] sm:text-3xl">
                 {user?.full_name?.trim() ? user.full_name : user?.email}
@@ -286,7 +286,7 @@ export default function ProfilePage() {
           </div>
 
           <div className="mt-6 border-t border-[#eee7de] pt-5">
-            <p className="text-sm font-semibold text-[#33485b]">A note about your photo</p>
+            <p className="text-sm font-semibold text-[#2e7776]">A note about your photo</p>
             <p className="mt-1 max-w-2xl text-sm leading-6 text-[#6b7782]">Choose a clear, professional headshot. Avoid logos, group photos and heavy filters. JPG, PNG or WebP, up to 3 MB. The photo is stored privately and only shown in your account.</p>
             {avatarMessage && <p role="status" className="mt-3 text-sm font-medium text-[#436348]">{avatarMessage}</p>}
             {avatarError && <p role="alert" className="mt-3 text-sm font-medium text-[#9b3e2b]">{avatarError}</p>}
@@ -294,7 +294,7 @@ export default function ProfilePage() {
         </section>
 
         <div className="mt-5 grid gap-5 lg:grid-cols-[1.35fr_.65fr]">
-          <section className="rounded-[24px] bg-[#fffdf9] p-5 shadow-[0_10px_34px_rgba(48,40,31,.045)] sm:p-6">
+          <section className="rounded-[24px] bg-[#fffdf9] p-5 shadow-[0_10px_34px_rgba(48,40,31,.045)] ring-1 ring-[#dce8ea] sm:p-6">
             <div className="flex items-center justify-between gap-4">
               <div>
                 <p className="text-sm font-medium text-[#a95320]">Recent activity</p>
@@ -304,7 +304,7 @@ export default function ProfilePage() {
             </div>
 
             {orders.length === 0 ? (
-              <div className="mt-5 rounded-2xl bg-[#f8f4ee] px-4 py-7 text-center">
+              <div className="mt-5 rounded-2xl bg-[#edf4f6] px-4 py-7 text-center">
                 <p className="text-sm text-[#65727d]">Your purchases and their progress will appear here.</p>
                 <Link href="/marketplace" className="mt-3 inline-flex min-h-10 items-center rounded-full px-3 text-sm font-semibold text-[#a95320] hover:bg-white">
                   Explore products
@@ -318,52 +318,38 @@ export default function ProfilePage() {
                       <p className="truncate text-sm font-semibold text-[#27394b]">{order.gigs?.title ?? 'Product'}</p>
                       <p className="mt-1 text-xs text-[#74808a]">₦{order.amount.toLocaleString()} <span aria-hidden="true">·</span> {new Date(order.created_at).toLocaleDateString('en-NG', { day: 'numeric', month: 'short' })}</p>
                     </div>
-                    <span className="w-fit rounded-full bg-[#f6f1e9] px-3 py-1.5 text-xs font-medium capitalize text-[#526272]">{order.status.replace(/_/g, ' ')}</span>
+                    <span className={`w-fit rounded-full px-3 py-1.5 text-xs font-semibold capitalize ${orderStatusStyle(order.status)}`}>{order.status.replace(/_/g, ' ')}</span>
                   </div>
                 ))}
               </div>
             )}
           </section>
 
-          <aside className="rounded-[24px] bg-[#183149] p-5 text-[#f7f3ec] shadow-[0_10px_34px_rgba(48,40,31,.07)] sm:p-6">
-            <p className="text-sm font-medium text-[#f2b28a]">Account</p>
-            <h2 className="mt-1 font-display text-xl font-semibold">{user?.is_seller ? 'Your creator space' : 'Ready when you are'}</h2>
-            <p className="mt-3 text-sm leading-6 text-white/75">
+          <aside className="rounded-[24px] border border-[#cddfdd] bg-[linear-gradient(145deg,#e5f2ef_0%,#eaf0f8_100%)] p-5 text-[#1b3044] shadow-[0_10px_34px_rgba(48,40,31,.045)] sm:p-6">
+            <p className="text-sm font-semibold text-[#347a76]">{user?.is_seller ? 'Creator account' : 'Your account'}</p>
+            <h2 className="mt-1 font-display text-xl font-semibold">{user?.is_seller ? 'Your seller status' : 'Buy and sell with one account'}</h2>
+            <p className="mt-3 text-sm leading-6 text-[#526777]">
               {user?.is_seller
-                ? 'Manage your products and seller verification from your creator pages.'
-                : 'You can become a seller from this account whenever you are ready.'}
+                ? 'Your product tools are in the main navigation. Check your current seller review status here.'
+                : 'Your buyer account can also become a seller whenever you’re ready.'}
             </p>
-            <div className="mt-5 grid gap-2">
-              {user?.is_seller && (
-                <Link href="/gigs/mine" className="flex min-h-11 items-center justify-between rounded-xl bg-white/10 px-4 text-sm font-semibold text-white transition hover:bg-white/15">
-                  My products <span aria-hidden="true">↗</span>
-                </Link>
-              )}
-              {user?.is_seller && (
-                <Link href="/seller-support" className="flex min-h-11 items-center justify-between rounded-xl bg-white/10 px-4 text-sm font-semibold text-white transition hover:bg-white/15">
-                  Operations messages <span aria-hidden="true">↗</span>
-                </Link>
-              )}
-              <Link href="/onboarding/role" className="flex min-h-11 items-center justify-between rounded-xl bg-white/10 px-4 text-sm font-semibold text-white transition hover:bg-white/15">
-                Account preferences <span aria-hidden="true">↗</span>
+            {user?.is_seller ? (
+              <div className="mt-5 flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-white/75 px-4 py-3">
+                <span className="text-sm font-medium text-[#526777]">Verification</span>
+                {sellerProfile && <VerificationBadge status={sellerProfile.verification_status} />}
+              </div>
+            ) : (
+              <Link href="/onboarding/role" className="mt-5 inline-flex min-h-11 items-center justify-center rounded-xl bg-[#de641e] px-4 text-sm font-semibold text-white transition hover:bg-[#c95415]">
+                Set up selling
               </Link>
-              <button onClick={handleSignOut} className="mt-2 min-h-10 rounded-xl px-4 text-left text-sm font-medium text-white/70 transition hover:bg-white/10 hover:text-white">
-                Sign out
-              </button>
-            </div>
+            )}
+            {user?.is_seller && (
+              <Link href="/seller-support" className="mt-3 flex min-h-11 items-center justify-center rounded-xl border border-[#b7cfcd] bg-white/70 px-4 text-sm font-semibold text-[#295e65] transition hover:bg-white">
+                Operations messages
+              </Link>
+            )}
           </aside>
         </div>
-
-        <section className="mt-5 flex flex-col gap-3 rounded-[24px] border border-[#ead8ca] bg-[#fffaf5] p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6">
-          <div>
-            <h2 className="font-display text-lg font-semibold text-[#26384a]">Account and privacy</h2>
-            <p className="mt-1 max-w-2xl text-sm leading-6 text-[#66717b]">Manage your preferences, review security settings or remove your account.</p>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            <Link href="/settings" className="inline-flex min-h-10 items-center justify-center rounded-xl border border-[#d8c7b8] bg-white px-4 text-sm font-semibold text-[#304458] transition hover:bg-[#f9f1e9]">Open settings</Link>
-            <Link href="/account/delete" className="inline-flex min-h-10 items-center justify-center rounded-xl px-4 text-sm font-semibold text-[#8b4025] transition hover:bg-[#faeee6]">Delete account</Link>
-          </div>
-        </section>
       </div>
     </main>
   );

@@ -41,7 +41,7 @@ export default function GigCard({ gig, rating }: { gig: CardGig; rating?: CardRa
       </div>
 
       <div className="pt-3">
-        <h2 className="line-clamp-2 text-[15px] font-semibold leading-5 text-[#203A53] transition-colors group-hover:text-[#0B3D91] sm:text-[16px]">
+        <h2 className="line-clamp-2 text-[15px] font-semibold leading-5 text-[#203A53] transition-colors group-hover:text-[#c95b1d] sm:text-[16px]">
           {gig.title}
         </h2>
 
@@ -52,7 +52,7 @@ export default function GigCard({ gig, rating }: { gig: CardGig; rating?: CardRa
               <span
                 aria-label="Verified seller"
                 title="Verified seller"
-                className="shrink-0 text-[12px] font-bold text-[#0B3D91]"
+                className="shrink-0 text-[12px] font-bold text-[#2e7776]"
               >
                 ✓
               </span>
@@ -65,7 +65,7 @@ export default function GigCard({ gig, rating }: { gig: CardGig; rating?: CardRa
           )}
         </div>
 
-        <p className="mt-2 text-[15px] font-semibold text-[#172B45]">
+        <p className="mt-2 text-[15px] font-semibold text-[#c95b1d]">
           ₦{gig.price_ngn.toLocaleString("en-NG")}
         </p>
       </div>
