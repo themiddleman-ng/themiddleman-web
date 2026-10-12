@@ -155,6 +155,14 @@ export default function ProfilePage() {
               >
                 Replay the quick tour
               </button>
+              {user?.is_seller && (
+                <Link
+                  href="/seller-support"
+                  className="rounded-full border border-line px-5 py-3 text-sm font-semibold text-bone transition-colors hover:border-ember/40 hover:text-ember"
+                >
+                  Operations messages
+                </Link>
+              )}
               <Link
                 href="/onboarding/role"
                 className="rounded-full border border-line px-5 py-3 text-sm font-semibold text-bone hover:border-slate transition-colors"
