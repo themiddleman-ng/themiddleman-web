@@ -197,6 +197,7 @@ function AuthPageInner() {
 
     if (error) {
       setLoginError(getLoginErrorMessage(error));
+      setShowPassword(false);
       setLoginLoading(false);
       return;
     }
