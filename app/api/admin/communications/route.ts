@@ -95,6 +95,7 @@ export async function POST(request: Request) {
   if (!text || text.length > 5000) return privateJson({ error: "Write a message of 1–5000 characters." }, 400);
   const db = administrator.db;
   let threadId = "";
+  let recipientUserId = "";
 
   if (body.action === "start") {
     if (!uuidPattern.test(body.profileId ?? "") || !uuidPattern.test(body.sellerUserId ?? "") ||
@@ -116,13 +117,15 @@ export async function POST(request: Request) {
       .select("id").single();
     if (threadError || !thread) return privateJson({ error: "Could not start the conversation." }, 409);
     threadId = thread.id;
+    recipientUserId = seller.user_id;
   } else if (body.action === "message") {
     if (!uuidPattern.test(body.threadId ?? "")) return privateJson({ error: "Invalid conversation." }, 400);
     const { data: thread } = await db.from("operational_threads")
-      .select("id,status").eq("id", body.threadId).maybeSingle();
+      .select("id,status,seller_user_id,subject").eq("id", body.threadId).maybeSingle();
     if (!thread) return privateJson({ error: "Conversation not found." }, 404);
     if (thread.status !== "open") return privateJson({ error: "Reopen this conversation before replying." }, 409);
     threadId = thread.id;
+    recipientUserId = thread.seller_user_id;
   } else {
     return privateJson({ error: "Choose a valid conversation action." }, 400);
   }
@@ -135,5 +138,14 @@ export async function POST(request: Request) {
   }).select("id,thread_id,sender_id,sender_kind,body,created_at").single();
   if (messageError || !message) return privateJson({ error: "Could not save the message." }, 409);
   await db.from("operational_threads").update({ updated_at: new Date().toISOString() }).eq("id", threadId);
+  await db.from("notifications").insert({
+    recipient_user_id: recipientUserId,
+    source: "admin",
+    notification_type: "operational_message",
+    title: "Message from The Middleman team",
+    body: "Open your seller Operations inbox to read this update.",
+    href: "/seller-support",
+    event_key: "operational-message:" + message.id,
+  });
   return privateJson({ threadId, message }, 201);
 }
