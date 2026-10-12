@@ -84,24 +84,32 @@ export default function FirstRunExperience() {
   }, []);
 
   const loadPreference = useCallback(async (id: string) => {
+    const show = (row: PreferenceRow | null) => {
+      if (!row) {
+        setTourIndex(0);
+        setStage("choice");
+      } else if (row.walkthrough_status === "in_progress" && row.experience_choice === "new") {
+        setTourIndex(Math.max(0, Math.min(TOUR_STEPS.length - 1, row.current_step || 0)));
+        setStage("tour");
+      } else {
+        setStage("hidden");
+      }
+    };
     const { data, error } = await supabase
       .from("user_onboarding_preferences")
       .select("experience_choice,walkthrough_status,current_step")
       .eq("user_id", id)
       .maybeSingle();
-    if (error) return;
-    if (!data) {
-      setTourIndex(0);
-      setStage("choice");
+    if (error) {
+      try {
+        const cached = localStorage.getItem("middleman-onboarding:" + id);
+        show(cached ? JSON.parse(cached) as PreferenceRow : null);
+      } catch {
+        show(null);
+      }
       return;
     }
-    const row = data as PreferenceRow;
-    if (row.walkthrough_status === "in_progress" && row.experience_choice === "new") {
-      setTourIndex(Math.max(0, Math.min(TOUR_STEPS.length - 1, row.current_step || 0)));
-      setStage("tour");
-    } else {
-      setStage("hidden");
-    }
+    show(data as PreferenceRow | null);
   }, []);
 
   useEffect(() => {
@@ -174,20 +182,26 @@ export default function FirstRunExperience() {
     };
   }, [stage, tourIndex, restoreTarget]);
 
-  const persist = useCallback(async (choice: ExperienceChoice, status: "in_progress" | "skipped", step = 0) => {
+  const persist = useCallback(async (choice: ExperienceChoice, status: "in_progress" | "completed" | "skipped", step = 0) => {
     if (!userId) return false;
     setSaving(true);
     setSaveError("");
-    const { error } = await supabase.from("user_onboarding_preferences").upsert({
+    const preference = {
       user_id: userId,
       experience_choice: choice,
       walkthrough_status: status,
       current_step: step,
       completed_at: status === "in_progress" ? null : new Date().toISOString(),
       updated_at: new Date().toISOString(),
-    }, { onConflict: "user_id" });
+    };
+    const { error } = await supabase.from("user_onboarding_preferences").upsert(preference, { onConflict: "user_id" });
+    let cached = false;
+    try {
+      localStorage.setItem("middleman-onboarding:" + userId, JSON.stringify(preference));
+      cached = true;
+    } catch { /* The database remains the primary store. */ }
     setSaving(false);
-    if (error) {
+    if (error && !cached) {
       setSaveError("We couldn’t save that just now. Please try once more.");
       return false;
     }
@@ -212,13 +226,7 @@ export default function FirstRunExperience() {
   async function advanceTour() {
     const nextStep = tourIndex + 1;
     if (nextStep >= TOUR_STEPS.length) {
-      if (await persist("new", "in_progress", TOUR_STEPS.length)) {
-        setStage("hidden");
-        await supabase.from("user_onboarding_preferences").update({
-          walkthrough_status: "completed",
-          completed_at: new Date().toISOString(),
-        }).eq("user_id", userId);
-      }
+      if (await persist("new", "completed", TOUR_STEPS.length)) setStage("hidden");
       return;
     }
     if (await persist("new", "in_progress", nextStep)) setTourIndex(nextStep);
