@@ -47,9 +47,12 @@ async function resolveAccount(secret: string, accountNumber: string, bankCode: s
     account_number?: string;
     account_name?: string;
   }> | null;
-  if (!response.ok || !payload?.status || !payload.data?.account_name ||
-    payload.data.account_number !== accountNumber) return null;
-  return payload.data;
+  const resolvedNumber = payload?.data?.account_number;
+  const resolvedName = payload?.data?.account_name;
+  if (!response.ok || !payload?.status || typeof resolvedNumber !== "string" ||
+    typeof resolvedName !== "string" || !resolvedName.trim() ||
+    resolvedNumber !== accountNumber) return null;
+  return { account_number: resolvedNumber, account_name: resolvedName };
 }
 
 function normalizeAccountName(value: string) {

@@ -174,7 +174,7 @@ export default function FirstRunExperience() {
     };
   }, [stage, tourIndex, restoreTarget]);
 
-  async function persist(choice: ExperienceChoice, status: "in_progress" | "skipped", step = 0) {
+  const persist = useCallback(async (choice: ExperienceChoice, status: "in_progress" | "skipped", step = 0) => {
     if (!userId) return false;
     setSaving(true);
     setSaveError("");
@@ -192,7 +192,7 @@ export default function FirstRunExperience() {
       return false;
     }
     return true;
-  }
+  }, [userId]);
 
   async function choose(choice: ExperienceChoice) {
     if (choice === "veteran") {
@@ -226,7 +226,7 @@ export default function FirstRunExperience() {
 
   useEffect(() => {
     const replay = async () => {
-      if (!userId || saving) return;
+      if (!userId) return;
       if (await persist("new", "in_progress", 0)) {
         setTourIndex(0);
         setStage("tour");
@@ -234,7 +234,7 @@ export default function FirstRunExperience() {
     };
     window.addEventListener("middleman:onboarding-replay", replay);
     return () => window.removeEventListener("middleman:onboarding-replay", replay);
-  }, [userId, saving]);
+  }, [userId, persist]);
 
   if (stage === "hidden") return null;
 

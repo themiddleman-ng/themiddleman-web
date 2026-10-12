@@ -46,7 +46,7 @@ export default async function AdminEmailPreviewPage() {
     buyerEmail: "buyer@example.com",
     sellerEmail: "creator@example.com",
     sellerName: "Sample Creator",
-    productVersionId: "preview-version",
+    productVersionId: "preview-version" as string,
   });
   const review = productReviewEmailTemplate({
     title: "Brand starter kit",
