@@ -26,6 +26,29 @@ function passwordIsValid(value) {
   return PASSWORD_RULES.every((rule) => rule.test(value));
 }
 
+function getLoginErrorMessage(error) {
+  const code = String(error?.code || '').toLowerCase();
+  const message = String(error?.message || '').toLowerCase();
+
+  if (code === 'invalid_credentials' || message.includes('invalid login credentials')) {
+    return 'Those details don’t match an account. Check your email and password, or use “Forgot password?” to reset it.';
+  }
+
+  if (code === 'email_not_confirmed' || message.includes('email not confirmed')) {
+    return 'Confirm your email address first, then come back to log in.';
+  }
+
+  if (error?.status === 429 || code.includes('rate_limit') || message.includes('too many requests')) {
+    return 'There have been too many sign-in attempts. Wait a little, then try again.';
+  }
+
+  if (message.includes('failed to fetch') || message.includes('network')) {
+    return 'We couldn’t reach the sign-in service. Check your connection and try again.';
+  }
+
+  return 'We couldn’t sign you in right now. Check your details and try again.';
+}
+
 function PasswordChecklist({ value }) {
   if (!value) return null;
   return (
@@ -173,8 +196,7 @@ function AuthPageInner() {
     });
 
     if (error) {
-      const errorMsg = error.message || error.error_description || 'Invalid email or password.';
-      setLoginError(errorMsg);
+      setLoginError(getLoginErrorMessage(error));
       setLoginLoading(false);
       return;
     }
