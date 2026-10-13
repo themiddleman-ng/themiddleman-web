@@ -173,6 +173,23 @@ export default function Home() {
         <div className="mx-auto flex max-w-7xl flex-col gap-5 px-5 py-7 sm:px-8 md:flex-row md:items-center md:justify-between">
           <div><Logo variant="horizontal" /><p className="mt-2 text-[14px] text-[#74818D]">Digital products from independent Nigerian creators.</p></div>
           <div className="flex flex-wrap gap-x-5 gap-y-2 text-[14px] text-[#647485]"><Link href="/marketplace" className="hover:text-[#0B3D91]">Marketplace</Link><Link href="/legal/terms" className="hover:text-[#0B3D91]">Terms</Link><Link href="/legal/privacy" className="hover:text-[#0B3D91]">Privacy</Link><a href="mailto:hello@themiddleman.com.ng" className="hover:text-[#0B3D91]">Contact</a></div>
+          <a
+            href="https://www.codehype.ai/product/the-middleman?utm_source=codehype_badge"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex shrink-0 items-center"
+          >
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="https://www.codehype.ai/badges/the-middleman.svg?variant=find-us&v=20"
+              alt="Featured on CodeHype"
+              width={180}
+              height={65}
+              loading="lazy"
+              decoding="async"
+              style={{ display: "inline-block", border: 0, width: "100%", maxWidth: 180, height: "auto", maxHeight: 65 }}
+            />
+          </a>
         </div>
       </footer>
     </main>
