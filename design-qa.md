@@ -2,6 +2,12 @@
 
 final result: blocked
 
+## Current review walkthrough
+
+The development and Vercel Preview builds now expose `/design-review?screen=...` with 22 selectable screen examples. It is explicitly labeled as sample content, includes the approved `SiteHeader`, and does not change real account permissions or call write endpoints. The marketplace uses a preview-only sample catalogue when Supabase is unavailable; real and production catalogues still use the existing data source. Product cards in the sample catalogue lead to the sample product-detail screen.
+
+The admin overview was visually checked at desktop size after adding this walkthrough. The queue, metrics, admin navigation, recent activity, and sample-data notice are visible. The order filter and local message composer were also exercised in the preview. Automated checks pass, and the build completes. This route makes the missing pages accessible for review; it does **not** establish pixel-exact fidelity for every generated board. Generic account subpages and populated data-backed screens still need route-by-route comparison against the corresponding references.
+
 ## Target and scope
 
 Recreate the generated desktop/mobile boards while preserving the repository's approved logo, existing header appearance, page content, actions and backend permissions. Exact branding and existing controls take precedence over differences invented by image generation. The landing page is excluded.

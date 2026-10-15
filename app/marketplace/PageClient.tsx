@@ -6,6 +6,7 @@ import { useSearchParams } from "next/navigation";
 import { isSupabaseConfigured, supabase } from "@/lib/supabaseClient";
 import SiteHeader from "@/components/SiteHeader";
 import GigCard, { type CardGig, type CardRating } from "@/components/marketplace/GigCard";
+import { DESIGN_PREVIEW_GIGS } from "@/lib/design-preview/catalog";
 
 type GigCategory = "development" | "design" | "marketing" | "writing" | "ai_assisted";
 
@@ -99,7 +100,7 @@ function LoadingState() {
   );
 }
 
-export default function MarketplacePage() {
+export default function MarketplacePage({ designPreview = false }: { designPreview?: boolean }) {
   const searchParams = useSearchParams();
   const [gigs, setGigs] = useState<GigRow[]>([]);
   const [ratings, setRatings] = useState<Record<string, GigRating>>({});
@@ -131,12 +132,17 @@ export default function MarketplacePage() {
       setFetchError(null);
 
       if (!isSupabaseConfigured) {
-        setGigs([]);
-        setFetchError({
-          title: "Marketplace connection is not configured",
-          message: "This deployment has not been connected to the product catalogue yet.",
-          canRetry: false,
-        });
+        if (designPreview) {
+          setGigs(DESIGN_PREVIEW_GIGS as GigRow[]);
+          setFetchError(null);
+        } else {
+          setGigs([]);
+          setFetchError({
+            title: "Marketplace connection is not configured",
+            message: "This deployment has not been connected to the product catalogue yet.",
+            canRetry: false,
+          });
+        }
         setLoading(false);
         return;
       }
@@ -181,7 +187,7 @@ export default function MarketplacePage() {
     return () => {
       cancelled = true;
     };
-  }, [retryCount]);
+  }, [designPreview, retryCount]);
 
   const filteredGigs = gigs.filter((gig) => {
     const matchesCategory = activeCategory === "all" || gig.category === activeCategory;
@@ -204,7 +210,7 @@ export default function MarketplacePage() {
               Find your next useful starting point.
             </h1>
             <p className="mt-1.5 max-w-2xl text-[14px] leading-6 text-[#526273]">
-              Browse creator-made products, preview what’s included, and pay in Naira through Paystack.
+              Discover ready-made digital products. Make them yours with the creator.
             </p>
           </div>
           <Link
@@ -215,7 +221,7 @@ export default function MarketplacePage() {
           </Link>
         </div>
 
-        <div className="relative mt-4">
+        <div className="relative mt-5">
           <svg className="pointer-events-none absolute left-4 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-[#71808B]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
             <circle cx="10.8" cy="10.8" r="6.8" />
             <path d="m16 16 4.5 4.5" strokeLinecap="round" />
@@ -285,11 +291,14 @@ export default function MarketplacePage() {
           )}
 
           {!loading && !fetchError && filteredGigs.length > 0 && (
-            <div className={gridClass}>
-              {filteredGigs.map((gig) => (
-                <GigCard key={gig.id} gig={gig as CardGig} rating={ratings[gig.id] as CardRating | undefined} />
-              ))}
-            </div>
+            <>
+              {designPreview && !isSupabaseConfigured && <p className="mm-preview-note" role="status">Design preview · sample listings, no live checkout. <Link href="/design-review?screen=marketplace">Open all page designs →</Link></p>}
+              <div className={gridClass}>
+                {filteredGigs.map((gig) => (
+                  <GigCard key={gig.id} gig={gig as CardGig} rating={ratings[gig.id] as CardRating | undefined} />
+                ))}
+              </div>
+            </>
           )}
           </div>
         </div>

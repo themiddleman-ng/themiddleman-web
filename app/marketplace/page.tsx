@@ -24,5 +24,6 @@ export const metadata: Metadata = {
 };
 
 export default function Page() {
-  return <PageClient />;
+  const designPreview = process.env.NODE_ENV === "development" || process.env.VERCEL_ENV === "preview";
+  return <PageClient designPreview={designPreview} />;
 }

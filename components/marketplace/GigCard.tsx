@@ -15,7 +15,7 @@ export default function GigCard({ gig, rating }: { gig: CardGig; rating?: CardRa
 
   return (
     <Link
-      href={`/gigs/${gig.id}`}
+      href={gig.id.startsWith("preview-") ? "/design-review?screen=product-detail" : `/gigs/${gig.id}`}
       className="gm-card group block rounded-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#0B3D91]"
     >
       <div className="gm-preview relative aspect-[4/3] overflow-hidden rounded-md bg-[#E9E0D6]">
