@@ -90,6 +90,7 @@ export default function RoleSelectionPage() {
                 <button
                   type="button"
                   key={choice.tag}
+                  aria-pressed={choice.active}
                   onClick={() => choice.setActive(!choice.active)}
                   className={`group relative rounded-2xl border p-4 text-left transition duration-200 sm:p-6 ${
                     choice.active
@@ -113,6 +114,10 @@ export default function RoleSelectionPage() {
                 </button>
               ))}
             </div>
+
+            <button type="button" aria-pressed={wantsToBuy && wantsToSell} onClick={() => { setWantsToBuy(true); setWantsToSell(true); }} className={`mt-4 w-full rounded-xl border px-5 py-4 text-left text-sm font-semibold ${wantsToBuy && wantsToSell ? 'border-ember bg-ember/10' : 'border-line bg-white'}`}>
+              Buy and sell <span className="ml-2 font-normal text-slate">Both, with one account</span>
+            </button>
 
             {error && <p className="auth-error mt-5">{error}</p>}
 

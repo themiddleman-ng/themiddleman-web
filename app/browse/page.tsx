@@ -25,9 +25,9 @@ export default function BrowsePage() {
   return (
     <main className="min-h-screen bg-ink text-bone">
       <SiteHeader />
-      <div className="mx-auto max-w-3xl px-5 pt-8 pb-10">
+      <div className="mx-auto max-w-6xl px-5 pt-8 pb-10">
         <p className="font-mono text-[10px] font-semibold uppercase tracking-[.2em] text-ember">Browse</p>
-        <h1 className="mt-2 font-display text-3xl font-bold tracking-tight">What are you looking for?</h1>
+        <h1 className="mt-2 font-display text-3xl font-bold tracking-tight">Find something worth building on.</h1>
 
         <form onSubmit={submit} className="mt-6">
           <label htmlFor="browse-search" className="mb-2 block text-sm font-medium">Search the marketplace</label>
@@ -39,15 +39,16 @@ export default function BrowsePage() {
             placeholder="Search products, code, templates, sellers"
             className="w-full rounded-full border border-line bg-paper px-5 py-3.5 text-sm text-bone placeholder-slate outline-none transition-colors focus:border-ember"
           />
+          <button type="submit" className="mt-3 min-h-11 rounded-lg bg-[#ed6509] px-6 text-sm font-semibold text-white">Search products</button>
         </form>
 
         <p className="mt-8 mb-3 font-mono text-[10px] font-semibold uppercase tracking-[.18em] text-slate">Categories</p>
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+        <div className="grid grid-cols-2 gap-4 lg:grid-cols-3">
           {CATEGORIES.map((c) => (
             <Link
               key={c.value}
               href={`/marketplace?category=${c.value}`}
-              className="rounded-xl border border-line bg-paper p-4 transition-colors hover:border-ember/40"
+              className="mm-category-tile rounded-xl border border-line bg-paper p-5 transition-colors hover:border-ember/40"
             >
               <span className="block font-display text-base font-bold">{c.label}</span>
               <span className="mt-1 block text-xs text-slate">{c.blurb}</span>

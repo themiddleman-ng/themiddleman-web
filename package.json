@@ -4,13 +4,14 @@
   "private": true,
   "packageManager": "pnpm@10.15.1",
   "scripts": {
-    "dev": "next dev",
+    "dev": "node scripts/dev.mjs",
     "build": "next build",
     "start": "next start",
     "lint": "eslint .",
     "test": "node --test --test-concurrency=1 tests/*.test.mjs"
   },
   "dependencies": {
+    "@phosphor-icons/react": "^2.1.10",
     "@supabase/ssr": "0.12.3",
     "@supabase/supabase-js": "2.110.7",
     "next": "15.5.24",

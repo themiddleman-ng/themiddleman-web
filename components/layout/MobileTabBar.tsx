@@ -1,5 +1,6 @@
 "use client";
 
+import { ShoppingBagIcon } from '@phosphor-icons/react/dist/csr/ShoppingBag';
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -100,8 +101,9 @@ export default function MobileTabBar() {
     | { href: string; label: string; icon: React.ReactNode; badge?: number }
     | null
   > = [
-    { href: "/marketplace", label: "Home", icon: <IconHome /> },
+    { href: "/marketplace", label: "Marketplace", icon: <IconHome /> },
     { href: "/browse", label: "Browse", icon: <IconBrowse /> },
+    { href: "/orders", label: "Orders", icon: <ShoppingBagIcon size={21} aria-hidden="true" /> },
     ...(showCreateButton ? [null] : []),
     { href: "/messages", label: "Messages", icon: <IconMessages />, badge: unread },
     { href: "/profile", label: "Profile", icon: <IconProfile /> },
@@ -122,7 +124,7 @@ export default function MobileTabBar() {
         aria-label="Mobile navigation"
       >
         <div className="border-t border-[#e8e0d6] bg-[#fffdf9]/96 shadow-[0_-8px_24px_rgba(35,40,45,.06)] backdrop-blur-xl">
-          <div className={`grid ${showCreateButton ? "grid-cols-5" : "grid-cols-4"}`}>
+          <div className={`grid ${showCreateButton ? "grid-cols-6" : "grid-cols-5"}`}>
             {tabs.map((tab) => {
               if (tab === null) {
                 return (

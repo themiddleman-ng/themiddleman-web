@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import SiteHeader from "@/components/SiteHeader";
+import { downloadCsv } from "@/lib/client/download-csv";
 
 type Row = {
   id: string;
@@ -29,6 +30,7 @@ function money(value: number) {
 
 export default function SellerAnalyticsPage() {
   const [days, setDays] = useState(7);
+  const [metric, setMetric] = useState<"sales" | "views" | "downloads">("sales");
   const [data, setData] = useState<Data | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -36,6 +38,8 @@ export default function SellerAnalyticsPage() {
   useEffect(() => {
     let active = true;
     setLoading(true);
+    setError("");
+    setData(null);
     fetch("/api/analytics/seller?days=" + days, { cache: "no-store" })
       .then(async (response) => {
         const result = await response.json();
@@ -60,6 +64,7 @@ export default function SellerAnalyticsPage() {
           <Link href="/gigs/mine" className="rounded-full border border-line px-4 py-2 text-sm text-slate hover:text-bone">My products</Link>
         </header>
 
+        <button type="button" disabled={!data || loading} onClick={() => data && downloadCsv('middleman-product-analytics.csv', [['Product', 'Views', 'Downloads', 'Sales', 'Sales value (NGN)', 'Conversion (%)'], ...data.products.map((row) => [row.title, row.views, row.downloads, row.sales, row.salesValue, row.conversionRate])])} className="mt-5 min-h-11 rounded-lg border border-line bg-white px-4 text-sm disabled:opacity-50">Export report</button>
         <div className="mt-5 flex flex-wrap gap-2" role="group" aria-label="Analytics time period">
           {[7, 30, 90, 0].map((period) => (
             <button key={period} onClick={() => setDays(period)} aria-pressed={days === period} className={"rounded-full px-4 py-2 text-xs " + (days === period ? "bg-ember text-ink" : "border border-line text-slate")}>
@@ -80,6 +85,11 @@ export default function SellerAnalyticsPage() {
               <div className="rounded-xl bg-paper p-5"><p className="text-xs text-slate">Sales value</p><strong className="mt-2 block font-display text-3xl">{money(data.totals.salesValue)}</strong></div>
             </div>
             <p className="mt-4 text-xs leading-5 text-slate">View estimates use a daily rotating, one-way network hash. No raw IP address or visitor identity is stored or shown. Sales value is the canonical order amount; payout and fees are shown in Payments.</p>
+            <section className="mm-performance-chart" aria-labelledby="product-performance-title">
+              <div className="flex flex-wrap items-center justify-between gap-3"><h2 id="product-performance-title">Product performance</h2><label className="!m-0 !flex"><span>Compare</span><select className="rounded-lg border border-line px-3 py-2" value={metric} onChange={(event) => setMetric(event.target.value as typeof metric)}><option value="sales">Sales</option><option value="views">Views</option><option value="downloads">Downloads</option></select></label></div>
+              <p>Recorded {metric} by product for {days ? `the last ${days} days` : 'all time'}.</p>
+              {data.products.length ? data.products.map((product) => <label key={product.id}><span className="truncate" title={product.title}>{product.title}</span><meter min={0} max={Math.max(1, ...data.products.map((row) => row[metric]))} value={product[metric]} aria-label={`${product.title}: ${product[metric]} ${metric}`} /><strong>{product[metric].toLocaleString('en-NG')}</strong></label>) : <p className="py-8">Your chart will appear when product activity is available.</p>}
+            </section>
             <div className="mt-7 overflow-x-auto rounded-xl border border-line">
               <div className="min-w-[620px]">
                 <div className="grid grid-cols-[minmax(0,2fr)_repeat(5,minmax(4rem,1fr))] gap-2 bg-paper/60 px-4 py-3 text-[11px] text-slate">

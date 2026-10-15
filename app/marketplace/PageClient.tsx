@@ -114,6 +114,14 @@ export default function MarketplacePage() {
   );
   const initialQuery = searchParams.get("q") ?? "";
   const [query, setQuery] = useState(initialQuery);
+  const [priceRange, setPriceRange] = useState('all');
+  const [sort, setSort] = useState('newest');
+  const [filtersOpen, setFiltersOpen] = useState(false);
+
+  useEffect(() => {
+    setQuery(initialQuery);
+    setActiveCategory(CATEGORIES.some((category) => category.value === initialCategory) ? initialCategory as GigCategory : 'all');
+  }, [initialCategory, initialQuery]);
 
   useEffect(() => {
     let cancelled = false;
@@ -179,15 +187,12 @@ export default function MarketplacePage() {
     const matchesCategory = activeCategory === "all" || gig.category === activeCategory;
     const haystack = `${gig.title} ${gig.seller_profiles?.display_name ?? ""}`.toLowerCase();
     const matchesQuery = query.trim() === "" || haystack.includes(query.trim().toLowerCase());
-    return matchesCategory && matchesQuery;
-  });
+    const price = Number(gig.price_ngn);
+    const matchesPrice = priceRange === 'all' || (priceRange === 'under5' && price < 5000) || (priceRange === '5to10' && price >= 5000 && price < 10000) || (priceRange === '10to25' && price >= 10000 && price <= 25000) || (priceRange === 'over25' && price > 25000);
+    return matchesCategory && matchesQuery && matchesPrice;
+  }).sort((a, b) => sort === 'low' ? a.price_ngn - b.price_ngn : sort === 'high' ? b.price_ngn - a.price_ngn : Date.parse(b.created_at) - Date.parse(a.created_at));
 
-  // With sparse inventory, a 4-column grid leaves a dead empty slot.
-  // Only open the 4th column once there is enough stock to fill it.
-  const gridClass =
-    filteredGigs.length >= 12
-      ? "grid grid-cols-1 gap-x-7 gap-y-9 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
-      : "grid grid-cols-1 gap-x-7 gap-y-9 sm:grid-cols-2 lg:grid-cols-3";
+  const gridClass = "mm-product-grid";
 
   return (
     <div className="mp-shell">
@@ -196,7 +201,7 @@ export default function MarketplacePage() {
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h1 className="font-display text-[26px] font-semibold leading-tight tracking-[-.035em] text-[#172B45] sm:text-[30px]">
-              Find digital products <span className="text-[#c95b1d]">worth paying for.</span>
+              Find your next useful starting point.
             </h1>
             <p className="mt-1.5 max-w-2xl text-[14px] leading-6 text-[#526273]">
               Browse creator-made products, preview what’s included, and pay in Naira through Paystack.
@@ -247,7 +252,14 @@ export default function MarketplacePage() {
           })}
         </nav>
 
-        <div className="mt-5">
+        <div className="mm-catalogue">
+          <aside id="marketplace-filters" className="mm-filters" data-open={filtersOpen} aria-label="Product filters">
+            <fieldset><legend>Category</legend>{CATEGORIES.map((category) => <label key={category.value}><input type="radio" name="filter-category" checked={activeCategory === category.value} onChange={() => setActiveCategory(category.value)} />{category.value === 'all' ? 'All products' : category.label}</label>)}</fieldset>
+            <fieldset><legend>Price range</legend>{[['all', 'Any price'], ['under5', 'Under ₦5,000'], ['5to10', '₦5,000 – ₦10,000'], ['10to25', '₦10,000 – ₦25,000'], ['over25', 'Over ₦25,000']].map(([value, label]) => <label key={value}><input type="radio" name="price-range" checked={priceRange === value} onChange={() => setPriceRange(value)} />{label}</label>)}</fieldset>
+            <button type="button" onClick={() => { setPriceRange('all'); setActiveCategory('all'); setQuery(''); }}>Clear filters</button>
+          </aside>
+          <div className="min-w-0">
+            <div className="mm-catalogue-toolbar"><button type="button" className="mm-filter-toggle" aria-controls="marketplace-filters" aria-expanded={filtersOpen} onClick={() => setFiltersOpen(!filtersOpen)}>Filters</button><span role="status">{loading ? 'Loading products…' : `${filteredGigs.length} products`}</span><label>Sort by<select value={sort} onChange={(event) => setSort(event.target.value)}><option value="newest">Newest</option><option value="low">Price: low to high</option><option value="high">Price: high to low</option></select></label></div>
           {loading && <LoadingState />}
 
           {!loading && fetchError && (
@@ -279,6 +291,7 @@ export default function MarketplacePage() {
               ))}
             </div>
           )}
+          </div>
         </div>
       </main>
     </div>

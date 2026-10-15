@@ -115,6 +115,7 @@ export default async function AdminPage() {
         </div>
       </section>
 
+      <section className="mm-performance-chart" aria-labelledby="admin-distribution-title"><h2 id="admin-distribution-title">Order status overview</h2><p>Distribution of the latest {orderRows.length} recorded orders. Live order states, rather than estimated revenue.</p>{FLOW.map(([status, label]) => <label key={status}><span>{label}</span><meter min={0} max={Math.max(1, orderRows.length)} value={counts[status] || 0} aria-label={`${label}: ${counts[status] || 0}`} /><strong>{counts[status] || 0}</strong></label>)}</section>
       <section className="mt-10 rounded-2xl border border-line bg-paper p-5 md:p-6">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>

@@ -17,6 +17,8 @@ const CATEGORY_LABELS = {
 
 export default function MyGigsPage() {
   const [gigs, setGigs] = useState([]);
+  const [productQuery, setProductQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');
   const [ratings, setRatings] = useState({});
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState("");
@@ -69,8 +71,9 @@ export default function MyGigsPage() {
     if (!["active", "paused"].includes(gig.status)) return;
     setBusyId(gig.id);
     const nextStatus = gig.status === "active" ? "paused" : "active";
-    await supabase.from("gigs").update({ status: nextStatus }).eq("id", gig.id);
-    await load();
+    const { error } = await supabase.from("gigs").update({ status: nextStatus }).eq("id", gig.id);
+    if (error) setLoadError('Could not update this product. Please try again.');
+    else await load();
     setBusyId(null);
   }
 
@@ -79,8 +82,9 @@ export default function MyGigsPage() {
     if (!confirmed) return;
 
     setBusyId(gig.id);
-    await supabase.from("gigs").update({ status: "deleted" }).eq("id", gig.id);
-    await load();
+    const { error } = await supabase.from("gigs").update({ status: "deleted" }).eq("id", gig.id);
+    if (error) setLoadError('Could not delete this product. Please try again.');
+    else await load();
     setBusyId(null);
   }
 
@@ -114,8 +118,9 @@ export default function MyGigsPage() {
           </p>
         )}
 
+        <div className="mt-6 flex flex-wrap gap-3 rounded-xl border border-line bg-white p-4"><label className="min-w-44 flex-1 text-xs font-semibold">Search products<input type="search" value={productQuery} onChange={(event) => setProductQuery(event.target.value)} placeholder="Search your products" className="mt-2 block min-h-11 w-full border px-3 text-sm font-normal" /></label><label className="text-xs font-semibold">Status<select value={statusFilter} onChange={(event) => setStatusFilter(event.target.value)} className="mt-2 block min-h-11 border px-3 text-sm font-normal"><option value="all">All statuses</option>{Array.from(new Set(gigs.map((gig) => gig.status))).map((status) => <option key={status} value={status}>{status}</option>)}</select></label></div>
         <div className="mt-6 space-y-3 sm:mt-8 sm:space-y-4">
-          {gigs.map((gig) => {
+          {gigs.filter((gig) => (statusFilter === 'all' || gig.status === statusFilter) && gig.title.toLowerCase().includes(productQuery.trim().toLowerCase())).map((gig) => {
             const rating = ratings[gig.id];
             return (
               <div key={gig.id} className="flex min-w-0 flex-wrap items-center justify-between gap-3 rounded-2xl border border-line bg-paper p-4 sm:gap-4 sm:p-5">

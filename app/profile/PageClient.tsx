@@ -96,6 +96,15 @@ export default function ProfilePage() {
   const [avatarLoading, setAvatarLoading] = useState(false);
   const [sellerProfile, setSellerProfile] = useState<SellerProfile | null>(null);
   const [orders, setOrders] = useState<OrderRow[]>([]);
+  const [fullName, setFullName] = useState('');
+  const [location, setLocation] = useState('');
+  const [displayName, setDisplayName] = useState('');
+  const [phone, setPhone] = useState('');
+  const [bio, setBio] = useState('');
+  const [savedExtras, setSavedExtras] = useState({ displayName: '', phone: '', bio: '' });
+  const [profileSaving, setProfileSaving] = useState(false);
+  const [profileNotice, setProfileNotice] = useState('');
+  const [profileError, setProfileError] = useState('');
 
   useEffect(() => {
     let active = true;
@@ -113,6 +122,8 @@ export default function ProfilePage() {
       const storedAvatarUrl = await avatarSignedUrl(storedPath);
       if (active) {
         setAuthUserId(authUser.id);
+        const extras = { displayName: String(authUser.user_metadata?.display_name || ''), phone: String(authUser.user_metadata?.phone || ''), bio: String(authUser.user_metadata?.bio || '') };
+        setSavedExtras(extras); setDisplayName(extras.displayName); setPhone(extras.phone); setBio(extras.bio);
         setAvatarPath(storedPath);
         setAvatarUrl(storedAvatarUrl);
       }
@@ -129,6 +140,8 @@ export default function ProfilePage() {
 
       if (!active) return;
       setUser(userRow as UserRow | null);
+      setFullName(userRow?.full_name || '');
+      setLocation(userRow?.state || '');
       setOrders((orderRows as unknown as OrderRow[]) || []);
 
       if (userRow?.is_seller) {
@@ -215,6 +228,22 @@ export default function ProfilePage() {
     setAvatarLoading(false);
   }
 
+  async function saveProfile(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!authUserId || !user || profileSaving) return;
+    setProfileSaving(true); setProfileNotice(''); setProfileError('');
+    try {
+      const { error } = await supabase.from('users').update({ full_name: fullName.trim(), state: location.trim() || null }).eq('id', authUserId);
+      if (error) throw error;
+      setUser({ ...user, full_name: fullName.trim(), state: location.trim() || null });
+      const { error: metadataError } = await supabase.auth.updateUser({ data: { display_name: displayName.trim(), phone: phone.trim(), bio: bio.trim() } });
+      if (metadataError) { setProfileError('Your name and state were saved, but the other details could not be saved. Please retry.'); return; }
+      setSavedExtras({ displayName: displayName.trim(), phone: phone.trim(), bio: bio.trim() });
+      setProfileNotice('Your profile has been saved.');
+    } catch { setProfileError('We could not save your profile. Your changes are still here; please try again.'); }
+    finally { setProfileSaving(false); }
+  }
+
   if (loading) {
     return (
       <main className="min-h-screen bg-[#f6f4ef] text-[#1d2733]">
@@ -238,10 +267,11 @@ export default function ProfilePage() {
         <div className="mb-6">
           <div>
             <p className="text-sm font-semibold text-[#2e7776]">Account</p>
-            <h1 className="mt-1 font-display text-3xl font-semibold tracking-[-.035em] text-[#1b3044] sm:text-4xl">Your profile</h1>
+            <h1 className="mt-1 font-display text-3xl font-semibold tracking-[-.035em] text-[#1b3044] sm:text-4xl">My profile</h1>
           </div>
         </div>
 
+        <p className="-mt-3 mb-7 text-sm text-[#606b80]">Manage how you appear on The Middleman.</p>
         <section className="rounded-[28px] border border-white/80 bg-[linear-gradient(115deg,#fffaf3_0%,#fffdf9_58%,#edf5f3_100%)] p-5 shadow-[0_12px_40px_rgba(48,40,31,.06)] sm:p-8">
           <div className="flex flex-col gap-6 sm:flex-row sm:items-center">
             <PhotoAvatar url={avatarUrl} name={user?.full_name ?? null} email={user?.email ?? ''} />
@@ -293,6 +323,22 @@ export default function ProfilePage() {
           </div>
         </section>
 
+        <section className="mm-profile-editor mt-6 rounded-xl border border-[#e1e5ed] bg-white p-5 sm:p-7">
+          <h2 className="text-lg font-semibold">Personal information</h2>
+          <p className="mt-1 text-sm text-[#606b80]">Keep your account details up to date.</p>
+          <form onSubmit={saveProfile} className="mt-6 grid gap-5 sm:grid-cols-2">
+            <label className="text-sm font-medium">Full name<input autoComplete="name" required maxLength={120} value={fullName} onChange={(event) => setFullName(event.target.value)} className="mt-2 block min-h-12 w-full border px-3" /></label>
+            <label className="text-sm font-medium">Display name<input autoComplete="nickname" maxLength={80} value={displayName} onChange={(event) => setDisplayName(event.target.value)} className="mt-2 block min-h-12 w-full border px-3" /></label>
+            <label className="text-sm font-medium">Email address<input type="email" value={user?.email || ''} readOnly className="mt-2 block min-h-12 w-full border px-3" /><span className="mt-1 block text-xs text-[#606b80]">Your sign-in email.</span></label>
+            <label className="text-sm font-medium">WhatsApp number<input type="tel" autoComplete="tel" maxLength={32} value={phone} onChange={(event) => setPhone(event.target.value)} className="mt-2 block min-h-12 w-full border px-3" /></label>
+            <label className="text-sm font-medium sm:col-span-2">Bio<textarea rows={3} maxLength={200} value={bio} onChange={(event) => setBio(event.target.value)} className="mt-2 block w-full border p-3" /><span className="mt-2 block text-right text-xs text-[#606b80]">{bio.length}/200</span></label>
+            <p className="text-xs text-[#606b80] sm:col-span-2">Your email and phone number are private. Your seller listing name is managed separately during seller setup.</p>
+            <label className="text-sm font-medium">State of residence<input autoComplete="address-level1" maxLength={80} value={location} onChange={(event) => setLocation(event.target.value)} className="mt-2 block min-h-12 w-full border px-3" /></label>
+            <div className="flex flex-wrap items-end justify-end gap-3"><button type="button" onClick={() => { setFullName(user?.full_name || ''); setLocation(user?.state || ''); setDisplayName(savedExtras.displayName); setPhone(savedExtras.phone); setBio(savedExtras.bio); setProfileNotice(''); setProfileError(''); }} className="min-h-11 rounded-lg border border-[#e1e5ed] px-4 text-sm">Cancel changes</button><button type="submit" disabled={profileSaving || !fullName.trim()} className="min-h-11 rounded-lg bg-[#ed6509] px-5 text-sm font-semibold text-white disabled:opacity-50">{profileSaving ? 'Saving…' : 'Save changes'}</button></div>
+            {profileNotice && <p role="status" className="text-sm text-[#13724a] sm:col-span-2">{profileNotice}</p>}{profileError && <p role="alert" className="text-sm text-[#b42318] sm:col-span-2">{profileError}</p>}
+          </form>
+        </section>
+        <Link href="/settings" className="mt-6 flex items-center justify-between rounded-xl border border-[#e1e5ed] bg-white p-5 text-sm font-semibold">Account settings<span className="font-normal text-[#606b80]">Security and preferences</span></Link>
         <div className="mt-5 grid gap-5 lg:grid-cols-[1.35fr_.65fr]">
           <section className="rounded-[24px] bg-[#fffdf9] p-5 shadow-[0_10px_34px_rgba(48,40,31,.045)] ring-1 ring-[#dce8ea] sm:p-6">
             <div className="flex items-center justify-between gap-4">

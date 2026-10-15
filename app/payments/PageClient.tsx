@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import SiteHeader from "@/components/SiteHeader";
+import { downloadCsv } from "@/lib/client/download-csv";
 
 const steps: [string, string, string][] = [
   ["1", "Pay in Naira", "Checkout uses Paystack. The total is shown in Naira before you confirm a payment."],
@@ -36,6 +37,7 @@ type PaymentRow = {
 
 export default function PaymentsPage() {
   const [payments, setPayments] = useState<PaymentRow[]>([]);
+  const [paymentQuery, setPaymentQuery] = useState("");
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState("");
 
@@ -70,6 +72,7 @@ export default function PaymentsPage() {
           Payments are made in Naira through Paystack. Review payment status and order records here. A buyer accepting delivery does not by itself send a seller payout.
         </p>
 
+        {!loading && !loadError && <div className="mt-6 grid gap-4 sm:grid-cols-3">{[['Payments made', payments.filter((row) => row.role !== 'seller').reduce((sum, row) => sum + row.amount, 0)], ['Sales awaiting payout · gross', payments.filter((row) => row.role === 'seller' && row.payout_status === 'pending').reduce((sum, row) => sum + row.amount, 0)], ['Settled sales · gross', payments.filter((row) => row.role === 'seller' && row.payout_status === 'paid').reduce((sum, row) => sum + row.amount, 0)]].map(([label, amount]) => <section key={String(label)} className="rounded-xl border border-line bg-white p-5"><p className="text-xs text-slate">{label}</p><strong className="mt-3 block text-2xl">₦{Number(amount).toLocaleString('en-NG')}</strong></section>)}</div>}
         <div className="mt-5 grid gap-3 sm:mt-7 sm:gap-4 md:grid-cols-3">
           {steps.map(([number, title, text]) => (
             <div key={number} className="rounded-2xl border border-line bg-paper p-4 sm:p-5">
@@ -81,7 +84,8 @@ export default function PaymentsPage() {
         </div>
 
         <section className="mt-5 rounded-2xl border border-line bg-paper p-4 sm:mt-7 sm:p-6">
-          <p className="text-xs font-bold tracking-[.16em] text-ember">PAYMENT ACTIVITY</p>
+          <div className="flex flex-wrap items-center justify-between gap-3"><h2 className="text-lg font-semibold">Transactions</h2><button type="button" disabled={!payments.length} onClick={() => downloadCsv('middleman-payments.csv', [['Date', 'Product', 'Role', 'Amount (NGN)', 'Escrow status', 'Payout status'], ...payments.map((row) => [row.created_at, row.orders?.gigs?.title || 'Product', row.role, row.amount, row.escrow_status, row.payout_status])])} className="min-h-11 rounded-lg border border-line px-4 text-sm disabled:opacity-50">Export CSV</button></div>
+          <label className="mt-4 block text-xs font-medium">Search transactions<input type="search" value={paymentQuery} onChange={(event) => setPaymentQuery(event.target.value)} placeholder="Product or reference" className="mt-2 block min-h-11 w-full border px-3 text-sm" /></label>
 
           {loading && <p className="mt-4 text-sm text-slate">Loading…</p>}
           {!loading && loadError && <p className="mt-4 text-sm text-slate">{loadError}</p>}
@@ -103,7 +107,7 @@ export default function PaymentsPage() {
 
           {!loading && !loadError && payments.length > 0 && (
             <div className="mt-4 divide-y divide-line">
-              {payments.map((payment) => (
+              {payments.filter((payment) => `${payment.orders?.gigs?.title || ''} ${payment.paystack_reference || ''}`.toLowerCase().includes(paymentQuery.trim().toLowerCase())).map((payment) => (
                 <div key={payment.id} className="flex flex-col gap-3 py-4 sm:flex-row sm:items-start sm:justify-between">
                   <div className="min-w-0">
                     <p className="break-words text-sm font-medium text-bone">{payment.orders?.gigs?.title ?? "Product"}</p>

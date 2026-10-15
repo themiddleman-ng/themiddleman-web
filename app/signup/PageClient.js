@@ -210,24 +210,24 @@ function AuthPageInner() {
   const labelClass = 'block text-sm font-medium text-[#33404d]';
 
   return (
-    <main className="min-h-[100svh] bg-[radial-gradient(ellipse_at_88%_8%,rgba(228,111,47,.20),transparent_30%),linear-gradient(145deg,#f7f1e7,#f4e9dc_56%,#f8f4ed)] px-4 py-5 text-[#1d2733] sm:px-6 sm:py-10">
+    <main data-mode={flipped ? "signin" : "signup"} className="mm-auth min-h-[100svh] bg-[radial-gradient(ellipse_at_88%_8%,rgba(228,111,47,.20),transparent_30%),linear-gradient(145deg,#f7f1e7,#f4e9dc_56%,#f8f4ed)] px-4 py-5 text-[#1d2733] sm:px-6 sm:py-10">
       <div className="mx-auto grid min-h-[calc(100svh-2.5rem)] w-full max-w-5xl overflow-hidden rounded-[1.75rem] border border-[#e9dfd3] bg-[#fffdf9] shadow-[0_24px_80px_rgba(65,46,28,.13)] md:min-h-[680px] md:grid-cols-[.85fr_1.15fr]">
-        <aside className="relative hidden flex-col justify-between overflow-hidden bg-[#182d41] p-10 text-[#faf4e9] md:flex lg:p-12">
+        <aside className="mm-auth-hero relative hidden flex-col justify-between overflow-hidden bg-[#182d41] p-10 text-[#faf4e9] md:flex lg:p-12">
           <div className="absolute -right-28 -top-24 h-80 w-80 rounded-full bg-[#e87635]/25 blur-3xl" aria-hidden="true" />
           <div className="relative">
-            <Logo variant="horizontal" className="text-[#faf4e9]" markClass="h-8 w-8" textClass="text-base" />
+            <Logo variant="vertical" />
             <p className="mt-20 max-w-sm font-display text-4xl font-semibold leading-[1.08] tracking-[-.035em]">
-              Useful digital products, made by people.
+              Ready-made.<br />Made yours.
             </p>
             <p className="mt-5 max-w-sm text-[15px] leading-7 text-[#e5e4de]/80">
-              Find ready-made templates, tools and creative resources from independent creators.
+              Find useful digital products. Customize them with the creator.
             </p>
           </div>
           <p className="relative text-sm text-[#e5e4de]/70">Pay in Naira through Paystack.</p>
         </aside>
 
-        <section className="min-w-0 px-5 py-6 sm:px-9 sm:py-9 md:px-12 md:py-10">
-          <div className="mb-7 flex items-center justify-between gap-4 md:hidden">
+        <section className="mm-auth-form min-w-0 px-5 py-6 sm:px-9 sm:py-9 md:px-12 md:py-10">
+          <div className="mm-auth-mobile-brand mb-7 flex items-center justify-between gap-4 md:hidden">
             <Logo variant="horizontal" markClass="h-8 w-8" textClass="text-base" />
             <Link href="/marketplace" className="text-sm font-medium text-[#445363] hover:text-[#de641e]">Browse first</Link>
           </div>
@@ -248,7 +248,7 @@ function AuthPageInner() {
                     <input id="signup-name" type="text" autoComplete="name" placeholder="Ada Obi" value={fullName} onChange={(e) => setFullName(e.target.value)} required className={inputClass} />
                   </label>
                   <label className={labelClass} htmlFor="signup-email">Email address
-                    <input id="signup-email" type="email" autoComplete="email" placeholder="you@example.com" value={email} onChange={(e) => setEmail(e.target.value)} required className={inputClass} />
+                    <input id="signup-email" type="email" autoComplete="email" placeholder="Enter your email" value={email} onChange={(e) => setEmail(e.target.value)} required className={inputClass} />
                   </label>
                   <label className={labelClass} htmlFor="signup-phone">WhatsApp number
                     <input id="signup-phone" type="tel" autoComplete="tel" inputMode="tel" placeholder="080..." value={phone} onChange={(e) => setPhone(e.target.value)} required className={inputClass} />
@@ -293,12 +293,12 @@ function AuthPageInner() {
               </>
             ) : (
               <>
-                <h1 className="font-display text-[2rem] font-bold leading-tight tracking-[-.035em] sm:text-4xl">Welcome back</h1>
-                <p className="mt-2 text-[15px] leading-6 text-[#596674]">Log in to manage your products, orders and account.</p>
+                <h1 className="font-display text-[2rem] font-bold leading-tight tracking-[-.035em] sm:text-4xl">Welcome back.</h1>
+                <p className="mt-2 text-[15px] leading-6 text-[#596674]">Sign in to your Middleman account.</p>
                 {loginNotice && <p role="status" className="mt-5 rounded-xl bg-[#f0f6ef] px-3.5 py-3 text-sm leading-5 text-[#35523b]">{loginNotice}</p>}
                 <form onSubmit={handleLogin} className="mt-7 space-y-5">
                   <label className={labelClass} htmlFor="login-email">Email address
-                    <input id="login-email" type="email" autoComplete="email" inputMode="email" placeholder="you@example.com" value={loginEmail} onChange={(e) => setLoginEmail(e.target.value)} required className={inputClass} />
+                    <input id="login-email" type="email" autoComplete="email" inputMode="email" placeholder="Enter your email" value={loginEmail} onChange={(e) => setLoginEmail(e.target.value)} required className={inputClass} />
                   </label>
                   <div>
                     <div className="flex items-center justify-between gap-3">

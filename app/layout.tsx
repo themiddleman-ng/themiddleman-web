@@ -3,6 +3,8 @@ import "./globals.css";
 import MobileTabBar from "@/components/layout/MobileTabBar";
 import CookieNotice from "@/components/legal/CookieNotice";
 import FirstRunExperience from "@/components/onboarding/FirstRunExperience";
+import DesignFrame from "@/components/design/DesignFrame";
+import "./product-design.css";
 
 const SITE_URL = "https://themiddleman.com.ng";
 const siteSchema = {
@@ -86,7 +88,7 @@ export default function RootLayout({
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(siteSchema) }}
         />
-        {children}
+        <DesignFrame>{children}</DesignFrame>
         <FirstRunExperience />
         <CookieNotice />
         <MobileTabBar />

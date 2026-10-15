@@ -1,382 +1,183 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
-import { usePathname } from "next/navigation";
-import { supabase } from "@/lib/supabaseClient";
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { usePathname } from 'next/navigation';
+import { supabase } from '@/lib/supabaseClient';
+import { XIcon } from '@phosphor-icons/react/dist/csr/X';
+import { markTourSeen, mergeTourStates, readTourState, tourKey, type TourState } from '@/lib/onboarding/tour-state';
 
-type Stage = "hidden" | "choice" | "tour";
-type ExperienceChoice = "new" | "veteran";
-type TourStep = {
-  target: string;
-  title: string;
-  text: string;
+type Step = { title: string; text: string; target?: string };
+const PAGE_TOURS: Record<string, Step[]> = {
+  '/marketplace': [{ title: 'Find your next starting point', text: 'Search products and select a category. Use price filters and sorting to narrow your choices.', target: 'input[type=search]' }, { title: 'Look before you buy', text: 'Open a product to review its preview, creator, price and what is included before ordering.' }],
+  '/browse': [{ title: 'Explore by category', text: 'Choose a category to discover relevant digital products. You can return to all products at any time.' }],
+  '/orders': [{ title: 'Everything you ordered', text: 'Follow payment, delivery and review progress here. Open an order to see the actions available for its current status.' }],
+  '/messages': [{ title: 'Your product conversations', text: 'Choose a conversation in the inbox. On mobile, use the back arrow to return to your other conversations.', target: '[aria-label="Conversation list"]' }, { title: 'Keep the conversation here', text: 'Write in the message box. Enter sends and Shift + Enter adds a new line. Share files through the order flow.' }],
+  '/profile': [{ title: 'Make yourself recognisable', text: 'Add or change your profile photo and review your account details here.' }, { title: 'One account, both roles', text: 'Use the selling setup to become a creator while continuing to buy products.' }],
+  '/payments': [{ title: 'Your money, clearly recorded', text: 'Review payments and seller payouts here. Statuses reflect the actual payment and order records.' }],
+  '/notifications': [{ title: 'Catch up on updates', text: 'Read order and account updates here. Use the available controls to mark notifications as read.' }],
+  '/settings': [{ title: 'Your preferences', text: 'Manage your account, cookie preferences and security. Replay the welcome tour here whenever you want.' }],
+  '/security': [{ title: 'Protect your account', text: 'Use the security controls to manage your sign-in protection. Keep recovery details in a safe place.' }],
+  '/gigs/mine': [{ title: 'Your product workspace', text: 'Manage your listings, check their status and open the editor. Create a product when you are ready to publish something new.' }],
+  '/gigs/new': [{ title: 'Give your product room to shine', text: 'Work through the listing fields, preview images and package requirements. Your existing validation will explain anything missing.' }],
+  '/gigs/detail': [{ title: 'Review the product first', text: 'Read the description, price, included files and seller details. The purchase controls will guide you through the next step.' }],
+  '/disputes': [{ title: 'Resolve an order issue', text: 'Review the dispute and submit the information requested. Existing order permissions and deadlines still apply.' }],
+  '/seller-support': [{ title: 'Stay in touch with operations', text: 'Read seller operations updates and use the available reply controls to keep the discussion together.' }],
+  '/onboarding/role': [{ title: 'Choose how you will use your account', text: 'Choose buying, selling, or the Buy and sell button. Continue saves your preference and guides sellers to the application.' }],
+  '/onboarding/seller': [{ title: 'Set up your creator profile', text: 'Complete the required profile and verification fields. Review your details before submitting your application.' }],
+  '/onboarding/pending': [{ title: 'Your application status', text: 'Check review progress and any feedback here. Your account will show the next available action when the review changes.' }],
+  '/account/delete': [{ title: 'Review account removal carefully', text: 'Read the consequences and requirements before using the existing deletion controls. You can leave this page without deleting anything.' }],
+  '/admin': [{ title: 'Operations overview', text: 'Review the recorded platform totals, order pipeline and items requiring attention. Use the workspace navigation to open each review queue.' }],
+  '/admin/products': [{ title: 'Review product packages', text: 'Inspect each submission and use the available review actions. Existing admin permissions and package feature gates remain in force.' }],
+  '/admin/sellers': [{ title: 'Seller directory', text: 'Review seller profiles and their current verification status. Use the existing review controls for the selected seller.' }],
+  '/admin/review': [{ title: 'Delivery review queue', text: 'Inspect submitted deliveries and provide clear review feedback before taking an approval or revision action.' }],
+  '/admin/escrow': [{ title: 'Trust and payouts', text: 'Review the order and payment state before acting. Financial actions remain protected by their existing server checks.' }],
+  '/admin/communications': [{ title: 'Seller communications', text: 'Select the intended seller and review the message before sending through the existing communication flow.' }],
+  '/admin/email-preview': [{ title: 'Review notification templates', text: 'Choose a template to inspect its contents and layout before changing notification content.' }],
+  '/analytics': [{ title: 'Understand your product performance', text: 'Change the time period to see recorded views, sales and downloads. The chart compares your products using the selected metric.' }],
 };
-type PreferenceRow = {
-  experience_choice: ExperienceChoice;
-  walkthrough_status: "in_progress" | "completed" | "skipped";
-  current_step: number;
-};
-
-const TOUR_READY_ROUTES = ["/marketplace", "/browse", "/gigs", "/orders", "/payments", "/messages", "/profile", "/notifications", "/settings"];
-
-function isTourReadyRoute(pathname: string) {
-  return TOUR_READY_ROUTES.some((route) => pathname === route || pathname.startsWith(`${route}/`));
-}
-
-const TOUR_STEPS: TourStep[] = [
-  {
-    target: "marketplace",
-    title: "Browse the marketplace",
-    text: "Search products, compare listing details, and find something useful for your next project.",
-  },
-  {
-    target: "orders",
-    title: "Keep an eye on your orders",
-    text: "Your order page shows what you bought and the latest delivery or review step.",
-  },
-  {
-    target: "messages",
-    title: "Talk about the product here",
-    text: "Use Middleman messages to ask the creator a question and keep the conversation with your order.",
-  },
-  {
-    target: "profile",
-    title: "Make this account yours",
-    text: "Update your account here. You can buy and sell from the same account whenever you are ready.",
-  },
-];
-
-function visibleTarget(name: string): HTMLElement | null {
-  const candidates = Array.from(document.querySelectorAll<HTMLElement>('[data-onboarding-target="' + name + '"]'));
-  return candidates.find((candidate) => {
-    const rect = candidate.getBoundingClientRect();
-    const style = window.getComputedStyle(candidate);
-    return rect.width > 0 && rect.height > 0 && style.visibility !== "hidden" && style.display !== "none";
-  }) ?? null;
-}
-
-function saveTargetStyle(element: HTMLElement) {
-  return {
-    position: element.style.position,
-    zIndex: element.style.zIndex,
-    boxShadow: element.style.boxShadow,
-    borderRadius: element.style.borderRadius,
-    outline: element.style.outline,
-    outlineOffset: element.style.outlineOffset,
-  };
-}
+const cacheKey = (id: string) => 'middleman-page-tours:' + id;
+function cached(id: string) { try { return readTourState(JSON.parse(localStorage.getItem(cacheKey(id)) || 'null')); } catch { return null; } }
 
 export default function FirstRunExperience() {
   const pathname = usePathname();
-  const [stage, setStage] = useState<Stage>("hidden");
+  const key = tourKey(pathname);
+  const steps = PAGE_TOURS[key];
+  const [stage, setStage] = useState<'hidden' | 'choice' | 'tour'>('hidden');
+  const [index, setIndex] = useState(0);
   const [userId, setUserId] = useState<string | null>(null);
-  const [tourIndex, setTourIndex] = useState(0);
-  const [targetRect, setTargetRect] = useState<DOMRect | null>(null);
-  const [saving, setSaving] = useState(false);
-  const [saveError, setSaveError] = useState("");
-  const targetRef = useRef<HTMLElement | null>(null);
-  const styleRef = useRef<ReturnType<typeof saveTargetStyle> | null>(null);
-  const restoreTarget = useCallback(() => {
-    if (targetRef.current && styleRef.current) {
-      const element = targetRef.current;
-      const previous = styleRef.current;
-      element.style.position = previous.position;
-      element.style.zIndex = previous.zIndex;
-      element.style.boxShadow = previous.boxShadow;
-      element.style.borderRadius = previous.borderRadius;
-      element.style.outline = previous.outline;
-      element.style.outlineOffset = previous.outlineOffset;
-    }
-    targetRef.current = null;
-    styleRef.current = null;
+  const [authVersion, setAuthVersion] = useState(0);
+  const stateRef = useRef<TourState | null>(null);
+  const dialogRef = useRef<HTMLElement>(null);
+  const pendingSave = useRef(Promise.resolve());
+  const [notice, setNotice] = useState('');
+
+  const save = useCallback(async (state: TourState, id: string) => {
+    stateRef.current = state;
+    let localSaved = false;
+    try { localStorage.setItem(cacheKey(id), JSON.stringify(state)); localSaved = true; } catch { /* Fall back to account metadata. */ }
+    // Preferences only: these metadata values are never used for authorisation.
+    pendingSave.current = pendingSave.current.catch(() => {}).then(async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user?.id !== id) return;
+      const merged = mergeTourStates(readTourState(user.user_metadata?.middleman_page_tours), state) || state;
+      const { error } = await supabase.auth.updateUser({ data: { middleman_page_tours: merged } });
+      if (error && !localSaved) setNotice('Your browser could not remember this tour. You can still close it for this visit.');
+    });
+    await pendingSave.current;
   }, []);
 
-  const loadPreference = useCallback(async (id: string) => {
-    const show = (row: PreferenceRow | null) => {
-      if (!isTourReadyRoute(pathname)) {
-        setStage("hidden");
-        return;
-      }
-      if (!row) {
-        setTourIndex(0);
-        setStage("choice");
-      } else if (row.walkthrough_status === "in_progress" && row.experience_choice === "new") {
-        setTourIndex(Math.max(0, Math.min(TOUR_STEPS.length - 1, row.current_step || 0)));
-        setStage("tour");
-      } else {
-        setStage("hidden");
-      }
-    };
-    try {
-      if (localStorage.getItem("middleman-onboarding-reset:" + id) === "yes") {
-        show(null);
-        return;
-      }
-    } catch { /* Continue with the saved database preference. */ }
-    const { data, error } = await supabase
-      .from("user_onboarding_preferences")
-      .select("experience_choice,walkthrough_status,current_step")
-      .eq("user_id", id)
-      .maybeSingle();
-    if (error) {
-      try {
-        const cached = localStorage.getItem("middleman-onboarding:" + id);
-        show(cached ? JSON.parse(cached) as PreferenceRow : null);
-      } catch {
-        show(null);
-      }
-      return;
-    }
-    show(data as PreferenceRow | null);
-  }, [pathname]);
+  useEffect(() => {
+    let knownId: string | null | undefined;
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      const id = session?.user.id || null;
+      if (event === 'SIGNED_OUT') { setStage('hidden'); setUserId(null); stateRef.current = null; }
+      if (id !== knownId && (event === 'SIGNED_IN' || event === 'SIGNED_OUT')) setAuthVersion((value) => value + 1);
+      knownId = id;
+    });
+    return () => subscription.unsubscribe();
+  }, []);
 
   useEffect(() => {
     let active = true;
-    const load = async (id?: string) => {
-      const signedInId = id ?? (await supabase.auth.getUser()).data.user?.id ?? null;
+    setStage('hidden'); setIndex(0); setNotice('');
+    if (!steps) return;
+    void (async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!active || !user) return;
+      setUserId(user.id);
+      let state = mergeTourStates(readTourState(user.user_metadata?.middleman_page_tours), cached(user.id));
+      if (!state) {
+        // Honour the original welcome preference when upgrading existing accounts.
+        const { data, error } = await supabase.from('user_onboarding_preferences').select('experience_choice,walkthrough_status,current_step').eq('user_id', user.id).maybeSingle();
+        let legacy = data;
+        try { legacy = JSON.parse(localStorage.getItem('middleman-onboarding:' + user.id) || 'null') || data; } catch { /* Keep the saved database preference. */ }
+        if (!active) return;
+        if (legacy) state = { version: 2, optedIn: legacy.experience_choice === 'new', seen: legacy.walkthrough_status === 'in_progress' ? {} : { '/marketplace': true, '/orders': true, '/messages': true, '/profile': true } };
+        // A connection error is not evidence that this is a first visit.
+        else if (error) return;
+      }
+      stateRef.current = state;
       if (!active) return;
-      setUserId(signedInId);
-      if (!signedInId) {
-        setStage("hidden");
-        return;
-      }
-      await loadPreference(signedInId);
-    };
-    void load();
-    const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event === "SIGNED_OUT") {
-        setUserId(null);
-        setStage("hidden");
-      } else if (event === "SIGNED_IN" && session?.user.id) {
-        void load(session.user.id);
-      }
-    });
-    return () => {
-      active = false;
-      authListener.subscription.unsubscribe();
-    };
-  }, [loadPreference, pathname]);
+      setStage(!state ? 'choice' : state.optedIn && !state.seen[key] ? 'tour' : 'hidden');
+    })();
+    return () => { active = false; };
+  }, [key, steps, authVersion]);
 
   useEffect(() => {
-    if (stage !== "tour") {
-      restoreTarget();
-      setTargetRect(null);
-      return;
+    function sync(event: StorageEvent) {
+      if (!userId || event.key !== cacheKey(userId)) return;
+      const updated = cached(userId);
+      stateRef.current = mergeTourStates(stateRef.current, updated);
+      if (updated && (!updated.optedIn || updated.seen[key])) setStage('hidden');
     }
-    let frame = 0;
-    const update = () => {
-      const step = TOUR_STEPS[tourIndex];
-      let target = visibleTarget(step.target);
-      if (!target) target = visibleTarget("menu");
-      if (target !== targetRef.current) {
-        restoreTarget();
-        if (target) {
-          styleRef.current = saveTargetStyle(target);
-          targetRef.current = target;
-          if (window.getComputedStyle(target).position === "static") target.style.position = "relative";
-          target.style.boxShadow = "0 0 0 4px rgba(242,100,25,.95), 0 0 0 7px rgba(255,252,246,.95)";
-          target.style.borderRadius = target.style.borderRadius || "12px";
-          target.style.outline = "2px solid #fffaf2";
-          target.style.outlineOffset = "2px";
-        }
-      }
-      if (target) setTargetRect(target.getBoundingClientRect());
-      else setTargetRect(null);
-    };
-    const schedule = () => {
-      cancelAnimationFrame(frame);
-      frame = requestAnimationFrame(update);
-    };
-    schedule();
-    window.addEventListener("resize", schedule);
-    window.addEventListener("scroll", schedule, true);
-    const timer = window.setInterval(schedule, 600);
-    return () => {
-      cancelAnimationFrame(frame);
-      window.clearInterval(timer);
-      window.removeEventListener("resize", schedule);
-      window.removeEventListener("scroll", schedule, true);
-      restoreTarget();
-    };
-  }, [stage, tourIndex, restoreTarget]);
+    window.addEventListener('storage', sync);
+    return () => window.removeEventListener('storage', sync);
+  }, [key, userId]);
 
-  const persist = useCallback(async (choice: ExperienceChoice, status: "in_progress" | "completed" | "skipped", step = 0) => {
-    if (!userId) return false;
-    setSaving(true);
-    setSaveError("");
-    const preference = {
-      user_id: userId,
-      experience_choice: choice,
-      walkthrough_status: status,
-      current_step: step,
-      completed_at: status === "in_progress" ? null : new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-    };
-    const { error } = await supabase.from("user_onboarding_preferences").upsert(preference, { onConflict: "user_id" });
-    let cached = false;
-    try {
-      localStorage.setItem("middleman-onboarding:" + userId, JSON.stringify(preference));
-      localStorage.removeItem("middleman-onboarding-reset:" + userId);
-      cached = true;
-    } catch { /* The database remains the primary store. */ }
-    setSaving(false);
-    if (error && !cached) {
-      setSaveError("We couldn’t save that just now. Please try once more.");
-      return false;
-    }
-    return true;
-  }, [userId]);
+  const dismiss = useCallback(() => {
+    setStage('hidden');
+    if (!userId) return;
+    const current = stateRef.current || { version: 2 as const, optedIn: false, seen: {} };
+    void save(markTourSeen(current, key), userId);
+  }, [key, save, userId]);
 
-  async function choose(choice: ExperienceChoice) {
-    if (choice === "veteran") {
-      if (await persist("veteran", "skipped")) setStage("hidden");
-      return;
-    }
-    if (await persist("new", "in_progress", 0)) {
-      setTourIndex(0);
-      setStage("tour");
-    }
-  }
-
-  async function skipTour() {
-    if (await persist("new", "skipped", tourIndex)) setStage("hidden");
-  }
-
-  async function advanceTour() {
-    const nextStep = tourIndex + 1;
-    if (nextStep >= TOUR_STEPS.length) {
-      if (await persist("new", "completed", TOUR_STEPS.length)) setStage("hidden");
-      return;
-    }
-    if (await persist("new", "in_progress", nextStep)) setTourIndex(nextStep);
+  function choose(optedIn: boolean) {
+    if (!userId) return;
+    const state: TourState = { version: 2, optedIn, seen: stateRef.current?.seen || {} };
+    void save(optedIn ? state : markTourSeen(state, key), userId);
+    // Keep the existing preference table compatible with older clients.
+    void supabase.from('user_onboarding_preferences').upsert({ user_id: userId, experience_choice: optedIn ? 'new' : 'veteran', walkthrough_status: optedIn ? 'completed' : 'skipped', current_step: 0, completed_at: new Date().toISOString(), updated_at: new Date().toISOString() }, { onConflict: 'user_id' });
+    setIndex(0); setStage(optedIn ? 'tour' : 'hidden');
   }
 
   useEffect(() => {
-    const resetWelcome = () => {
-      if (!userId) return;
-      try { localStorage.setItem("middleman-onboarding-reset:" + userId, "yes"); }
-      catch { /* The current welcome choice can still be replayed this visit. */ }
-      setTourIndex(0);
-      setSaveError("");
-      setStage("choice");
-    };
-    const replay = async () => {
-      if (!userId) return;
-      if (await persist("new", "in_progress", 0)) {
-        setTourIndex(0);
-        setStage("tour");
-      }
-    };
-    window.addEventListener("middleman:onboarding-reset", resetWelcome);
-    window.addEventListener("middleman:onboarding-replay", replay);
-    return () => {
-      window.removeEventListener("middleman:onboarding-reset", resetWelcome);
-      window.removeEventListener("middleman:onboarding-replay", replay);
-    };
-  }, [userId, persist]);
+    const welcome = () => { if (userId) { setIndex(0); setStage('choice'); } };
+    const replay = () => { if (userId && steps) { setIndex(0); setStage('tour'); } };
+    window.addEventListener('middleman:onboarding-reset', welcome);
+    window.addEventListener('middleman:onboarding-replay', replay);
+    return () => { window.removeEventListener('middleman:onboarding-reset', welcome); window.removeEventListener('middleman:onboarding-replay', replay); };
+  }, [steps, userId]);
 
-  if (stage === "hidden") return null;
+  useEffect(() => {
+    if (stage === 'hidden') return;
+    const previousFocus = document.activeElement as HTMLElement | null;
+    const dialog = dialogRef.current;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    dialog?.querySelector<HTMLButtonElement>('button')?.focus();
+    function keyboard(event: KeyboardEvent) {
+      if (event.key === 'Escape') { event.preventDefault(); dismiss(); }
+      if (event.key !== 'Tab' || !dialog) return;
+      const controls = Array.from(dialog.querySelectorAll<HTMLElement>('button:not(:disabled),a[href],input:not(:disabled)'));
+      const first = controls[0]; const last = controls[controls.length - 1];
+      if (event.shiftKey && (document.activeElement === first || !dialog.contains(document.activeElement))) { event.preventDefault(); last?.focus(); }
+      else if (!event.shiftKey && (document.activeElement === last || !dialog.contains(document.activeElement))) { event.preventDefault(); first?.focus(); }
+    }
+    document.addEventListener('keydown', keyboard);
+    return () => { document.body.style.overflow = previousOverflow; document.removeEventListener('keydown', keyboard); previousFocus?.focus(); };
+  }, [stage, dismiss]);
 
-  if (stage === "choice") {
-    return (
-      <div className="fixed inset-0 z-[110] flex items-center justify-center bg-[#17233a]/45 p-4" role="presentation">
-        <section
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="middleman-welcome-title"
-          className="w-full max-w-lg rounded-[28px] border border-[#eadfd0] bg-[#fffdf8] p-6 text-[#1d2d46] shadow-[0_28px_90px_rgba(12,23,39,.28)] sm:p-8"
-        >
-          <div className="mb-5 grid h-12 w-12 place-items-center rounded-2xl bg-[#fff0dc] text-2xl" aria-hidden="true">👋</div>
-          <p className="text-sm font-semibold text-[#d75b17]">A quick hello</p>
-          <h2 id="middleman-welcome-title" className="mt-2 text-2xl font-semibold tracking-[-.025em] sm:text-3xl">
-            Glad you’re here. How well do you know The Middleman?
-          </h2>
-          <p className="mt-3 text-sm leading-6 text-[#586578]">
-            Pick your path and we’ll make the next bit fit you. No quizzes, promise. 🙂
-          </p>
-          <div className="mt-6 grid gap-3 sm:grid-cols-2">
-            <button
-              type="button"
-              disabled={saving}
-              onClick={() => void choose("new")}
-              className="rounded-2xl bg-[#172b49] px-5 py-4 text-left text-sm font-semibold text-white transition hover:bg-[#203a60] disabled:opacity-60"
-            >
-              <span className="block text-lg">I’m new here 🌱</span>
-              <span className="mt-1 block text-xs font-normal text-white/75">Show me the basics</span>
-            </button>
-            <button
-              type="button"
-              disabled={saving}
-              onClick={() => void choose("veteran")}
-              className="rounded-2xl border border-[#e8dece] bg-white px-5 py-4 text-left text-sm font-semibold text-[#24334a] transition hover:border-[#e7772f] disabled:opacity-60"
-            >
-              <span className="block text-lg">I know my way ✨</span>
-              <span className="mt-1 block text-xs font-normal text-[#687386]">Skip the walkthrough</span>
-            </button>
-          </div>
-          {saveError && <p role="alert" className="mt-4 text-sm text-red-700">{saveError}</p>}
-        </section>
+  useEffect(() => {
+    if (stage !== 'tour') return;
+    const target = steps?.[index]?.target ? document.querySelector<HTMLElement>(steps[index].target!) : null;
+    if (!target) return;
+    const outline = target.style.outline; const offset = target.style.outlineOffset;
+    target.style.outline = '3px solid #ed6509'; target.style.outlineOffset = '5px';
+    return () => { target.style.outline = outline; target.style.outlineOffset = offset; };
+  }, [stage, index, steps]);
+
+  if (stage === 'hidden' || !steps) return null;
+  const step = steps[index] || steps[0];
+  return <div className="fixed inset-0 z-[121] flex items-center justify-center bg-[#111b30]/50 p-4">
+    <section ref={dialogRef} role="dialog" aria-modal="true" aria-labelledby="mm-tour-title" aria-describedby="mm-tour-description" className="relative w-full max-w-md rounded-2xl border border-[#e1e5ed] bg-white p-7 text-[#11172b] shadow-xl">
+      <button type="button" onClick={dismiss} aria-label="Close tour" className="absolute right-3 top-3 grid h-11 w-11 place-items-center rounded-lg text-2xl text-[#606b80] hover:bg-[#f1f5fa]"><XIcon size={20} aria-hidden="true" /></button>
+      <p className="pr-10 text-xs font-semibold uppercase tracking-wider text-[#b84b00]">{stage === 'choice' ? 'Welcome to The Middleman' : `Page tour · ${index + 1} of ${steps.length}`}</p>
+      <h2 aria-live="polite" id="mm-tour-title" className="mt-4 pr-4 text-2xl font-semibold tracking-tight">{stage === 'choice' ? 'Is this your first time here?' : step.title}</h2>
+      <p aria-live="polite" id="mm-tour-description" className="mt-3 text-sm leading-6 text-[#606b80]">{stage === 'choice' ? 'Take a short introduction on each page as you explore. You can close a tour anytime and replay the welcome from Settings.' : step.text}</p>
+      <div className="mt-7 flex flex-wrap items-center gap-3">
+        {stage === 'choice' ? <><button type="button" onClick={() => choose(true)} className="min-h-11 rounded-lg bg-[#e96309] px-5 text-sm font-semibold text-white">Yes, show me around</button><button type="button" onClick={() => choose(false)} className="min-h-11 rounded-lg border border-[#e1e5ed] px-4 text-sm font-medium">I know my way</button></> : <><button type="button" onClick={dismiss} className="min-h-11 px-2 text-sm text-[#606b80]">Skip this tour</button><button type="button" onClick={() => index + 1 >= steps.length ? dismiss() : setIndex(index + 1)} className="ml-auto min-h-11 rounded-lg bg-[#e96309] px-5 text-sm font-semibold text-white">{index + 1 >= steps.length ? 'Got it' : 'Next'}</button></>}
       </div>
-    );
-  }
-
-  const step = TOUR_STEPS[tourIndex];
-  const viewportWidth = typeof window === "undefined" ? 400 : window.innerWidth;
-  const viewportHeight = typeof window === "undefined" ? 800 : window.innerHeight;
-  const bubbleWidth = Math.min(360, viewportWidth - 32);
-  const bubbleLeft = targetRect
-    ? Math.max(16, Math.min(targetRect.left + targetRect.width / 2 - bubbleWidth / 2, viewportWidth - bubbleWidth - 16))
-    : Math.max(16, (viewportWidth - bubbleWidth) / 2);
-  const bubbleTop = targetRect
-    ? Math.min(targetRect.bottom + 14, viewportHeight - 200)
-    : Math.max(24, viewportHeight / 2 - 80);
-
-  return (
-    <>
-      {targetRect ? (
-        <>
-          <div className="fixed z-[105] bg-[#14233b]/65" aria-hidden="true" style={{ top: 0, left: 0, right: 0, height: Math.max(0, targetRect.top - 9) }} />
-          <div className="fixed z-[105] bg-[#14233b]/65" aria-hidden="true" style={{ top: targetRect.bottom + 9, left: 0, right: 0, bottom: 0 }} />
-          <div className="fixed z-[105] bg-[#14233b]/65" aria-hidden="true" style={{ top: Math.max(0, targetRect.top - 9), left: 0, width: Math.max(0, targetRect.left - 9), height: targetRect.height + 18 }} />
-          <div className="fixed z-[105] bg-[#14233b]/65" aria-hidden="true" style={{ top: Math.max(0, targetRect.top - 9), left: targetRect.right + 9, right: 0, height: targetRect.height + 18 }} />
-        </>
-      ) : (
-        <div className="fixed inset-0 z-[105] bg-[#14233b]/65" aria-hidden="true" />
-      )}
-      {targetRect && (
-        <section
-          role="dialog"
-          aria-modal="false"
-          aria-live="polite"
-          aria-labelledby="middleman-tour-title"
-          className="fixed z-[121] w-[calc(100vw-2rem)] max-w-[22.5rem] rounded-2xl border border-[#e9dece] bg-[#fffdf8] p-5 text-[#1d2d46] shadow-[0_22px_70px_rgba(12,23,39,.3)]"
-          style={{ left: bubbleLeft, top: bubbleTop }}
-        >
-          <p className="text-xs font-semibold text-[#d75b17]">A tiny tour · {tourIndex + 1} of {TOUR_STEPS.length}</p>
-          <h2 id="middleman-tour-title" className="mt-1 text-lg font-semibold">{step.title}</h2>
-          <p className="mt-2 text-sm leading-6 text-[#586578]">{step.text}</p>
-          <div className="mt-4 flex items-center justify-between gap-3">
-            <button type="button" onClick={() => void skipTour()} disabled={saving} className="text-sm font-medium text-[#687386] underline underline-offset-4 disabled:opacity-50">
-              Skip tour
-            </button>
-            <button type="button" onClick={() => void advanceTour()} disabled={saving} className="rounded-full bg-[#e86b25] px-4 py-2 text-sm font-semibold text-[#1b2636] transition hover:bg-[#f07b34] disabled:opacity-60">
-              {tourIndex === TOUR_STEPS.length - 1 ? "Finish" : "Next"}
-            </button>
-          </div>
-          {saveError && <p role="alert" className="mt-3 text-xs text-red-700">{saveError}</p>}
-        </section>
-      )}
-      {!targetRect && (
-        <div role="dialog" aria-modal="false" className="fixed left-1/2 top-1/2 z-[121] w-[calc(100vw-2rem)] max-w-sm -translate-x-1/2 -translate-y-1/2 rounded-2xl bg-[#fffdf8] p-5 text-[#1d2d46] shadow-xl">
-          <h2 className="font-semibold">{step.title}</h2>
-          <p className="mt-2 text-sm leading-6 text-[#586578]">{step.text}</p>
-          <div className="mt-4 flex justify-between">
-            <button type="button" onClick={() => void skipTour()} className="text-sm underline">Skip tour</button>
-            <button type="button" onClick={() => void advanceTour()} className="rounded-full bg-[#e86b25] px-4 py-2 text-sm font-semibold">Next</button>
-          </div>
-        </div>
-      )}
-    </>
-  );
+      {notice && <p role="status" className="mt-3 text-xs text-[#9c4014]">{notice}</p>}
+    </section>
+  </div>;
 }
-

@@ -90,7 +90,7 @@ function ConversationRowItem({
       type="button"
       onClick={onClick}
       aria-current={active ? "true" : undefined}
-      className={`flex w-full gap-3 border-b border-[#f0ece5] px-4 py-4 text-left transition-colors ${active ? "bg-[#f7f0e7]" : "hover:bg-[#faf8f4]"}`}
+      className={`flex w-full gap-3 border-b border-[#f0ece5] px-4 py-4 text-left transition-colors ${active ? "bg-[#fff0e5]" : "hover:bg-[#faf8f4]"}`}
     >
       <Avatar initials={conversation.counterpartInitials} />
       <div className="min-w-0 flex-1">
@@ -112,7 +112,7 @@ function MessageEntry({ isYou, senderName, message }: { isYou: boolean; senderNa
       {!isYou && <Avatar initials={initialsFrom(senderName)} />}
       <div className={`max-w-[82%] sm:max-w-[72%] ${isYou ? "items-end" : "items-start"}`}>
         <p className={`mb-1 px-1 text-[11px] font-medium ${isYou ? "text-right text-[#78838d]" : "text-[#657482]"}`}>{senderName}</p>
-        <div className={`whitespace-pre-wrap break-words rounded-2xl px-3.5 py-2.5 text-sm leading-6 shadow-[0_2px_7px_rgba(30,40,50,.04)] ${isYou ? "rounded-br-md bg-[#1c3851] text-white" : "rounded-bl-md bg-[#f1efeb] text-[#273849]"}`}>
+        <div className={`whitespace-pre-wrap break-words rounded-2xl px-3.5 py-2.5 text-sm leading-6 shadow-[0_2px_7px_rgba(30,40,50,.04)] ${isYou ? "rounded-br-md bg-[#ffeddf] text-[#273849]" : "rounded-bl-md bg-[#f1efeb] text-[#273849]"}`}>
           {message.body}
         </div>
         <time className={`mt-1 block px-1 text-[10px] text-[#89929a] ${isYou ? "text-right" : ""}`} dateTime={message.created_at}>{formatTime(message.created_at)}</time>
@@ -124,6 +124,7 @@ function MessageEntry({ isYou, senderName, message }: { isYou: boolean; senderNa
 function MessagesPageInner() {
   const searchParams = useSearchParams();
   const requestedConversationId = searchParams.get("conversation");
+  const [conversationQuery, setConversationQuery] = useState("");
   const [userId, setUserId] = useState<string | null>(null);
   const [conversations, setConversations] = useState<ConversationRow[]>([]);
   const [activeId, setActiveId] = useState<string | null>(null);
@@ -379,7 +380,8 @@ function MessagesPageInner() {
                 <h2 className="text-sm font-semibold text-[#26384a]">Inbox</h2>
                 <span className="text-xs text-[#89929a]">{conversations.length}</span>
               </div>
-              {conversations.map((conversation) => (
+              <input type="search" aria-label="Search conversations" placeholder="Search conversations" value={conversationQuery} onChange={(event) => setConversationQuery(event.target.value)} />
+              {conversations.filter((conversation) => `${conversation.counterpartName} ${conversation.gigTitle || ''}`.toLowerCase().includes(conversationQuery.trim().toLowerCase())).map((conversation) => (
                 <ConversationRowItem
                   key={conversation.id}
                   conversation={conversation}
@@ -457,6 +459,14 @@ function MessagesPageInner() {
                 <p className="mt-2 px-1 text-[10px] text-[#89929a]">Enter to send · Shift + Enter for a new line</p>
               </div>
             </section>
+            <aside className="hidden w-60 shrink-0 border-l border-[#e1e5ed] p-6 xl:block" aria-label="Conversation details">
+              <h2 className="text-sm font-semibold">Conversation details</h2>
+              <p className="mt-6 text-xs text-[#606b80]">Product</p>
+              <p className="mt-2 text-sm font-semibold">{activeConversation.gigTitle || 'Product conversation'}</p>
+              {activeConversation.gig_id && <Link href={`/gigs/${activeConversation.gig_id}`} className="mt-5 block rounded-lg border border-[#e1e5ed] px-4 py-3 text-center text-sm font-medium">View product</Link>}
+              <Link href="/orders" className="mt-3 block rounded-lg bg-[#ed6509] px-4 py-3 text-center text-sm font-semibold text-white">View your orders</Link>
+              <p className="mt-6 text-xs leading-5 text-[#606b80]">Keep payments and delivery on The Middleman. Share files through the order flow.</p>
+            </aside>
           </div>
         )}
       </div>

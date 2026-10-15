@@ -169,13 +169,15 @@ export default async function LegalPage({ params }: { params: Promise<{ document
           <p className="mt-3 text-sm text-slate">Last updated: {doc.updated}</p>
         </div>
 
+        <div className="mm-legal-layout">
+        <aside className="mm-legal-contents" aria-label="On this page"><h2 className="text-sm font-semibold">On this page</h2><nav>{doc.sections.map((section, index) => <a key={section.heading} href={`#section-${index + 1}`}>{section.heading}</a>)}</nav></aside>
         <div className="relative rounded-2xl border border-line bg-paper p-6 sm:p-10">
           <div className="absolute -left-2 top-1/2 w-4 h-4 rounded-full bg-ink border border-line -translate-y-1/2" />
           <div className="absolute -right-2 top-1/2 w-4 h-4 rounded-full bg-ink border border-line -translate-y-1/2" />
 
           <div className="space-y-8">
             {doc.sections.map((section, index) => (
-              <div key={section.heading} className={index > 0 ? 'pt-6 border-t border-line' : ''}>
+              <div id={`section-${index + 1}`} key={section.heading} className={index > 0 ? 'pt-6 border-t border-line' : ''}>
                 <h2 className="font-display text-lg font-bold text-bone">{section.heading}</h2>
                 <p className="mt-3 text-sm leading-relaxed text-slate">{section.body}</p>
               </div>
@@ -188,6 +190,7 @@ export default async function LegalPage({ params }: { params: Promise<{ document
           </div>
         </div>
 
+        </div>
         <div className="mt-8 flex flex-wrap gap-3">
           {Object.entries(LEGAL_DOCS).map(([key, d]) => (
             <Link

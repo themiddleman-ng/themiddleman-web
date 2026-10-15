@@ -138,9 +138,9 @@ export default function SiteHeader({ isSeller: sellerHint = false, compact = fal
   return (
     <header className={`${hideOnMobile ? 'hidden md:block ' : ''}sticky top-0 z-30 border-b border-[#e9e2d9] backdrop-blur-xl ${compact ? 'bg-[#faf7f0]/95' : 'bg-[#fbf8f2]/95'}`}>
       <div className="relative mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-2.5 sm:px-6">
-        <Link href="/marketplace" aria-label="The Middleman home" className="shrink-0">
-          <Logo className="text-lg" markClass="h-7 w-7" variant="horizontal" textClass="text-sm" />
-        </Link>
+        <div className="shrink-0">
+          <Logo href="/marketplace" className="text-lg" markClass="h-7 w-7" variant="horizontal" textClass="text-sm" />
+        </div>
 
         <nav className="hidden items-center gap-1 md:flex" aria-label="Main navigation">
           <Link href="/marketplace" className={desktopLink}>Marketplace</Link>
