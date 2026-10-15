@@ -11,8 +11,11 @@ async function access(id: string) {
   const { data: conversation } = await db.from('conversations')
     .select('buyer_id,seller_id,gig_id').eq('id', id).maybeSingle();
   if (!conversation || (conversation.buyer_id !== user.id && conversation.seller_id !== user.id)) return null;
+  const { data: sellerProfile } = await db.from('seller_profiles')
+    .select('id').eq('user_id', conversation.seller_id).maybeSingle();
+  if (!sellerProfile) return null;
   const { data: paidOrder } = await db.from('orders').select('id')
-    .eq('buyer_id', conversation.buyer_id).eq('seller_id', conversation.seller_id).eq('gig_id', conversation.gig_id)
+    .eq('buyer_id', conversation.buyer_id).eq('seller_id', sellerProfile.id).eq('gig_id', conversation.gig_id)
     .in('status', ['in_escrow', 'delivered', 'approved', 'disputed']).limit(1).maybeSingle();
   if (!paidOrder) return null;
   return { user, db };
@@ -24,9 +27,9 @@ export async function GET(_request: Request, { params }: { params: Promise<{ id:
   if (!session) return privateJson({ error: 'Conversation not found.' }, 404);
   const { data, error } = await session.db.from('messages')
     .select('id,conversation_id,sender_id,body,created_at').eq('conversation_id', id)
-    .order('created_at', { ascending: true }).limit(200);
+    .order('created_at', { ascending: false }).limit(200);
   if (error) return privateJson({ error: 'Could not load messages.' }, 500);
-  return privateJson({ messages: (data ?? []).map(message => ({
+  return privateJson({ messages: (data ?? []).reverse().map(message => ({
     id: message.id, conversation_id: message.conversation_id, body: message.body,
     created_at: message.created_at, mine: message.sender_id === session.user.id,
   })) });

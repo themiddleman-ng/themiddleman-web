@@ -1,12 +1,14 @@
+'use client';
+
 import Link from "next/link";
 import Image from "next/image";
 import { supabase } from "@/lib/supabaseClient";
 import { StarRatingDisplay } from "@/components/StarRating";
+import { SaveProductButton } from "./Shortlist";
 import GigPreview from "./GigPreview";
 
 export type CardGig = { id: string; title: string; description: string; category: string; price_ngn: number; is_ai_assisted: boolean; gallery_image_paths?: string[]; seller_profiles: { display_name: string; verification_status: string } | null };
 export type CardRating = { average_rating: number; review_count: number };
-const LABELS: Record<string, string> = { development: "Development", design: "Design", marketing: "Marketing", writing: "Writing", ai_assisted: "AI-assisted" };
 export default function GigCard({ gig, rating }: { gig: CardGig; rating?: CardRating }) {
   const seller = gig.seller_profiles?.display_name ?? "Unknown seller";
   const verified = gig.seller_profiles?.verification_status === "approved";
@@ -14,9 +16,10 @@ export default function GigCard({ gig, rating }: { gig: CardGig; rating?: CardRa
   const imageUrl = cover ? supabase.storage.from("gig-media").getPublicUrl(cover).data.publicUrl : null;
 
   return (
+    <article className="gm-card relative min-w-0 rounded-md">
     <Link
       href={`/gigs/${gig.id}`}
-      className="gm-card group block rounded-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#0B3D91]"
+      className="group block rounded-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#0B3D91]"
     >
       <div className="gm-preview relative aspect-[4/3] overflow-hidden rounded-md bg-[#E9E0D6]">
         <div className="gm-preview-inner absolute inset-0">
@@ -30,7 +33,7 @@ export default function GigCard({ gig, rating }: { gig: CardGig; rating?: CardRa
               className="object-cover"
             />
           ) : (
-            <GigPreview category={gig.category} seed={gig.id} />
+            <GigPreview category={gig.category} seed={gig.id} title={gig.title} />
           )}
         </div>
         {gig.is_ai_assisted && (
@@ -70,5 +73,7 @@ export default function GigCard({ gig, rating }: { gig: CardGig; rating?: CardRa
         </p>
       </div>
     </Link>
+    <div className="absolute right-2 top-2"><SaveProductButton product={gig} /></div>
+    </article>
   );
 }

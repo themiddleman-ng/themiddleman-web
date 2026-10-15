@@ -1,0 +1,750 @@
+{
+  "summary": {
+    "checks": 105,
+    "issues": [],
+    "menuDismissed": true,
+    "categoryWorks": true,
+    "reducedMotion": true,
+    "comparisonWorks": true,
+    "shortlistPersists": true,
+    "progressStarts": true,
+    "progressAdvances": true
+  },
+  "results": [
+    {
+      "width": 360,
+      "route": "/",
+      "status": 200,
+      "overflow": false,
+      "errors": []
+    },
+    {
+      "width": 360,
+      "route": "/design-preview",
+      "status": 200,
+      "overflow": false,
+      "errors": []
+    },
+    {
+      "width": 360,
+      "route": "/marketplace",
+      "status": 200,
+      "overflow": false,
+      "errors": []
+    },
+    {
+      "width": 360,
+      "route": "/browse",
+      "status": 200,
+      "overflow": false,
+      "errors": []
+    },
+    {
+      "width": 360,
+      "route": "/signup",
+      "status": 200,
+      "overflow": false,
+      "errors": []
+    },
+    {
+      "width": 360,
+      "route": "/signup?mode=signin",
+      "status": 200,
+      "overflow": false,
+      "errors": []
+    },
+    {
+      "width": 360,
+      "route": "/about",
+      "status": 200,
+      "overflow": false,
+      "errors": []
+    },
+    {
+      "width": 360,
+      "route": "/careers",
+      "status": 200,
+      "overflow": false,
+      "errors": []
+    },
+    {
+      "width": 360,
+      "route": "/orders",
+      "status": 200,
+      "overflow": false,
+      "errors": []
+    },
+    {
+      "width": 360,
+      "route": "/payments",
+      "status": 200,
+      "overflow": false,
+      "errors": []
+    },
+    {
+      "width": 360,
+      "route": "/messages",
+      "status": 200,
+      "overflow": false,
+      "errors": []
+    },
+    {
+      "width": 360,
+      "route": "/profile",
+      "status": 200,
+      "overflow": false,
+      "errors": []
+    },
+    {
+      "width": 360,
+      "route": "/settings",
+      "status": 200,
+      "overflow": false,
+      "errors": []
+    },
+    {
+      "width": 360,
+      "route": "/notifications",
+      "status": 200,
+      "overflow": false,
+      "errors": []
+    },
+    {
+      "width": 360,
+      "route": "/security",
+      "status": 200,
+      "overflow": false,
+      "errors": []
+    },
+    {
+      "width": 360,
+      "route": "/reset-password",
+      "status": 200,
+      "overflow": false,
+      "errors": []
+    },
+    {
+      "width": 360,
+      "route": "/onboarding/role",
+      "status": 200,
+      "overflow": false,
+      "errors": []
+    },
+    {
+      "width": 360,
+      "route": "/onboarding/seller",
+      "status": 200,
+      "overflow": false,
+      "errors": []
+    },
+    {
+      "width": 360,
+      "route": "/onboarding/pending",
+      "status": 200,
+      "overflow": false,
+      "errors": []
+    },
+    {
+      "width": 360,
+      "route": "/gigs/new",
+      "status": 200,
+      "overflow": false,
+      "errors": []
+    },
+    {
+      "width": 360,
+      "route": "/gigs/mine",
+      "status": 200,
+      "overflow": false,
+      "errors": []
+    },
+    {
+      "width": 360,
+      "route": "/gigs/ebe2fdfe-6072-4521-873f-796ba38a3ca8",
+      "status": 200,
+      "overflow": false,
+      "errors": []
+    },
+    {
+      "width": 360,
+      "route": "/seller-support",
+      "status": 200,
+      "overflow": false,
+      "errors": []
+    },
+    {
+      "width": 360,
+      "route": "/analytics",
+      "status": 200,
+      "overflow": false,
+      "errors": []
+    },
+    {
+      "width": 360,
+      "route": "/disputes",
+      "status": 200,
+      "overflow": false,
+      "errors": []
+    },
+    {
+      "width": 360,
+      "route": "/account/delete",
+      "status": 200,
+      "overflow": false,
+      "errors": []
+    },
+    {
+      "width": 360,
+      "route": "/legal/terms",
+      "status": 200,
+      "overflow": false,
+      "errors": []
+    },
+    {
+      "width": 360,
+      "route": "/legal/privacy",
+      "status": 200,
+      "overflow": false,
+      "errors": []
+    },
+    {
+      "width": 360,
+      "route": "/legal/refunds",
+      "status": 200,
+      "overflow": false,
+      "errors": []
+    },
+    {
+      "width": 360,
+      "route": "/legal/cookies",
+      "status": 200,
+      "overflow": false,
+      "errors": []
+    },
+    {
+      "width": 360,
+      "route": "/admin",
+      "status": 200,
+      "overflow": false,
+      "errors": []
+    },
+    {
+      "width": 360,
+      "route": "/admin/products",
+      "status": 200,
+      "overflow": false,
+      "errors": []
+    },
+    {
+      "width": 360,
+      "route": "/admin/review",
+      "status": 200,
+      "overflow": false,
+      "errors": []
+    },
+    {
+      "width": 360,
+      "route": "/admin/sellers",
+      "status": 200,
+      "overflow": false,
+      "errors": []
+    },
+    {
+      "width": 360,
+      "route": "/admin/escrow",
+      "status": 200,
+      "overflow": false,
+      "errors": []
+    },
+    {
+      "width": 390,
+      "route": "/",
+      "status": 200,
+      "overflow": false,
+      "errors": []
+    },
+    {
+      "width": 390,
+      "route": "/design-preview",
+      "status": 200,
+      "overflow": false,
+      "errors": []
+    },
+    {
+      "width": 390,
+      "route": "/marketplace",
+      "status": 200,
+      "overflow": false,
+      "errors": []
+    },
+    {
+      "width": 390,
+      "route": "/browse",
+      "status": 200,
+      "overflow": false,
+      "errors": []
+    },
+    {
+      "width": 390,
+      "route": "/signup",
+      "status": 200,
+      "overflow": false,
+      "errors": []
+    },
+    {
+      "width": 390,
+      "route": "/signup?mode=signin",
+      "status": 200,
+      "overflow": false,
+      "errors": []
+    },
+    {
+      "width": 390,
+      "route": "/about",
+      "status": 200,
+      "overflow": false,
+      "errors": []
+    },
+    {
+      "width": 390,
+      "route": "/careers",
+      "status": 200,
+      "overflow": false,
+      "errors": []
+    },
+    {
+      "width": 390,
+      "route": "/orders",
+      "status": 200,
+      "overflow": false,
+      "errors": []
+    },
+    {
+      "width": 390,
+      "route": "/payments",
+      "status": 200,
+      "overflow": false,
+      "errors": []
+    },
+    {
+      "width": 390,
+      "route": "/messages",
+      "status": 200,
+      "overflow": false,
+      "errors": []
+    },
+    {
+      "width": 390,
+      "route": "/profile",
+      "status": 200,
+      "overflow": false,
+      "errors": []
+    },
+    {
+      "width": 390,
+      "route": "/settings",
+      "status": 200,
+      "overflow": false,
+      "errors": []
+    },
+    {
+      "width": 390,
+      "route": "/notifications",
+      "status": 200,
+      "overflow": false,
+      "errors": []
+    },
+    {
+      "width": 390,
+      "route": "/security",
+      "status": 200,
+      "overflow": false,
+      "errors": []
+    },
+    {
+      "width": 390,
+      "route": "/reset-password",
+      "status": 200,
+      "overflow": false,
+      "errors": []
+    },
+    {
+      "width": 390,
+      "route": "/onboarding/role",
+      "status": 200,
+      "overflow": false,
+      "errors": []
+    },
+    {
+      "width": 390,
+      "route": "/onboarding/seller",
+      "status": 200,
+      "overflow": false,
+      "errors": []
+    },
+    {
+      "width": 390,
+      "route": "/onboarding/pending",
+      "status": 200,
+      "overflow": false,
+      "errors": []
+    },
+    {
+      "width": 390,
+      "route": "/gigs/new",
+      "status": 200,
+      "overflow": false,
+      "errors": []
+    },
+    {
+      "width": 390,
+      "route": "/gigs/mine",
+      "status": 200,
+      "overflow": false,
+      "errors": []
+    },
+    {
+      "width": 390,
+      "route": "/gigs/ebe2fdfe-6072-4521-873f-796ba38a3ca8",
+      "status": 200,
+      "overflow": false,
+      "errors": []
+    },
+    {
+      "width": 390,
+      "route": "/seller-support",
+      "status": 200,
+      "overflow": false,
+      "errors": []
+    },
+    {
+      "width": 390,
+      "route": "/analytics",
+      "status": 200,
+      "overflow": false,
+      "errors": []
+    },
+    {
+      "width": 390,
+      "route": "/disputes",
+      "status": 200,
+      "overflow": false,
+      "errors": []
+    },
+    {
+      "width": 390,
+      "route": "/account/delete",
+      "status": 200,
+      "overflow": false,
+      "errors": []
+    },
+    {
+      "width": 390,
+      "route": "/legal/terms",
+      "status": 200,
+      "overflow": false,
+      "errors": []
+    },
+    {
+      "width": 390,
+      "route": "/legal/privacy",
+      "status": 200,
+      "overflow": false,
+      "errors": []
+    },
+    {
+      "width": 390,
+      "route": "/legal/refunds",
+      "status": 200,
+      "overflow": false,
+      "errors": []
+    },
+    {
+      "width": 390,
+      "route": "/legal/cookies",
+      "status": 200,
+      "overflow": false,
+      "errors": []
+    },
+    {
+      "width": 390,
+      "route": "/admin",
+      "status": 200,
+      "overflow": false,
+      "errors": []
+    },
+    {
+      "width": 390,
+      "route": "/admin/products",
+      "status": 200,
+      "overflow": false,
+      "errors": []
+    },
+    {
+      "width": 390,
+      "route": "/admin/review",
+      "status": 200,
+      "overflow": false,
+      "errors": []
+    },
+    {
+      "width": 390,
+      "route": "/admin/sellers",
+      "status": 200,
+      "overflow": false,
+      "errors": []
+    },
+    {
+      "width": 390,
+      "route": "/admin/escrow",
+      "status": 200,
+      "overflow": false,
+      "errors": []
+    },
+    {
+      "width": 1440,
+      "route": "/",
+      "status": 200,
+      "overflow": false,
+      "errors": []
+    },
+    {
+      "width": 1440,
+      "route": "/design-preview",
+      "status": 200,
+      "overflow": false,
+      "errors": []
+    },
+    {
+      "width": 1440,
+      "route": "/marketplace",
+      "status": 200,
+      "overflow": false,
+      "errors": []
+    },
+    {
+      "width": 1440,
+      "route": "/browse",
+      "status": 200,
+      "overflow": false,
+      "errors": []
+    },
+    {
+      "width": 1440,
+      "route": "/signup",
+      "status": 200,
+      "overflow": false,
+      "errors": []
+    },
+    {
+      "width": 1440,
+      "route": "/signup?mode=signin",
+      "status": 200,
+      "overflow": false,
+      "errors": []
+    },
+    {
+      "width": 1440,
+      "route": "/about",
+      "status": 200,
+      "overflow": false,
+      "errors": []
+    },
+    {
+      "width": 1440,
+      "route": "/careers",
+      "status": 200,
+      "overflow": false,
+      "errors": []
+    },
+    {
+      "width": 1440,
+      "route": "/orders",
+      "status": 200,
+      "overflow": false,
+      "errors": []
+    },
+    {
+      "width": 1440,
+      "route": "/payments",
+      "status": 200,
+      "overflow": false,
+      "errors": []
+    },
+    {
+      "width": 1440,
+      "route": "/messages",
+      "status": 200,
+      "overflow": false,
+      "errors": []
+    },
+    {
+      "width": 1440,
+      "route": "/profile",
+      "status": 200,
+      "overflow": false,
+      "errors": []
+    },
+    {
+      "width": 1440,
+      "route": "/settings",
+      "status": 200,
+      "overflow": false,
+      "errors": []
+    },
+    {
+      "width": 1440,
+      "route": "/notifications",
+      "status": 200,
+      "overflow": false,
+      "errors": []
+    },
+    {
+      "width": 1440,
+      "route": "/security",
+      "status": 200,
+      "overflow": false,
+      "errors": []
+    },
+    {
+      "width": 1440,
+      "route": "/reset-password",
+      "status": 200,
+      "overflow": false,
+      "errors": []
+    },
+    {
+      "width": 1440,
+      "route": "/onboarding/role",
+      "status": 200,
+      "overflow": false,
+      "errors": []
+    },
+    {
+      "width": 1440,
+      "route": "/onboarding/seller",
+      "status": 200,
+      "overflow": false,
+      "errors": []
+    },
+    {
+      "width": 1440,
+      "route": "/onboarding/pending",
+      "status": 200,
+      "overflow": false,
+      "errors": []
+    },
+    {
+      "width": 1440,
+      "route": "/gigs/new",
+      "status": 200,
+      "overflow": false,
+      "errors": []
+    },
+    {
+      "width": 1440,
+      "route": "/gigs/mine",
+      "status": 200,
+      "overflow": false,
+      "errors": []
+    },
+    {
+      "width": 1440,
+      "route": "/gigs/ebe2fdfe-6072-4521-873f-796ba38a3ca8",
+      "status": 200,
+      "overflow": false,
+      "errors": []
+    },
+    {
+      "width": 1440,
+      "route": "/seller-support",
+      "status": 200,
+      "overflow": false,
+      "errors": []
+    },
+    {
+      "width": 1440,
+      "route": "/analytics",
+      "status": 200,
+      "overflow": false,
+      "errors": []
+    },
+    {
+      "width": 1440,
+      "route": "/disputes",
+      "status": 200,
+      "overflow": false,
+      "errors": []
+    },
+    {
+      "width": 1440,
+      "route": "/account/delete",
+      "status": 200,
+      "overflow": false,
+      "errors": []
+    },
+    {
+      "width": 1440,
+      "route": "/legal/terms",
+      "status": 200,
+      "overflow": false,
+      "errors": []
+    },
+    {
+      "width": 1440,
+      "route": "/legal/privacy",
+      "status": 200,
+      "overflow": false,
+      "errors": []
+    },
+    {
+      "width": 1440,
+      "route": "/legal/refunds",
+      "status": 200,
+      "overflow": false,
+      "errors": []
+    },
+    {
+      "width": 1440,
+      "route": "/legal/cookies",
+      "status": 200,
+      "overflow": false,
+      "errors": []
+    },
+    {
+      "width": 1440,
+      "route": "/admin",
+      "status": 200,
+      "overflow": false,
+      "errors": []
+    },
+    {
+      "width": 1440,
+      "route": "/admin/products",
+      "status": 200,
+      "overflow": false,
+      "errors": []
+    },
+    {
+      "width": 1440,
+      "route": "/admin/review",
+      "status": 200,
+      "overflow": false,
+      "errors": []
+    },
+    {
+      "width": 1440,
+      "route": "/admin/sellers",
+      "status": 200,
+      "overflow": false,
+      "errors": []
+    },
+    {
+      "width": 1440,
+      "route": "/admin/escrow",
+      "status": 200,
+      "overflow": false,
+      "errors": []
+    }
+  ]
+}

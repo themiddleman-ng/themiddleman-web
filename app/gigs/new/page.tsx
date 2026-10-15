@@ -26,7 +26,7 @@ export default function NewGigPage() {
 	const router = useRouter();
 	const [title, setTitle] = useState('');
 	const [description, setDescription] = useState('');
-	const [category, setCategory] = useState('');
+	const [category, setCategory] = useState('development');
 	const [priceNgn, setPriceNgn] = useState('');
 	const [deliveryDays, setDeliveryDays] = useState('7');
 	const [experienceTier, setExperienceTier] = useState('beginner');
@@ -182,6 +182,16 @@ export default function NewGigPage() {
 		router.push('/gigs/mine');
 	}
 
+  const preparationSteps = [
+    { label: 'Draft opened', done: true },
+    { label: 'Product described', done: Boolean(title.trim()) && description.trim().length >= 30 },
+    { label: 'Price and delivery set', done: Number(priceNgn) > 0 && Number(deliveryDays) > 0 && Boolean(category) },
+    { label: 'Real preview added', done: images.length > 0 },
+    ...(packageEnabled ? [{ label: 'Product file attached', done: Boolean(packageFile) || Boolean(createdGigId) }] : []),
+  ];
+  const preparationCount = preparationSteps.filter(step => step.done).length;
+  const preparationPercent = Math.round(preparationCount / preparationSteps.length * 100);
+
 	const categoryLabel = CATEGORIES.find((c) => c.value === category)?.label || 'Category';
 
 	return (
@@ -206,6 +216,12 @@ export default function NewGigPage() {
 					<p className="mt-3 text-sm text-slate max-w-xl">Describe the ready-made product, what it includes, supported formats and any requirements. Every submission is reviewed before it appears in the marketplace.</p>
 				</div>
 
+        <section aria-label="Listing preparation progress" className="mb-7 rounded-xl border border-[#e6d8c9] bg-[#fffaf3] p-4 sm:p-5">
+          <div className="flex items-center justify-between gap-3"><h2 className="text-sm font-semibold">Your listing is taking shape</h2><span className="text-sm font-semibold text-[#a94b18]">{preparationCount} of {preparationSteps.length}</span></div>
+          <div role="progressbar" aria-label="Listing preparation" aria-valuemin={0} aria-valuemax={100} aria-valuenow={preparationPercent} className="mt-3 h-2 overflow-hidden rounded-full bg-[#eadfce]"><div className="listing-progress h-full rounded-full bg-[#d26925]" style={{ width: `${preparationPercent}%` }} /></div>
+          <ol className="mt-3 flex flex-wrap gap-x-5 gap-y-2 text-xs text-slate">{preparationSteps.map(step => <li key={step.label} className={step.done ? 'font-medium text-[#8b431d]' : ''}><span aria-hidden="true">{step.done ? '✓ ' : '○ '}</span>{step.label}</li>)}</ol>
+          <p className="mt-3 text-xs leading-5 text-slate">Preview your listing as you build. This tracks preparation; publication still requires review.</p>
+        </section>
 				<div className="grid min-w-0 gap-8 lg:grid-cols-[1.3fr_.7fr] lg:gap-12">
 					<form onSubmit={handleSubmit} className="min-w-0 space-y-6 sm:space-y-8">
 						<div className="field-shell">

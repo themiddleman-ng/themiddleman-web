@@ -14,6 +14,10 @@ const APP_PREFIXES = [
   "/messages",
   "/profile",
   "/settings",
+  "/notifications",
+  "/analytics",
+  "/disputes",
+  "/seller-support",
 ];
 
 function IconHome() {
@@ -77,8 +81,9 @@ export default function MobileTabBar() {
       setUnread(result.unreadCount ?? 0);
     }
 
-    loadUnreadCount();
-    const refresh = () => { void loadUnreadCount(); };
+    const safeRefresh = () => loadUnreadCount().catch(() => {});
+    void safeRefresh();
+    const refresh = () => { void safeRefresh(); };
     window.addEventListener("messages:read-updated", refresh);
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setUserId(session?.user.id ?? null);
@@ -117,7 +122,7 @@ export default function MobileTabBar() {
       />
 
       <nav
-        className="fixed inset-x-0 bottom-0 z-40 md:hidden"
+        className="fixed inset-x-0 bottom-0 z-40 bg-[#fffdf9] md:hidden"
         style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
         aria-label="Mobile navigation"
       >

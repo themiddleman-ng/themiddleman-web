@@ -1,4 +1,5 @@
 import { authenticatedUser, privateJson, serviceClient, uuidPattern } from '@/lib/server/marketplace';
+import { oneRelation, paidConversationKey } from '@/lib/domain/conversations.mjs';
 import { sameOriginMutation } from '@/lib/server/same-origin.mjs';
 
 export const runtime = 'nodejs';
@@ -15,7 +16,9 @@ export async function GET() {
     .select('id').eq('user_id', user.id).maybeSingle();
   if (profileError) return privateJson({ error: 'Could not load conversations.' }, 500);
 
-  const participantFilter = sellerProfile?.id
+  // Conversations store the seller USER id; orders store the seller PROFILE id.
+  const participantFilter = `buyer_id.eq.${user.id},seller_id.eq.${user.id}`;
+  const orderFilter = sellerProfile?.id
     ? `buyer_id.eq.${user.id},seller_id.eq.${sellerProfile.id}`
     : `buyer_id.eq.${user.id}`;
   const [conversationsResult, ordersResult] = await Promise.all([
@@ -24,14 +27,14 @@ export async function GET() {
       .or(participantFilter),
     db.from('orders')
       .select('buyer_id,seller_id,gig_id')
-      .or(participantFilter)
+      .or(orderFilter)
       .in('status', paidOrderStatuses),
   ]);
   if (conversationsResult.error || ordersResult.error) return privateJson({ error: 'Could not load conversations.' }, 500);
 
-  const paidOrderKeys = new Set((ordersResult.data ?? []).map(order => `${order.buyer_id}:${order.seller_id}:${order.gig_id}`));
+  const paidOrderKeys = new Set((ordersResult.data ?? []).map(order => paidConversationKey(order)));
   const paidConversations = (conversationsResult.data ?? []).filter(row =>
-    paidOrderKeys.has(`${row.buyer_id}:${row.seller_id}:${row.gig_id}`)
+    paidOrderKeys.has(paidConversationKey(row))
   );
 
   let unreadCount = 0;
@@ -41,8 +44,8 @@ export async function GET() {
       (!lastReadAt || Date.parse(message.created_at) > Date.parse(lastReadAt)))) unreadCount++;
     return {
       id: row.id, gig_id: row.gig_id, role: row.buyer_id === user.id ? 'buyer' : 'seller',
-      counterpartName: row.buyer_id === user.id ? row.seller?.[0]?.display_name ?? 'Seller' : 'Private buyer',
-      gigTitle: row.gigs?.[0]?.title ?? null,
+      counterpartName: row.buyer_id === user.id ? oneRelation(row.seller)?.display_name ?? 'Seller' : 'Private buyer',
+      gigTitle: oneRelation(row.gigs)?.title ?? null,
       lastReadAt,
     };
   });
@@ -60,7 +63,7 @@ export async function POST(request: Request) {
   if (!uuidPattern.test(body.gigId ?? '')) return privateJson({ error: 'Invalid product.' }, 400);
   const { data: gig } = await db.from('gigs').select('id,seller_id,status,seller_profiles(user_id)')
     .eq('id', body.gigId).maybeSingle();
-  const seller = gig?.seller_profiles?.[0]?.user_id;
+  const seller = oneRelation(gig?.seller_profiles)?.user_id;
   if (!gig || gig.status !== 'active' || !seller || seller === user.id) {
     return privateJson({ error: 'This seller is not available.' }, 409);
   }
@@ -72,13 +75,13 @@ export async function POST(request: Request) {
   if (!paidOrder) return privateJson({ error: 'Messaging is available only after a paid order for this product.' }, 403);
 
   const { data: existing } = await db.from('conversations').select('id')
-    .eq('buyer_id', user.id).eq('seller_id', gig.seller_id).eq('gig_id', gig.id).maybeSingle();
+    .eq('buyer_id', user.id).eq('seller_id', seller).eq('gig_id', gig.id).maybeSingle();
   if (existing) return privateJson({ id: existing.id });
   const { data: created, error } = await db.from('conversations')
-    .insert({ buyer_id: user.id, seller_id: gig.seller_id, gig_id: gig.id }).select('id').single();
+    .insert({ buyer_id: user.id, seller_id: seller, gig_id: gig.id }).select('id').single();
   if (error?.code === '23505') {
     const { data: raced } = await db.from('conversations').select('id')
-      .eq('buyer_id', user.id).eq('seller_id', gig.seller_id).eq('gig_id', gig.id).maybeSingle();
+      .eq('buyer_id', user.id).eq('seller_id', seller).eq('gig_id', gig.id).maybeSingle();
     if (raced) return privateJson({ id: raced.id });
   }
   return error || !created ? privateJson({ error: 'Could not start conversation.' }, 500)

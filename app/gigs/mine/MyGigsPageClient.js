@@ -68,8 +68,9 @@ export default function MyGigsPage() {
   async function toggleStatus(gig) {
     if (!["active", "paused"].includes(gig.status)) return;
     setBusyId(gig.id);
-    const nextStatus = gig.status === "active" ? "paused" : "active";
-    await supabase.from("gigs").update({ status: nextStatus }).eq("id", gig.id);
+    const nextStatus = gig.status === "active" ? "paused" : "pending_review";
+    const { data, error } = await supabase.from("gigs").update({ status: nextStatus }).eq("id", gig.id).select('id');
+    if (error || !data?.length) { setLoadError('Could not update this product. Please retry.'); setBusyId(null); return; }
     await load();
     setBusyId(null);
   }
@@ -79,7 +80,8 @@ export default function MyGigsPage() {
     if (!confirmed) return;
 
     setBusyId(gig.id);
-    await supabase.from("gigs").update({ status: "deleted" }).eq("id", gig.id);
+    const { data, error } = await supabase.from("gigs").update({ status: "deleted" }).eq("id", gig.id).select('id');
+    if (error || !data?.length) { setLoadError('Could not delete this product. Please retry.'); setBusyId(null); return; }
     await load();
     setBusyId(null);
   }
@@ -146,7 +148,7 @@ export default function MyGigsPage() {
                       disabled={busyId === gig.id}
                       className="min-h-10 rounded-full border border-line px-3 py-2 text-xs font-medium text-bone transition-colors hover:border-slate disabled:opacity-50 sm:px-4"
                     >
-                      {gig.status === "active" ? "Pause" : "Resume"}
+                      {gig.status === "active" ? "Pause" : "Submit for review"}
                     </button>
                   ) : null}
                   <button

@@ -18,6 +18,12 @@ const nextConfig = {
       },
       ...[
         "/admin/:path*",
+        "/account/:path*",
+        "/settings/:path*",
+        "/notifications/:path*",
+        "/analytics/:path*",
+        "/disputes/:path*",
+        "/seller-support/:path*",
         "/gigs/mine/:path*",
         "/gigs/new",
         "/login",

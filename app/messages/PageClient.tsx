@@ -112,7 +112,7 @@ function MessageEntry({ isYou, senderName, message }: { isYou: boolean; senderNa
       {!isYou && <Avatar initials={initialsFrom(senderName)} />}
       <div className={`max-w-[82%] sm:max-w-[72%] ${isYou ? "items-end" : "items-start"}`}>
         <p className={`mb-1 px-1 text-[11px] font-medium ${isYou ? "text-right text-[#78838d]" : "text-[#657482]"}`}>{senderName}</p>
-        <div className={`whitespace-pre-wrap break-words rounded-2xl px-3.5 py-2.5 text-sm leading-6 shadow-[0_2px_7px_rgba(30,40,50,.04)] ${isYou ? "rounded-br-md bg-[#1c3851] text-white" : "rounded-bl-md bg-[#f1efeb] text-[#273849]"}`}>
+        <div className={`whitespace-pre-wrap break-words rounded-2xl px-3.5 py-2.5 text-sm leading-6 shadow-[0_2px_7px_rgba(30,40,50,.04)] ${isYou ? "rounded-br-md bg-[#f4dcc8] text-[#432b1e]" : "rounded-bl-md bg-[#f1efeb] text-[#273849]"}`}>
           {message.body}
         </div>
         <time className={`mt-1 block px-1 text-[10px] text-[#89929a] ${isYou ? "text-right" : ""}`} dateTime={message.created_at}>{formatTime(message.created_at)}</time>
@@ -130,6 +130,8 @@ function MessagesPageInner() {
   const [mobileThreadOpen, setMobileThreadOpen] = useState(false);
   const [messages, setMessages] = useState<MessageRow[]>([]);
   const [draft, setDraft] = useState("");
+  const [sending, setSending] = useState(false);
+  const sendLock = useRef(false);
   const [warning, setWarning] = useState<string | null>(null);
   const [noticeDismissed, setNoticeDismissed] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -184,7 +186,7 @@ function MessagesPageInner() {
       setLoading(false);
     }
 
-    load();
+    void load().catch(() => { if (!cancelled) { setLoadError('Could not load messages. Check your connection and reload.'); setLoading(false); } });
     return () => {
       cancelled = true;
     };
@@ -199,12 +201,15 @@ function MessagesPageInner() {
 
     let cancelled = false;
 
+    setMessages([]);
     async function loadMessages() {
+      try {
       const response = await fetch(`/api/conversations/${activeId}/messages`, { cache: 'no-store' });
       if (response.ok && !cancelled) {
         const result = await response.json();
-        setMessages((result.messages as MessageRow[]) ?? []);
-      }
+        if (!cancelled) setMessages((result.messages as MessageRow[]) ?? []);
+      } else if (!cancelled) setWarning('Messages could not refresh. Retrying shortly.');
+      } catch { if (!cancelled) setWarning('Connection interrupted. Your draft is still here.'); }
     }
 
     loadMessages();
@@ -272,27 +277,23 @@ function MessagesPageInner() {
 
   async function handleSend() {
     const text = draft.trim();
-    if (!text || !activeId || !userId) return;
-
+    if (!text || !activeId || !userId || sendLock.current) return;
     const restriction = containsRestrictedContent(text);
-    if (restriction) {
-      setWarning(restriction);
-      return;
-    }
-
-    const response = await fetch(`/api/conversations/${activeId}/messages`, {
-      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ text }),
-    });
-    if (!response.ok) {
+    if (restriction) { setWarning(restriction); return; }
+    sendLock.current = true;
+    setSending(true);
+    try {
+      const response = await fetch(`/api/conversations/${activeId}/messages`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ text }),
+      });
       const result = await response.json();
-      setWarning(result.error || 'Could not send message.');
-      return;
-    }
-
-    setDraft("");
-    setWarning(null);
-    const refreshed = await fetch(`/api/conversations/${activeId}/messages`, { cache: 'no-store' });
-    if (refreshed.ok) setMessages((await refreshed.json()).messages);
+      if (!response.ok) throw new Error(result.error || 'Could not send message.');
+      setDraft(current => current === text ? '' : current);
+      setWarning(null);
+      setMessages(current => current.some(item => item.id === result.message.id) ? current : [...current, result.message]);
+    } catch (error) {
+      setWarning(error instanceof Error ? error.message : 'Could not send message. Your draft is still here.');
+    } finally { sendLock.current = false; setSending(false); }
   }
 
   function handleKeyDown(e: React.KeyboardEvent<HTMLTextAreaElement>) {
@@ -447,7 +448,7 @@ function MessagesPageInner() {
                   <button
                     type="button"
                     onClick={handleSend}
-                    disabled={!draft.trim()}
+                    disabled={sending || !draft.trim()}
                     className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-[#de641e] text-white transition hover:bg-[#c95415] disabled:cursor-not-allowed disabled:bg-[#e8dfd7] disabled:text-[#9b968f]"
                     aria-label="Send message"
                   >

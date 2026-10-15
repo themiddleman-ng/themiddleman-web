@@ -6,6 +6,8 @@ import Link from "next/link";
 import Image from "next/image";
 import { supabase } from "@/lib/supabaseClient";
 import { StarRatingDisplay } from "@/components/StarRating";
+import { SaveProductButton } from "@/components/marketplace/Shortlist";
+import GigPreview from "@/components/marketplace/GigPreview";
 import SiteHeader from "@/components/SiteHeader";
 
 type SellerProfile = { user_id: string; display_name: string; bio: string | null; verification_status: string };
@@ -54,6 +56,7 @@ export default function GigPageClient({ gigId, purchasesEnabled }: { gigId: stri
   const [loadError, setLoadError] = useState("");
   const [actionError, setActionError] = useState("");
   const [paying, setPaying] = useState(false);
+  const [pendingVerification, setPendingVerification] = useState(false);
   const [reportReason, setReportReason] = useState("Spam or misleading content");
   const [reportDetails, setReportDetails] = useState("");
   const [reporting, setReporting] = useState(false);
@@ -90,7 +93,9 @@ export default function GigPageClient({ gigId, purchasesEnabled }: { gigId: stri
       setRating({ average: matched?.average_rating ?? 0, count: matched?.review_count ?? 0 });
       setReviews(reviewsData || []); setLoading(false);
     }
-    load();
+    void load().catch(() => {
+      if (!cancelled) { setLoadError('Could not load this product. Check your connection and try again.'); setLoading(false); }
+    });
     return () => { cancelled = true; };
   }, [gigId]);
 
@@ -98,13 +103,14 @@ export default function GigPageClient({ gigId, purchasesEnabled }: { gigId: stri
 
   async function handleBuyAndPay() {
     setActionError("");
+    if (pendingVerification) return;
     if (!userId) { router.push("/signup?mode=signin"); return; }
     if (!gig) return;
     const sellerUserId = gig.seller_profiles?.user_id;
     if (!sellerUserId) { setActionError("We could not verify the seller account for this product."); return; }
     if (userId === sellerUserId) { setActionError("You cannot buy your own product."); return; }
     const publicKey = process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY;
-    if (!publicKey) { setActionError("Payments aren't configured yet — add NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY to .env.local."); return; }
+    if (!publicKey) { setActionError("Payments are temporarily unavailable. Please try again later."); return; }
     setPaying(true);
     try {
       orderRequestKey.current ??= crypto.randomUUID();
@@ -127,6 +133,21 @@ export default function GigPageClient({ gigId, purchasesEnabled }: { gigId: stri
     } catch (err) { setActionError(err instanceof Error ? err.message : String(err)); setPaying(false); }
   }
 
+  async function verifyPendingPayment(orderId: string) {
+    setPaying(true);
+    setActionError('');
+    try {
+      const response = await fetch('/api/payments/verify', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ reference: `mm_${orderId}`, orderId }),
+      });
+      if (!response.ok) throw new Error('pending');
+      router.push('/orders');
+    } catch {
+      setActionError("We couldn't confirm payment yet. Retry verification or check My Orders. Do not pay again.");
+    } finally { setPaying(false); }
+  }
+
   async function payReviewedCheckout() {
     if (!checkout) return;
     const { order, fees } = checkout;
@@ -138,22 +159,9 @@ export default function GigPageClient({ gigId, purchasesEnabled }: { gigId: stri
       const win = window as PaystackWindow;
       const handler = win.PaystackPop!.setup({
         key: publicKey, email: userEmail, amount: fees?.buyer_total_kobo ?? Number(order.amount) * 100, currency: "NGN", ref: `mm_${order.id}`,
-        callback: (response) => {
-          fetch("/api/payments/verify", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ reference: response.reference, orderId: order.id }),
-          })
-            .then(async (res) => {
-              const result = await res.json();
-              if (!res.ok) throw new Error(result.error || "Payment verification is pending. Check My Orders shortly.");
-              return result;
-            })
-            .then(() => router.push("/orders"))
-            .catch(() => {
-              setActionError("We couldn't confirm payment yet — check My Orders shortly. Do not pay again.");
-              setPaying(false);
-            });
+        callback: () => {
+          setPendingVerification(true);
+          void verifyPendingPayment(order.id);
         },
         onClose: () => setPaying(false),
       });
@@ -217,15 +225,17 @@ export default function GigPageClient({ gigId, purchasesEnabled }: { gigId: stri
 
   const purchasePanel = <div className="rounded-2xl border border-line bg-paper p-4 shadow-[0_18px_50px_rgba(31,21,12,.08)] sm:p-6">
     <div className="flex items-baseline justify-between"><span className="text-sm text-slate">Price</span><span className="font-mono text-2xl font-semibold text-bone">₦{gig.price_ngn.toLocaleString()}</span></div>
-    {isOwnGig ? <div className="mt-5 space-y-3"><p className="text-center text-xs text-slate">This is your product.{" "}<Link href="/gigs/mine" className="text-ember hover:underline">Manage it</Link></p><button onClick={handleDeleteGig} className="w-full rounded-full border border-red-900/20 bg-red-950/10 px-5 py-3 text-sm font-semibold text-red-500 transition-colors hover:border-red-900/40 hover:bg-red-950/20">Delete product</button></div> : purchasesEnabled ? <div className="mt-5 space-y-3"><button onClick={handleBuyAndPay} disabled={paying} className="auth-button w-full">{paying ? "Opening Paystack…" : "Buy this product"}</button><p className="text-center text-xs text-slate">Checkout is enabled only in an isolated Paystack test environment.</p></div> : <div className="mt-5 rounded-xl bg-[#EFE7DB] p-4 text-center"><p className="text-sm font-semibold text-[#172B45]">Purchases are paused</p><p className="mt-2 text-xs leading-5 text-[#526577]">Payment and delivery are being verified before live checkout is enabled.</p></div>}
+    {isOwnGig ? <div className="mt-5 space-y-3"><p className="text-center text-xs text-slate">This is your product.{" "}<Link href="/gigs/mine" className="text-ember hover:underline">Manage it</Link></p><button onClick={handleDeleteGig} className="w-full rounded-full border border-red-900/20 bg-red-950/10 px-5 py-3 text-sm font-semibold text-red-500 transition-colors hover:border-red-900/40 hover:bg-red-950/20">Delete product</button></div> : purchasesEnabled ? <div className="mt-5 space-y-3"><button onClick={handleBuyAndPay} disabled={paying || pendingVerification || Boolean(checkout)} className="auth-button w-full">{paying ? "Opening Paystack…" : "Buy this product"}</button><p className="text-center text-xs text-slate">Checkout is enabled only in an isolated Paystack test environment.</p></div> : <div className="mt-5 rounded-xl bg-[#EFE7DB] p-4 text-center"><p className="text-sm font-semibold text-[#172B45]">Purchases are paused</p><p className="mt-2 text-xs leading-5 text-[#526577]">Payment and delivery are being verified before live checkout is enabled.</p></div>}
     {checkout && <section className="mt-5 border-t border-line pt-5" aria-label="Checkout summary">
       <h2 className="font-semibold">Review your total</h2>
       <dl className="mt-3 space-y-2 text-sm">{(checkout.fees ? [['Product',checkout.fees.price_kobo],['Service fee (3%)',checkout.fees.buyer_fee_kobo],['Platform fee ($1)',checkout.fees.flat_fee_kobo],['VAT on fees',checkout.fees.buyer_vat_kobo],['Total',checkout.fees.buyer_total_kobo]] : [['Total',Number(checkout.order.amount)*100]]).map(([label,value])=><div key={String(label)} className="flex justify-between gap-3"><dt>{label}</dt><dd>₦{(Number(value)/100).toLocaleString('en-NG',{minimumFractionDigits:2})}</dd></div>)}</dl>
       {checkout.display && <p className="mt-3 text-sm text-slate">Estimated USD total: {new Intl.NumberFormat('en-US',{style:'currency',currency:'USD'}).format(checkout.display.buyer_total_minor/100)}</p>}
       {checkout.fees && <p className="mt-3 text-xs text-slate">You pay in NGN. The USD-to-NGN rate used for the $1 platform fee is locked to this order. Your bank sets its own conversion rate.</p>}
-      <button onClick={payReviewedCheckout} disabled={paying} className="auth-button mt-4 w-full">{paying?'Opening payment…':'Continue to Paystack'}</button>
-      <button className="mt-3 text-sm text-slate underline" disabled={paying} onClick={()=>{setCheckout(null);orderRequestKey.current=null;}}>Close checkout</button>
+      {pendingVerification ? <button onClick={() => verifyPendingPayment(checkout.order.id)} disabled={paying} className="auth-button mt-4 w-full">{paying ? 'Checking payment…' : 'Retry payment verification'}</button> : <button onClick={payReviewedCheckout} disabled={paying} className="auth-button mt-4 w-full">{paying ? 'Opening payment…' : 'Continue to Paystack'}</button>}
+      {pendingVerification && <Link href="/orders" className="mt-3 block text-center text-sm underline">View My Orders</Link>}
+      <button className="mt-3 text-sm text-slate underline" disabled={paying || pendingVerification} onClick={()=>{setCheckout(null);}}>Close checkout</button>
     </section>}
+    <div className="mt-4 flex justify-center"><SaveProductButton product={gig} /></div>
     {actionError && <p className="auth-error mt-4">{actionError}</p>}
   </div>;
 
@@ -240,7 +250,7 @@ export default function GigPageClient({ gigId, purchasesEnabled }: { gigId: stri
   return <main className="min-h-screen bg-ink text-bone"><SiteHeader /><div className="mx-auto max-w-7xl px-4 py-5 sm:px-6 sm:py-10">
     <Link href="/marketplace" className="text-xs font-semibold text-slate transition-colors hover:text-ember">← Back to marketplace</Link>
     <div className="mt-5 grid min-w-0 grid-cols-1 gap-7 lg:grid-cols-12 lg:gap-10"><div className="min-w-0 lg:col-span-8">
-      <div className="overflow-hidden rounded-2xl border border-line bg-paper shadow-[0_18px_50px_rgba(31,21,12,.08)]"><div className="relative aspect-[16/9]">{imageUrls[0] ? <Image unoptimized src={imageUrls[0]} fill sizes="(max-width: 1024px) 100vw, 800px" alt={`${gig.title} preview`} className="object-cover" /> : <div className="grid h-full w-full place-items-center bg-[#EEF1F2] p-8 text-center"><p className="max-w-sm text-base font-medium text-[#526577]">The seller has not uploaded a product preview yet.</p></div>}</div></div>
+      <div className="overflow-hidden rounded-2xl border border-line bg-paper shadow-[0_18px_50px_rgba(31,21,12,.08)]"><div className="relative aspect-[16/9]">{imageUrls[0] ? <Image unoptimized src={imageUrls[0]} fill sizes="(max-width: 1024px) 100vw, 800px" alt={`${gig.title} preview`} className="object-cover" /> : <GigPreview category={gig.category} seed={gig.id} title={gig.title} />}</div></div>
       {imageUrls.length > 1 && <div className="mt-3 grid grid-cols-3 gap-3">{imageUrls.slice(1).map((url, index) => <a key={url} href={url} target="_blank" rel="noopener noreferrer" className="relative aspect-video overflow-hidden rounded-lg border border-line"><Image unoptimized src={url} fill sizes="250px" alt={`${gig.title} gallery image ${index + 2}`} className="object-cover" /></a>)}</div>}
       {videoUrl && <section className="mt-8"><h2 className="mb-3 font-display text-xl font-bold">Demo video</h2><video controls preload="none" className="w-full rounded-xl" src={videoUrl}>Your browser does not support video playback.</video></section>}
       {demoLinks.length > 0 && <section className="mt-8"><h2 className="mb-3 font-display text-xl font-bold">Explore the demo</h2><div className="flex flex-wrap gap-3">{demoLinks.map((url, index) => <a key={url} href={url} target="_blank" rel="noopener noreferrer" className="rounded-full border border-line px-4 py-2 text-sm text-ember hover:border-ember">Open demo {index + 1} ↗</a>)}</div></section>}

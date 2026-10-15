@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
-import { supabase } from "@/lib/supabaseClient";
+import { isSupabaseConfigured, supabase } from "@/lib/supabaseClient";
 import GigCard, { type CardGig, type CardRating } from "./GigCard";
 
 type GigRow = CardGig & { created_at: string };
@@ -35,7 +35,7 @@ function CategoryLinks({ items, duplicate = false }: { items: Array<{ key: strin
       key={item.key + index}
       href={`/marketplace?category=${encodeURIComponent(item.key)}`}
       tabIndex={duplicate ? -1 : undefined}
-      className="group inline-flex shrink-0 items-center gap-3 px-5 py-3 text-[17px] font-semibold tracking-[-.025em] text-[#263E55] transition-colors hover:text-[#0B3D91] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-[#0B3D91] sm:px-7 sm:text-[19px]"
+      className="group inline-flex shrink-0 items-center gap-3 px-5 py-3 text-[17px] font-semibold tracking-[-.025em] text-[#263E55] transition-colors hover:text-[#a94b18] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-[#0B3D91] sm:px-7 sm:text-[19px]"
     >
       <span aria-hidden="true" className="text-[15px] font-bold text-[#E57814] transition-transform group-hover:scale-110 sm:text-base">{item.mark}</span>
       <span>{item.label}</span>
@@ -54,6 +54,7 @@ export default function HomeFeed() {
     let cancelled = false;
 
     async function load() {
+      if (!isSupabaseConfigured) { setLoadError(true); setLoading(false); return; }
       const [gigsResult, ratingsResult] = await Promise.all([
         supabase
           .from("gigs")
@@ -80,7 +81,9 @@ export default function HomeFeed() {
       setLoading(false);
     }
 
-    load();
+    void load().catch(() => {
+      if (!cancelled) { setLoadError(true); setLoading(false); }
+    });
     return () => {
       cancelled = true;
     };
@@ -93,11 +96,7 @@ export default function HomeFeed() {
       .map(([key, detail]) => ({ key, ...detail }));
   }, [gigs]);
 
-  const imageGigs = useMemo(
-    () => gigs.filter((gig) => Array.isArray(gig.gallery_image_paths) && gig.gallery_image_paths.length > 0),
-    [gigs]
-  );
-  const visibleGigs = imageGigs.slice(0, 4);
+  const visibleGigs = gigs.slice(0, 4);
 
   return (
     <section id="categories" className="bg-[#F8F6F1]">
@@ -124,7 +123,7 @@ export default function HomeFeed() {
             <p className="text-[13px] font-semibold tracking-[.01em] text-[#E07818] sm:text-[14px]">A small selection</p>
             <h2 className="mt-2 font-display text-[clamp(2rem,4vw,3rem)] font-semibold leading-[1.04] tracking-[-.05em] text-[#172B45]">A few listings to explore</h2>
           </div>
-          <Link href="/marketplace" className="w-fit text-[16px] font-semibold text-[#0B3D91] hover:underline">See all marketplace listings</Link>
+          <Link href="/marketplace" className="w-fit text-[16px] font-semibold text-[#a94b18] hover:underline">See all marketplace listings</Link>
         </div>
 
         <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
@@ -135,13 +134,13 @@ export default function HomeFeed() {
 
         {!loading && loadError && (
           <div className="mt-5 px-1 py-4 text-[16px] text-[#657585]" role="status">
-            Marketplace listings are unavailable right now. <Link href="/marketplace" className="font-semibold text-[#0B3D91] underline">Open the marketplace</Link>.
+            Marketplace listings are unavailable right now. <Link href="/marketplace" className="font-semibold text-[#a94b18] underline">Open the marketplace</Link>.
           </div>
         )}
         {!loading && !loadError && visibleGigs.length === 0 && (
           <div className="mt-5 flex flex-col gap-3 py-4 text-[16px] text-[#657585] sm:flex-row sm:items-center sm:justify-between">
-            <p>{imageGigs.length === 0 ? "No product previews yet. Browse the marketplace to see current listings." : "New product previews are on the way."}</p>
-            <Link href="/marketplace" className="w-fit font-semibold text-[#0B3D91] underline">Browse all listings</Link>
+            <p>New listings will appear here as creators publish them.</p>
+            <Link href="/marketplace" className="w-fit font-semibold text-[#a94b18] underline">Browse all listings</Link>
           </div>
         )}
       </div>

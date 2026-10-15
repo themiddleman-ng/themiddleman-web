@@ -1,122 +1,25 @@
-const lineWidths = ["w-11/12", "w-4/5", "w-10/12", "w-3/4", "w-9/12", "w-2/3"];
+const labels: Record<string, string> = { development: 'Web & software', design: 'Design studio', marketing: 'Content planning', writing: 'Launch copy', ai_assisted: 'Workflow tools' };
 
-function DocumentLines({ accent = false }: { accent?: boolean }) {
+/** An illustrative cover, never represented as the seller's actual deliverable. */
+export default function GigPreview({ category, seed, title = '' }: { category: string; seed: string; title?: string }) {
+  const dashboard = /dashboard|spreadsheet|automation|invoice|tracker/i.test(title);
+  const mobile = /mobile|figma/i.test(title);
+  const variant = [...seed].reduce((sum, c) => sum + c.charCodeAt(0), 0) % 3;
   return (
-    <div className="space-y-2">
-      {lineWidths.map((width, index) => (
-        <div
-          key={index}
-          className={`h-1.5 rounded-sm ${index === 0 && accent ? "bg-[#D67A3B]/45" : "bg-[#34485C]/10"} ${width}`}
-        />
-      ))}
-    </div>
-  );
-}
-
-export default function GigPreview({ category }: { category: string; seed: string }) {
-  if (category === "development") {
-    return (
-      <div className="h-full w-full bg-[#e3edf4] p-3 sm:p-4">
-        <div className="flex h-full overflow-hidden rounded-sm bg-[#f9fbfc]">
-          <div className="hidden w-1/4 border-r border-[#d5e2e8] bg-[#edf3f7] p-2 sm:block">
-            <div className="h-1.5 w-2/3 rounded bg-[#3c5367]/20" />
-            <div className="mt-4 space-y-2">
-              <div className="h-1 w-full rounded bg-[#3c5367]/10" />
-              <div className="h-1 w-4/5 rounded bg-[#547fa5]/35" />
-              <div className="h-1 w-5/6 rounded bg-[#3c5367]/10" />
-            </div>
-          </div>
-          <div className="flex-1 p-3 sm:p-4">
-            <div className="h-2 w-2/5 rounded bg-[#3c5367]/25" />
-            <div className="mt-4 space-y-2">
-              <div className="h-1.5 w-1/3 rounded bg-[#547fa5]/45" />
-              <DocumentLines />
-            </div>
-            <div className="mt-4 h-7 w-full rounded-sm border border-[#d5e2e8] bg-white" />
-          </div>
-        </div>
+    <div className={`concept-cover concept-variant-${variant}`} role="img" aria-label={`Illustrative concept for ${title || labels[category] || 'digital product'}; not a seller preview`}>
+      <div className="concept-toolbar"><span className="concept-dots">● ● ●</span><span>{labels[category] || 'Digital product'}</span><span>↗</span></div>
+      <div className="concept-workspace" aria-hidden="true">
+        {dashboard ? <div className="concept-dashboard">
+          <div className="concept-sidebar"><b>Overview</b><span>Activity</span><span>Reports</span><span>Settings</span></div>
+          <div className="concept-dashboard-main"><b>Your work, at a glance.</b><div className="concept-stats"><span>Projects<strong>12</strong></span><span>Complete<strong>08</strong></span></div><div className="concept-chart">{[32, 49, 38, 65, 54, 78, 88].map((h,i) => <i key={i} style={{height:`${h}%`}} />)}</div></div>
+        </div> : mobile ? <div className="concept-mobile"><div className="concept-phone"><small>Discover</small><b>Good finds.<br />Great work.</b><div className="concept-tiles"><i/><i/><i/><i/></div><span>Explore →</span></div><div><small>Made for smaller screens</small><h3>Less friction.<br />More finding.</h3><span className="concept-swatch" /></div></div>
+        : category === 'design' ? <div className="concept-brand"><small>Brand essentials / 01</small><h3>Aa<span>↗</span></h3><div className="concept-palette"><i/><i/><i/><i/></div><p>Identity. Type. Colour.</p></div>
+        : category === 'marketing' ? <div className="concept-calendar"><b>A little planning. A better launch.</b><div>{Array.from({length:14},(_,i)=><span key={i}><small>{String(i+1).padStart(2,'0')}</small>{i%3===0 && <i>{['Launch','Story','Share'][i%3]}</i>}</span>)}</div></div>
+        : category === 'writing' ? <div className="concept-writing"><small>THE LAUNCH EDIT</small><h3>Find the words.<br />Make your mark.</h3><p>A clear message starts here.</p><div className="concept-rule"/><span>Headline / Story / Call to action</span></div>
+        : category === 'development' ? <div className="concept-landing"><small>YOUR NEXT IDEA</small><h3>Built to get<br />you moving.</h3><span>Take a look ↗</span><div className="concept-orbit">↗</div></div>
+        : <div className="concept-workflow"><small>A REPEATABLE WORKFLOW</small><h3>From a thought<br />to a first draft.</h3><div><span>01 Brief</span><b>→</b><span>02 Draft</span><b>→</b><span>03 Review</span></div></div>}
       </div>
-    );
-  }
-
-  if (category === "design") {
-    return (
-      <div className="h-full w-full bg-[#ece7f3] p-3 sm:p-4">
-        <div className="flex h-full flex-col justify-between bg-[#fbf9fd] p-4 sm:p-5">
-          <div>
-            <div className="h-1.5 w-1/4 rounded bg-[#514469]/20" />
-            <div className="mt-5 font-display text-3xl font-semibold tracking-tight text-[#23364B] sm:text-4xl">Aa</div>
-          </div>
-          <div className="flex items-end justify-between">
-            <div className="space-y-2">
-              <div className="h-1.5 w-16 rounded bg-[#514469]/15" />
-              <div className="h-1.5 w-11 rounded bg-[#514469]/10" />
-            </div>
-            <div className="flex gap-1.5">
-              <span className="h-4 w-4 rounded-full bg-[#896bab]" />
-              <span className="h-4 w-4 rounded-full bg-[#514469]" />
-              <span className="h-4 w-4 rounded-full bg-[#b9a7d3]" />
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (category === "marketing") {
-    return (
-      <div className="h-full w-full bg-[#f8e7dd] p-3 sm:p-4">
-        <div className="h-full rounded-sm bg-[#fffaf7] p-3 sm:p-4">
-          <div className="flex items-center justify-between border-b border-[#f0d9ca] pb-2">
-            <div className="h-2 w-1/3 rounded bg-[#34485C]/20" />
-            <div className="h-1.5 w-1/5 rounded bg-[#34485C]/10" />
-          </div>
-          <div className="mt-3 grid h-[calc(100%-2rem)] grid-cols-4 gap-1.5">
-            {Array.from({ length: 8 }, (_, index) => (
-              <div key={index} className="rounded-sm border border-[#f0d9ca] bg-[#fcf0e7] p-1.5">
-                <div className="h-1 w-1/2 rounded bg-[#34485C]/10" />
-                {index % 3 === 0 && <div className="mt-1.5 h-3 rounded-sm bg-[#D67A3B]/20" />}
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (category === "writing") {
-    return (
-      <div className="h-full w-full bg-[#e3f0eb] p-3 sm:p-4">
-        <div className="h-full bg-[#f9fcfa] p-4 sm:p-5">
-          <div className="h-2 w-3/5 rounded bg-[#31584f]/25" />
-          <div className="mt-2 h-1.5 w-2/5 rounded bg-[#31584f]/10" />
-          <div className="mt-5">
-            <DocumentLines accent />
-          </div>
-          <div className="mt-4 h-5 w-1/3 rounded-sm bg-[#D67A3B]/15" />
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div className="h-full w-full bg-[#e4eafa] p-3 sm:p-4">
-      <div className="flex h-full overflow-hidden rounded-sm bg-[#f9faff]">
-        <div className="w-1/4 border-r border-[#dce4f1] bg-[#eef2f8] p-2">
-          <div className="h-1.5 w-4/5 rounded bg-[#34485C]/15" />
-          <div className="mt-4 space-y-2">
-            <div className="h-1.5 w-full rounded bg-[#D67A3B]/25" />
-            <div className="h-1.5 w-4/5 rounded bg-[#34485C]/10" />
-          </div>
-        </div>
-        <div className="flex-1 p-3 sm:p-4">
-          <div className="h-2 w-1/2 rounded bg-[#34485C]/20" />
-          <div className="mt-4 rounded-sm border border-[#dce4f1] bg-white p-3">
-            <div className="h-1.5 w-2/5 rounded bg-[#D67A3B]/35" />
-            <div className="mt-3"><DocumentLines /></div>
-          </div>
-        </div>
-      </div>
+      <div className="concept-caption">Concept mockup · Seller preview not supplied</div>
     </div>
   );
 }

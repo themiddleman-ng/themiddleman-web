@@ -2,8 +2,9 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { isSupabaseConfigured, supabase } from "@/lib/supabaseClient";
+import { ShortlistPanel } from "@/components/marketplace/Shortlist";
 import SiteHeader from "@/components/SiteHeader";
 import GigCard, { type CardGig, type CardRating } from "@/components/marketplace/GigCard";
 
@@ -52,7 +53,7 @@ function describeMarketplaceError(error: unknown): MarketplaceError {
   if (normalized.includes("failed to fetch") || normalized.includes("network")) {
     return {
       title: "We couldn't reach the marketplace",
-      message: "Check your connection and try again. If this continues, the preview deployment's Supabase settings need to be checked.",
+      message: "Check your connection and try again.",
       canRetry: true,
     };
   }
@@ -101,6 +102,7 @@ function LoadingState() {
 
 export default function MarketplacePage() {
   const searchParams = useSearchParams();
+  const router = useRouter();
   const [gigs, setGigs] = useState<GigRow[]>([]);
   const [ratings, setRatings] = useState<Record<string, GigRating>>({});
   const [loading, setLoading] = useState(true);
@@ -114,6 +116,19 @@ export default function MarketplacePage() {
   );
   const initialQuery = searchParams.get("q") ?? "";
   const [query, setQuery] = useState(initialQuery);
+  const [sort, setSort] = useState('newest');
+  useEffect(() => {
+    setQuery(searchParams.get('q') ?? '');
+    const category = searchParams.get('category');
+    setActiveCategory(CATEGORIES.some(item => item.value === category) ? category as GigCategory : 'all');
+  }, [searchParams]);
+  function chooseCategory(category: GigCategory | 'all') {
+    setActiveCategory(category);
+    const params = new URLSearchParams(searchParams.toString());
+    if (category === 'all') params.delete('category'); else params.set('category', category);
+    if (query.trim()) params.set('q', query.trim()); else params.delete('q');
+    router.replace(`/marketplace${params.size ? '?' + params.toString() : ''}`, { scroll: false });
+  }
 
   useEffect(() => {
     let cancelled = false;
@@ -177,10 +192,10 @@ export default function MarketplacePage() {
 
   const filteredGigs = gigs.filter((gig) => {
     const matchesCategory = activeCategory === "all" || gig.category === activeCategory;
-    const haystack = `${gig.title} ${gig.seller_profiles?.display_name ?? ""}`.toLowerCase();
+    const haystack = `${gig.title} ${gig.description} ${gig.seller_profiles?.display_name ?? ""}`.toLowerCase();
     const matchesQuery = query.trim() === "" || haystack.includes(query.trim().toLowerCase());
     return matchesCategory && matchesQuery;
-  });
+  }).sort((a, b) => sort === 'price-low' ? a.price_ngn - b.price_ngn : sort === 'price-high' ? b.price_ngn - a.price_ngn : Date.parse(b.created_at) - Date.parse(a.created_at));
 
   // With sparse inventory, a 4-column grid leaves a dead empty slot.
   // Only open the 4th column once there is enough stock to fill it.
@@ -233,7 +248,7 @@ export default function MarketplacePage() {
                 key={category.value}
                 type="button"
                 aria-pressed={active}
-                onClick={() => setActiveCategory(category.value)}
+                onClick={() => chooseCategory(category.value)}
                 className={
                   "mp-tab shrink-0 whitespace-nowrap rounded-md px-3 py-2 text-[13px] font-medium transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-[#0B3D91] " +
                   (active
@@ -247,6 +262,11 @@ export default function MarketplacePage() {
           })}
         </nav>
 
+        <ShortlistPanel />
+        <div className="mt-4 flex items-center justify-between gap-3 text-sm text-[#596B7A]">
+          <span role="status" aria-live="polite">{loading ? 'Loading products…' : `${filteredGigs.length} product${filteredGigs.length === 1 ? '' : 's'}`}</span>
+          <label className="flex items-center gap-2">Sort by<select value={sort} onChange={event => setSort(event.target.value)} className="min-h-11 rounded-md border border-line bg-white px-2 text-bone"><option value="newest">Newest</option><option value="price-low">Price: low to high</option><option value="price-high">Price: high to low</option></select></label>
+        </div>
         <div className="mt-5">
           {loading && <LoadingState />}
 
@@ -269,6 +289,7 @@ export default function MarketplacePage() {
           {!loading && !fetchError && filteredGigs.length === 0 && (
             <p className="py-2 text-sm text-[#596B7A]" role="status">
               No products match that search yet. Try another term or category.
+              <button className="ml-2 min-h-11 font-semibold text-[#a94b18] underline" onClick={() => { setQuery(''); setActiveCategory('all'); router.replace('/marketplace', { scroll: false }); }}>Clear filters</button>
             </p>
           )}
 

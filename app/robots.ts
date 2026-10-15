@@ -9,6 +9,13 @@ export default function robots(): MetadataRoute.Robots {
       allow: ["/", "/marketplace", "/about", "/careers", "/legal/"],
       disallow: [
         "/admin/",
+        "/design-preview",
+        "/account/",
+        "/settings",
+        "/notifications",
+        "/analytics",
+        "/disputes",
+        "/seller-support",
         "/api/",
         "/gigs/mine",
         "/gigs/new",

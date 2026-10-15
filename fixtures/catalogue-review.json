@@ -1,0 +1,110 @@
+{
+  "existing": [
+    {
+      "id": "ebe2fdfe-6072-4521-873f-796ba38a3ca8",
+      "title": "Build a lightweight spreadsheet automation plan",
+      "category": "ai_assisted",
+      "price_ngn": 70000
+    },
+    {
+      "id": "4c12722a-33fa-4c78-8f17-0081d2a6ce5d",
+      "title": "Write launch copy for your digital product",
+      "category": "writing",
+      "price_ngn": 45000
+    },
+    {
+      "id": "5061455c-d3f5-4a90-8e8e-a946675fda24",
+      "title": "Prepare a 14-day content calendar for your offer",
+      "category": "marketing",
+      "price_ngn": 55000
+    },
+    {
+      "id": "7524a5a7-d7c8-4546-9556-d7ee86e79e9c",
+      "title": "Create an AI prompt system for your workflow",
+      "category": "ai_assisted",
+      "price_ngn": 50000
+    },
+    {
+      "id": "4d5683fb-fb98-45d8-ac70-7da8eaab87ba",
+      "title": "Build a conversion-ready Next.js landing page",
+      "category": "development",
+      "price_ngn": 85000
+    },
+    {
+      "id": "246bc8dc-4371-42ba-93d1-3b2ad34fd2d4",
+      "title": "Create a simple business dashboard interface",
+      "category": "development",
+      "price_ngn": 120000
+    },
+    {
+      "id": "532a59de-cfa3-4d37-96ec-59023903bb54",
+      "title": "Design a premium logo and brand starter kit",
+      "category": "design",
+      "price_ngn": 65000
+    },
+    {
+      "id": "446aeecf-6cfb-4cbc-bf29-3d41c4b9c85d",
+      "title": "Design a mobile-first marketplace screen in Figma",
+      "category": "design",
+      "price_ngn": 90000
+    }
+  ],
+  "drafts": [
+    {
+      "id": "invoice-tracker",
+      "title": "Freelancer invoice and income tracker",
+      "category": "development",
+      "price_ngn": 15000,
+      "description": "Draft product proposal: a spreadsheet workbook with invoices, payment status, monthly income and a short setup guide. No integrations or automatic tax calculations.",
+      "deliverables": [
+        "XLSX workbook",
+        "Sample entries",
+        "PDF setup guide"
+      ],
+      "status": "pending_review",
+      "published": false
+    },
+    {
+      "id": "portfolio-starter",
+      "title": "Personal portfolio landing page starter",
+      "category": "development",
+      "price_ngn": 25000,
+      "description": "Draft product proposal: responsive HTML and CSS sections for an introduction, selected work and contact links. Hosting and customization excluded.",
+      "deliverables": [
+        "HTML and CSS source",
+        "Responsive page layouts",
+        "README setup instructions"
+      ],
+      "status": "pending_review",
+      "published": false
+    },
+    {
+      "id": "social-launch-kit",
+      "title": "Small business social launch kit",
+      "category": "design",
+      "price_ngn": 18000,
+      "description": "Draft product proposal: editable post layouts for product introductions, pricing and FAQs. All photographs and final brand assets must be supplied by the buyer.",
+      "deliverables": [
+        "12 editable Figma layouts",
+        "Typography and colour notes",
+        "Export guide"
+      ],
+      "status": "pending_review",
+      "published": false
+    },
+    {
+      "id": "support-replies",
+      "title": "Customer support reply library",
+      "category": "writing",
+      "price_ngn": 12000,
+      "description": "Draft product proposal: editable responses for order updates, product questions and support follow-ups. Refund wording must be adapted to the seller\u2019s published policy.",
+      "deliverables": [
+        "30 editable reply templates",
+        "Tone guide",
+        "Quick-reference index"
+      ],
+      "status": "pending_review",
+      "published": false
+    }
+  ]
+}

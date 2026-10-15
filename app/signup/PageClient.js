@@ -75,33 +75,35 @@ function PasswordChecklist({ value }) {
   );
 }
 
-// Decide which face to show before the very first paint, so there's nothing
-// to "flip away from". URL param wins (explicit ?mode=signin link), otherwise
-// we fall back to whatever the person used last time.
+// Keep the server and first client render identical. Browser preferences are
+// restored after hydration; explicit mode links always win.
 function getInitialMode(searchParams) {
-  const fromUrl = searchParams.get('mode');
-  if (fromUrl === 'signin') return true;
-  if (fromUrl === 'signup') return false;
-  if (typeof window !== 'undefined') {
-    try { return window.localStorage.getItem('mm_last_auth_mode') === 'signin'; }
-    catch { return false; }
-  }
-  return false;
+  return searchParams.get('mode') === 'signin';
 }
 
 function AuthPageInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [flipped, setFlipped] = useState(() => getInitialMode(searchParams));
+  const [modeReady, setModeReady] = useState(false);
+  useEffect(() => {
+    const mode = searchParams.get('mode');
+    if (mode === 'signin' || mode === 'signup') setFlipped(mode === 'signin');
+    else {
+      try { setFlipped(window.localStorage.getItem('mm_last_auth_mode') === 'signin'); }
+      catch { setFlipped(false); }
+    }
+    setModeReady(true);
+  }, [searchParams]);
 
   // Remember the mode the person ends up on, so their next visit opens
   // straight to it instead of always defaulting to sign up.
   useEffect(() => {
-    if (typeof window !== 'undefined') {
+    if (modeReady) {
       try { window.localStorage.setItem('mm_last_auth_mode', flipped ? 'signin' : 'signup'); }
       catch { /* The auth form still works when preference storage is blocked. */ }
     }
-  }, [flipped]);
+  }, [flipped, modeReady]);
 
   // Sign up state
   const [fullName, setFullName] = useState('');

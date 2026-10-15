@@ -1,5 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
+import { ShortlistProvider } from "@/components/marketplace/Shortlist";
+import PageMotion from "@/components/motion/PageMotion";
 import MobileTabBar from "@/components/layout/MobileTabBar";
 import CookieNotice from "@/components/legal/CookieNotice";
 import FirstRunExperience from "@/components/onboarding/FirstRunExperience";
@@ -71,6 +73,7 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
+  viewportFit: "cover",
   themeColor: "#f7f3ec",
 };
 
@@ -86,10 +89,13 @@ export default function RootLayout({
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(siteSchema) }}
         />
+        <ShortlistProvider>
         {children}
         <FirstRunExperience />
         <CookieNotice />
         <MobileTabBar />
+        <PageMotion />
+        </ShortlistProvider>
       </body>
     </html>
   );
