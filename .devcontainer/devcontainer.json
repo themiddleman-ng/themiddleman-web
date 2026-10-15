@@ -1,7 +1,6 @@
 {
   "name": "The Middleman Dev Container",
-  "image": "mcr.microsoft.com/devcontainers/typescript-node:1-20-bullseye",
-  
+  "image": "mcr.microsoft.com/devcontainers/typescript-node:1-22-bookworm",
   "customizations": {
     "vscode": {
       "settings": {
@@ -15,13 +14,18 @@
       ]
     }
   },
-
-  "forwardPorts": [3000],
-
+  "forwardPorts": [
+    3000
+  ],
+  "portsAttributes": {
+    "3000": {
+      "label": "The Middleman",
+      "onAutoForward": "notify"
+    }
+  },
   "containerEnv": {
     "NEXT_PUBLIC_SUPABASE_URL": "${localEnv:NEXT_PUBLIC_SUPABASE_URL}",
     "NEXT_PUBLIC_SUPABASE_ANON_KEY": "${localEnv:NEXT_PUBLIC_SUPABASE_ANON_KEY}"
   },
-
-  "postCreateCommand": "corepack enable && pnpm install --frozen-lockfile"
+  "postCreateCommand": "corepack enable && corepack prepare pnpm@10.15.1 --activate && pnpm install --frozen-lockfile"
 }
