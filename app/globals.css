@@ -24,10 +24,20 @@
   --font-mono: var(--font-dm-mono);
 }
 
+html {
+  /* 100vw hero artwork includes the scrollbar and was shifting the page sideways. */
+  overflow-x: hidden;
+}
+
 .homepage-fonts {
   --font-body: var(--home-body);
   --font-syne: var(--home-display);
   font-family: var(--home-body), sans-serif;
+}
+
+.homepage-fonts :is(a, button):focus-visible {
+  outline: 2px solid #0B3D91;
+  outline-offset: 3px;
 }
 
 

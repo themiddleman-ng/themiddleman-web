@@ -43,7 +43,6 @@ export const metadata: Metadata = {
     "Nigerian creators",
     "templates and creative resources",
   ],
-  alternates: { canonical: "/" },
   openGraph: {
     type: "website",
     url: SITE_URL,

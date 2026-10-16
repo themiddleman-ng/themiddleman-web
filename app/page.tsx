@@ -1,9 +1,14 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
 import { DM_Sans, Outfit } from "next/font/google";
 import HomeFAQ from "@/components/HomeFAQ";
 import HomeFeed from "@/components/marketplace/HomeFeed";
 import Logo from "@/components/Logo";
+
+export const metadata: Metadata = {
+  alternates: { canonical: "/" },
+};
 
 const homepageBody = DM_Sans({ subsets: ["latin"], variable: "--home-body", display: "swap" });
 const homepageDisplay = Outfit({ subsets: ["latin"], variable: "--home-display", display: "swap" });
@@ -93,6 +98,7 @@ export default function Home() {
                   <div
                     data-product-image-slot={index + 1}
                     className="relative h-20 w-24 shrink-0 overflow-hidden rounded-md bg-[#E9E0D6] sm:aspect-[4/3] sm:h-auto sm:w-full"
+                    role={product.imageSrc ? undefined : "img"}
                     aria-label={product.imageSrc ? undefined : `Image placeholder for ${product.title}`}
                   >
                     {product.imageSrc ? (
@@ -113,7 +119,7 @@ export default function Home() {
                     </h2>
                     <p className="mt-1 flex items-center gap-1 text-[11px] text-[#667381]">
                       <span className="truncate">{product.creator}</span>
-                      {product.verified && <span aria-label="Verified seller" title="Verified seller" className="shrink-0 font-bold text-[#0B3D91]">✓</span>}
+                      {product.verified && <span role="img" aria-label="Verified seller" title="Verified seller" className="shrink-0 font-bold text-[#0B3D91]">✓</span>}
                     </p>
                     <p className="mt-2 text-[14px] font-bold text-[#172B45]">₦{product.price.toLocaleString("en-NG")}</p>
                   </div>
