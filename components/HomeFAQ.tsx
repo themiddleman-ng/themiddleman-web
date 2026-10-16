@@ -45,14 +45,16 @@ export default function HomeFAQ() {
               <div key={item.question} className="border-b border-[#DCE2E5]">
                 <button
                   type="button"
+                  id={`faq-question-${index}`}
                   onClick={() => setOpenIndex(isOpen ? null : index)}
                   aria-expanded={isOpen}
+                  aria-controls={`faq-answer-${index}`}
                   className="flex w-full items-center justify-between gap-4 py-5 text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0B3D91]"
                 >
                   <span className="text-[17px] font-semibold text-[#253E55] sm:text-[18px]">{item.question}</span>
                   <span aria-hidden="true" className={`grid h-7 w-7 shrink-0 place-items-center rounded-full border border-[#DCE2E5] text-base font-normal text-[#496277] transition-transform ${isOpen ? "rotate-45 bg-[#0B3D91] text-white" : ""}`}>+</span>
                 </button>
-                {isOpen && <p className="max-w-2xl pb-5 pr-10 text-[16px] leading-7 text-[#6B7A87] sm:text-[17px]">{item.answer}</p>}
+                <p id={`faq-answer-${index}`} role="region" aria-labelledby={`faq-question-${index}`} hidden={!isOpen} className="max-w-2xl pb-5 pr-10 text-[16px] leading-7 text-[#6B7A87] sm:text-[17px]">{item.answer}</p>
               </div>
             );
           })}

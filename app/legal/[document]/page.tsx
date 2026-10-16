@@ -184,7 +184,7 @@ export default async function LegalPage({ params }: { params: Promise<{ document
             ))}
           </div>
 
-          <div className="mt-10 pt-6 border-t border-dashed border-line flex items-center justify-between">
+          <div className="mt-10 flex flex-wrap items-center justify-between gap-3 border-t border-dashed border-line pt-6">
             <p className="text-xs text-slate font-mono">THE MIDDLEMAN · LAGOS, NIGERIA</p>
             <div className="ink-stamp rounded-md px-3 py-1 text-[10px]">OFFICIAL</div>
           </div>

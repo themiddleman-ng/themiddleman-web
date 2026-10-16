@@ -50,6 +50,7 @@ export default function GigCard({ gig, rating }: { gig: CardGig; rating?: CardRa
             <span className="truncate">{seller}</span>
             {verified && (
               <span
+                role="img"
                 aria-label="Verified seller"
                 title="Verified seller"
                 className="shrink-0 text-[12px] font-bold text-[#2e7776]"
