@@ -266,7 +266,7 @@ function AuthPageInner() {
   const labelClass = 'block text-sm font-medium text-[#33404d]';
 
   return (
-    <main data-mode={flipped ? "signin" : "signup"} className="mm-auth min-h-[100svh] bg-[radial-gradient(ellipse_at_88%_8%,rgba(228,111,47,.20),transparent_30%),linear-gradient(145deg,#f7f1e7,#f4e9dc_56%,#f8f4ed)] px-4 py-5 text-[#1d2733] sm:px-6 sm:py-10">
+    <main data-mode={flipped ? "signin" : "signup"} className="mm-auth min-h-[100svh] bg-[radial-gradient(ellipse_at_88%_8%,rgba(228,111,47,.20),transparent_30%),linear-gradient(145deg,#f7f1e7,#f4e9dc_56%,#f8f4ed)] px-4 pb-24 pt-5 text-[#1d2733] sm:px-6 sm:py-10">
       <div className="mx-auto grid min-h-[calc(100svh-2.5rem)] w-full max-w-5xl overflow-hidden rounded-[1.75rem] border border-[#e9dfd3] bg-[#fffdf9] shadow-[0_24px_80px_rgba(65,46,28,.13)] md:min-h-[680px] md:grid-cols-[.85fr_1.15fr]">
         <aside className="mm-auth-hero relative hidden flex-col justify-between overflow-hidden bg-[#182d41] p-10 text-[#faf4e9] md:flex lg:p-12">
           <div className="absolute -right-28 -top-24 h-80 w-80 rounded-full bg-[#e87635]/25 blur-3xl" aria-hidden="true" />
@@ -282,8 +282,8 @@ function AuthPageInner() {
           <p className="relative text-sm text-[#e5e4de]/70">Pay in Naira through Paystack.</p>
         </aside>
 
-        <section className="mm-auth-form min-w-0 px-5 py-6 sm:px-9 sm:py-9 md:px-12 md:py-10">
-          <div className="mm-auth-mobile-brand mb-7 flex items-center justify-between gap-4 md:hidden">
+        <section className="mm-auth-form min-w-0 w-full flex-col px-5 py-6 sm:px-9 sm:py-9 md:px-12 md:py-10">
+          <div className="mm-auth-mobile-brand mb-7 flex w-full items-center justify-between gap-4 md:hidden">
             <Logo variant="horizontal" markClass="h-8 w-8" textClass="text-base" />
             <Link href="/marketplace" className="text-sm font-medium text-[#445363] hover:text-[#de641e]">Browse first</Link>
           </div>

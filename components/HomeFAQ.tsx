@@ -33,7 +33,7 @@ export default function HomeFAQ() {
       <div className="mx-auto grid max-w-7xl gap-9 px-5 py-16 sm:px-8 sm:py-20 md:grid-cols-[.8fr_1.2fr] md:gap-16">
         <div>
           <p className="text-[13px] font-bold uppercase tracking-[.14em] text-[#0B3D91]">Frequently asked</p>
-          <h2 className="mt-4 max-w-sm font-display text-[clamp(2.8rem,5vw,4.25rem)] font-semibold leading-[1.02] tracking-[-.055em] text-[#172B45]">Good questions.<br />Clear answers.</h2>
+          <h2 className="mt-4 max-w-sm font-display text-[1.85rem] font-semibold leading-[1.08] tracking-[-.055em] text-[#172B45] sm:text-[clamp(2.8rem,5vw,4.25rem)] sm:leading-[1.02]">Good questions.<br />Clear answers.</h2>
           <p className="mt-4 max-w-sm text-[17px] leading-7 text-[#6C7A87]">What to expect when you shop or sell digital products here.</p>
           <a href="mailto:hello@themiddleman.com.ng" className="mt-5 inline-flex text-[16px] font-semibold text-[#0B3D91] underline decoration-[#FF8A00] underline-offset-4">Talk to the team</a>
         </div>

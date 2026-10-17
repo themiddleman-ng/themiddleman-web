@@ -73,8 +73,8 @@ html {
   pointer-events: none;
   width: min(48vw, 590px);
   height: min(48vw, 520px);
-  min-width: 300px;
-  min-height: 300px;
+  min-width: 180px;
+  min-height: 180px;
   right: 0;
   top: 50%;
   transform: translate(8%, -50%);

@@ -84,7 +84,7 @@ const CATEGORIES: Array<{ value: GigCategory | "all"; label: string }> = [
 
 function LoadingState() {
   return (
-    <div role="status" aria-label="Loading products" className="grid grid-cols-1 gap-x-7 gap-y-9 sm:grid-cols-2 lg:grid-cols-3">
+    <div role="status" aria-label="Loading products" className="mm-product-grid">
       <span className="sr-only">Loading products</span>
       {Array.from({ length: 6 }, (_, index) => (
         <div key={index} aria-hidden="true" className="marketplace-skeleton">
@@ -215,7 +215,7 @@ export default function MarketplacePage({ designPreview = false }: { designPrevi
           </div>
           <Link
             href="/gigs/new"
-            className="inline-flex w-fit shrink-0 items-center justify-center rounded-full bg-[#fff0e5] px-4 py-2.5 text-sm font-semibold text-[#b64d18] transition-colors hover:bg-[#fbe1cf] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#de641e]"
+            className="inline-flex w-full shrink-0 items-center justify-center rounded-xl bg-[#fff0e5] px-4 py-2.5 text-sm font-semibold text-[#b64d18] transition-colors hover:bg-[#fbe1cf] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#de641e] sm:w-fit sm:rounded-full"
           >
             Sell a digital product
           </Link>

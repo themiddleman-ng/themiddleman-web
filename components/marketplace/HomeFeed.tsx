@@ -127,7 +127,7 @@ export default function HomeFeed() {
           <Link href="/marketplace" className="w-fit text-[16px] font-semibold text-[#0B3D91] hover:underline">See all marketplace listings</Link>
         </div>
 
-        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="homepage-listings grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-5 lg:grid-cols-4">
           {loading
             ? Array.from({ length: 4 }, (_, index) => <ListingSkeleton key={index} />)
             : visibleGigs.map((gig) => <GigCard key={gig.id} gig={gig} rating={ratings[gig.id]} />)}

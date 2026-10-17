@@ -202,7 +202,7 @@ export default function NewGigPage() {
 			<div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-8 lg:py-10">
 				<div className="mb-6 sm:mb-10">
 					<p className="text-xs font-bold tracking-[.2em] text-ember uppercase">New digital product</p>
-					<h1 className="mt-2 font-display text-3xl font-bold sm:text-4xl">List a ready-made product</h1>
+					<h1 className="mt-2 font-display text-[1.65rem] font-bold sm:text-4xl">List a ready-made product</h1>
 					<p className="mt-3 text-sm text-slate max-w-xl">Describe the ready-made product, what it includes, supported formats and any requirements. Every submission is reviewed before it appears in the marketplace.</p>
 				</div>
 

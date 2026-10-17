@@ -2,10 +2,13 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabaseClient';
 import SiteHeader from '@/components/SiteHeader';
+import PhotoPicker from '@/components/profile/PhotoPicker';
+import { avatarStoragePath } from '@/lib/profile/avatar-file.mjs';
+import { prepareAvatarFile } from '@/lib/profile/prepare-avatar';
 
 type UserRow = {
   full_name: string | null;
@@ -30,7 +33,6 @@ type OrderRow = {
 
 const AVATAR_BUCKET = 'profile-avatars';
 const MAX_AVATAR_BYTES = 3 * 1024 * 1024;
-const ACCEPTED_AVATAR_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
 
 function initials(name: string | null, email: string) {
   const source = name?.trim() || email;
@@ -85,7 +87,6 @@ function PhotoAvatar({ url, name, email }: { url: string; name: string | null; e
 
 export default function ProfilePage() {
   const router = useRouter();
-  const fileInputRef = useRef<HTMLInputElement>(null);
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<UserRow | null>(null);
   const [authUserId, setAuthUserId] = useState('');
@@ -160,33 +161,34 @@ export default function ProfilePage() {
     return () => { active = false; };
   }, [router]);
 
-  async function handleAvatarSelected(event: React.ChangeEvent<HTMLInputElement>) {
-    const file = event.target.files?.[0];
-    event.target.value = '';
+  async function handleAvatarSelected(file: File) {
     setAvatarError('');
     setAvatarMessage('');
-    if (!file || !authUserId) return;
+    if (!authUserId) return;
 
-    if (!ACCEPTED_AVATAR_TYPES.includes(file.type)) {
-      setAvatarError('Choose a JPG, PNG or WebP image.');
-      return;
-    }
-    if (file.size > MAX_AVATAR_BYTES) {
-      setAvatarError('This photo is over 3 MB. Choose a smaller image.');
+    const prepared = await prepareAvatarFile(file, MAX_AVATAR_BYTES);
+    if (!prepared.ok) {
+      setAvatarError(prepared.message || 'Choose a JPG, PNG or a photo from your camera roll.');
       return;
     }
 
+    setAvatarUrl(prepared.previewUrl);
     setAvatarLoading(true);
-    const path = `${authUserId}/avatar`;
-    const { error: uploadError } = await supabase.storage.from(AVATAR_BUCKET).upload(path, file, {
+    const path = avatarStoragePath(authUserId, prepared.type);
+    const { error: uploadError } = await supabase.storage.from(AVATAR_BUCKET).upload(path, prepared.file, {
       cacheControl: '3600',
-      contentType: file.type,
+      contentType: prepared.type,
       upsert: true,
     });
     if (uploadError) {
-      setAvatarError(uploadError.message.includes('Bucket not found')
-        ? 'Profile photos are being set up. Please try again later.'
-        : 'We couldn’t upload that photo. Please try again.');
+      const detail = String(uploadError.message || '');
+      setAvatarError(
+        detail.includes('Bucket not found')
+          ? 'Profile photos are being set up on this environment. The preview is only on this device until storage is ready.'
+          : detail.includes('row-level security') || detail.toLowerCase().includes('unauthorized')
+            ? 'Sign in again, then choose the photo. Your account could not write to photo storage.'
+            : 'We couldn’t save that photo. Try a JPG under 3 MB.'
+      );
       setAvatarLoading(false);
       return;
     }
@@ -201,7 +203,9 @@ export default function ProfilePage() {
     }
 
     setAvatarPath(path);
-    setAvatarUrl(await avatarSignedUrl(path));
+    const signed = await avatarSignedUrl(path);
+    URL.revokeObjectURL(prepared.previewUrl);
+    setAvatarUrl(signed || prepared.previewUrl);
     setAvatarMessage('Your profile photo is updated.');
     setAvatarLoading(false);
   }
@@ -286,22 +290,11 @@ export default function ProfilePage() {
             </div>
 
             <div className="flex w-full flex-col gap-2 sm:w-auto sm:min-w-48">
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/jpeg,image/png,image/webp"
-                onChange={handleAvatarSelected}
-                className="sr-only"
-                aria-label="Choose a professional profile photo"
-              />
-              <button
-                type="button"
-                onClick={() => fileInputRef.current?.click()}
-                disabled={avatarLoading}
-                className="min-h-11 rounded-xl bg-[#de641e] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#c95415] disabled:cursor-wait disabled:opacity-60"
-              >
-                {avatarLoading ? 'Uploading photo…' : avatarUrl ? 'Change photo' : 'Add profile photo'}
-              </button>
+              <PhotoPicker id="profile-avatar-file" label="Choose a profile photo" disabled={avatarLoading} onFile={(file) => { void handleAvatarSelected(file); }}>
+                <span className="inline-flex min-h-11 w-full items-center justify-center rounded-xl bg-[#de641e] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#c95415]">
+                  {avatarLoading ? 'Uploading photo…' : avatarUrl ? 'Change photo' : 'Add profile photo'}
+                </span>
+              </PhotoPicker>
               {avatarUrl && (
                 <button
                   type="button"
@@ -317,7 +310,7 @@ export default function ProfilePage() {
 
           <div className="mt-6 border-t border-[#eee7de] pt-5">
             <p className="text-sm font-semibold text-[#2e7776]">A note about your photo</p>
-            <p className="mt-1 max-w-2xl text-sm leading-6 text-[#6b7782]">Choose a clear, professional headshot. Avoid logos, group photos and heavy filters. JPG, PNG or WebP, up to 3 MB. The photo is stored privately and only shown in your account.</p>
+            <p className="mt-1 max-w-2xl text-sm leading-6 text-[#6b7782]">Choose a clear headshot from your camera roll. JPG, PNG, WebP, or a phone photo up to 3 MB. The photo is stored privately and only shown in your account.</p>
             {avatarMessage && <p role="status" className="mt-3 text-sm font-medium text-[#436348]">{avatarMessage}</p>}
             {avatarError && <p role="alert" className="mt-3 text-sm font-medium text-[#9b3e2b]">{avatarError}</p>}
           </div>

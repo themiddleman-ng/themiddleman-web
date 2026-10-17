@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useEffect, useId, useRef, useState, type FormEvent, type ReactNode } from "react";
 import { ArrowRightIcon } from "@phosphor-icons/react/dist/csr/ArrowRight";
 import { BellIcon } from "@phosphor-icons/react/dist/csr/Bell";
@@ -23,8 +24,10 @@ import { ShoppingBagIcon } from "@phosphor-icons/react/dist/csr/ShoppingBag";
 import { UserCircleIcon } from "@phosphor-icons/react/dist/csr/UserCircle";
 import { XIcon } from "@phosphor-icons/react/dist/csr/X";
 import SiteHeader from "@/components/SiteHeader";
+import PhotoPicker from "@/components/profile/PhotoPicker";
 import { downloadCsv } from "@/lib/client/download-csv";
 import { filterListings, filterThreads, type Listing } from "@/lib/design-preview/filters.mjs";
+import { prepareAvatarFile } from "@/lib/profile/prepare-avatar";
 
 type PreviewScreen = {
   id: string;
@@ -428,8 +431,10 @@ function MessagesPreview() {
           {notice && <p role="status">{notice}</p>}
         </div>
         <form className="mm-demo-composer" onSubmit={send}>
-          <input ref={fileRef} type="file" hidden onChange={(event) => setAttachment(event.target.files?.[0] ?? null)} />
-          <button type="button" aria-label="Attach a file" onClick={() => fileRef.current?.click()}><PaperclipIcon size={16} aria-hidden="true" /></button>
+          <label className="relative grid size-[38px] place-items-center overflow-hidden rounded-[6px] border border-[#dce2eb] text-[#253650]">
+            <input ref={fileRef} type="file" className="absolute inset-0 cursor-pointer opacity-0" aria-label="Attach a file" onChange={(event) => setAttachment(event.target.files?.[0] ?? null)} />
+            <PaperclipIcon size={16} aria-hidden="true" />
+          </label>
           {attachment && <span className="mm-demo-file-chip">{attachment.name} <button type="button" aria-label="Remove attachment" onClick={() => setAttachment(null)}><XIcon size={12} /></button></span>}
           <input value={draft} onChange={(event) => setDraft(event.target.value)} placeholder={`Message ${active.name}…`} aria-label={`Message about ${active.product}`} />
           <button className="send" type="submit" aria-label="Send message"><PaperPlaneTiltIcon size={16} weight="fill" aria-hidden="true" /></button>
@@ -457,24 +462,19 @@ function ProfilePreview() {
   const [status, setStatus] = useState("");
   const [photo, setPhoto] = useState("");
   const [photoError, setPhotoError] = useState("");
-  const photoRef = useRef<HTMLInputElement>(null);
 
-  function onPhoto(file: File | undefined) {
-    if (!file) return;
-    if (!file.type.startsWith("image/")) {
-      setPhotoError("Choose a JPG, PNG, or WebP image.");
+  async function onPhoto(file: File) {
+    const prepared = await prepareAvatarFile(file, 5 * 1024 * 1024);
+    if (!prepared.ok) {
+      setPhotoError(prepared.message || "Choose a JPG, PNG or a photo from your camera roll.");
       return;
     }
-    if (file.size > 5 * 1024 * 1024) {
-      setPhotoError("That image is over 5 MB.");
-      return;
-    }
-    const url = URL.createObjectURL(file);
     setPhoto((current) => {
       if (current) URL.revokeObjectURL(current);
-      return url;
+      return prepared.previewUrl;
     });
     setPhotoError("");
+    setStatus("Photo updated in this preview. It is not saved to an account.");
   }
 
   function onSubmit(event: FormEvent) {
@@ -499,13 +499,18 @@ function ProfilePreview() {
       <section>
         <div className="mm-demo-hero"><div><h1>My profile</h1><p>Manage how you appear on The Middleman.</p></div></div>
         <div className="mm-demo-panel mm-demo-profile-head">
-          <div className="mm-demo-profile-photo" style={photo ? { backgroundImage: `url("${photo}")` } : undefined}>{photo ? null : "BS"}</div>
+          <div className="mm-demo-profile-photo">{photo ? (
+            // Blob URLs from this device cannot use next/image.
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={photo} alt="" />
+          ) : "BS"}</div>
           <div>
             <h2>{form.displayName || "Buks Samuel"}</h2>
             <p>@bukssamuel</p>
-            <input ref={photoRef} type="file" accept="image/png,image/jpeg,image/webp" hidden onChange={(event) => onPhoto(event.target.files?.[0])} />
-            <button type="button" className="mm-demo-outline" onClick={() => photoRef.current?.click()}><ImageIcon size={14} aria-hidden="true" /> Change photo</button>
-            <small>JPG, PNG, or WebP. Up to 5 MB.</small>
+            <PhotoPicker id="preview-profile-photo" label="Change photo" onFile={(file) => { void onPhoto(file); }}>
+              <span className="mm-demo-outline"><ImageIcon size={14} aria-hidden="true" /> Change photo</span>
+            </PhotoPicker>
+            <small>JPG, PNG, WebP, or a photo from your camera roll. Up to 5 MB.</small>
             {photoError && <small role="alert">{photoError}</small>}
           </div>
         </div>
@@ -922,6 +927,7 @@ function SecurityPreview() {
 }
 
 export default function DesignPreviewScreen({ initialScreen = "marketplace" }: { initialScreen?: string }) {
+  const router = useRouter();
   const screen = DESIGN_PREVIEW_SCREENS.some((item) => item.id === initialScreen) ? initialScreen : "marketplace";
   const current = DESIGN_PREVIEW_SCREENS.find((item) => item.id === screen)!;
   const groups = Array.from(new Set(DESIGN_PREVIEW_SCREENS.map((item) => item.group)));
@@ -937,6 +943,12 @@ export default function DesignPreviewScreen({ initialScreen = "marketplace" }: {
           </div>
           <Link href="/marketplace">Return to marketplace</Link>
         </div>
+        <label className="mm-demo-screen-select">
+          <span>Preview screen</span>
+          <select aria-label="Preview screen" value={screen} onChange={(event) => router.push(`?screen=${event.target.value}`)}>
+            {DESIGN_PREVIEW_SCREENS.map((item) => <option key={item.id} value={item.id}>{item.group} · {item.label}</option>)}
+          </select>
+        </label>
         <div className="mm-demo-layout">
           <nav className="mm-demo-screen-nav" aria-label="Choose a design preview">
             {groups.map((group) => (

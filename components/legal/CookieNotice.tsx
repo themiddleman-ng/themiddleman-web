@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 
 const STORAGE_KEY = "themiddleman-cookie-preferences-v2";
@@ -22,7 +23,11 @@ function readPreferences(): CookiePreferences {
   }
 }
 
+const TAB_PREFIXES = ["/marketplace", "/browse", "/gigs", "/orders", "/payments", "/messages", "/profile", "/settings"];
+
 export default function CookieNotice() {
+  const pathname = usePathname();
+  const aboveTabs = TAB_PREFIXES.some((prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`));
   const [visible, setVisible] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [optionalAnalytics, setOptionalAnalytics] = useState(false);
@@ -81,17 +86,19 @@ export default function CookieNotice() {
       {visible && (
         <aside
           aria-label="Cookie notice"
-          className="fixed bottom-[calc(4.75rem+env(safe-area-inset-bottom))] left-3 right-3 z-50 mx-auto max-w-sm rounded-2xl border border-[#e5dbcf] bg-[#fffdf9] p-4 text-[#243344] shadow-[0_12px_36px_rgba(28,37,47,.16)] sm:bottom-4 sm:left-4 sm:right-auto"
+          className={`fixed inset-x-0 z-50 border-t border-[#e5dbcf] bg-[#fffdf9] px-3 py-2.5 text-[#243344] shadow-[0_-8px_24px_rgba(28,37,47,.12)] sm:inset-x-auto sm:bottom-4 sm:left-4 sm:right-auto sm:max-w-sm sm:rounded-2xl sm:border sm:p-4 sm:shadow-[0_12px_36px_rgba(28,37,47,.16)] ${aboveTabs ? "bottom-[calc(4rem+env(safe-area-inset-bottom))]" : "bottom-0"}`}
         >
-          <p className="text-sm font-semibold">Your privacy, your choice</p>
-          <p className="mt-1 text-xs leading-5 text-[#64717c]">
-            Essential cookies keep sign-in working. You can choose whether to allow optional analytics.
-          </p>
-          <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
-            <Link href="/legal/cookies" className="text-xs font-semibold text-[#a94b18] hover:underline">
-              Cookie policy
-            </Link>
-            <div className="flex items-center gap-2">
+          <div className="mx-auto flex max-w-lg items-center gap-3 sm:block sm:max-w-none">
+            <div className="min-w-0 flex-1">
+              <p className="text-sm font-semibold">Cookies</p>
+              <p className="mt-0.5 hidden text-xs leading-5 text-[#64717c] sm:mt-1 sm:block">
+                Essential cookies keep sign-in working. You can choose whether to allow optional analytics.
+              </p>
+            </div>
+            <div className="flex shrink-0 items-center gap-2">
+              <Link href="/legal/cookies" className="hidden text-xs font-semibold text-[#a94b18] hover:underline sm:inline">
+                Cookie policy
+              </Link>
               <button
                 type="button"
                 onClick={() => { setOptionalAnalytics(readPreferences().optionalAnalytics); setSettingsOpen(true); }}
@@ -104,7 +111,7 @@ export default function CookieNotice() {
                 onClick={() => savePreferences(false)}
                 className="min-h-9 rounded-lg bg-[#de641e] px-3 text-xs font-semibold text-white hover:bg-[#c95415]"
               >
-                Only essential
+                OK
               </button>
             </div>
           </div>

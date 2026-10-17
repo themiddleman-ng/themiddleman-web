@@ -12,6 +12,16 @@ declare module "@/lib/design-preview/filters.mjs" {
   ): T[];
 }
 
+declare module "@/lib/profile/avatar-file.mjs" {
+  export function guessImageType(file: { type?: string; name?: string } | null | undefined): string;
+  export function avatarExtension(type: string): string;
+  export function classifyAvatarFile(
+    file: { type?: string; name?: string; size?: number } | null | undefined,
+    maxBytes?: number,
+  ): { ok: boolean; code?: string; message?: string; type?: string; needsConvert?: boolean };
+  export function avatarStoragePath(userId: string, type: string): string;
+}
+
 declare module "@/lib/auth/login-errors.mjs" {
   export type AuthField = "email" | "password" | "credentials" | "form";
   export type AuthAlert = {

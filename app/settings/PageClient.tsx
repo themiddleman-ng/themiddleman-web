@@ -56,7 +56,7 @@ export default function SettingsPageClient() {
               <p className="text-sm font-semibold text-[#26384a]">Profile</p>
               <p className="mt-1 text-sm leading-6 text-[#6b7782]">Update your photo and view your account details.</p>
             </div>
-            <Link href="/profile" className="inline-flex min-h-10 shrink-0 items-center justify-center rounded-xl border border-[#ddd5c9] px-4 text-sm font-semibold text-[#304458] transition hover:bg-[#f7f2eb]">Open profile</Link>
+            <Link href="/profile" className="inline-flex min-h-11 w-full shrink-0 items-center justify-center rounded-xl border border-[#ddd5c9] px-4 text-sm font-semibold text-[#304458] transition hover:bg-[#f7f2eb] sm:w-auto">Open profile</Link>
           </section>
 
           <section className="flex flex-col gap-4 py-5 sm:flex-row sm:items-center sm:justify-between sm:py-6">
@@ -65,7 +65,7 @@ export default function SettingsPageClient() {
               <p className="mt-1 max-w-xl text-sm leading-6 text-[#6b7782]">Start again from the friendly welcome question. Pick “I’m new here” for the guided tour, or skip if you already know your way around.</p>
               {welcomeReset && <p role="status" className="mt-2 text-sm font-medium text-[#426348]">The welcome question is ready.</p>}
             </div>
-            <button type="button" onClick={replayWelcome} className="inline-flex min-h-10 shrink-0 items-center justify-center rounded-xl bg-[#183149] px-4 text-sm font-semibold text-white transition hover:bg-[#24445f]">Replay welcome</button>
+            <button type="button" onClick={replayWelcome} className="inline-flex min-h-11 w-full shrink-0 items-center justify-center rounded-xl bg-[#183149] px-4 text-sm font-semibold text-white transition hover:bg-[#24445f] sm:w-auto">Replay welcome</button>
           </section>
 
           <section className="flex flex-col gap-4 py-5 sm:flex-row sm:items-center sm:justify-between sm:py-6">
@@ -73,7 +73,7 @@ export default function SettingsPageClient() {
               <p className="text-sm font-semibold text-[#26384a]">Cookie preferences</p>
               <p className="mt-1 text-sm leading-6 text-[#6b7782]">Choose whether to allow optional analytics. Essential storage stays on for sign-in and security.</p>
             </div>
-            <button type="button" onClick={openCookieSettings} className="inline-flex min-h-10 shrink-0 items-center justify-center rounded-xl border border-[#ddd5c9] px-4 text-sm font-semibold text-[#304458] transition hover:bg-[#f7f2eb]">Review cookies</button>
+            <button type="button" onClick={openCookieSettings} className="inline-flex min-h-11 w-full shrink-0 items-center justify-center rounded-xl border border-[#ddd5c9] px-4 text-sm font-semibold text-[#304458] transition hover:bg-[#f7f2eb] sm:w-auto">Review cookies</button>
           </section>
 
           <section className="flex flex-col gap-4 py-5 sm:flex-row sm:items-center sm:justify-between sm:py-6">
@@ -81,7 +81,7 @@ export default function SettingsPageClient() {
               <p className="text-sm font-semibold text-[#26384a]">Security</p>
               <p className="mt-1 text-sm leading-6 text-[#6b7782]">Manage your sign-in protection and password recovery options.</p>
             </div>
-            <Link href="/security" className="inline-flex min-h-10 shrink-0 items-center justify-center rounded-xl border border-[#ddd5c9] px-4 text-sm font-semibold text-[#304458] transition hover:bg-[#f7f2eb]">Security settings</Link>
+            <Link href="/security" className="inline-flex min-h-11 w-full shrink-0 items-center justify-center rounded-xl border border-[#ddd5c9] px-4 text-sm font-semibold text-[#304458] transition hover:bg-[#f7f2eb] sm:w-auto">Security settings</Link>
           </section>
 
           <section className="flex flex-col gap-4 py-5 sm:flex-row sm:items-center sm:justify-between sm:py-6">
@@ -89,7 +89,7 @@ export default function SettingsPageClient() {
               <p className="text-sm font-semibold text-[#26384a]">Account removal</p>
               <p className="mt-1 text-sm leading-6 text-[#6b7782]">Review what happens to your account and records before deleting it.</p>
             </div>
-            <Link href="/account/delete" className="inline-flex min-h-10 shrink-0 items-center justify-center rounded-xl px-4 text-sm font-semibold text-[#91432b] transition hover:bg-[#faeee6]">Delete account</Link>
+            <Link href="/account/delete" className="inline-flex min-h-11 w-full shrink-0 items-center justify-center rounded-xl px-4 text-sm font-semibold text-[#91432b] transition hover:bg-[#faeee6] sm:w-auto">Delete account</Link>
           </section>
         </div>
       </div>

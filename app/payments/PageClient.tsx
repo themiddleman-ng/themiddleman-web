@@ -67,7 +67,7 @@ export default function PaymentsPage() {
 
       <div className="mx-auto max-w-5xl px-4 py-5 sm:px-6 sm:py-9">
         <p className="text-xs font-bold tracking-[.2em] text-ember">PAYMENTS</p>
-        <h1 className="mt-2 font-display text-3xl font-bold leading-tight tracking-tight sm:text-4xl">Payment activity</h1>
+        <h1 className="mt-2 font-display text-[1.65rem] font-bold leading-tight tracking-tight sm:text-4xl">Payment activity</h1>
         <p className="mt-3 max-w-2xl text-sm leading-6 text-slate sm:text-base">
           Payments are made in Naira through Paystack. Review payment status and order records here. A buyer accepting delivery does not by itself send a seller payout.
         </p>
@@ -84,7 +84,7 @@ export default function PaymentsPage() {
         </div>
 
         <section className="mt-5 rounded-2xl border border-line bg-paper p-4 sm:mt-7 sm:p-6">
-          <div className="flex flex-wrap items-center justify-between gap-3"><h2 className="text-lg font-semibold">Transactions</h2><button type="button" disabled={!payments.length} onClick={() => downloadCsv('middleman-payments.csv', [['Date', 'Product', 'Role', 'Amount (NGN)', 'Escrow status', 'Payout status'], ...payments.map((row) => [row.created_at, row.orders?.gigs?.title || 'Product', row.role, row.amount, row.escrow_status, row.payout_status])])} className="min-h-11 rounded-lg border border-line px-4 text-sm disabled:opacity-50">Export CSV</button></div>
+          <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between"><h2 className="text-lg font-semibold">Transactions</h2><button type="button" disabled={!payments.length} onClick={() => downloadCsv('middleman-payments.csv', [['Date', 'Product', 'Role', 'Amount (NGN)', 'Escrow status', 'Payout status'], ...payments.map((row) => [row.created_at, row.orders?.gigs?.title || 'Product', row.role, row.amount, row.escrow_status, row.payout_status])])} className="min-h-11 w-full rounded-lg border border-line px-4 text-sm disabled:opacity-50 sm:w-auto">Export CSV</button></div>
           <label className="mt-4 block text-xs font-medium">Search transactions<input type="search" value={paymentQuery} onChange={(event) => setPaymentQuery(event.target.value)} placeholder="Product or reference" className="mt-2 block min-h-11 w-full border px-3 text-sm" /></label>
 
           {loading && <p className="mt-4 text-sm text-slate">Loading…</p>}

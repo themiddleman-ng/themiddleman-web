@@ -75,7 +75,7 @@ export default function RoleSelectionPage() {
         <div className="overflow-hidden rounded-2xl border border-line bg-[#fffdf9] shadow-[0_20px_70px_rgba(31,21,12,.12)]">
           <div className="border-b border-line bg-[radial-gradient(circle_at_top_right,_rgba(242,100,25,.18),_transparent_42%),linear-gradient(180deg,rgba(255,255,255,.88),rgba(247,243,236,.92))] px-5 py-6 sm:px-10 sm:py-10">
             <p className="text-xs font-semibold tracking-[.2em] text-ember">MAKE IT YOURS</p>
-            <h1 className="mt-2 font-display text-3xl font-bold tracking-tight sm:mt-3 sm:text-5xl">
+            <h1 className="mt-2 font-display text-[1.65rem] font-bold tracking-tight sm:mt-3 sm:text-5xl">
               How would you like to use<br className="hidden sm:block" /> The Middleman?
             </h1>
             <p className="mt-4 max-w-xl text-sm leading-relaxed text-slate sm:text-base">

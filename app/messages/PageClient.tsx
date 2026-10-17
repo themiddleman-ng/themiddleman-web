@@ -380,7 +380,7 @@ function MessagesPageInner() {
                 <h2 className="text-sm font-semibold text-[#26384a]">Inbox</h2>
                 <span className="text-xs text-[#89929a]">{conversations.length}</span>
               </div>
-              <input type="search" aria-label="Search conversations" placeholder="Search conversations" value={conversationQuery} onChange={(event) => setConversationQuery(event.target.value)} />
+              <input type="search" aria-label="Search conversations" placeholder="Search conversations" value={conversationQuery} onChange={(event) => setConversationQuery(event.target.value)} className="mx-3 mb-1 mt-3 min-h-11 w-[calc(100%-1.5rem)] rounded-lg border border-[#e1e5ed] px-3 text-sm" />
               {conversations.filter((conversation) => `${conversation.counterpartName} ${conversation.gigTitle || ''}`.toLowerCase().includes(conversationQuery.trim().toLowerCase())).map((conversation) => (
                 <ConversationRowItem
                   key={conversation.id}
