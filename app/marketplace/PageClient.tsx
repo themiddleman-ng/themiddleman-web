@@ -206,6 +206,10 @@ export default function MarketplacePage({ designPreview = false }: { designPrevi
       <main className="mp-content mx-auto max-w-7xl px-4 pb-12 pt-5 sm:px-6 sm:pb-16 sm:pt-7 lg:px-8">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
+            <p className="mb-2 flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[.16em] text-[#c65316]">
+              <span className="h-px w-5 bg-[#de641e]" aria-hidden="true" />
+              Marketplace
+            </p>
             <h1 className="font-display text-[26px] font-semibold leading-tight tracking-[-.035em] text-[#172B45] sm:text-[30px]">
               Find your next useful starting point.
             </h1>
@@ -232,7 +236,7 @@ export default function MarketplacePage({ designPreview = false }: { designPrevi
             onChange={(event) => setQuery(event.target.value)}
             placeholder="Search products, creators, templates..."
             aria-label="Search products, creators, and templates"
-            className="h-12 w-full rounded-lg border border-[#dce6e5] bg-[#fffefd] pl-11 pr-4 text-[15px] text-[#172B45] shadow-[0_2px_10px_rgba(39,30,20,.035)] placeholder:text-[#7C8790] focus:border-[#D87B36] focus:outline-none focus:ring-2 focus:ring-[#E89A5C]/20"
+            className="h-12 w-full rounded-2xl border border-[#eadfd3] bg-white pl-11 pr-4 text-[15px] text-[#172B45] shadow-[0_8px_24px_rgba(39,30,20,.06)] placeholder:text-[#7C8790] transition focus:border-[#D87B36] focus:outline-none focus:ring-4 focus:ring-[#E89A5C]/15"
           />
         </div>
 

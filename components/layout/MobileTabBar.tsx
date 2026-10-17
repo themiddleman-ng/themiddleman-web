@@ -1,9 +1,8 @@
 "use client";
 
-import { ShoppingBagIcon } from '@phosphor-icons/react/dist/csr/ShoppingBag';
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { supabase } from "@/lib/supabaseClient";
 
 const APP_PREFIXES = [
@@ -54,6 +53,8 @@ function IconPlus() {
   );
 }
 
+type Tab = { href: string; label: string; icon: ReactNode; badge?: number };
+
 export default function MobileTabBar() {
   const pathname = usePathname();
   const shouldShow = APP_PREFIXES.some((prefix) => pathname.startsWith(prefix));
@@ -97,21 +98,44 @@ export default function MobileTabBar() {
   const creatingProduct = pathname.startsWith("/gigs/new");
   const showCreateButton = Boolean(userId) && !creatingProduct;
 
-  const tabs: Array<
-    | { href: string; label: string; icon: React.ReactNode; badge?: number }
-    | null
-  > = [
+  const leading: Tab[] = [
     { href: "/marketplace", label: "Marketplace", icon: <IconHome /> },
     { href: "/browse", label: "Browse", icon: <IconBrowse /> },
-    { href: "/orders", label: "Orders", icon: <ShoppingBagIcon size={21} aria-hidden="true" /> },
-    ...(showCreateButton ? [null] : []),
+  ];
+  const trailing: Tab[] = [
     { href: "/messages", label: "Messages", icon: <IconMessages />, badge: unread },
     { href: "/profile", label: "Profile", icon: <IconProfile /> },
   ];
 
+  function renderTab(tab: Tab) {
+    const active = pathname.startsWith("/settings")
+      ? tab.href === "/profile"
+      : tab.href === "/" ? pathname === "/" : pathname.startsWith(tab.href);
+    return (
+      <Link
+        key={tab.href}
+        href={tab.href}
+        data-onboarding-target={tab.href === "/profile" || tab.href === "/messages" ? tab.href.slice(1) : undefined}
+        aria-current={active ? "page" : undefined}
+        className={`flex h-16 flex-col items-center justify-center gap-1 text-[10px] font-semibold tracking-wide transition-colors ${
+          active ? "text-[#c65316]" : "text-[#71808d]"
+        }`}
+      >
+        <span className="relative">
+          {tab.icon}
+          {tab.badge ? (
+            <span className="absolute -right-2 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-ember px-1 text-[9px] font-bold text-ink">
+              {tab.badge > 9 ? "9+" : tab.badge}
+            </span>
+          ) : null}
+        </span>
+        {tab.label}
+      </Link>
+    );
+  }
+
   return (
     <>
-      {/* In-flow spacer so the fixed bar never covers content */}
       <div
         className="md:hidden"
         style={{ height: "calc(4rem + env(safe-area-inset-bottom))" }}
@@ -123,51 +147,23 @@ export default function MobileTabBar() {
         style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
         aria-label="Mobile navigation"
       >
-        <div className="border-t border-[#e8e0d6] bg-[#fffdf9]/96 shadow-[0_-8px_24px_rgba(35,40,45,.06)] backdrop-blur-xl">
-          <div className={`grid ${showCreateButton ? "grid-cols-6" : "grid-cols-5"}`}>
-            {tabs.map((tab) => {
-              if (tab === null) {
-                return (
-                  <div key="fab" className="relative flex justify-center">
-                    <Link
-                      href="/gigs/new"
-                      aria-label="List a product"
-                      className="absolute -top-5 flex h-12 w-12 items-center justify-center rounded-full border-[3px] border-[#fffdf9] bg-[#de641e] text-white shadow-[0_8px_22px_rgba(214,94,28,.28)] transition-transform active:scale-95"
-                    >
-                      <IconPlus />
-                    </Link>
-                  </div>
-                );
-              }
-              const active = pathname.startsWith("/settings")
-                ? tab.href === "/profile"
-                : tab.href === "/" ? pathname === "/" : pathname.startsWith(tab.href);
-              return (
-                <Link
-                  key={tab.href}
-                  href={tab.href}
-                  data-onboarding-target={tab.href === "/profile" || tab.href === "/messages" ? tab.href.slice(1) : undefined}
-                  aria-current={active ? "page" : undefined}
-                  className={`flex h-16 flex-col items-center justify-center gap-1 text-[10px] font-semibold tracking-wide transition-colors ${
-                    active ? "text-[#c65316]" : "text-[#71808d]"
-                  }`}
-                >
-                  <span className="relative">
-                    {tab.icon}
-                    {tab.badge ? (
-                      <span className="absolute -right-2 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-ember px-1 text-[9px] font-bold text-ink">
-                        {tab.badge > 9 ? "9+" : tab.badge}
-                      </span>
-                    ) : null}
-                  </span>
-                  {tab.label}
-                </Link>
-              );
-            })}
+        <div className="relative border-t border-[#e8e0d6] bg-[#fffdf9]/96 shadow-[0_-8px_24px_rgba(35,40,45,.06)] backdrop-blur-xl">
+          {showCreateButton ? (
+            <Link
+              href="/gigs/new"
+              aria-label="List a product"
+              className="absolute left-1/2 top-0 z-10 flex h-[3.25rem] w-[3.25rem] -translate-x-1/2 -translate-y-[42%] items-center justify-center rounded-full border-[3px] border-[#fffdf9] bg-[#de641e] text-white shadow-[0_10px_24px_rgba(214,94,28,.32)] transition-transform active:scale-95"
+            >
+              <IconPlus />
+            </Link>
+          ) : null}
+          <div className={`grid ${showCreateButton ? "grid-cols-5" : "grid-cols-4"}`}>
+            {leading.map(renderTab)}
+            {showCreateButton ? <div aria-hidden="true" /> : null}
+            {trailing.map(renderTab)}
           </div>
         </div>
       </nav>
     </>
   );
 }
-

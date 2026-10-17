@@ -9,8 +9,10 @@ import { LockIcon } from '@phosphor-icons/react/dist/csr/Lock';
 import { WarningCircleIcon } from '@phosphor-icons/react/dist/csr/WarningCircle';
 import { WifiSlashIcon } from '@phosphor-icons/react/dist/csr/WifiSlash';
 import { ClockIcon } from '@phosphor-icons/react/dist/csr/Clock';
+import { CheckCircleIcon } from '@phosphor-icons/react/dist/csr/CheckCircle';
 import { supabase } from '@/lib/supabaseClient';
 import { applyLoginFailure, classifyLoginError, classifySignupError, validateLoginInput } from '@/lib/auth/login-errors.mjs';
+import { markSignedIn } from '@/components/feedback/SignedInToast';
 import Link from 'next/link';
 import Logo from '@/components/Logo';
 
@@ -45,19 +47,23 @@ function alertIcon(alert) {
 function AuthCallout({ alert, onAction }) {
   if (!alert) return null;
   const Icon = alertIcon(alert);
+  const compact = alert.code === 'invalid-credentials' || !alert.message;
   return (
-    <div id="auth-alert" className="rounded-lg border border-[#e4c2b2] border-l-4 border-l-[#b42318] bg-[#fff8f6] px-3.5 py-3" role="alert" aria-live="assertive">
-      <div className="flex gap-3">
-        <Icon size={18} weight="fill" className="mt-0.5 shrink-0 text-[#b42318]" aria-hidden="true" />
-        <div className="min-w-0">
-          <p className="text-sm font-semibold leading-5 text-[#7a271a]">{alert.title}</p>
-          <p className="mt-1 text-[13px] leading-5 text-[#5c4036]">{alert.message}</p>
-          {alert.actionHref ? (
-            <Link href={alert.actionHref} className="mt-2 inline-flex text-[13px] font-semibold text-[#9a3412] underline decoration-[#e7b49a] underline-offset-2">{alert.actionLabel}</Link>
-          ) : alert.actionLabel && onAction ? (
-            <button type="button" onClick={onAction} className="mt-2 text-[13px] font-semibold text-[#9a3412] underline decoration-[#e7b49a] underline-offset-2">{alert.actionLabel}</button>
-          ) : null}
-        </div>
+    <div
+      id="auth-alert"
+      className={`flex items-start gap-2 rounded-md border-l-[3px] border-l-[#b42318] bg-[#fff6f4] px-3 ${compact ? 'py-2' : 'py-2.5'}`}
+      role="alert"
+      aria-live="assertive"
+    >
+      <Icon size={16} weight="fill" className="mt-0.5 shrink-0 text-[#b42318]" aria-hidden="true" />
+      <div className="min-w-0">
+        <p className="text-[13px] font-semibold leading-5 text-[#7a271a]">{alert.title}</p>
+        {alert.message ? <p className="mt-0.5 text-[12px] leading-5 text-[#5c4036]">{alert.message}</p> : null}
+        {alert.actionHref ? (
+          <Link href={alert.actionHref} className="mt-1.5 inline-flex text-[12px] font-semibold text-[#9a3412] underline decoration-[#e7b49a] underline-offset-2">{alert.actionLabel}</Link>
+        ) : alert.actionLabel && onAction ? (
+          <button type="button" onClick={onAction} className="mt-1.5 text-[12px] font-semibold text-[#9a3412] underline decoration-[#e7b49a] underline-offset-2">{alert.actionLabel}</button>
+        ) : null}
       </div>
     </div>
   );
@@ -118,9 +124,6 @@ function PasswordChecklist({ value }) {
   );
 }
 
-// Decide which face to show before the very first paint, so there's nothing
-// to "flip away from". URL param wins (explicit ?mode=signin link), otherwise
-// we fall back to whatever the person used last time.
 function getInitialMode(searchParams) {
   const fromUrl = searchParams.get('mode');
   if (fromUrl === 'signin') return true;
@@ -136,9 +139,9 @@ function AuthPageInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [flipped, setFlipped] = useState(() => getInitialMode(searchParams));
+  const [switching, setSwitching] = useState(false);
+  const switchTimer = useRef(0);
 
-  // Remember the mode the person ends up on, so their next visit opens
-  // straight to it instead of always defaulting to sign up.
   useEffect(() => {
     if (typeof window !== 'undefined') {
       try { window.localStorage.setItem('mm_last_auth_mode', flipped ? 'signin' : 'signup'); }
@@ -146,7 +149,22 @@ function AuthPageInner() {
     }
   }, [flipped]);
 
-  // Sign up state
+  useEffect(() => () => window.clearTimeout(switchTimer.current), []);
+
+  function switchMode(signin) {
+    if (signin === flipped || switching) return;
+    const reduceMotion = typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const desktop = typeof window !== 'undefined' && window.matchMedia('(min-width: 768px)').matches;
+    if (reduceMotion || desktop) {
+      setFlipped(signin);
+      return;
+    }
+    setSwitching(true);
+    window.clearTimeout(switchTimer.current);
+    window.setTimeout(() => setFlipped(signin), 300);
+    switchTimer.current = window.setTimeout(() => setSwitching(false), 720);
+  }
+
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
@@ -158,12 +176,12 @@ function AuthPageInner() {
   const [signupNotice, setSignupNotice] = useState('');
   const [showSignupPassword, setShowSignupPassword] = useState(false);
 
-  // Sign in state
   const [loginEmail, setLoginEmail] = useState('');
   const [loginPassword, setLoginPassword] = useState('');
   const [loginLoading, setLoginLoading] = useState(false);
   const [loginAlert, setLoginAlert] = useState(null);
   const [loginNotice, setLoginNotice] = useState('');
+  const [loginSuccess, setLoginSuccess] = useState(false);
   const [showLoginPassword, setShowLoginPassword] = useState(false);
   const loginEmailRef = useRef(null);
   const loginPasswordRef = useRef(null);
@@ -175,7 +193,6 @@ function AuthPageInner() {
   }, [searchParams]);
 
   useEffect(() => {
-    // Remove personal details and any consent value saved by earlier versions.
     try { window.localStorage.removeItem('mm_signup_draft'); }
     catch { /* Storage can be unavailable in private browsing. */ }
   }, []);
@@ -220,6 +237,7 @@ function AuthPageInner() {
       return;
     }
 
+    markSignedIn();
     router.push('/onboarding/role');
   }
 
@@ -257,7 +275,11 @@ function AuthPageInner() {
     }
 
     const assurance = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
-    router.push(assurance.data?.nextLevel === 'aal2' && assurance.data?.currentLevel !== 'aal2' ? '/security' : '/marketplace');
+    setLoginLoading(false);
+    setLoginSuccess(true);
+    markSignedIn();
+    const next = assurance.data?.nextLevel === 'aal2' && assurance.data?.currentLevel !== 'aal2' ? '/security' : '/marketplace';
+    window.setTimeout(() => router.push(next), 700);
   }
 
   const inputClass = 'mt-1.5 w-full rounded-xl border bg-white px-3.5 py-3 text-[15px] text-[#1d2733] outline-none transition placeholder:text-[#89919a] focus:ring-4';
@@ -266,12 +288,13 @@ function AuthPageInner() {
   const labelClass = 'block text-sm font-medium text-[#33404d]';
 
   return (
-    <main data-mode={flipped ? "signin" : "signup"} className="mm-auth min-h-[100svh] bg-[radial-gradient(ellipse_at_88%_8%,rgba(228,111,47,.20),transparent_30%),linear-gradient(145deg,#f7f1e7,#f4e9dc_56%,#f8f4ed)] px-4 pb-24 pt-5 text-[#1d2733] sm:px-6 sm:py-10">
+    <main data-mode={flipped ? 'signin' : 'signup'} data-switching={switching || undefined} className="mm-auth min-h-[100svh] bg-white px-4 pb-24 pt-5 text-[#1d2733] sm:px-6 sm:py-10">
       <div className="mx-auto grid min-h-[calc(100svh-2.5rem)] w-full max-w-5xl overflow-hidden rounded-[1.75rem] border border-[#e9dfd3] bg-[#fffdf9] shadow-[0_24px_80px_rgba(65,46,28,.13)] md:min-h-[680px] md:grid-cols-[.85fr_1.15fr]">
-        <aside className="mm-auth-hero relative hidden flex-col justify-between overflow-hidden bg-[#182d41] p-10 text-[#faf4e9] md:flex lg:p-12">
-          <div className="absolute -right-28 -top-24 h-80 w-80 rounded-full bg-[#e87635]/25 blur-3xl" aria-hidden="true" />
+        <aside className="mm-auth-hero relative flex flex-col justify-between overflow-hidden bg-[#eb650c] p-10 text-[#faf4e9] lg:p-12">
+          <div aria-hidden="true" />
           <div className="relative">
             <Logo variant="vertical" />
+            <Link href="/marketplace" className="mm-auth-browse absolute right-0 top-0 text-sm font-semibold text-[#172b45]/80 hover:text-[#172b45]">Browse first</Link>
             <p className="mt-20 max-w-sm font-display text-4xl font-semibold leading-[1.08] tracking-[-.035em]">
               Ready-made.<br />Made yours.
             </p>
@@ -279,21 +302,11 @@ function AuthPageInner() {
               Find useful digital products. Customize them with the creator.
             </p>
           </div>
-          <p className="relative text-sm text-[#e5e4de]/70">Pay in Naira through Paystack.</p>
+          <p className="mm-auth-hero-note relative text-sm text-[#e5e4de]/70">Pay in Naira through Paystack.</p>
         </aside>
 
         <section className="mm-auth-form min-w-0 w-full flex-col px-5 py-6 sm:px-9 sm:py-9 md:px-12 md:py-10">
-          <div className="mm-auth-mobile-brand mb-7 flex w-full items-center justify-between gap-4 md:hidden">
-            <Logo variant="horizontal" markClass="h-8 w-8" textClass="text-base" />
-            <Link href="/marketplace" className="text-sm font-medium text-[#445363] hover:text-[#de641e]">Browse first</Link>
-          </div>
-
-          <div className="mx-auto w-full max-w-lg">
-            <div className="mb-7 grid grid-cols-2 rounded-xl bg-[#f4efe8] p-1" aria-label="Account access">
-              <button type="button" onClick={() => setFlipped(false)} aria-pressed={!flipped} className={`rounded-lg px-3 py-2.5 text-sm font-semibold transition ${!flipped ? 'bg-white text-[#1d2733] shadow-sm' : 'text-[#687481] hover:text-[#1d2733]'}`}>Create account</button>
-              <button type="button" onClick={() => setFlipped(true)} aria-pressed={flipped} className={`rounded-lg px-3 py-2.5 text-sm font-semibold transition ${flipped ? 'bg-white text-[#1d2733] shadow-sm' : 'text-[#687481] hover:text-[#1d2733]'}`}>Log in</button>
-            </div>
-
+          <div key={flipped ? 'signin' : 'signup'} className="mm-auth-form-face mx-auto w-full max-w-lg">
             {!flipped ? (
               <>
                 <h1 className="font-display text-[2rem] font-bold leading-tight tracking-[-.035em] sm:text-4xl">Create your account</h1>
@@ -339,11 +352,11 @@ function AuthPageInner() {
                       I agree to the <Link href="/legal/terms" className="font-semibold text-[#b84d13] underline">Terms of Service</Link>, <Link href="/legal/privacy" className="font-semibold text-[#b84d13] underline">Privacy Policy</Link>, and <Link href="/legal/refunds" className="font-semibold text-[#b84d13] underline">Refund Policy</Link>.
                     </label>
                   </div>
-                  <AuthCallout alert={signupAlert} onAction={signupAlert?.actionLabel ? () => { setFlipped(true); setSignupAlert(null); } : undefined} />
+                  <AuthCallout alert={signupAlert} onAction={signupAlert?.actionLabel ? () => { switchMode(true); setSignupAlert(null); } : undefined} />
                   {signupNotice ? (
                     <div className="rounded-xl bg-[#f0f6ef] p-4 text-sm leading-6 text-[#35523b]" role="status">
                       <p>{signupNotice}</p>
-                      <button type="button" onClick={() => setFlipped(true)} className="mt-2 font-semibold underline">Go to sign in</button>
+                      <button type="button" onClick={() => switchMode(true)} className="mt-2 font-semibold underline">Go to sign in</button>
                     </div>
                   ) : (
                     <button className="w-full rounded-xl bg-[#de641e] px-5 py-3.5 text-sm font-bold text-white transition hover:bg-[#c95415] focus:outline-none focus:ring-4 focus:ring-[#de641e]/20 disabled:cursor-not-allowed disabled:opacity-50" type="submit" disabled={signupLoading || !signupReady}>
@@ -352,7 +365,7 @@ function AuthPageInner() {
                   )}
                 </form>
 
-                <p className="mt-5 text-center text-sm text-[#63707d]">Already have an account? <button type="button" onClick={() => setFlipped(true)} className="font-semibold text-[#b84d13] hover:underline">Log in</button></p>
+                <p className="mt-5 text-center text-sm text-[#63707d]">Already have an account? <button type="button" onClick={() => switchMode(true)} className="font-semibold text-[#b84d13] hover:underline">Log in</button></p>
               </>
             ) : (
               <>
@@ -381,17 +394,25 @@ function AuthPageInner() {
                       onChange={(e) => { setLoginPassword(e.target.value); if (loginAlert?.field === 'password' || loginAlert?.field === 'credentials') setLoginAlert(null); }}
                     />
                   </div>
-                  <AuthCallout alert={loginAlert} />
-                  <button className="w-full rounded-xl bg-[#de641e] px-5 py-3.5 text-sm font-bold text-white transition hover:bg-[#c95415] focus:outline-none focus:ring-4 focus:ring-[#de641e]/20 disabled:cursor-not-allowed disabled:opacity-50" type="submit" disabled={loginLoading}>
-                    {loginLoading ? 'Logging in…' : 'Log in'}
+                  {loginSuccess ? (
+                    <div className="flex items-center gap-2 rounded-md bg-[#eef7f0] px-3 py-2.5 text-[13px] font-semibold text-[#215c38]" role="status" aria-live="polite">
+                      <CheckCircleIcon size={16} weight="fill" aria-hidden="true" />
+                      Signed in successfully
+                    </div>
+                  ) : (
+                    <AuthCallout alert={loginAlert} />
+                  )}
+                  <button className="w-full rounded-xl bg-[#de641e] px-5 py-3.5 text-sm font-bold text-white transition hover:bg-[#c95415] focus:outline-none focus:ring-4 focus:ring-[#de641e]/20 disabled:cursor-not-allowed disabled:opacity-50" type="submit" disabled={loginLoading || loginSuccess}>
+                    {loginSuccess ? 'Continuing…' : loginLoading ? 'Logging in…' : 'Log in'}
                   </button>
                 </form>
-                <p className="mt-6 text-center text-sm text-[#63707d]">New to The Middleman? <button type="button" onClick={() => setFlipped(false)} className="font-semibold text-[#b84d13] hover:underline">Create an account</button></p>
+                <p className="mt-6 text-center text-sm text-[#63707d]">New to The Middleman? <button type="button" onClick={() => switchMode(false)} className="font-semibold text-[#b84d13] hover:underline">Create an account</button></p>
                 <p className="mt-8 border-t border-[#eee6dc] pt-5 text-center text-xs leading-5 text-[#71808d]">By continuing, you agree to the <Link href="/legal/terms" className="underline">Terms of Service</Link> and <Link href="/legal/privacy" className="underline">Privacy Policy</Link>.</p>
               </>
             )}
           </div>
         </section>
+        <div className="mm-auth-wipe" aria-hidden="true" />
       </div>
     </main>
   );
@@ -404,4 +425,3 @@ export default function AuthPage() {
     </Suspense>
   );
 }
-

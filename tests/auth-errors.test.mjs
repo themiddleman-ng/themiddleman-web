@@ -22,8 +22,9 @@ test("wrong email or password keeps the email and clears the password", () => {
     assert.equal(next.email, "ada@studio.com");
     assert.equal(next.password, "");
     assert.equal(next.focus, "password");
-    assert.match(failure.message, /email stays filled in/i);
-    assert.equal(failure.actionHref, "/reset-password");
+    assert.equal(failure.actionHref, undefined);
+    assert.equal(failure.actionLabel, undefined);
+    assert.ok(!failure.message);
   }
 });
 
