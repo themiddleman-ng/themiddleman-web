@@ -1,8 +1,16 @@
 'use client';
 
-import { Suspense, useEffect, useState } from 'react';
+import { Suspense, useEffect, useRef, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { EyeIcon } from '@phosphor-icons/react/dist/csr/Eye';
+import { EyeSlashIcon } from '@phosphor-icons/react/dist/csr/EyeSlash';
+import { EnvelopeSimpleIcon } from '@phosphor-icons/react/dist/csr/EnvelopeSimple';
+import { LockIcon } from '@phosphor-icons/react/dist/csr/Lock';
+import { WarningCircleIcon } from '@phosphor-icons/react/dist/csr/WarningCircle';
+import { WifiSlashIcon } from '@phosphor-icons/react/dist/csr/WifiSlash';
+import { ClockIcon } from '@phosphor-icons/react/dist/csr/Clock';
 import { supabase } from '@/lib/supabaseClient';
+import { applyLoginFailure, classifyLoginError, classifySignupError, validateLoginInput } from '@/lib/auth/login-errors.mjs';
 import Link from 'next/link';
 import Logo from '@/components/Logo';
 
@@ -26,27 +34,62 @@ function passwordIsValid(value) {
   return PASSWORD_RULES.every((rule) => rule.test(value));
 }
 
-function getLoginErrorMessage(error) {
-  const code = String(error?.code || '').toLowerCase();
-  const message = String(error?.message || '').toLowerCase();
+function alertIcon(alert) {
+  if (alert.code === 'network' || alert.code === 'unavailable') return WifiSlashIcon;
+  if (alert.code === 'rate-limit') return ClockIcon;
+  if (alert.field === 'email') return EnvelopeSimpleIcon;
+  if (alert.field === 'password' || alert.field === 'credentials') return LockIcon;
+  return WarningCircleIcon;
+}
 
-  if (code === 'invalid_credentials' || message.includes('invalid login credentials')) {
-    return 'Those details don’t match an account. Check your email and password, or use “Forgot password?” to reset it.';
-  }
+function AuthCallout({ alert, onAction }) {
+  if (!alert) return null;
+  const Icon = alertIcon(alert);
+  return (
+    <div id="auth-alert" className="rounded-lg border border-[#e4c2b2] border-l-4 border-l-[#b42318] bg-[#fff8f6] px-3.5 py-3" role="alert" aria-live="assertive">
+      <div className="flex gap-3">
+        <Icon size={18} weight="fill" className="mt-0.5 shrink-0 text-[#b42318]" aria-hidden="true" />
+        <div className="min-w-0">
+          <p className="text-sm font-semibold leading-5 text-[#7a271a]">{alert.title}</p>
+          <p className="mt-1 text-[13px] leading-5 text-[#5c4036]">{alert.message}</p>
+          {alert.actionHref ? (
+            <Link href={alert.actionHref} className="mt-2 inline-flex text-[13px] font-semibold text-[#9a3412] underline decoration-[#e7b49a] underline-offset-2">{alert.actionLabel}</Link>
+          ) : alert.actionLabel && onAction ? (
+            <button type="button" onClick={onAction} className="mt-2 text-[13px] font-semibold text-[#9a3412] underline decoration-[#e7b49a] underline-offset-2">{alert.actionLabel}</button>
+          ) : null}
+        </div>
+      </div>
+    </div>
+  );
+}
 
-  if (code === 'email_not_confirmed' || message.includes('email not confirmed')) {
-    return 'Confirm your email address first, then come back to log in.';
-  }
-
-  if (error?.status === 429 || code.includes('rate_limit') || message.includes('too many requests')) {
-    return 'There have been too many sign-in attempts. Wait a little, then try again.';
-  }
-
-  if (message.includes('failed to fetch') || message.includes('network')) {
-    return 'We couldn’t reach the sign-in service. Check your connection and try again.';
-  }
-
-  return 'We couldn’t sign you in right now. Check your details and try again.';
+function PasswordField({ id, value, onChange, autoComplete, placeholder, shown, onToggle, invalid, describedBy, inputRef }) {
+  return (
+    <div className="relative mt-1.5">
+      <input
+        ref={inputRef}
+        id={id}
+        type={shown ? 'text' : 'password'}
+        autoComplete={autoComplete}
+        placeholder={placeholder}
+        value={value}
+        onChange={onChange}
+        aria-invalid={invalid || undefined}
+        aria-describedby={invalid ? describedBy : undefined}
+        className={`w-full rounded-xl border bg-white py-3 pl-3.5 pr-12 text-[15px] text-[#1d2733] outline-none transition placeholder:text-[#89919a] focus:ring-4 ${invalid ? 'border-[#b42318] focus:border-[#b42318] focus:ring-[#b42318]/15' : 'border-[#ded6cb] focus:border-[#de641e] focus:ring-[#de641e]/10'}`}
+      />
+      <button
+        type="button"
+        aria-pressed={shown}
+        aria-label={shown ? 'Hide password' : 'Show password'}
+        onMouseDown={(event) => event.preventDefault()}
+        onClick={onToggle}
+        className="absolute inset-y-0 right-0 grid w-11 place-items-center rounded-r-xl text-[#5d6874] hover:text-[#c95415] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0B3D91]"
+      >
+        {shown ? <EyeSlashIcon size={18} aria-hidden="true" /> : <EyeIcon size={18} aria-hidden="true" />}
+      </button>
+    </div>
+  );
 }
 
 function PasswordChecklist({ value }) {
@@ -111,16 +154,19 @@ function AuthPageInner() {
   const [password, setPassword] = useState('');
   const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [signupLoading, setSignupLoading] = useState(false);
-  const [signupError, setSignupError] = useState('');
+  const [signupAlert, setSignupAlert] = useState(null);
   const [signupNotice, setSignupNotice] = useState('');
+  const [showSignupPassword, setShowSignupPassword] = useState(false);
 
   // Sign in state
   const [loginEmail, setLoginEmail] = useState('');
   const [loginPassword, setLoginPassword] = useState('');
   const [loginLoading, setLoginLoading] = useState(false);
-  const [loginError, setLoginError] = useState('');
+  const [loginAlert, setLoginAlert] = useState(null);
   const [loginNotice, setLoginNotice] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
+  const [showLoginPassword, setShowLoginPassword] = useState(false);
+  const loginEmailRef = useRef(null);
+  const loginPasswordRef = useRef(null);
 
   useEffect(() => {
     if (searchParams.get('reset') === 'success') {
@@ -143,11 +189,11 @@ function AuthPageInner() {
 
   async function handleSignup(e) {
     e.preventDefault();
-    setSignupError('');
+    setSignupAlert(null);
     setSignupNotice('');
 
     if (!passwordIsValid(password)) {
-      setSignupError('Password must be 12–128 characters and include an uppercase letter, a lowercase letter, a number, and a symbol.');
+      setSignupAlert(classifySignupError({ code: 'weak_password' }));
       return;
     }
 
@@ -163,15 +209,7 @@ function AuthPageInner() {
     });
 
     if (error) {
-      // Bulletproof error extraction for Supabase
-      const errorMsg =
-        error.message ||
-        error.error_description ||
-        error.details ||
-        error.hint ||
-        (typeof error === 'string' ? error : 'Sign up failed. Please check your details and try again.');
-
-      setSignupError(errorMsg);
+      setSignupAlert(classifySignupError(error));
       setSignupLoading(false);
       return;
     }
@@ -185,20 +223,36 @@ function AuthPageInner() {
     router.push('/onboarding/role');
   }
 
+  function focusLoginField(field) {
+    const node = field === 'email' ? loginEmailRef.current : field === 'password' || field === 'credentials' ? loginPasswordRef.current : null;
+    node?.focus();
+  }
+
   async function handleLogin(e) {
     e.preventDefault();
-    setLoginError('');
+    const clientError = validateLoginInput({ email: loginEmail, password: loginPassword });
+    if (clientError) {
+      setLoginAlert(clientError);
+      focusLoginField(clientError.field);
+      return;
+    }
+
+    setLoginAlert(null);
     setLoginLoading(true);
 
     const { error } = await supabase.auth.signInWithPassword({
-      email: loginEmail,
+      email: loginEmail.trim(),
       password: loginPassword,
     });
 
     if (error) {
-      setLoginError(getLoginErrorMessage(error));
-      setShowPassword(false);
+      const failure = classifyLoginError(error);
+      const next = applyLoginFailure({ email: loginEmail, password: loginPassword, alert: failure });
+      setLoginAlert(failure);
+      setLoginPassword(next.password);
+      setShowLoginPassword(false);
       setLoginLoading(false);
+      window.requestAnimationFrame(() => focusLoginField(next.focus));
       return;
     }
 
@@ -206,7 +260,9 @@ function AuthPageInner() {
     router.push(assurance.data?.nextLevel === 'aal2' && assurance.data?.currentLevel !== 'aal2' ? '/security' : '/marketplace');
   }
 
-  const inputClass = 'mt-1.5 w-full rounded-xl border border-[#ded6cb] bg-white px-3.5 py-3 text-[15px] text-[#1d2733] outline-none transition focus:border-[#de641e] focus:ring-4 focus:ring-[#de641e]/10 placeholder:text-[#89919a]';
+  const inputClass = 'mt-1.5 w-full rounded-xl border bg-white px-3.5 py-3 text-[15px] text-[#1d2733] outline-none transition placeholder:text-[#89919a] focus:ring-4';
+  const validInput = 'border-[#ded6cb] focus:border-[#de641e] focus:ring-[#de641e]/10';
+  const invalidInput = 'border-[#b42318] focus:border-[#b42318] focus:ring-[#b42318]/15';
   const labelClass = 'block text-sm font-medium text-[#33404d]';
 
   return (
@@ -245,28 +301,35 @@ function AuthPageInner() {
 
                 <form onSubmit={handleSignup} className="mt-6 space-y-4">
                   <label className={labelClass} htmlFor="signup-name">Full name
-                    <input id="signup-name" type="text" autoComplete="name" placeholder="Ada Obi" value={fullName} onChange={(e) => setFullName(e.target.value)} required className={inputClass} />
+                    <input id="signup-name" type="text" autoComplete="name" placeholder="Ada Obi" value={fullName} onChange={(e) => setFullName(e.target.value)} required className={`${inputClass} ${validInput}`} />
                   </label>
                   <label className={labelClass} htmlFor="signup-email">Email address
-                    <input id="signup-email" type="email" autoComplete="email" placeholder="Enter your email" value={email} onChange={(e) => setEmail(e.target.value)} required className={inputClass} />
+                    <input id="signup-email" type="email" autoComplete="email" placeholder="Enter your email" value={email} onChange={(e) => { setEmail(e.target.value); if (signupAlert?.field === 'email') setSignupAlert(null); }} aria-invalid={signupAlert?.field === 'email' || undefined} aria-describedby={signupAlert?.field === 'email' ? 'auth-alert' : undefined} required className={`${inputClass} ${signupAlert?.field === 'email' ? invalidInput : validInput}`} />
                   </label>
                   <label className={labelClass} htmlFor="signup-phone">WhatsApp number
-                    <input id="signup-phone" type="tel" autoComplete="tel" inputMode="tel" placeholder="080..." value={phone} onChange={(e) => setPhone(e.target.value)} required className={inputClass} />
+                    <input id="signup-phone" type="tel" autoComplete="tel" inputMode="tel" placeholder="080..." value={phone} onChange={(e) => setPhone(e.target.value)} required className={`${inputClass} ${validInput}`} />
                   </label>
                   <label className={labelClass} htmlFor="signup-state">State of residence
-                    <select id="signup-state" value={state} onChange={(e) => setState(e.target.value)} required className={`${inputClass} appearance-none`}>
+                    <select id="signup-state" value={state} onChange={(e) => setState(e.target.value)} required className={`${inputClass} ${validInput} appearance-none`}>
                       <option value="" disabled>Select a state</option>
                       {NIGERIAN_STATES.map((s) => <option key={s} value={s}>{s}</option>)}
                     </select>
                   </label>
                   <label className={labelClass} htmlFor="signup-password">Password
-                    <span className="relative block">
-                      <input id="signup-password" type={showPassword ? 'text' : 'password'} autoComplete="new-password" placeholder="12–128 characters" value={password} onChange={(e) => {
+                    <PasswordField
+                      id="signup-password"
+                      value={password}
+                      autoComplete="new-password"
+                      placeholder="12–128 characters"
+                      shown={showSignupPassword}
+                      onToggle={() => setShowSignupPassword((value) => !value)}
+                      invalid={signupAlert?.field === 'password'}
+                      describedBy="auth-alert"
+                      onChange={(e) => {
                         setPassword(e.target.value);
-                        if (signupError) setSignupError('');
-                      }} minLength={12} maxLength={128} required className={`${inputClass} pr-20`} />
-                      <button type="button" onClick={() => setShowPassword((value) => !value)} aria-label={showPassword ? 'Hide password' : 'Show password'} className="absolute right-3 top-1/2 -translate-y-1/2 rounded-md px-2 py-1 text-xs font-semibold text-[#5d6874] hover:text-[#d7601e]">{showPassword ? 'Hide' : 'Show'}</button>
-                    </span>
+                        if (signupAlert?.field === 'password') setSignupAlert(null);
+                      }}
+                    />
                   </label>
                   <PasswordChecklist value={password} />
 
@@ -276,7 +339,7 @@ function AuthPageInner() {
                       I agree to the <Link href="/legal/terms" className="font-semibold text-[#b84d13] underline">Terms of Service</Link>, <Link href="/legal/privacy" className="font-semibold text-[#b84d13] underline">Privacy Policy</Link>, and <Link href="/legal/refunds" className="font-semibold text-[#b84d13] underline">Refund Policy</Link>.
                     </label>
                   </div>
-                  {signupError && <p className="rounded-xl bg-[#fff0e8] px-3.5 py-3 text-sm leading-5 text-[#9d3e16]" role="alert">{signupError}</p>}
+                  <AuthCallout alert={signupAlert} onAction={signupAlert?.actionLabel ? () => { setFlipped(true); setSignupAlert(null); } : undefined} />
                   {signupNotice ? (
                     <div className="rounded-xl bg-[#f0f6ef] p-4 text-sm leading-6 text-[#35523b]" role="status">
                       <p>{signupNotice}</p>
@@ -296,37 +359,29 @@ function AuthPageInner() {
                 <h1 className="font-display text-[2rem] font-bold leading-tight tracking-[-.035em] sm:text-4xl">Welcome back.</h1>
                 <p className="mt-2 text-[15px] leading-6 text-[#596674]">Sign in to your Middleman account.</p>
                 {loginNotice && <p role="status" className="mt-5 rounded-xl bg-[#f0f6ef] px-3.5 py-3 text-sm leading-5 text-[#35523b]">{loginNotice}</p>}
-                <form onSubmit={handleLogin} className="mt-7 space-y-5">
+                <form noValidate onSubmit={handleLogin} className="mt-7 space-y-5">
                   <label className={labelClass} htmlFor="login-email">Email address
-                    <input id="login-email" type="email" autoComplete="email" inputMode="email" placeholder="Enter your email" value={loginEmail} onChange={(e) => setLoginEmail(e.target.value)} required className={inputClass} />
+                    <input ref={loginEmailRef} id="login-email" type="email" autoComplete="email" inputMode="email" placeholder="Enter your email" value={loginEmail} onChange={(e) => { setLoginEmail(e.target.value); if (loginAlert && loginAlert.field !== 'password') setLoginAlert(null); }} aria-invalid={loginAlert?.field === 'email' || loginAlert?.field === 'credentials' || undefined} aria-describedby={loginAlert ? 'auth-alert' : undefined} className={`${inputClass} ${loginAlert?.field === 'email' || loginAlert?.field === 'credentials' ? invalidInput : validInput}`} />
                   </label>
                   <div>
                     <div className="flex items-center justify-between gap-3">
                       <label className={labelClass} htmlFor="login-password">Password</label>
                       <Link href="/reset-password" className="text-xs font-semibold text-[#b84d13] hover:underline">Forgot password?</Link>
                     </div>
-                    <span className="relative block">
-                      <input id="login-password" type={showPassword ? 'text' : 'password'} autoComplete="current-password" placeholder="Enter your password" value={loginPassword} onChange={(e) => setLoginPassword(e.target.value)} required className={`${inputClass} pr-20`} />
-                      <button type="button" className="absolute right-3 top-1/2 -translate-y-1/2 rounded-md px-2 py-1 text-xs font-semibold text-[#5d6874] hover:text-[#d7601e]" aria-label={showPassword ? 'Hide password' : 'Show password'} onClick={() => setShowPassword((value) => !value)}>{showPassword ? 'Hide' : 'Show'}</button>
-                    </span>
+                    <PasswordField
+                      id="login-password"
+                      inputRef={loginPasswordRef}
+                      value={loginPassword}
+                      autoComplete="current-password"
+                      placeholder="Enter your password"
+                      shown={showLoginPassword}
+                      onToggle={() => setShowLoginPassword((value) => !value)}
+                      invalid={loginAlert?.field === 'password' || loginAlert?.field === 'credentials'}
+                      describedBy="auth-alert"
+                      onChange={(e) => { setLoginPassword(e.target.value); if (loginAlert?.field === 'password' || loginAlert?.field === 'credentials') setLoginAlert(null); }}
+                    />
                   </div>
-                  {loginError && (
-                    <div
-                      className="flex gap-3.5 rounded-2xl border border-[#f0c6ad] bg-[#fff8f3] p-4 shadow-[0_8px_24px_-20px_rgba(120,53,20,0.45)]"
-                      role="alert"
-                      aria-live="assertive"
-                    >
-                      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#fbe5d7] text-[#a94417]" aria-hidden="true">
-                        <svg viewBox="0 0 20 20" fill="none" className="h-[18px] w-[18px]">
-                          <path d="M10 6.25v4.5m0 3h.01M17 10a7 7 0 1 1-14 0 7 7 0 0 1 14 0Z" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" />
-                        </svg>
-                      </span>
-                      <div className="min-w-0 pt-0.5">
-                        <p className="text-sm font-semibold leading-5 text-[#713516]">We couldn’t sign you in</p>
-                        <p className="mt-1 text-[13px] leading-5 text-[#765b4d]">{loginError}</p>
-                      </div>
-                    </div>
-                  )}
+                  <AuthCallout alert={loginAlert} />
                   <button className="w-full rounded-xl bg-[#de641e] px-5 py-3.5 text-sm font-bold text-white transition hover:bg-[#c95415] focus:outline-none focus:ring-4 focus:ring-[#de641e]/20 disabled:cursor-not-allowed disabled:opacity-50" type="submit" disabled={loginLoading}>
                     {loginLoading ? 'Logging in…' : 'Log in'}
                   </button>
