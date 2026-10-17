@@ -462,6 +462,7 @@ function ProfilePreview() {
   const [status, setStatus] = useState("");
   const [photo, setPhoto] = useState("");
   const [photoError, setPhotoError] = useState("");
+  const [editing, setEditing] = useState(false);
 
   async function onPhoto(file: File) {
     const prepared = await prepareAvatarFile(file, 5 * 1024 * 1024);
@@ -485,6 +486,7 @@ function ProfilePreview() {
     }
     setSaved(form);
     setStatus("Saved in this preview. Nothing was written to an account.");
+    setEditing(false);
   }
 
   return (
@@ -515,16 +517,35 @@ function ProfilePreview() {
           </div>
         </div>
         <form className="mm-demo-panel mm-demo-form" onSubmit={onSubmit}>
-          <h2>Personal information</h2>
-          <label>Full name<input value={form.fullName} onChange={(event) => setForm({ ...form, fullName: event.target.value })} /></label>
-          <label>Display name<input value={form.displayName} onChange={(event) => setForm({ ...form, displayName: event.target.value })} /></label>
-          <label>Email address<input defaultValue="samuel@example.com" readOnly /><small><CheckCircleIcon size={12} aria-hidden="true" /> Verified</small></label>
-          <label>WhatsApp number<input value={form.phone} placeholder="Add your WhatsApp number" onChange={(event) => setForm({ ...form, phone: event.target.value })} /></label>
-          <label className="wide">Bio<textarea value={form.bio} maxLength={200} onChange={(event) => setForm({ ...form, bio: event.target.value })} /></label>
-          <p className="mm-demo-privacy">Your email and phone number are private.</p>
-          {status && <p className="mm-demo-preview-alert" role="status">{status}</p>}
-          <button className="mm-demo-primary" type="submit">Save changes</button>
-          <button type="button" className="mm-demo-text-button" onClick={() => { setForm(saved); setStatus(""); }}>Cancel</button>
+          <div className="mm-demo-profile-edit-head">
+            <h2>Personal information</h2>
+            {!editing && <button type="button" className="mm-demo-outline" onClick={() => { setStatus(""); setEditing(true); }}>Edit</button>}
+          </div>
+          {!editing ? (
+            <>
+              <p className="mm-demo-privacy">Your saved details. Tap Edit to change them.</p>
+              <dl className="mm-demo-profile-summary">
+                <div><dt>Full name</dt><dd>{saved.fullName}</dd></div>
+                <div><dt>Display name</dt><dd>{saved.displayName}</dd></div>
+                <div><dt>Email address</dt><dd>samuel@example.com<small>Sign-in email</small></dd></div>
+                <div><dt>WhatsApp number</dt><dd>{saved.phone || "Not added"}</dd></div>
+                <div className="wide"><dt>Bio</dt><dd>{saved.bio || "Not added"}</dd></div>
+              </dl>
+              {status && <p className="mm-demo-preview-alert" role="status">{status}</p>}
+            </>
+          ) : (
+            <>
+              <label>Full name<input value={form.fullName} onChange={(event) => setForm({ ...form, fullName: event.target.value })} /></label>
+              <label>Display name<input value={form.displayName} onChange={(event) => setForm({ ...form, displayName: event.target.value })} /></label>
+              <label>Email address<input defaultValue="samuel@example.com" readOnly /><small><CheckCircleIcon size={12} aria-hidden="true" /> Sign-in email</small></label>
+              <label>WhatsApp number<input value={form.phone} placeholder="Add your WhatsApp number" onChange={(event) => setForm({ ...form, phone: event.target.value })} /></label>
+              <label className="wide">Bio<textarea value={form.bio} maxLength={200} onChange={(event) => setForm({ ...form, bio: event.target.value })} /></label>
+              <p className="mm-demo-privacy">Your email and phone number are private.</p>
+              {status && <p className="mm-demo-preview-alert" role="status">{status}</p>}
+              <button className="mm-demo-primary" type="submit">Save changes</button>
+              <button type="button" className="mm-demo-text-button" onClick={() => { setForm(saved); setStatus(""); setEditing(false); }}>Cancel</button>
+            </>
+          )}
         </form>
         <div className="mm-demo-panel mm-demo-row"><span><strong>Seller tools</strong><small>List a product and manage your creator profile.</small></span><Link href="?screen=my-products">Open seller tools <ArrowRightIcon size={12} aria-hidden="true" /></Link></div>
       </section>

@@ -4,19 +4,25 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import SiteHeader from '@/components/SiteHeader';
+import { useAdminAccount } from '@/lib/account/use-admin-account';
 import { supabase } from '@/lib/supabaseClient';
 
 export default function SettingsPageClient() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [welcomeReset, setWelcomeReset] = useState(false);
+  const [userId, setUserId] = useState<string | null>(null);
+  const isAdmin = useAdminAccount(userId);
 
   useEffect(() => {
     let active = true;
     supabase.auth.getUser().then(({ data: { user } }) => {
       if (!active) return;
       if (!user) router.replace('/signup?mode=signin');
-      else setLoading(false);
+      else {
+        setUserId(user.id);
+        setLoading(false);
+      }
     });
     return () => { active = false; };
   }, [router]);
@@ -78,10 +84,26 @@ export default function SettingsPageClient() {
 
           <section className="flex flex-col gap-4 py-5 sm:flex-row sm:items-center sm:justify-between sm:py-6">
             <div>
-              <p className="text-sm font-semibold text-[#26384a]">Security</p>
-              <p className="mt-1 text-sm leading-6 text-[#6b7782]">Manage your sign-in protection and password recovery options.</p>
+              <p className="text-sm font-semibold text-[#26384a]">Authenticator app</p>
+              <p className="mt-1 text-sm leading-6 text-[#6b7782]">Add a 6-digit code from Google Authenticator or Authy. This is the same “authenticator” used to unlock admin tools.</p>
             </div>
-            <Link href="/security" className="inline-flex min-h-11 w-full shrink-0 items-center justify-center rounded-xl border border-[#ddd5c9] px-4 text-sm font-semibold text-[#304458] transition hover:bg-[#f7f2eb] sm:w-auto">Security settings</Link>
+            <Link href="/security" className="inline-flex min-h-11 w-full shrink-0 items-center justify-center rounded-xl border border-[#ddd5c9] px-4 text-sm font-semibold text-[#304458] transition hover:bg-[#f7f2eb] sm:w-auto">Set up authenticator</Link>
+          </section>
+
+          <section className="flex flex-col gap-4 py-5 sm:flex-row sm:items-center sm:justify-between sm:py-6">
+            <div>
+              <p className="text-sm font-semibold text-[#26384a]">Admin workspace</p>
+              {isAdmin ? (
+                <p className="mt-1 text-sm leading-6 text-[#6b7782]">This account is a platform admin. Open Admin from here or the account photo menu. If it asks for a code first, finish the authenticator setup above.</p>
+              ) : (
+                <p className="mt-1 text-sm leading-6 text-[#6b7782]">Admin tools are only shown to platform operators. This account is a regular buyer or seller, so there is no Admin page to open.</p>
+              )}
+            </div>
+            {isAdmin ? (
+              <Link href="/admin" className="inline-flex min-h-11 w-full shrink-0 items-center justify-center rounded-xl bg-[#183149] px-4 text-sm font-semibold text-white transition hover:bg-[#24445f] sm:w-auto">Open admin</Link>
+            ) : (
+              <span className="inline-flex min-h-11 w-full shrink-0 items-center justify-center rounded-xl border border-[#eee7de] px-4 text-sm text-[#7a8691] sm:w-auto">Not an admin account</span>
+            )}
           </section>
 
           <section className="flex flex-col gap-4 py-5 sm:flex-row sm:items-center sm:justify-between sm:py-6">

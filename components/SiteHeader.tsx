@@ -3,9 +3,11 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import Image from 'next/image';
 import { supabase } from '@/lib/supabaseClient';
 import Logo from '@/components/Logo';
+import OwnerAvatar from '@/components/profile/OwnerAvatar';
+import { useAdminAccount } from '@/lib/account/use-admin-account';
+import { publishOwnerAvatar, useOwnerAvatar } from '@/lib/profile/use-owner-avatar';
 
 type HeaderUser = {
   id: string;
@@ -18,19 +20,13 @@ function userLabel(user: HeaderUser) {
   return typeof name === 'string' && name.trim() ? name.trim() : user.email ?? 'Your account';
 }
 
-function initials(user: HeaderUser | null) {
-  if (!user) return '';
-  const parts = userLabel(user).split(/[\s@._-]+/).filter(Boolean);
-  if (parts.length > 1) return (parts[0][0] + parts[1][0]).toUpperCase();
-  return parts[0]?.slice(0, 2).toUpperCase() ?? 'MM';
-}
-
 export default function SiteHeader({ isSeller: sellerHint = false, compact = false, hideOnMobile = false }: { isSeller?: boolean; compact?: boolean; hideOnMobile?: boolean }) {
   const router = useRouter();
   const pathname = usePathname();
   const [user, setUser] = useState<HeaderUser | null>(null);
-  const [avatarUrl, setAvatarUrl] = useState('');
   const [authResolved, setAuthResolved] = useState(false);
+  const ownerAvatar = useOwnerAvatar(user);
+  const isAdmin = useAdminAccount(user?.id);
   const [unreadCount, setUnreadCount] = useState(0);
   const [notificationCount, setNotificationCount] = useState(0);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -72,9 +68,14 @@ export default function SiteHeader({ isSeller: sellerHint = false, compact = fal
     window.addEventListener('messages:read-updated', refresh);
     window.addEventListener('notifications:updated', refresh);
     window.addEventListener('focus', refresh);
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      const nextUser = (session?.user as HeaderUser | null) ?? null;
-      setUser(nextUser);
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'USER_UPDATED') {
+        void supabase.auth.getUser().then(({ data }) => {
+          if (!cancelled) setUser((data.user as HeaderUser | null) ?? null);
+        });
+      } else {
+        setUser((session?.user as HeaderUser | null) ?? null);
+      }
       setAuthResolved(true);
       if (!session?.user) {
         setSellerAccount(false);
@@ -97,21 +98,9 @@ export default function SiteHeader({ isSeller: sellerHint = false, compact = fal
 
   useEffect(() => setMenuOpen(false), [pathname]);
 
-  useEffect(() => {
-    let active = true;
-    const path = user?.user_metadata?.profile_avatar_path;
-    if (typeof path !== 'string' || !path) {
-      setAvatarUrl('');
-      return () => { active = false; };
-    }
-    void supabase.storage.from('profile-avatars').createSignedUrl(path, 3600).then(({ data }) => {
-      if (active) setAvatarUrl(data?.signedUrl ?? '');
-    });
-    return () => { active = false; };
-  }, [user?.id, user?.user_metadata?.profile_avatar_path]);
-
   async function handleSignOut() {
     await supabase.auth.signOut();
+    publishOwnerAvatar(null);
     setUser(null);
     setMenuOpen(false);
     router.push('/marketplace');
@@ -162,14 +151,16 @@ export default function SiteHeader({ isSeller: sellerHint = false, compact = fal
             aria-haspopup="menu"
             aria-controls="account-menu"
             data-onboarding-target="menu"
-            className="relative grid h-10 w-10 place-items-center rounded-full border border-[#e5ddd3] bg-white text-[#23384d] shadow-sm transition hover:border-[#dc6b2e]/60 hover:bg-[#fffaf3] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#dc6b2e]/15"
+            className="relative grid h-10 w-10 place-items-center overflow-hidden rounded-full border border-[#e5ddd3] bg-white text-[#23384d] shadow-sm transition hover:border-[#dc6b2e]/60 hover:bg-[#fffaf3] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#dc6b2e]/15"
           >
             {user ? (
-              avatarUrl ? (
-                <Image src={avatarUrl} alt="" width={40} height={40} unoptimized className="h-10 w-10 rounded-full object-cover" />
-              ) : (
-                <span className="text-xs font-bold">{initials(user)}</span>
-              )
+              <OwnerAvatar
+                url={ownerAvatar.url}
+                name={userLabel(user)}
+                email={user.email}
+                size={40}
+                className="h-10 w-10"
+              />
             ) : (
               <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" aria-hidden="true">
                 <circle cx="12" cy="8" r="3.5" /><path d="M4.5 20c.8-3.4 3.3-5.2 7.5-5.2s6.7 1.8 7.5 5.2" />
@@ -183,9 +174,12 @@ export default function SiteHeader({ isSeller: sellerHint = false, compact = fal
             <div id="account-menu" role="menu" className="absolute right-0 top-[calc(100%+0.65rem)] z-50 max-h-[min(78svh,36rem)] w-[min(20rem,calc(100vw-1.5rem))] overflow-y-auto rounded-2xl border border-[#e7dfd5] bg-[#fffdf9] p-2.5 text-[#243344] shadow-[0_18px_55px_rgba(32,39,45,.18)]">
               {user ? (
                 <>
-                  <div className="mb-1 border-b border-[#eee7de] px-3 pb-3 pt-2">
-                    <p className="truncate text-sm font-semibold">{userLabel(user)}</p>
-                    {user.email && <p className="mt-0.5 truncate text-xs text-[#6d7883]">{user.email}</p>}
+                  <div className="mb-1 flex items-center gap-3 border-b border-[#eee7de] px-3 pb-3 pt-2">
+                    <OwnerAvatar url={ownerAvatar.url} name={userLabel(user)} email={user.email} size={40} />
+                    <div className="min-w-0">
+                      <p className="truncate text-sm font-semibold">{userLabel(user)}</p>
+                      {user.email && <p className="mt-0.5 truncate text-xs text-[#6d7883]">{user.email}</p>}
+                    </div>
                   </div>
                   <nav aria-label="Account navigation" className="space-y-0.5">
                     <Link role="menuitem" href="/profile" data-onboarding-target="profile" className="hidden min-h-11 items-center justify-between rounded-xl px-3 py-2.5 text-sm text-[#273544] transition-colors hover:bg-[#f5efe7] md:flex">Profile</Link>
@@ -194,6 +188,8 @@ export default function SiteHeader({ isSeller: sellerHint = false, compact = fal
                     <Link role="menuitem" href="/notifications" className={`${mobileLink} md:hidden`}><span>Notifications</span>{notificationBadge}</Link>
                     <Link role="menuitem" href="/payments" className={`${mobileLink} md:hidden`}>Payments</Link>
                     <Link role="menuitem" href="/settings" className={mobileLink}>Settings</Link>
+                    <Link role="menuitem" href="/security" className={mobileLink}>Authenticator &amp; security</Link>
+                    {isAdmin && <Link role="menuitem" href="/admin" className={mobileLink}>Admin workspace</Link>}
                   </nav>
                   <div className="my-2 border-t border-[#eee7de] pt-2">
                     <button type="button" role="menuitem" onClick={handleSignOut} className={`${mobileLink} w-full text-left text-[#8e3b28] hover:bg-[#fff0ea]`}>Sign out</button>

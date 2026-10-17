@@ -22,6 +22,24 @@ declare module "@/lib/profile/avatar-file.mjs" {
   export function avatarStoragePath(userId: string, type: string): string;
 }
 
+declare module "@/lib/profile/owner-avatar.mjs" {
+  export const AVATAR_BUCKET: string;
+  export const OWNER_AVATAR_EVENT: string;
+  export const OWNER_AVATAR_CACHE_KEY: string;
+  export function metadataAvatarPath(metadata: { profile_avatar_path?: unknown } | null | undefined): string | null;
+  export function isAvatarObjectName(name: string | null | undefined): boolean;
+  export function folderAvatarPath(userId: string, name: string): string | null;
+  export function candidateAvatarPaths(userId: string, knownPath?: string | null): string[];
+  export function readCachedOwnerAvatar(
+    storage: { getItem(key: string): string | null } | null | undefined,
+    userId: string,
+  ): { userId: string; path: string | null; url: string } | null;
+  export function writeCachedOwnerAvatar(
+    storage: { setItem(key: string, value: string): void; removeItem(key: string): void } | null | undefined,
+    record: { userId: string; path: string | null; url: string } | null,
+  ): void;
+}
+
 declare module "@/lib/auth/login-errors.mjs" {
   export type AuthField = "email" | "password" | "credentials" | "form";
   export type AuthAlert = {

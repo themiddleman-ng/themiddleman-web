@@ -4,6 +4,8 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState, type ReactNode } from "react";
 import { supabase } from "@/lib/supabaseClient";
+import OwnerAvatar from "@/components/profile/OwnerAvatar";
+import { useOwnerAvatar } from "@/lib/profile/use-owner-avatar";
 
 const APP_PREFIXES = [
   "/marketplace",
@@ -59,17 +61,18 @@ export default function MobileTabBar() {
   const pathname = usePathname();
   const shouldShow = APP_PREFIXES.some((prefix) => pathname.startsWith(prefix));
   const [unread, setUnread] = useState(0);
-  const [userId, setUserId] = useState<string | null>(null);
+  const [user, setUser] = useState<{ id: string; email?: string; user_metadata?: Record<string, unknown> } | null>(null);
+  const ownerAvatar = useOwnerAvatar(user);
 
   useEffect(() => {
     if (!shouldShow) return;
     let cancelled = false;
 
     async function loadUnreadCount() {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { user: authUser } } = await supabase.auth.getUser();
       if (cancelled) return;
-      setUserId(user?.id ?? null);
-      if (!user) {
+      setUser(authUser);
+      if (!authUser) {
         if (!cancelled) setUnread(0);
         return;
       }
@@ -83,7 +86,7 @@ export default function MobileTabBar() {
     const refresh = () => { void loadUnreadCount(); };
     window.addEventListener("messages:read-updated", refresh);
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUserId(session?.user.id ?? null);
+      setUser(session?.user ?? null);
       if (!session?.user) setUnread(0);
     });
     return () => {
@@ -96,7 +99,7 @@ export default function MobileTabBar() {
   if (!shouldShow) return null;
 
   const creatingProduct = pathname.startsWith("/gigs/new");
-  const showCreateButton = Boolean(userId) && !creatingProduct;
+  const showCreateButton = Boolean(user?.id) && !creatingProduct;
 
   const leading: Tab[] = [
     { href: "/marketplace", label: "Marketplace", icon: <IconHome /> },
@@ -104,7 +107,20 @@ export default function MobileTabBar() {
   ];
   const trailing: Tab[] = [
     { href: "/messages", label: "Messages", icon: <IconMessages />, badge: unread },
-    { href: "/profile", label: "Profile", icon: <IconProfile /> },
+    {
+      href: "/profile",
+      label: "Profile",
+      icon: user ? (
+        <OwnerAvatar
+          url={ownerAvatar.url}
+          name={typeof user.user_metadata?.full_name === "string" ? user.user_metadata.full_name : null}
+          email={user.email}
+          size={22}
+        />
+      ) : (
+        <IconProfile />
+      ),
+    },
   ];
 
   function renderTab(tab: Tab) {

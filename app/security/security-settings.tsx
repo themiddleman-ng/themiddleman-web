@@ -2,6 +2,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { useAdminAccount } from "@/lib/account/use-admin-account";
 import { supabase } from "@/lib/supabaseClient";
 
 export default function SecuritySettings() {
@@ -17,8 +18,13 @@ export default function SecuritySettings() {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [returningForDeletion, setReturningForDeletion] = useState(false);
+  const [userId, setUserId] = useState("");
+  const [needsAdminUnlock, setNeedsAdminUnlock] = useState(false);
+  const isAdmin = useAdminAccount(userId || null);
   useEffect(() => {
-    setReturningForDeletion(new URLSearchParams(window.location.search).get('next') === '/account/delete');
+    const next = new URLSearchParams(window.location.search).get('next');
+    setReturningForDeletion(next === '/account/delete');
+    setNeedsAdminUnlock(next === 'admin' || next === '/admin');
     void (async () => {
       const { data, error } = await supabase.auth.getUser();
       if (error || !data.user) {
@@ -26,6 +32,7 @@ export default function SecuritySettings() {
         return;
       }
       setEmail(data.user.email ?? "");
+      setUserId(data.user.id);
       setReady(true);
       const factors = await supabase.auth.mfa.listFactors();
       const existing = factors.data?.totp.find((f) => f.status === "verified");
@@ -91,13 +98,23 @@ export default function SecuritySettings() {
             <h2 className="font-display text-xl font-semibold">
               Authenticator app
             </h2>
-            <p className="mt-2 text-sm text-slate">
+            <p className="mt-2 text-sm leading-6 text-slate">
               {returningForDeletion
                 ? "Verify a current code to continue with account deletion. You will review the final confirmation before anything is removed."
+                : needsAdminUnlock
+                ? "You opened Admin, but the workspace stays locked until you confirm a code from your authenticator app. Finish the steps below, then you will be taken to the admin workspace."
                 : verified
-                ? "An authenticator is enrolled. Verify a current code to access admin tools."
-                : "Scan the QR code in your authenticator app, then enter its six-digit code."}
+                ? "An authenticator app is already on this account. Enter a current 6-digit code if a sensitive action asks for one."
+                : "Use this to add a second step when you sign in. Open Google Authenticator or Authy, tap Set up authenticator, scan the QR code, then type the 6-digit code the app shows."}
             </p>
+            {!verified && !factor && (
+              <ol className="mt-4 list-decimal space-y-2 pl-5 text-sm leading-6 text-slate">
+                <li>Install Google Authenticator or Authy on your phone.</li>
+                <li>Tap Set up authenticator on this page.</li>
+                <li>Scan the QR code, or type the setup key into the app.</li>
+                <li>Enter the 6-digit code here and tap Verify code.</li>
+              </ol>
+            )}
             {!factor && (
               <button
                 disabled={busy}
@@ -152,13 +169,23 @@ export default function SecuritySettings() {
                 </button>
               </form>
             )}
-            {verified && (
+            {verified && isAdmin && (
               <Link
                 href="/admin"
                 className="mt-4 inline-block text-ember underline"
               >
                 Open admin workspace
               </Link>
+            )}
+            {isAdmin && !verified && !needsAdminUnlock && (
+              <p className="mt-4 text-sm text-slate">
+                This account can open Admin after the authenticator is verified. You can also tap Admin workspace in the account photo menu.
+              </p>
+            )}
+            {!isAdmin && ready && (
+              <p className="mt-4 text-sm text-slate">
+                Admin is only for platform operators. If you do not see Admin in the account menu, this account is a regular buyer or seller account.
+              </p>
             )}
           </section>
           <section className="rounded-2xl border border-line bg-paper p-4 sm:p-6">

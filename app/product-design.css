@@ -339,6 +339,12 @@
 .mm-demo-profile-head small,.mm-demo-form small { display:block; color:#748196; font-size:10px; }
 .mm-demo-form { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px; }
 .mm-demo-form h2,.mm-demo-form > p { grid-column:1/-1; margin:0; }
+.mm-demo-profile-edit-head { grid-column:1/-1; display:flex; align-items:center; justify-content:space-between; gap:12px; }
+.mm-demo-profile-summary { grid-column:1/-1; display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px; }
+.mm-demo-profile-summary .wide { grid-column:1/-1; }
+.mm-demo-profile-summary dt { color:#748196; font-size:11px; font-weight:600; }
+.mm-demo-profile-summary dd { margin:4px 0 0; color:#1a2438; font-size:14px; font-weight:600; }
+.mm-demo-profile-summary small { display:block; margin-top:4px; color:#748196; font-size:10px; font-weight:500; }
 .mm-demo-form label { display:grid; gap:6px; color:#28364c; font-size:12px; }
 .mm-demo-form label.wide,.mm-demo-form .mm-demo-privacy { grid-column:1/-1; }
 .mm-demo-form textarea { min-height:78px; resize:vertical; }
@@ -437,6 +443,8 @@
  .mm-demo-outline { display:inline-flex; }
  .mm-demo-form { grid-template-columns:1fr; padding:14px; }
  .mm-demo-form label,.mm-demo-form label.wide,.mm-demo-form .mm-demo-privacy { grid-column:1; }
+ .mm-demo-profile-summary { grid-template-columns:1fr; }
+ .mm-demo-profile-summary .wide { grid-column:1; }
  .mm-demo-messages { display:block; min-height:auto; border:0; overflow:visible; }
  .mm-demo-conversations { display:none; }
  .mm-demo-thread { min-height:560px; border:1px solid #dfe5ed; }
