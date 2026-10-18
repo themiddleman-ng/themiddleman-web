@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { DM_Sans, Outfit } from "next/font/google";
+import EscrowTrustLine from "@/components/EscrowTrustLine";
 import HomeFAQ from "@/components/HomeFAQ";
 import HomeFeed from "@/components/marketplace/HomeFeed";
 import Logo from "@/components/Logo";
@@ -94,11 +95,12 @@ export default function Home() {
           <p className="text-[13px] font-bold uppercase tracking-[.14em] text-eyebrow">How it works</p>
           <h2 className="mt-3 max-w-md font-display text-[1.85rem] font-semibold leading-[1.08] tracking-[-.05em] text-bone sm:text-[2.4rem]">Find, pay, then collect your files.</h2>
           <div className="mt-8 grid gap-4 sm:grid-cols-3">
-            {steps.map((step) => (
+            {steps.map((step, index) => (
               <article key={step.title} className="rounded-2xl border border-line bg-paper p-5">
                 <span className="text-ember">{step.icon}</span>
                 <h3 className="mt-4 text-[18px] font-bold text-bone">{step.title}</h3>
                 <p className="mt-2 text-[16px] leading-7 text-slate">{step.body}</p>
+                {index === 2 ? <EscrowTrustLine className="mt-3" /> : null}
               </article>
             ))}
           </div>
