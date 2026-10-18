@@ -2,11 +2,10 @@ import Link from "next/link";
 import Image from "next/image";
 import { supabase } from "@/lib/supabaseClient";
 import { StarRatingDisplay } from "@/components/StarRating";
-import GigPreview from "./GigPreview";
+import ProductCover from "./ProductCover";
 
 export type CardGig = { id: string; title: string; description: string; category: string; price_ngn: number; is_ai_assisted: boolean; gallery_image_paths?: string[]; seller_profiles: { display_name: string; verification_status: string } | null };
 export type CardRating = { average_rating: number; review_count: number };
-const LABELS: Record<string, string> = { development: "Development", design: "Design", marketing: "Marketing", writing: "Writing", ai_assisted: "AI-assisted" };
 export default function GigCard({ gig, rating }: { gig: CardGig; rating?: CardRating }) {
   const seller = gig.seller_profiles?.display_name ?? "Unknown seller";
   const verified = gig.seller_profiles?.verification_status === "approved";
@@ -15,8 +14,8 @@ export default function GigCard({ gig, rating }: { gig: CardGig; rating?: CardRa
 
   return (
     <Link
-      href={gig.id.startsWith("preview-") ? "/design-review?screen=product-detail" : `/gigs/${gig.id}`}
-      className="gm-card group block rounded-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#0B3D91]"
+      href={`/gigs/${gig.id}`}
+      className="gm-card group block rounded-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#C2410C]"
     >
       <div className="gm-preview relative aspect-[4/3] overflow-hidden rounded-md bg-[#E9E0D6]">
         <div className="gm-preview-inner absolute inset-0">
@@ -30,7 +29,7 @@ export default function GigCard({ gig, rating }: { gig: CardGig; rating?: CardRa
               className="object-cover"
             />
           ) : (
-            <GigPreview category={gig.category} seed={gig.id} />
+            <ProductCover title={gig.title} category={gig.category} compact />
           )}
         </div>
         {gig.is_ai_assisted && (
@@ -41,7 +40,7 @@ export default function GigCard({ gig, rating }: { gig: CardGig; rating?: CardRa
       </div>
 
       <div className="pt-3">
-        <h2 className="line-clamp-2 text-[15px] font-semibold leading-5 text-[#203A53] transition-colors group-hover:text-[#c95b1d] sm:text-[16px]">
+        <h2 className="line-clamp-2 text-[15px] font-semibold leading-5 text-[#203A53] transition-colors group-hover:text-[#C2410C] sm:text-[16px]">
           {gig.title}
         </h2>
 
@@ -53,7 +52,7 @@ export default function GigCard({ gig, rating }: { gig: CardGig; rating?: CardRa
                 role="img"
                 aria-label="Verified seller"
                 title="Verified seller"
-                className="shrink-0 text-[12px] font-bold text-[#2e7776]"
+                className="shrink-0 text-[12px] font-bold text-[#9A3412]"
               >
                 ✓
               </span>
@@ -66,7 +65,7 @@ export default function GigCard({ gig, rating }: { gig: CardGig; rating?: CardRa
           )}
         </div>
 
-        <p className="mt-2 text-[15px] font-semibold text-[#c95b1d]">
+        <p className="mt-2 text-[15px] font-semibold text-[#172B45]">
           ₦{gig.price_ngn.toLocaleString("en-NG")}
         </p>
       </div>

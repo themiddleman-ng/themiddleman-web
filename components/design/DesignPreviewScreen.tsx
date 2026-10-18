@@ -24,6 +24,7 @@ import { ShoppingBagIcon } from "@phosphor-icons/react/dist/csr/ShoppingBag";
 import { UserCircleIcon } from "@phosphor-icons/react/dist/csr/UserCircle";
 import { XIcon } from "@phosphor-icons/react/dist/csr/X";
 import SiteHeader from "@/components/SiteHeader";
+import ProductCover from "@/components/marketplace/ProductCover";
 import PhotoPicker from "@/components/profile/PhotoPicker";
 import { downloadCsv } from "@/lib/client/download-csv";
 import { filterListings, filterThreads, type Listing } from "@/lib/design-preview/filters.mjs";
@@ -214,14 +215,6 @@ function MarketplacePreview() {
       </div>
       <div className="mm-demo-market-grid">
         <aside className="mm-demo-panel mm-demo-filter">
-          <strong>Category</strong>
-          {CATEGORIES.map((item) => (
-            <label key={item}>
-              <input type="radio" name="preview-category" checked={category === item} onChange={() => setCategory(item)} />
-              {categoryLabel(item)}
-            </label>
-          ))}
-          <hr />
           <strong>Price range</strong>
           {PRICE_RANGES.map((item) => (
             <label key={item}>
@@ -244,10 +237,10 @@ function MarketplacePreview() {
           </div>
           {sorted.length === 0 ? <p role="status">No sample products match those filters.</p> : (
             <div className="mm-demo-product-grid">
-              {sorted.map((item, index) => (
+              {sorted.map((item) => (
                 <Link href="?screen=product-detail" className="mm-demo-product" key={item[0]}>
-                  <div className={`mm-demo-cover cover-${index % 4}`}>
-                    <div className="mm-demo-cover-sheet"><span>{item[0]}</span><i /><i /><i /><FileIcon size={16} aria-hidden="true" /></div>
+                  <div className="mm-demo-cover">
+                    <ProductCover title={item[0]} category={item[3]} compact />
                   </div>
                   <strong>{item[0]}</strong>
                   <span>{item[1]} <Verified /></span>
@@ -646,7 +639,7 @@ function ProductPreview() {
       <div className="mm-demo-breadcrumb">Marketplace / Web &amp; Software / Invoice &amp; Expense Tracker</div>
       <div className="mm-demo-detail-grid">
         <section>
-          <div className="mm-demo-product-visual"><div className="mm-demo-cover-sheet"><span>Invoice &amp; Expense Tracker</span><i /><i /><i /><b>Income · Expenses · Overview</b></div></div>
+          <div className="mm-demo-product-visual"><ProductCover title="Invoice & Expense Tracker" category="development" /></div>
           <div className="mm-demo-tabs" role="tablist">
             {productTabs.map((item) => (
               <button key={item.id} className={tab === item.id ? "active" : ""} type="button" role="tab" id={`product-tab-${item.id}`} aria-selected={tab === item.id} aria-controls={`product-panel-${item.id}`} onClick={() => setTab(item.id)}>{item.label}</button>
@@ -723,7 +716,7 @@ function SellerPreview({ create = false }: { create?: boolean }) {
           </form>
           <aside className="mm-demo-panel">
             <h2>Listing preview</h2>
-            <div className="mm-demo-product-visual compact"><div className="mm-demo-cover-sheet"><span>Admin Dashboard</span><i /><i /><i /></div></div>
+            <div className="mm-demo-product-visual compact"><ProductCover title="Admin Dashboard" category="development" compact /></div>
             <strong>Modern React Admin Dashboard Template</strong>
             <p className="mm-demo-price">₦15,000</p>
             <small>Sample preview · not submitted</small>
@@ -787,7 +780,7 @@ function BrowsePreview() {
         {CATEGORIES.map((item) => <button key={item} type="button" aria-pressed={category === item} onClick={() => setCategory(item)}>{categoryLabel(item)}</button>)}
       </div>
       <div className="mm-demo-product-grid">
-        {items.map((item) => <Link className="mm-demo-product" href="?screen=product-detail" key={item[0]}><strong>{item[0]}</strong><span>{item[1]}</span><strong className="mm-demo-price">{item[2]}</strong></Link>)}
+        {items.map((item) => <Link className="mm-demo-product" href="?screen=product-detail" key={item[0]}><div className="mm-demo-cover"><ProductCover title={item[0]} category={item[3]} compact /></div><strong>{item[0]}</strong><span>{item[1]}</span><strong className="mm-demo-price">{item[2]}</strong></Link>)}
       </div>
     </>
   );

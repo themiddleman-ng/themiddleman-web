@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { LogoMark } from "@/components/Logo";
+import SiteHeader from "@/components/SiteHeader";
 
 export const metadata = {
   title: "About",
@@ -12,15 +12,7 @@ export const metadata = {
 export default function AboutPage() {
   return (
     <main className="min-h-screen bg-ink text-bone">
-      <header className="border-b border-line">
-        <div className="mx-auto flex max-w-4xl items-center justify-between gap-3 px-4 py-4 sm:px-6 sm:py-5">
-          <Link href="/" className="flex min-w-0 items-center gap-2.5">
-            <LogoMark className="h-6 w-6 shrink-0" />
-            <span className="truncate font-display text-base font-bold tracking-tight sm:text-lg">The Middleman</span>
-          </Link>
-          <Link href="/" className="shrink-0 text-sm font-semibold text-slate transition-colors hover:text-bone">Home</Link>
-        </div>
-      </header>
+      <SiteHeader />
 
       <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6 sm:py-12">
         <p className="text-xs font-bold uppercase tracking-[.16em] text-ember">About us</p>
@@ -52,7 +44,7 @@ export default function AboutPage() {
         </div>
 
         <div className="mt-8 grid gap-3 sm:mt-10 sm:flex sm:flex-wrap">
-          <Link href="/marketplace" className="inline-flex min-h-12 items-center justify-center rounded-xl bg-ember px-6 py-3 text-sm font-bold text-ink transition-colors hover:bg-ember/90 sm:rounded-full">Browse the marketplace</Link>
+          <Link href="/marketplace" className="inline-flex min-h-12 items-center justify-center rounded-xl bg-[#C2410C] px-6 py-3 text-sm font-bold text-white transition-colors hover:bg-[#9A3412] sm:rounded-full">Browse the marketplace</Link>
           <Link href="/signup" className="inline-flex min-h-12 items-center justify-center rounded-xl border border-line px-6 py-3 text-sm font-semibold text-bone transition-colors hover:border-ember/40 sm:rounded-full">Create an account</Link>
         </div>
       </div>

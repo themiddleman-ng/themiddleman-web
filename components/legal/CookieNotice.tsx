@@ -86,30 +86,29 @@ export default function CookieNotice() {
       {visible && (
         <aside
           aria-label="Cookie notice"
-          className={`fixed inset-x-0 z-50 border-t border-[#e5dbcf] bg-[#fffdf9] px-3 py-2.5 text-[#243344] shadow-[0_-8px_24px_rgba(28,37,47,.12)] sm:inset-x-auto sm:bottom-4 sm:left-4 sm:right-auto sm:max-w-sm sm:rounded-2xl sm:border sm:p-4 sm:shadow-[0_12px_36px_rgba(28,37,47,.16)] ${aboveTabs ? "bottom-[calc(4rem+env(safe-area-inset-bottom))]" : "bottom-0"}`}
+          className={`fixed inset-x-0 z-50 border-t border-[#e5dbcf] bg-[#fffdf9] text-[#243344] shadow-[0_-6px_18px_rgba(28,37,47,.08)] ${
+            aboveTabs ? "bottom-[calc(4rem+env(safe-area-inset-bottom))] md:bottom-0" : "bottom-0"
+          }`}
         >
-          <div className="mx-auto flex max-w-lg items-center gap-3 sm:block sm:max-w-none">
-            <div className="min-w-0 flex-1">
-              <p className="text-sm font-semibold">Cookies</p>
-              <p className="mt-0.5 hidden text-xs leading-5 text-[#64717c] sm:mt-1 sm:block">
-                Essential cookies keep sign-in working. You can choose whether to allow optional analytics.
-              </p>
-            </div>
-            <div className="flex shrink-0 items-center gap-2">
-              <Link href="/legal/cookies" className="hidden text-xs font-semibold text-[#a94b18] hover:underline sm:inline">
+          <div className="mx-auto flex max-w-7xl items-center gap-3 px-4 py-2 sm:px-6">
+            <p className="min-w-0 flex-1 truncate text-[13px] leading-5 text-[#243344]">
+              Essential cookies keep sign-in working.{" "}
+              <Link href="/legal/cookies" className="font-semibold text-[#9A3412] hover:underline">
                 Cookie policy
               </Link>
+            </p>
+            <div className="flex shrink-0 items-center gap-2">
               <button
                 type="button"
                 onClick={() => { setOptionalAnalytics(readPreferences().optionalAnalytics); setSettingsOpen(true); }}
-                className="min-h-9 rounded-lg px-2.5 text-xs font-semibold text-[#465665] hover:bg-[#f5efe7]"
+                className="min-h-9 rounded-lg px-2.5 text-xs font-semibold text-[#172B45] hover:bg-[#f5efe7]"
               >
                 Choose
               </button>
               <button
                 type="button"
                 onClick={() => savePreferences(false)}
-                className="min-h-9 rounded-lg bg-[#de641e] px-3 text-xs font-semibold text-white hover:bg-[#c95415]"
+                className="min-h-9 rounded-lg bg-[#C2410C] px-3 text-xs font-semibold text-white hover:bg-[#9A3412]"
               >
                 OK
               </button>
@@ -131,7 +130,7 @@ export default function CookieNotice() {
           >
             <div className="flex items-start justify-between gap-4">
               <div>
-                <p className="text-xs font-semibold text-[#be561b]">Privacy</p>
+                <p className="text-xs font-semibold text-[#9A3412]">Privacy</p>
                 <h2 id="cookie-settings-title" className="mt-1 font-display text-xl font-semibold">Cookie settings</h2>
                 <p className="mt-2 text-sm leading-6 text-[#64717c]">
                   Essential storage keeps your account signed in and secure. Change optional preferences below.
@@ -169,28 +168,28 @@ export default function CookieNotice() {
                   aria-checked={optionalAnalytics}
                   aria-label="Allow optional analytics"
                   onClick={() => setOptionalAnalytics((value) => !value)}
-                  className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#de641e]/20 ${optionalAnalytics ? "bg-[#de641e]" : "bg-[#c9c3ba]"}`}
+                  className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#C2410C]/20 ${optionalAnalytics ? "bg-[#C2410C]" : "bg-[#c9c3ba]"}`}
                 >
                   <span className={`h-5 w-5 rounded-full bg-white shadow-sm transition-transform ${optionalAnalytics ? "translate-x-[22px]" : "translate-x-0.5"}`} />
                 </button>
               </div>
             </div>
 
-            <Link href="/legal/cookies" onClick={() => setSettingsOpen(false)} className="mt-4 inline-block text-xs font-semibold text-[#a94b18] hover:underline">
+            <Link href="/legal/cookies" onClick={() => setSettingsOpen(false)} className="mt-4 inline-block text-xs font-semibold text-[#9A3412] hover:underline">
               Read the cookie policy
             </Link>
             <div className="mt-5 grid grid-cols-2 gap-2">
               <button
                 type="button"
                 onClick={() => savePreferences(false)}
-                className="min-h-11 rounded-xl border border-[#ddd3c8] px-4 py-2.5 text-sm font-semibold text-[#465665] transition hover:bg-[#f7f1e9]"
+                className="min-h-11 rounded-xl border border-[#ddd3c8] px-4 py-2.5 text-sm font-semibold text-[#172B45] transition hover:bg-[#f7f1e9]"
               >
                 Only essential
               </button>
               <button
                 type="button"
                 onClick={() => savePreferences(optionalAnalytics)}
-                className="min-h-11 rounded-xl bg-[#de641e] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#c95415]"
+                className="min-h-11 rounded-xl bg-[#C2410C] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#9A3412]"
               >
                 Save choice
               </button>
@@ -201,4 +200,3 @@ export default function CookieNotice() {
     </>
   );
 }
-
