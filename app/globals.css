@@ -2,13 +2,26 @@
 
 :root {
   --ink: #111111;
-  --ember: #F26419;
+  --ember: #E8590C;
+  --ember-cta: #C2410C;
+  --ember-hover: #E8590C;
   --bone: #F5F2EC;
-  --slate: #A8A39B;
+  --slate: #A1A1AA;
   --paper: #1A1A1A;
   --line: #2C2C2C;
   --elevated: #222222;
   --on-ember: #FFFFFF;
+  --eyebrow: #FB923C;
+  --focus: #E8590C;
+  --logo-blue: #3B82F6;
+  --logo-orange: #E8590C;
+  --logo-navy: #0B1E3F;
+  --accent-violet: #A78BFA;
+  --accent-teal: #2DD4BF;
+  --accent-pink: #F472B6;
+  --accent-lime: #A3E635;
+  --accent-sky: #38BDF8;
+  --accent-amber: #FBBF24;
   --font-syne: "Segoe UI", "Avenir Next", "Helvetica Neue", Arial, sans-serif;
   --font-dm-sans: "Inter", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
   --font-dm-mono: "Consolas", "SFMono-Regular", "Roboto Mono", "Liberation Mono", Menlo, monospace;
@@ -17,12 +30,25 @@
 @theme inline {
   --color-ink: var(--ink);
   --color-ember: var(--ember);
+  --color-ember-cta: var(--ember-cta);
+  --color-ember-hover: var(--ember-hover);
   --color-bone: var(--bone);
   --color-slate: var(--slate);
   --color-paper: var(--paper);
   --color-line: var(--line);
   --color-elevated: var(--elevated);
   --color-on-ember: var(--on-ember);
+  --color-eyebrow: var(--eyebrow);
+  --color-focus: var(--focus);
+  --color-logo-blue: var(--logo-blue);
+  --color-logo-orange: var(--logo-orange);
+  --color-logo-navy: var(--logo-navy);
+  --color-accent-violet: var(--accent-violet);
+  --color-accent-teal: var(--accent-teal);
+  --color-accent-pink: var(--accent-pink);
+  --color-accent-lime: var(--accent-lime);
+  --color-accent-sky: var(--accent-sky);
+  --color-accent-amber: var(--accent-amber);
   --font-display: var(--font-syne);
   --font-body: var(--font-dm-sans);
   --font-mono: var(--font-dm-mono);
@@ -41,8 +67,20 @@ html {
 }
 
 .homepage-fonts :is(a, button):focus-visible {
-  outline: 2px solid #C2410C;
+  outline: 2px solid var(--focus);
   outline-offset: 3px;
+}
+
+.btn-primary {
+  background: var(--ember-cta);
+  color: var(--on-ember);
+}
+.btn-primary:hover:not(:disabled) {
+  background: var(--ember-hover);
+}
+.btn-primary:focus-visible,
+:is(a, button):focus-visible {
+  outline-color: var(--focus);
 }
 
 
@@ -52,7 +90,11 @@ html {
 .homepage-hero {
   position: relative;
   isolation: isolate;
+  overflow-x: clip;
   background: none;
+}
+@media (min-width: 768px) {
+  .homepage-hero { max-height: 70vh; }
 }
 .homepage-hero::before {
   content: "";
@@ -65,29 +107,72 @@ html {
   height: 100%;
   transform: translateX(-50%);
   background:
-    radial-gradient(ellipse at 78% 48%, rgba(242, 100, 25, .18), transparent 46%),
-    radial-gradient(ellipse at 23% 10%, rgba(242, 100, 25, .08), transparent 55%),
-    linear-gradient(112deg, #161616 0%, #111111 52%, #1a1512 100%);
-  background-size: 115% 115%;
-  animation: hero-light-shift 36s ease-in-out infinite alternate;
+    radial-gradient(ellipse at 82% 18%, color-mix(in srgb, #E8590C 55%, transparent), transparent 42%),
+    radial-gradient(ellipse at 12% 88%, color-mix(in srgb, #FB923C 36%, transparent), transparent 46%),
+    linear-gradient(180deg, color-mix(in srgb, #E8590C 16%, var(--ink)) 0%, var(--ink) 72%);
 }
 .homepage-hero::after {
   content: "";
   position: absolute;
   z-index: -1;
   pointer-events: none;
-  width: min(48vw, 590px);
-  height: min(48vw, 520px);
-  min-width: 180px;
-  min-height: 180px;
-  right: 0;
-  top: 50%;
-  transform: translate(8%, -50%);
+  width: min(52vw, 560px);
+  height: min(42vw, 360px);
+  min-width: 160px;
+  min-height: 160px;
+  right: -6%;
+  top: 8%;
   border-radius: 50%;
-  background: radial-gradient(ellipse, rgba(242, 100, 25, .22) 0%, rgba(242, 100, 25, .12) 36%, rgba(242, 100, 25, .05) 58%, transparent 74%);
-  filter: blur(28px);
-  opacity: .82;
-  animation: hero-ambient-drift 32s ease-in-out infinite alternate;
+  background: radial-gradient(ellipse, color-mix(in srgb, #E8590C 70%, #FB923C) 0%, color-mix(in srgb, #FB923C 40%, transparent) 48%, transparent 74%);
+  filter: blur(36px);
+  opacity: .88;
+}
+.homepage-confetti {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  overflow: hidden;
+}
+.homepage-confetti span {
+  position: absolute;
+  border-radius: 999px;
+  opacity: .14;
+}
+.homepage-confetti span:nth-child(1) { left: 8%; top: 18%; width: 18px; height: 18px; background: var(--accent-violet); transform: rotate(18deg); border-radius: 4px; }
+.homepage-confetti span:nth-child(2) { left: 22%; top: 72%; width: 12px; height: 12px; background: var(--accent-teal); }
+.homepage-confetti span:nth-child(3) { right: 18%; top: 28%; width: 16px; height: 10px; background: var(--accent-lime); border-radius: 3px; }
+.homepage-confetti span:nth-child(4) { right: 8%; bottom: 18%; width: 14px; height: 14px; background: var(--accent-pink); }
+.homepage-confetti span:nth-child(5) { left: 48%; top: 12%; width: 10px; height: 10px; background: var(--accent-sky); }
+.homepage-confetti span:nth-child(6) { left: 62%; bottom: 16%; width: 20px; height: 8px; background: var(--accent-amber); }
+
+.category-tile {
+  background: color-mix(in srgb, var(--tile-accent) 13%, var(--paper));
+  color: var(--tile-accent);
+  border: 1px solid color-mix(in srgb, var(--tile-accent) 18%, var(--line));
+}
+.category-tile:hover,
+.category-tile:focus-visible {
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--tile-accent) 28%, transparent);
+  border-color: color-mix(in srgb, var(--tile-accent) 45%, var(--line));
+}
+.category-chip,
+.tag-pill {
+  background: color-mix(in srgb, var(--tile-accent) 12%, var(--paper));
+  color: var(--tile-accent);
+}
+.product-cover {
+  background:
+    radial-gradient(circle at 82% 18%, color-mix(in srgb, var(--tile-accent) 28%, transparent), transparent 42%),
+    linear-gradient(160deg, color-mix(in srgb, var(--tile-accent) 18%, var(--paper)), color-mix(in srgb, var(--tile-accent) 8%, var(--ink)));
+  color: var(--tile-accent);
+}
+.developer-strip {
+  background: color-mix(in srgb, var(--accent-violet) 10%, var(--ink));
+}
+.cta-band {
+  background: linear-gradient(135deg, #E8590C, #FB923C);
+  color: var(--logo-navy);
 }
 @keyframes hero-light-shift {
   from { background-position: 0% 0%, 0% 0%, 0% 50%; }

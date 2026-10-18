@@ -206,20 +206,20 @@ export default function MarketplacePage({ designPreview = false }: { designPrevi
       <main className="mp-content mx-auto max-w-7xl px-4 pb-12 pt-5 sm:px-6 sm:pb-16 sm:pt-7 lg:px-8">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <p className="mb-2 flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[.16em] text-[#C2410C]">
+            <p className="mb-2 flex items-center gap-2 text-[13px] font-semibold uppercase tracking-[.16em] text-eyebrow">
               <span className="h-px w-5 bg-[#C2410C]" aria-hidden="true" />
               Marketplace
             </p>
-            <h1 className="font-display text-[26px] font-semibold leading-tight tracking-[-.035em] text-bone sm:text-[30px]">
+            <h1 className="font-display text-[26px] font-semibold leading-tight tracking-[-.035em] text-[#172B45] sm:text-[30px]">
               Find your next useful starting point.
             </h1>
-            <p className="mt-1.5 max-w-2xl text-[14px] leading-6 text-slate">
+            <p className="mt-1.5 max-w-2xl text-[14px] leading-6 text-[#526273]">
               Discover ready-made digital products. Make them yours with the creator.
             </p>
           </div>
           <Link
             href="/gigs/new"
-            className="inline-flex w-full shrink-0 items-center justify-center rounded-xl border border-bone px-4 py-2.5 text-sm font-semibold text-bone transition-colors hover:bg-elevated focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ember sm:w-fit sm:rounded-full"
+            className="inline-flex min-h-11 w-full shrink-0 items-center justify-center rounded-xl border border-bone px-4 text-sm font-semibold text-bone transition-colors hover:bg-elevated focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus sm:w-fit sm:rounded-full"
           >
             Sell a digital product
           </Link>
@@ -236,7 +236,7 @@ export default function MarketplacePage({ designPreview = false }: { designPrevi
             onChange={(event) => setQuery(event.target.value)}
             placeholder="Search products, creators, templates..."
             aria-label="Search products, creators, and templates"
-            className="h-12 w-full rounded-2xl border border-line bg-paper pl-11 pr-4 text-[15px] text-bone shadow-[0_8px_24px_rgba(0,0,0,.28)] placeholder:text-slate transition focus:border-ember focus:outline-none focus:ring-4 focus:ring-ember/15"
+            className="h-12 w-full rounded-2xl border border-[#eadfd3] bg-white pl-11 pr-4 text-[15px] text-[#172B45] shadow-[0_8px_24px_rgba(39,30,20,.06)] placeholder:text-[#7C8790] transition focus:border-[#D87B36] focus:outline-none focus:ring-4 focus:ring-[#E89A5C]/15"
           />
         </div>
 
@@ -250,9 +250,9 @@ export default function MarketplacePage({ designPreview = false }: { designPrevi
                 aria-pressed={active}
                 onClick={() => setActiveCategory(category.value)}
                 className={
-                  "mp-tab shrink-0 whitespace-nowrap rounded-md px-3 py-2 text-[13px] font-medium transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-[#C2410C] " +
+                  "mp-tab inline-flex min-h-11 shrink-0 items-center whitespace-nowrap rounded-md px-3 text-[13px] font-medium transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-focus " +
                   (active
-                    ? "bg-[#C2410C] text-white shadow-[0_2px_8px_rgba(190,81,25,.18)]"
+                    ? "bg-ember-cta text-on-ember"
                     : "text-slate hover:bg-elevated hover:text-bone")
                 }
               >

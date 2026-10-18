@@ -61,6 +61,7 @@ export default function GigPageClient({ gigId, purchasesEnabled }: { gigId: stri
   const [reporting, setReporting] = useState(false);
   const [reportSuccess, setReportSuccess] = useState(false);
   const [reportOpen, setReportOpen] = useState(false);
+  const [moreOpen, setMoreOpen] = useState(false);
   const orderRequestKey = useRef<string | null>(null);
 
   useEffect(() => {
@@ -259,12 +260,12 @@ export default function GigPageClient({ gigId, purchasesEnabled }: { gigId: stri
   const buyPanel = (
     <div className="rounded-2xl border border-line bg-paper p-4 sm:p-6">
       <div className="flex flex-wrap items-center gap-2">
-        <p className="font-mono text-[10px] font-semibold uppercase tracking-[.18em] text-slate">{CATEGORY_LABELS[gig.category] ?? gig.category}</p>
+        <p className="font-mono text-[13px] font-semibold uppercase tracking-[.14em] text-slate">{CATEGORY_LABELS[gig.category] ?? gig.category}</p>
         {showAiPill && <span className="rounded-full bg-[#C2410C]/12 px-3 py-1 text-xs font-semibold text-[#9A3412]">AI-assisted</span>}
       </div>
       <h1 className="mt-2 break-words font-display text-[1.55rem] font-bold tracking-tight sm:text-[1.85rem]">{gig.title}</h1>
       <div className="mt-4 flex flex-wrap items-center gap-3">
-        <div className="grid h-10 w-10 place-items-center rounded-full border border-line bg-elevated font-display text-sm font-bold text-bone">{initialsFrom(gig.seller_profiles?.display_name ?? "?")}</div>
+        <div className="grid h-10 w-10 place-items-center rounded-full border border-line bg-[#FBF4EC] font-display text-sm font-bold text-bone">{initialsFrom(gig.seller_profiles?.display_name ?? "?")}</div>
         <div>
           <p className="text-sm font-medium">{gig.seller_profiles?.display_name ?? "Unknown seller"}</p>
           {verified ? <p className="text-xs font-semibold text-[#9A3412]">Verified seller</p> : <p className="text-xs text-slate">Verification in progress</p>}
@@ -286,9 +287,9 @@ export default function GigPageClient({ gigId, purchasesEnabled }: { gigId: stri
           <p className="text-center text-xs text-slate">Checkout is enabled only in an isolated Paystack test environment.</p>
         </div>
       ) : (
-        <div className="mt-5 rounded-xl bg-elevated p-4 text-center">
-          <p className="text-sm font-semibold text-bone">Purchases are paused</p>
-          <p className="mt-2 text-xs leading-5 text-slate">Payment and delivery are being verified before live checkout is enabled.</p>
+        <div className="mt-5 rounded-xl bg-[#EFE7DB] p-4 text-center">
+          <p className="text-sm font-semibold text-[#172B45]">Purchases are paused</p>
+          <p className="mt-2 text-xs leading-5 text-[#526577]">Payment and delivery are being verified before live checkout is enabled.</p>
         </div>
       )}
       {checkout && (
@@ -302,28 +303,39 @@ export default function GigPageClient({ gigId, purchasesEnabled }: { gigId: stri
         </section>
       )}
       {actionError && <p className="auth-error mt-4">{actionError}</p>}
-      {reportSuccess && <p className="mt-4 text-xs font-semibold text-[#9A3412]">Thanks. The admin team will review this product.</p>}
-      {!isOwnGig && (
-        <button type="button" onClick={() => setReportOpen(true)} className="mt-4 text-sm font-semibold text-[#9A3412] underline-offset-2 hover:underline">
-          Report
-        </button>
-      )}
+      {reportSuccess && <p className="mt-4 text-[13px] font-semibold text-ember">Thanks. The admin team will review this product.</p>}
     </div>
   );
 
   return <main className="min-h-screen bg-ink text-bone"><SiteHeader /><div className="mx-auto max-w-7xl px-4 py-5 sm:px-6 sm:py-10">
-    <Link href="/marketplace" className="text-xs font-semibold text-slate transition-colors hover:text-[#9A3412]">← Marketplace</Link>
+    <div className="flex items-center justify-between gap-3">
+      <Link href="/marketplace" className="inline-flex min-h-11 items-center text-[16px] font-semibold text-slate transition-colors hover:text-ember">← Marketplace</Link>
+      {!isOwnGig && (
+        <div className="relative">
+          <button type="button" aria-label="More actions" aria-expanded={moreOpen} onClick={() => setMoreOpen((open) => !open)} className="grid h-11 w-11 place-items-center rounded-full text-bone hover:bg-elevated">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="5" cy="12" r="1.6" /><circle cx="12" cy="12" r="1.6" /><circle cx="19" cy="12" r="1.6" /></svg>
+          </button>
+          {moreOpen && (
+            <div role="menu" className="absolute right-0 top-12 z-20 min-w-40 rounded-xl border border-line bg-paper p-1.5 shadow-lg">
+              <button type="button" role="menuitem" onClick={() => { setMoreOpen(false); setReportOpen(true); }} className="flex min-h-11 w-full items-center rounded-lg px-3 text-left text-[15px] font-semibold text-ember">
+                Report
+              </button>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
     <div className="mt-4 grid min-w-0 grid-cols-1 gap-7 lg:mt-5 lg:grid-cols-12 lg:gap-10">
       <div className="min-w-0 lg:order-2 lg:col-span-4">
         <div className="lg:sticky lg:top-24">{buyPanel}</div>
       </div>
       <div className="min-w-0 lg:order-1 lg:col-span-8">
       <div className="overflow-hidden rounded-xl border border-line bg-paper">
-        <div className="relative h-44 sm:h-56 lg:h-64">
+        <div className="relative aspect-[4/3]">
           {imageUrls[0] ? (
             <Image unoptimized src={imageUrls[0]} fill sizes="(max-width: 1024px) 100vw, 800px" alt={`${gig.title} preview`} className="object-cover" />
           ) : (
-            <ProductCover title={gig.title} category={gig.category} />
+            <ProductCover title={gig.title} category={gig.category} label={showAiPill ? "AI-assisted" : undefined} />
           )}
         </div>
       </div>
@@ -332,7 +344,7 @@ export default function GigPageClient({ gigId, purchasesEnabled }: { gigId: stri
       {demoLinks.length > 0 && <section className="mt-8"><h2 className="mb-3 font-display text-xl font-bold">Explore the demo</h2><div className="flex flex-wrap gap-3">{demoLinks.map((url, index) => <a key={url} href={url} target="_blank" rel="noopener noreferrer" className="rounded-full border border-line px-4 py-2 text-sm font-semibold text-[#9A3412] hover:border-[#C2410C]">{index === 0 ? "View live demo" : `View live demo ${index + 1}`} ↗</a>)}</div></section>}
       <section className="mt-10"><h2 className="font-display text-xl font-bold">What you&apos;ll get</h2><p className="mt-3 whitespace-pre-wrap text-[15px] leading-relaxed text-slate">{gig.description}</p></section>
       <section className="mt-8"><h2 className="font-display text-xl font-bold">Before you buy</h2><p className="mt-3 text-[15px] leading-relaxed text-slate">The seller&apos;s description is the source of truth for what the product includes, supported formats and any requirements. Confirm those details before checkout.</p>{included.length > 0 && <ul className="mt-4 space-y-3">{included.map((line) => <li key={line} className="flex items-start gap-3 text-[15px] text-bone"><span aria-hidden="true" className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-ember" />{line}</li>)}</ul>}<p className="mt-4 text-[14px] leading-6 text-slate">Optional customization is not included unless the listing says so. Paid product add-ons are not available yet.</p></section>
-      <section className="mt-10 rounded-2xl bg-elevated p-6"><h2 className="font-display text-lg font-bold text-bone">Payment and delivery</h2><p className="mt-2 text-[14px] leading-relaxed text-slate">Paystack processes eligible payments. The Middleman does not currently hold funds in escrow or guarantee refunds. Payment confirmation and product delivery are separate steps; use your order page to check the status available for your purchase.</p></section>
+      <section className="mt-10 rounded-2xl bg-[#EFE7DB] p-6"><h2 className="font-display text-lg font-bold text-[#172B45]">Payment and delivery</h2><p className="mt-2 text-[14px] leading-relaxed text-[#526577]">Paystack processes eligible payments. The Middleman does not currently hold funds in escrow or guarantee refunds. Payment confirmation and product delivery are separate steps; use your order page to check the status available for your purchase.</p></section>
       <section className="mt-10 border-t border-line pt-8"><h2 className="font-display text-xl font-bold">Reviews {rating.count > 0 && `(${rating.count})`}</h2>{reviews.length === 0 && <p className="mt-4 text-sm text-slate">No reviews yet for this product.</p>}<div className="mt-5 space-y-5">{reviews.map((review, i) => <div key={i} className="border-b border-line pb-5 last:border-0"><div className="mb-2 flex items-center justify-between"><StarRatingDisplay average={review.rating} count={1} size={12} /><span className="text-xs text-slate">{review.reviewer_name || "Buyer"}</span></div>{review.comment && <p className="text-sm leading-relaxed text-slate">{review.comment}</p>}</div>)}</div></section>
     </div></div>
   </div>
@@ -355,18 +367,24 @@ export default function GigPageClient({ gigId, purchasesEnabled }: { gigId: stri
       </section>
     </div>
   )}
-  {!isOwnGig && purchasesEnabled && (
+  {!isOwnGig && (
     <>
       <div className="h-[4.75rem] lg:hidden" aria-hidden="true" />
       <div className="fixed inset-x-0 z-30 border-t border-line bg-paper/96 p-3 backdrop-blur lg:hidden" style={{ bottom: "calc(4rem + env(safe-area-inset-bottom))" }}>
         <div className="flex items-center gap-3">
           <div className="min-w-0">
-            <p className="text-[11px] text-slate">Price</p>
+            <p className="text-[13px] text-slate">Price</p>
             <p className="font-mono text-lg font-semibold text-bone">₦{gig.price_ngn.toLocaleString()}</p>
           </div>
-          <button type="button" onClick={checkout ? payReviewedCheckout : handleBuyAndPay} disabled={paying} className="ml-auto inline-flex min-h-11 flex-1 items-center justify-center rounded-xl bg-[#C2410C] px-4 text-sm font-semibold text-white disabled:opacity-50">
-            {paying ? "Opening…" : checkout ? "Continue to Paystack" : "Buy this product"}
-          </button>
+          {purchasesEnabled ? (
+            <button type="button" onClick={checkout ? payReviewedCheckout : handleBuyAndPay} disabled={paying} className="btn-primary ml-auto inline-flex min-h-11 flex-1 items-center justify-center rounded-xl px-4 text-sm font-semibold disabled:opacity-50">
+              {paying ? "Opening…" : checkout ? "Continue to Paystack" : "Buy this product"}
+            </button>
+          ) : (
+            <button type="button" disabled className="ml-auto inline-flex min-h-11 flex-1 items-center justify-center rounded-xl bg-line px-4 text-sm font-semibold text-slate">
+              Purchases paused
+            </button>
+          )}
         </div>
       </div>
     </>

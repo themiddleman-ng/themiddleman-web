@@ -133,16 +133,15 @@ export default function SiteHeader({ isSeller: sellerHint = false, compact = fal
   ) : null;
 
   return (
-    <header className={`${hideOnMobile ? 'hidden md:block ' : ''}sticky top-0 z-30 border-b border-line backdrop-blur-xl ${compact ? 'bg-ink/95' : 'bg-ink/95'}`}>
+    <header className={`${hideOnMobile ? 'hidden md:block ' : ''}sticky top-0 z-30 border-b border-line bg-ink/95 backdrop-blur-xl`}>
       <div className="relative mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-2.5 sm:px-6">
         <div className="z-10 shrink-0">
           <Logo href="/" className="text-lg" markClass="h-7 w-7" variant="horizontal" textClass="text-sm" />
         </div>
 
         <nav className="absolute left-1/2 hidden -translate-x-1/2 items-center gap-1 md:flex" aria-label="Main navigation">
+          <Link href="/#categories" className={desktopLink}>Categories</Link>
           <Link href="/marketplace" className={desktopLink}>Marketplace</Link>
-          <Link href="/#how-it-works" className={`${desktopLink} hidden lg:inline-flex`}>How it works</Link>
-          <Link href="/#faq" className={`${desktopLink} hidden lg:inline-flex`}>FAQ</Link>
           {user && <>
             <Link href="/orders" data-onboarding-target="orders" className={desktopLink}>Orders</Link>
             <Link href="/messages" data-onboarding-target="messages" className={desktopLink}><span className="inline-flex items-center gap-2">Messages{unreadBadge}</span></Link>
@@ -162,16 +161,21 @@ export default function SiteHeader({ isSeller: sellerHint = false, compact = fal
                 value={searchQuery}
                 onChange={(event) => setSearchQuery(event.target.value)}
                 placeholder="Search products"
-                className="h-10 w-44 rounded-full border border-line bg-paper pl-9 pr-3 text-sm text-bone placeholder:text-slate transition focus:w-56 focus:border-ember focus:outline-none focus:ring-4 focus:ring-ember/15 xl:w-56 xl:focus:w-64"
+                className="h-11 w-44 rounded-full border border-line bg-paper pl-9 pr-3 text-sm text-bone placeholder:text-slate transition focus:w-56 focus:border-ember focus:outline-none focus:ring-4 focus:ring-ember/15 xl:w-56 xl:focus:w-64"
               />
             </label>
           </form>
-          <Link href="/browse" aria-label="Search products" className="grid h-10 w-10 place-items-center rounded-full border border-line bg-paper text-bone lg:hidden">
+          <Link href="/browse" aria-label="Search products" className="grid h-11 w-11 place-items-center rounded-full border border-line bg-paper text-bone lg:hidden">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
               <circle cx="10.8" cy="10.8" r="6.8" />
               <path d="m16 16 4.5 4.5" strokeLinecap="round" />
             </svg>
           </Link>
+          {!user && authResolved && (
+            <Link href="/signup?mode=signin" className="hidden h-11 items-center rounded-full bg-ember-cta px-4 text-sm font-semibold text-on-ember hover:bg-ember-hover sm:inline-flex">
+              Sign in
+            </Link>
+          )}
           <button
             type="button"
             onClick={() => setMenuOpen((open) => !open)}
@@ -180,34 +184,34 @@ export default function SiteHeader({ isSeller: sellerHint = false, compact = fal
             aria-haspopup="menu"
             aria-controls="account-menu"
             data-onboarding-target="menu"
-            className="relative grid h-10 w-10 place-items-center overflow-hidden rounded-full border border-line bg-paper text-bone shadow-sm transition hover:border-ember/60 hover:bg-elevated focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-ember/15"
+            className="relative grid h-11 w-11 place-items-center overflow-hidden rounded-full border border-line bg-paper text-bone shadow-sm transition hover:border-ember/60 hover:bg-elevated focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-ember/15"
           >
             {user ? (
               <OwnerAvatar
                 url={ownerAvatar.url}
                 name={userLabel(user)}
                 email={user.email}
-                size={40}
-                className="h-10 w-10"
+                size={44}
+                className="h-11 w-11"
               />
             ) : (
               <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" aria-hidden="true">
                 <circle cx="12" cy="8" r="3.5" /><path d="M4.5 20c.8-3.4 3.3-5.2 7.5-5.2s6.7 1.8 7.5 5.2" />
               </svg>
             )}
-            {!authResolved && <span className="absolute inset-0 rounded-full ring-2 ring-line" aria-hidden="true" />}
-            {(unreadCount + notificationCount) > 0 && <span className="absolute -right-0.5 -top-0.5 h-2.5 w-2.5 rounded-full border-2 border-ink bg-ember" aria-label="You have unread updates" />}
+            {!authResolved && <span className="absolute inset-0 rounded-full ring-2 ring-[#e8e0d6]" aria-hidden="true" />}
+            {(unreadCount + notificationCount) > 0 && <span className="absolute -right-0.5 -top-0.5 h-2.5 w-2.5 rounded-full border-2 border-[#fbf8f2] bg-[#e56b27]" aria-label="You have unread updates" />}
           </button>
 
           {menuOpen && (
-            <div id="account-menu" role="menu" className="absolute right-0 top-[calc(100%+0.65rem)] z-50 max-h-[min(78svh,36rem)] w-[min(20rem,calc(100vw-1.5rem))] overflow-y-auto rounded-2xl border border-line bg-paper p-2.5 text-bone shadow-[0_18px_55px_rgba(0,0,0,.45)]">
+            <div id="account-menu" role="menu" className="absolute right-0 top-[calc(100%+0.65rem)] z-50 max-h-[min(78svh,36rem)] w-[min(20rem,calc(100vw-1.5rem))] overflow-y-auto rounded-2xl border border-[#e7dfd5] bg-[#fffdf9] p-2.5 text-[#243344] shadow-[0_18px_55px_rgba(32,39,45,.18)]">
               {user ? (
                 <>
-                  <div className="mb-1 flex items-center gap-3 border-b border-line px-3 pb-3 pt-2">
+                  <div className="mb-1 flex items-center gap-3 border-b border-[#eee7de] px-3 pb-3 pt-2">
                     <OwnerAvatar url={ownerAvatar.url} name={userLabel(user)} email={user.email} size={40} />
                     <div className="min-w-0">
                       <p className="truncate text-sm font-semibold">{userLabel(user)}</p>
-                      {user.email && <p className="mt-0.5 truncate text-xs text-slate">{user.email}</p>}
+                      {user.email && <p className="mt-0.5 truncate text-xs text-[#6d7883]">{user.email}</p>}
                     </div>
                   </div>
                   <nav aria-label="Account navigation" className="space-y-0.5">
@@ -220,24 +224,24 @@ export default function SiteHeader({ isSeller: sellerHint = false, compact = fal
                     <Link role="menuitem" href="/security" className={mobileLink}>Authenticator &amp; security</Link>
                     {isAdmin && <Link role="menuitem" href="/admin" className={mobileLink}>Admin workspace</Link>}
                   </nav>
-                  <div className="my-2 border-t border-line pt-2">
-                    <button type="button" role="menuitem" onClick={handleSignOut} className={`${mobileLink} w-full text-left text-ember hover:bg-elevated`}>Sign out</button>
+                  <div className="my-2 border-t border-[#eee7de] pt-2">
+                    <button type="button" role="menuitem" onClick={handleSignOut} className={`${mobileLink} w-full text-left text-[#8e3b28] hover:bg-[#fff0ea]`}>Sign out</button>
                   </div>
                 </>
               ) : (
                 <>
                   <div className="px-3 pb-3 pt-2">
                     <p className="font-display text-lg font-semibold">Welcome to The Middleman</p>
-                    <p className="mt-1 text-xs leading-5 text-slate">Browse products now, then sign in when you’re ready to buy or sell.</p>
+                    <p className="mt-1 text-xs leading-5 text-[#697581]">Browse products now, then sign in when you’re ready to buy or sell.</p>
                   </div>
                   <nav aria-label="Guest account menu" className="space-y-0.5">
                     <Link role="menuitem" href="/marketplace" className={mobileLink}>Browse products</Link>
                     <Link role="menuitem" href="/about" className={mobileLink}>About The Middleman</Link>
                     <button type="button" role="menuitem" onClick={openCookieSettings} className={`${mobileLink} w-full text-left`}>Cookie settings</button>
                   </nav>
-                  <div className="mt-2 grid gap-2 border-t border-line px-1 pt-3">
-                    <Link role="menuitem" href="/signup?mode=signin" className="flex min-h-11 items-center justify-center rounded-xl border border-line bg-elevated px-3 text-sm font-semibold text-bone transition hover:bg-paper">Log in</Link>
-                    <Link role="menuitem" href="/signup?mode=signup" className="flex min-h-11 items-center justify-center rounded-xl bg-[#C2410C] px-3 text-sm font-semibold text-white transition hover:bg-[#9A3412]">Create an account</Link>
+                  <div className="mt-2 grid gap-2 border-t border-[#eee7de] px-1 pt-3">
+                    <Link role="menuitem" href="/signup?mode=signin" className="flex min-h-11 items-center justify-center rounded-xl border border-line bg-paper px-3 text-sm font-semibold text-bone transition hover:bg-elevated">Log in</Link>
+                    <Link role="menuitem" href="/signup?mode=signup" className="btn-primary flex min-h-11 items-center justify-center rounded-xl px-3 text-sm font-semibold">Create an account</Link>
                   </div>
                 </>
               )}
