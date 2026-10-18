@@ -856,6 +856,12 @@ html [class*="text-[#1c2a40]"],
 html [class*="text-[#19243a]"],
 html [class*="text-[#182238]"],
 html [class*="text-[#121a2e]"],
+html [class*="text-[#253650]"],
+html [class*="text-[#28374d]"],
+html [class*="text-[#24334b]"],
+html [class*="text-[#26384a]"],
+html [class*="text-[#24384b]"],
+html [class*="text-[#273849]"],
 html [class*="text-[#203A53]"],
 html [class*="text-[#203a53]"],
 html [class*="text-[#263E55]"],
@@ -985,12 +991,81 @@ html [class*="border-[#172b45]"] {
 @media (min-width: 768px) {
   .mm-auth-logo-fixed { top: 32px; left: 32px; }
 }
+.mm-demo-order-link {
+  background: var(--elevated);
+  border-color: var(--line);
+  color: var(--bone);
+}
+.mm-demo-thumb {
+  background: var(--elevated);
+  border-color: var(--line);
+  color: var(--ember);
+}
+.mm-demo-file,
+.mm-demo-file-chip {
+  background: var(--elevated);
+  border-color: var(--line);
+  color: var(--bone);
+}
+.mm-demo-file small {
+  color: var(--slate);
+}
+.mm-demo-composer button {
+  background: var(--elevated);
+  border-color: var(--line);
+  color: var(--bone);
+}
+.mm-demo-composer button.send {
+  background: var(--ember-cta);
+  border-color: var(--ember-cta);
+  color: var(--on-ember);
+}
+.mm-demo-avatar.navy {
+  background: var(--ember-cta);
+  color: var(--on-ember);
+}
 .mm-demo-primary,
 .mm-demo-order-link a {
   background: var(--ember-cta);
   border-color: var(--ember-cta);
   color: var(--on-ember);
   min-height: 44px;
+}
+
+/* Desktop/tablet login only. Keep the 375px rust + wave layout untouched. */
+@media (min-width: 768px) {
+  .mm-auth .mm-auth-hero {
+    background: #eb650c !important;
+  }
+  .mm-auth .mm-auth-hero > div:first-child {
+    display: none !important;
+    filter: none;
+  }
+  .mm-auth .mm-auth-hero::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    right: -1px;
+    bottom: 0;
+    width: 56px;
+    z-index: 2;
+    pointer-events: none;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 56 800' preserveAspectRatio='none'%3E%3Cpath fill='%231A1A1A' d='M56 0H30C10 80 50 160 30 240S10 400 30 480 50 640 30 720 10 800 30 800H56Z'/%3E%3Cpath fill='none' stroke='%23E8590C' stroke-width='3' d='M30 0C10 80 50 160 30 240S10 400 30 480 50 640 30 720 10 800 30 800'/%3E%3C/svg%3E") no-repeat center right / 56px 100%;
+  }
+  .mm-auth[data-mode=signup] .mm-auth-hero::after {
+    right: auto;
+    left: -1px;
+    transform: scaleX(-1);
+    background-position: center left;
+  }
+  .mm-auth .mm-auth-hero p,
+  .mm-auth .mm-auth-hero p.mt-5,
+  .mm-auth .mm-auth-hero-note {
+    color: #F4F4F6;
+  }
+  .mm-auth .mm-auth-hero p.font-display {
+    color: #F4F4F6;
+  }
 }
 .mm-demo-thread-header > button,
 .mm-demo-composer button {
