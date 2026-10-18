@@ -55,9 +55,39 @@
 .mm-filters legend { font-size:13px; font-weight:600; margin-bottom:12px; }
 .mm-filters label { display:flex; align-items:center; gap:10px; font-size:13px; color:#536078; margin:13px 0; }
 .mm-filters input { width:16px; height:16px; accent-color:var(--mm-orange); }
-.mm-filters button { margin-top:16px; min-height:44px; font-size:14px; color:#C2410C; text-decoration:underline; }
-.mm-filters button:disabled { color:#4B5563; text-decoration:none; cursor:default; }
+.mm-filters button { margin-top:16px; min-height:44px; font-size:14px; color:var(--ember-cta); text-decoration:underline; }
+.mm-filters button:disabled { color:var(--slate); text-decoration:none; cursor:default; }
 .mm-catalogue-toolbar { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:18px; font-size:14px; }
+.mm-catalogue-status { display:flex; align-items:center; gap:4px; min-width:0; }
+.mm-catalogue-status span { font-size:14px; white-space:nowrap; }
+.mm-clear-filters {
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-height:44px;
+  min-width:44px;
+  padding:0 8px;
+  border:0;
+  background:transparent;
+  color:var(--ember-cta);
+  font-size:13px;
+  font-weight:500;
+  cursor:pointer;
+}
+.mm-clear-filters:hover { text-decoration:underline; }
+.mm-signed-out-empty { display:grid; min-height:calc(100svh - 5rem); place-items:center; padding:4rem 1.25rem; }
+.mm-info-panel {
+  display:flex;
+  align-items:flex-start;
+  gap:12px;
+  margin-top:1.25rem;
+  padding:1rem;
+  border:1px solid var(--line);
+  border-radius:12px;
+  background:var(--paper);
+  color:var(--slate);
+}
+.mm-info-panel p { margin:0; font-size:14px; color:var(--slate); }
 .mm-catalogue-toolbar label { display:flex; align-items:center; gap:12px; min-height:44px; }
 .mm-catalogue-toolbar select { min-height:44px; padding:9px 28px 9px 10px; border:1px solid var(--mm-border); }
 .mm-filter-toggle { display:none; min-height:44px; }
@@ -171,7 +201,7 @@
 .mm-auth .mm-auth-form-face { width:100%; max-width:28rem; margin-left:auto; margin-right:auto; }
 @media(max-width:767px) {
  .mm-catalogue-toolbar { flex-wrap:wrap; }
- .mm-catalogue-toolbar > span { font-size:14px; white-space:nowrap; }
+ .mm-catalogue-status span { font-size:14px; white-space:nowrap; }
  .mm-catalogue-toolbar label { margin-left:auto; gap:7px; white-space:nowrap; font-size:14px; }
  .mm-catalogue-toolbar select { max-width:145px; }
  .mm-profile .mm-profile-editor { padding:20px 16px; }

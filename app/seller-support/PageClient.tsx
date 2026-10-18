@@ -94,9 +94,9 @@ export default function SellerSupportPage() {
         <p className="mt-2 max-w-2xl text-sm leading-6 text-slate">Private notes from The Middleman team about your seller account and product operations.</p>
 
         {unavailable && (
-          <div role="status" className="mt-5 flex items-start gap-3 rounded-xl border border-line bg-paper p-4">
+          <div role="status" className="mm-info-panel">
             <InfoIcon size={20} className="mt-0.5 shrink-0 text-slate" aria-hidden="true" />
-            <p className="text-sm text-slate">{"Operations messages aren't available yet"}</p>
+            <p>{"Operations messages aren't available yet"}</p>
           </div>
         )}
         {error && !unavailable && <p role="alert" className="mt-5 rounded-xl border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-200">{error}</p>}

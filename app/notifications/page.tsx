@@ -85,13 +85,13 @@ export default function NotificationsPage() {
     <main className="min-h-screen bg-ink text-bone">
       <SiteHeader />
       {signedOut && !loading ? (
-        <section className="grid min-h-[calc(100svh-5rem)] place-items-center px-5 py-16">
+        <section className="mm-signed-out-empty">
           <div className="flex flex-col items-center text-center">
             <BellIcon size={40} className="text-slate" aria-hidden="true" />
             <p className="mt-4 text-sm text-slate">Sign in to see your notifications</p>
             <Link
               href="/signup?mode=signin&next=/notifications"
-              className="mt-5 inline-flex min-h-11 items-center justify-center rounded-full bg-[#C2410C] px-5 text-sm font-semibold text-white"
+              className="mt-5 inline-flex min-h-11 items-center justify-center rounded-full bg-ember-cta px-5 text-sm font-semibold text-on-ember hover:bg-ember-hover"
             >
               Sign in
             </Link>
@@ -103,9 +103,9 @@ export default function NotificationsPage() {
             <div>
               <p className="text-xs font-semibold tracking-[.14em] text-ember">YOUR ACCOUNT</p>
               <h1 className="mt-2 font-display text-3xl font-bold">Notifications</h1>
-              {!signedOut ? <p className="mt-2 text-sm text-slate">{unreadCount} unread</p> : null}
+              {!loading && !signedOut ? <p className="mt-2 text-sm text-slate">{unreadCount} unread</p> : null}
             </div>
-            {!signedOut && unreadCount > 0 ? <button onClick={markAllRead} className="rounded-full border border-line px-4 py-2 text-xs text-slate hover:text-bone">Mark all read</button> : null}
+            {!loading && !signedOut && unreadCount > 0 ? <button onClick={markAllRead} className="rounded-full border border-line px-4 py-2 text-xs text-slate hover:text-bone">Mark all read</button> : null}
           </header>
 
           {loading ? <p className="mt-7 text-sm text-slate">Loading notifications…</p> : null}

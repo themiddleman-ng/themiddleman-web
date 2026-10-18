@@ -281,21 +281,14 @@ export default function MarketplacePage({ designPreview = false }: { designPrevi
         <div className="mm-catalogue">
           <aside id="marketplace-filters" className="mm-filters" data-open={filtersOpen} aria-label="Product filters">
             <fieldset><legend>Price range</legend>{[['all', 'Any price'], ['under5', 'Under ₦5,000'], ['5to10', '₦5,000 – ₦10,000'], ['10to25', '₦10,000 – ₦25,000'], ['over25', 'Over ₦25,000']].map(([value, label]) => <label key={value} className="min-h-11"><input type="radio" name="price-range" checked={priceRange === value} onChange={() => setPriceRange(value)} />{label}</label>)}</fieldset>
-            {activeFilterCount > 0 ? (
-              <button type="button" onClick={clearAllFilters}>Clear filters</button>
-            ) : null}
           </aside>
           <div className="min-w-0">
             <div className="mm-catalogue-toolbar">
               <button type="button" className="mm-filter-toggle" aria-controls="marketplace-filters" aria-expanded={filtersOpen} onClick={() => setFiltersOpen(!filtersOpen)}>Filters</button>
-              <div className="flex min-w-0 items-center gap-2">
+              <div className="mm-catalogue-status">
                 <span role="status">{loading ? 'Loading products…' : `${filteredGigs.length} products`}</span>
                 {activeFilterCount > 0 ? (
-                  <button
-                    type="button"
-                    onClick={clearAllFilters}
-                    className="inline-flex min-h-11 min-w-11 items-center justify-center bg-transparent px-2 text-[13px] font-medium text-[#C2410C]"
-                  >
+                  <button type="button" onClick={clearAllFilters} className="mm-clear-filters">
                     {`Clear all (${activeFilterCount})`}
                   </button>
                 ) : null}
