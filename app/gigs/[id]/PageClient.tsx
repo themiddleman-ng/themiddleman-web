@@ -8,6 +8,7 @@ import { isSupabaseConfigured, supabase } from "@/lib/supabaseClient";
 import { StarRatingDisplay } from "@/components/StarRating";
 import SiteHeader from "@/components/SiteHeader";
 import ProductCover from "@/components/marketplace/ProductCover";
+import EscrowTrustLine from "@/components/EscrowTrustLine";
 import { DESIGN_PREVIEW_GIGS } from "@/lib/design-preview/catalog";
 
 type SellerProfile = { user_id: string; display_name: string; bio: string | null; verification_status: string };
@@ -276,6 +277,7 @@ export default function GigPageClient({ gigId, purchasesEnabled }: { gigId: stri
         <span className="text-sm text-slate">Price</span>
         <span className="font-mono text-2xl font-semibold text-bone">₦{gig.price_ngn.toLocaleString()}</span>
       </div>
+      <EscrowTrustLine className="mt-3" />
       {isOwnGig ? (
         <div className="mt-5 space-y-3">
           <p className="text-center text-xs text-slate">This is your product.{" "}<Link href="/gigs/mine" className="font-semibold text-[#9A3412] hover:underline">Manage it</Link></p>
@@ -369,7 +371,7 @@ export default function GigPageClient({ gigId, purchasesEnabled }: { gigId: stri
   )}
   {!isOwnGig && (
     <>
-      <div className="h-[4.75rem] lg:hidden" aria-hidden="true" />
+      <div className="h-24 lg:hidden" aria-hidden="true" />
       <div className="fixed inset-x-0 z-30 border-t border-line bg-paper/96 p-3 backdrop-blur lg:hidden" style={{ bottom: "calc(4rem + env(safe-area-inset-bottom))" }}>
         <div className="flex items-center gap-3">
           <div className="min-w-0">
@@ -386,6 +388,7 @@ export default function GigPageClient({ gigId, purchasesEnabled }: { gigId: stri
             </button>
           )}
         </div>
+        <EscrowTrustLine compact className="mt-2" />
       </div>
     </>
   )}
