@@ -3,7 +3,7 @@ import Image from "next/image";
 
 type LogoVariant = "responsive" | "horizontal" | "vertical" | "symbol" | "dark" | "mono";
 
-export function LogoMark({ className = "h-7 w-7", inverted = false }: { className?: string; inverted?: boolean }) {
+export function LogoMark({ className = "h-7 w-7", inverted = true }: { className?: string; inverted?: boolean }) {
   return (
     <Image
       src="/brand/middleman-approved-master.png"
@@ -21,7 +21,7 @@ export default function Logo({
   markClass = "h-8 w-8",
   textClass = "text-[15px]",
   variant = "responsive",
-  inverted = false,
+  inverted = true,
 }: {
   href?: string;
   className?: string;
@@ -43,8 +43,8 @@ export default function Logo({
           priority
           className={`${markClass} shrink-0 object-contain ${invertClass}`}
         />
-        <span className={`font-display font-extrabold tracking-[-.045em] ${inverted ? "text-white" : "text-[#172B45]"} ${textClass}`}>
-          The <span className={inverted ? "text-white" : "text-[#0B3D91]"}>Middleman</span>
+        <span className={`font-display font-extrabold tracking-[-.045em] ${inverted ? "text-white" : "text-bone"} ${textClass}`}>
+          The <span className={inverted ? "text-white" : "text-bone"}>Middleman</span>
         </span>
       </Link>
     );

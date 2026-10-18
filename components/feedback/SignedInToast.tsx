@@ -35,7 +35,7 @@ export default function SignedInToast() {
       <p
         role="status"
         aria-live="polite"
-        className="mm-signed-in-toast flex items-center gap-2 rounded-full bg-[#172b45] px-4 py-2.5 text-sm font-semibold text-white shadow-[0_12px_40px_rgba(23,43,69,.28)]"
+        className="mm-signed-in-toast flex items-center gap-2 rounded-full bg-paper px-4 py-2.5 text-sm font-semibold text-bone shadow-[0_12px_40px_rgba(0,0,0,.45)]"
       >
         <CheckCircleIcon size={18} weight="fill" className="text-[#8ee0a8]" aria-hidden="true" />
         Signed in successfully

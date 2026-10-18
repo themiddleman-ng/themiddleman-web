@@ -18,13 +18,13 @@ const CATEGORY_DETAILS: Record<string, { label: string; mark: string }> = {
 
 function ListingSkeleton() {
   return (
-    <div aria-hidden="true" className="overflow-hidden rounded-lg bg-white">
-      <div className="aspect-[16/10] animate-pulse bg-[#E8EDF0]" />
+    <div aria-hidden="true" className="overflow-hidden rounded-lg bg-paper">
+      <div className="aspect-[16/10] animate-pulse bg-elevated" />
       <div className="space-y-3 p-4">
-        <div className="h-2 w-20 animate-pulse rounded bg-[#E8EDF0]" />
-        <div className="h-4 w-4/5 animate-pulse rounded bg-[#E8EDF0]" />
-        <div className="h-3 w-2/3 animate-pulse rounded bg-[#EEF1F2]" />
-        <div className="mt-4 flex justify-between pt-3"><div className="h-4 w-20 animate-pulse rounded bg-[#E8EDF0]" /><div className="h-3 w-16 animate-pulse rounded bg-[#EEF1F2]" /></div>
+        <div className="h-2 w-20 animate-pulse rounded bg-elevated" />
+        <div className="h-4 w-4/5 animate-pulse rounded bg-elevated" />
+        <div className="h-3 w-2/3 animate-pulse rounded bg-line" />
+        <div className="mt-4 flex justify-between pt-3"><div className="h-4 w-20 animate-pulse rounded bg-elevated" /><div className="h-3 w-16 animate-pulse rounded bg-line" /></div>
       </div>
     </div>
   );
@@ -36,11 +36,11 @@ function CategoryLinks({ items, duplicate = false }: { items: Array<{ key: strin
       key={item.key + index}
       href={`/marketplace?category=${encodeURIComponent(item.key)}`}
       tabIndex={duplicate ? -1 : undefined}
-      className="group inline-flex shrink-0 items-center gap-3 px-5 py-3 text-[17px] font-semibold tracking-[-.025em] text-[#263E55] transition-colors hover:text-[#C2410C] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-[#C2410C] sm:px-7 sm:text-[19px]"
+      className="group inline-flex shrink-0 items-center gap-3 px-5 py-3 text-[17px] font-semibold tracking-[-.025em] text-bone transition-colors hover:text-ember focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-ember sm:px-7 sm:text-[19px]"
     >
-      <span aria-hidden="true" className="text-[15px] font-bold text-[#C2410C] transition-transform group-hover:scale-110 sm:text-base">{item.mark}</span>
+      <span aria-hidden="true" className="text-[15px] font-bold text-ember transition-transform group-hover:scale-110 sm:text-base">{item.mark}</span>
       <span>{item.label}</span>
-      <span aria-hidden="true" className="ml-1 h-1 w-1 rounded-full bg-[#BCC7CC]" />
+      <span aria-hidden="true" className="ml-1 h-1 w-1 rounded-full bg-line" />
     </Link>
   ));
 }
@@ -102,12 +102,12 @@ export default function HomeFeed() {
   const visibleGigs = gigs.slice(0, 4);
 
   return (
-    <section id="categories" className="bg-[#F8F6F1]">
+    <section id="categories" className="bg-ink">
       {categoryItems.length > 0 && (
         <>
           <div className="mx-auto max-w-7xl px-5 pb-2 pt-3 sm:px-8 sm:pt-5">
-            <div className="flex items-center gap-3 px-1 text-[13px] font-medium tracking-[.01em] text-[#6D7B86] sm:text-[14px]">
-              <span className="h-px w-5 bg-[#C2410C]" />
+            <div className="flex items-center gap-3 px-1 text-[13px] font-medium tracking-[.01em] text-slate sm:text-[14px]">
+              <span className="h-px w-5 bg-ember" />
               <span>Explore the marketplace</span>
             </div>
           </div>
@@ -123,10 +123,10 @@ export default function HomeFeed() {
       <div className="mx-auto max-w-7xl px-5 pb-16 pt-12 sm:px-8 sm:pb-20 sm:pt-16">
         <div className="mb-7 flex flex-col gap-4 sm:mb-8 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <p className="text-[13px] font-semibold tracking-[.01em] text-[#9A3412] sm:text-[14px]">A small selection</p>
-            <h2 className="mt-2 font-display text-[clamp(2rem,4vw,3rem)] font-semibold leading-[1.04] tracking-[-.05em] text-[#172B45]">A few listings to explore</h2>
+            <p className="text-[13px] font-semibold tracking-[.01em] text-ember sm:text-[14px]">A small selection</p>
+            <h2 className="mt-2 font-display text-[clamp(2rem,4vw,3rem)] font-semibold leading-[1.04] tracking-[-.05em] text-bone">A few listings to explore</h2>
           </div>
-          <Link href="/marketplace" className="w-fit text-[16px] font-semibold text-[#172B45] hover:underline">See all marketplace listings</Link>
+          <Link href="/marketplace" className="w-fit text-[16px] font-semibold text-bone hover:underline">See all marketplace listings</Link>
         </div>
 
         <div className="homepage-listings grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-5 lg:grid-cols-4">
@@ -136,14 +136,14 @@ export default function HomeFeed() {
         </div>
 
         {!loading && loadError && (
-          <div className="mt-5 px-1 py-4 text-[16px] text-[#657585]" role="status">
-            Marketplace listings are unavailable right now. <Link href="/marketplace" className="font-semibold text-[#172B45] underline">Open the marketplace</Link>.
+          <div className="mt-5 px-1 py-4 text-[16px] text-slate" role="status">
+            Marketplace listings are unavailable right now. <Link href="/marketplace" className="font-semibold text-bone underline">Open the marketplace</Link>.
           </div>
         )}
         {!loading && !loadError && visibleGigs.length === 0 && (
-          <div className="mt-5 flex flex-col gap-3 py-4 text-[16px] text-[#657585] sm:flex-row sm:items-center sm:justify-between">
+          <div className="mt-5 flex flex-col gap-3 py-4 text-[16px] text-slate sm:flex-row sm:items-center sm:justify-between">
             <p>No listings to show yet. Browse the marketplace to see current products.</p>
-            <Link href="/marketplace" className="w-fit font-semibold text-[#172B45] underline">Browse all listings</Link>
+            <Link href="/marketplace" className="w-fit font-semibold text-bone underline">Browse all listings</Link>
           </div>
         )}
       </div>

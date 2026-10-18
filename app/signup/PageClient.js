@@ -51,14 +51,14 @@ function AuthCallout({ alert, onAction }) {
   return (
     <div
       id="auth-alert"
-      className={`flex items-start gap-2 rounded-md border-l-[3px] border-l-[#b42318] bg-[#fff6f4] px-3 ${compact ? 'py-2' : 'py-2.5'}`}
+      className={`flex items-start gap-2 rounded-md border-l-[3px] border-l-[#e86b5a] bg-[#3a1a16] px-3 ${compact ? 'py-2' : 'py-2.5'}`}
       role="alert"
       aria-live="assertive"
     >
-      <Icon size={16} weight="fill" className="mt-0.5 shrink-0 text-[#b42318]" aria-hidden="true" />
+      <Icon size={16} weight="fill" className="mt-0.5 shrink-0 text-[#f0a090]" aria-hidden="true" />
       <div className="min-w-0">
-        <p className="text-[13px] font-semibold leading-5 text-[#7a271a]">{alert.title}</p>
-        {alert.message ? <p className="mt-0.5 text-[12px] leading-5 text-[#5c4036]">{alert.message}</p> : null}
+        <p className="text-[13px] font-semibold leading-5 text-[#f3b4a8]">{alert.title}</p>
+        {alert.message ? <p className="mt-0.5 text-[12px] leading-5 text-[#d9b8ae]">{alert.message}</p> : null}
         {alert.actionHref ? (
           <Link href={alert.actionHref} className="mt-1.5 inline-flex text-[12px] font-semibold text-[#9a3412] underline decoration-[#e7b49a] underline-offset-2">{alert.actionLabel}</Link>
         ) : alert.actionLabel && onAction ? (
@@ -282,14 +282,14 @@ function AuthPageInner() {
     window.setTimeout(() => router.push(next), 700);
   }
 
-  const inputClass = 'mt-1.5 w-full rounded-xl border bg-white px-3.5 py-3 text-[15px] text-[#1d2733] outline-none transition placeholder:text-[#89919a] focus:ring-4';
-  const validInput = 'border-[#ded6cb] focus:border-[#C2410C] focus:ring-[#C2410C]/10';
-  const invalidInput = 'border-[#b42318] focus:border-[#b42318] focus:ring-[#b42318]/15';
-  const labelClass = 'block text-sm font-medium text-[#33404d]';
+  const inputClass = 'mt-1.5 w-full rounded-xl border bg-paper px-3.5 py-3 text-[15px] text-bone outline-none transition placeholder:text-slate focus:ring-4';
+  const validInput = 'border-line focus:border-ember focus:ring-ember/10';
+  const invalidInput = 'border-[#e86b5a] focus:border-[#e86b5a] focus:ring-[#e86b5a]/15';
+  const labelClass = 'block text-sm font-medium text-slate';
 
   return (
-    <main data-mode={flipped ? 'signin' : 'signup'} data-switching={switching || undefined} className="mm-auth min-h-[100svh] bg-white px-4 pb-24 pt-5 text-[#1d2733] sm:px-6 sm:py-10">
-      <div className="mx-auto grid min-h-[calc(100svh-2.5rem)] w-full max-w-5xl overflow-hidden rounded-[1.75rem] border border-[#e9dfd3] bg-[#fffdf9] shadow-[0_24px_80px_rgba(65,46,28,.13)] md:min-h-[680px] md:grid-cols-[.85fr_1.15fr]">
+    <main data-mode={flipped ? 'signin' : 'signup'} data-switching={switching || undefined} className="mm-auth min-h-[100svh] bg-ink px-4 pb-24 pt-5 text-bone sm:px-6 sm:py-10">
+      <div className="mx-auto grid min-h-[calc(100svh-2.5rem)] w-full max-w-5xl overflow-hidden rounded-[1.75rem] border border-line bg-paper shadow-[0_24px_80px_rgba(0,0,0,.45)] md:min-h-[680px] md:grid-cols-[.85fr_1.15fr]">
         <aside className="mm-auth-hero relative flex flex-col justify-between overflow-hidden bg-[#eb650c] p-10 text-[#faf4e9] lg:p-12">
           <div aria-hidden="true" />
           <div className="relative">

@@ -17,7 +17,7 @@ export default function GigCard({ gig, rating }: { gig: CardGig; rating?: CardRa
       href={`/gigs/${gig.id}`}
       className="gm-card group block rounded-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#C2410C]"
     >
-      <div className="gm-preview relative aspect-[4/3] overflow-hidden rounded-md bg-[#E9E0D6]">
+      <div className="gm-preview relative aspect-[4/3] overflow-hidden rounded-md bg-elevated">
         <div className="gm-preview-inner absolute inset-0">
           {imageUrl ? (
             <Image
@@ -40,12 +40,12 @@ export default function GigCard({ gig, rating }: { gig: CardGig; rating?: CardRa
       </div>
 
       <div className="pt-3">
-        <h2 className="line-clamp-2 text-[15px] font-semibold leading-5 text-[#203A53] transition-colors group-hover:text-[#C2410C] sm:text-[16px]">
+        <h2 className="line-clamp-2 text-[15px] font-semibold leading-5 text-bone transition-colors group-hover:text-ember sm:text-[16px]">
           {gig.title}
         </h2>
 
         <div className="mt-1.5 flex min-w-0 items-center justify-between gap-3">
-          <span className="flex min-w-0 items-center gap-1.5 text-[13px] text-[#677582]">
+          <span className="flex min-w-0 items-center gap-1.5 text-[13px] text-slate">
             <span className="truncate">{seller}</span>
             {verified && (
               <span
@@ -65,7 +65,7 @@ export default function GigCard({ gig, rating }: { gig: CardGig; rating?: CardRa
           )}
         </div>
 
-        <p className="mt-2 text-[15px] font-semibold text-[#172B45]">
+        <p className="mt-2 text-[15px] font-semibold text-bone">
           ₦{gig.price_ngn.toLocaleString("en-NG")}
         </p>
       </div>
