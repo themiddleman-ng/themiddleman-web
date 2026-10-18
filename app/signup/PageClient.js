@@ -288,13 +288,15 @@ function AuthPageInner() {
   const labelClass = 'block text-sm font-medium text-[#33404d]';
 
   return (
-    <main data-mode={flipped ? 'signin' : 'signup'} data-switching={switching || undefined} className="mm-auth min-h-[100svh] bg-white px-4 pb-24 pt-5 text-[#1d2733] sm:px-6 sm:py-10">
-      <div className="mx-auto grid min-h-[calc(100svh-2.5rem)] w-full max-w-5xl overflow-hidden rounded-[1.75rem] border border-[#e9dfd3] bg-[#fffdf9] shadow-[0_24px_80px_rgba(65,46,28,.13)] md:min-h-[680px] md:grid-cols-[.85fr_1.15fr]">
+    <main data-mode={flipped ? 'signin' : 'signup'} data-switching={switching || undefined} className="mm-auth relative min-h-[100svh] bg-paper px-4 pb-24 pt-5 text-bone sm:px-6 sm:py-10">
+      <div className="mm-auth-logo-fixed">
+        <Logo variant="horizontal" onPanel textClass="text-[17px]" markClass="h-8 w-8" />
+      </div>
+      <div className="mx-auto grid min-h-[calc(100svh-2.5rem)] w-full max-w-5xl overflow-hidden rounded-[1.75rem] border border-line bg-paper shadow-[0_24px_80px_rgba(65,46,28,.13)] md:min-h-[680px] md:grid-cols-[.85fr_1.15fr]">
         <aside className="mm-auth-hero relative flex flex-col justify-between overflow-hidden bg-[#eb650c] p-10 text-[#faf4e9] lg:p-12">
           <div aria-hidden="true" />
           <div className="relative">
-            <Logo variant="vertical" inverted />
-            <Link href="/marketplace" className="mm-auth-browse absolute right-0 top-0 text-sm font-semibold text-[#172b45]/80 hover:text-[#172b45]">Browse first</Link>
+            <Link href="/marketplace" className="mm-auth-browse absolute right-0 top-0 text-sm font-semibold text-logo-navy/80 hover:text-logo-navy">Browse first</Link>
             <p className="mt-20 max-w-sm font-display text-4xl font-semibold leading-[1.08] tracking-[-.035em]">
               Ready-made.<br />Made yours.
             </p>

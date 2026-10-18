@@ -206,7 +206,7 @@ export default function MarketplacePage({ designPreview = false }: { designPrevi
       <main className="mp-content mx-auto max-w-7xl px-4 pb-12 pt-5 sm:px-6 sm:pb-16 sm:pt-7 lg:px-8">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <p className="mb-2 flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[.16em] text-[#C2410C]">
+            <p className="mb-2 flex items-center gap-2 text-[13px] font-semibold uppercase tracking-[.16em] text-eyebrow">
               <span className="h-px w-5 bg-[#C2410C]" aria-hidden="true" />
               Marketplace
             </p>
@@ -219,7 +219,7 @@ export default function MarketplacePage({ designPreview = false }: { designPrevi
           </div>
           <Link
             href="/gigs/new"
-            className="inline-flex w-full shrink-0 items-center justify-center rounded-xl border border-[#172B45] px-4 py-2.5 text-sm font-semibold text-[#172B45] transition-colors hover:bg-[#f5efe7] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#C2410C] sm:w-fit sm:rounded-full"
+            className="inline-flex min-h-11 w-full shrink-0 items-center justify-center rounded-xl border border-bone px-4 text-sm font-semibold text-bone transition-colors hover:bg-elevated focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus sm:w-fit sm:rounded-full"
           >
             Sell a digital product
           </Link>
@@ -250,10 +250,10 @@ export default function MarketplacePage({ designPreview = false }: { designPrevi
                 aria-pressed={active}
                 onClick={() => setActiveCategory(category.value)}
                 className={
-                  "mp-tab shrink-0 whitespace-nowrap rounded-md px-3 py-2 text-[13px] font-medium transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-[#C2410C] " +
+                  "mp-tab inline-flex min-h-11 shrink-0 items-center whitespace-nowrap rounded-md px-3 text-[13px] font-medium transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-focus " +
                   (active
-                    ? "bg-[#C2410C] text-white shadow-[0_2px_8px_rgba(190,81,25,.18)]"
-                    : "text-[#526777] hover:bg-[#f5efe7] hover:text-[#172B45]")
+                    ? "bg-ember-cta text-on-ember"
+                    : "text-slate hover:bg-elevated hover:text-bone")
                 }
               >
                 {category.label}

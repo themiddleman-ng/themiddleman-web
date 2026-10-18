@@ -3,14 +3,29 @@ import Image from "next/image";
 
 type LogoVariant = "responsive" | "horizontal" | "vertical" | "symbol" | "dark" | "mono";
 
-export function LogoMark({ className = "h-7 w-7", inverted = false }: { className?: string; inverted?: boolean }) {
+function Wordmark({ onPanel = false, textClass = "text-[15px]" }: { onPanel?: boolean; textClass?: string }) {
+  if (onPanel) {
+    return (
+      <span className={`font-display font-extrabold tracking-[-.045em] text-logo-navy ${textClass}`}>
+        The Middleman
+      </span>
+    );
+  }
+  return (
+    <span className={`font-display font-extrabold tracking-[-.045em] text-bone ${textClass}`}>
+      The <span className="text-logo-blue">Middle</span><span className="text-logo-orange">man</span>
+    </span>
+  );
+}
+
+export function LogoMark({ className = "h-7 w-7" }: { className?: string; inverted?: boolean }) {
   return (
     <Image
       src="/brand/middleman-approved-master.png"
       alt="The Middleman"
       width={1254}
       height={1254}
-      className={`${className} object-contain ${inverted ? "brightness-0 invert" : ""}`}
+      className={`${className} object-contain`}
     />
   );
 }
@@ -21,7 +36,7 @@ export default function Logo({
   markClass = "h-8 w-8",
   textClass = "text-[15px]",
   variant = "responsive",
-  inverted = false,
+  onPanel = false,
 }: {
   href?: string;
   className?: string;
@@ -29,11 +44,11 @@ export default function Logo({
   textClass?: string;
   variant?: LogoVariant;
   inverted?: boolean;
+  onPanel?: boolean;
 }) {
-  const invertClass = inverted ? "brightness-0 invert" : "";
   if (variant === "horizontal") {
     return (
-      <Link href={href} aria-label="The Middleman homepage" className={`inline-flex items-center gap-2.5 ${className}`}>
+      <Link href={href} aria-label="The Middleman homepage" className={`inline-flex min-h-11 items-center gap-2.5 ${className}`}>
         <Image
           src="/brand/middleman-approved-master.png"
           alt=""
@@ -41,24 +56,24 @@ export default function Logo({
           width={1254}
           height={1254}
           priority
-          className={`${markClass} shrink-0 object-contain ${invertClass}`}
+          className={`${markClass} shrink-0 object-contain`}
         />
-        <span className={`font-display font-extrabold tracking-[-.045em] ${inverted ? "text-white" : "text-[#172B45]"} ${textClass}`}>
-          The <span className={inverted ? "text-white" : "text-[#0B3D91]"}>Middleman</span>
-        </span>
+        <Wordmark onPanel={onPanel} textClass={textClass} />
       </Link>
     );
   }
 
   return (
-    <Link href={href} aria-label="The Middleman homepage" className={`flex items-center ${className}`}>
+    <Link href={href} aria-label="The Middleman homepage" className={`inline-flex min-h-11 items-center ${className}`}>
       <Image
         src="/brand/middleman-approved-master.png"
-        alt="The Middleman"
+        alt=""
+        aria-hidden="true"
         width={1254}
         height={1254}
-        className={`h-auto w-24 object-contain sm:w-28 md:w-32 ${invertClass}`}
+        className={`h-auto w-24 object-contain sm:w-28 md:w-32`}
       />
+      <span className="sr-only">The Middleman</span>
     </Link>
   );
 }

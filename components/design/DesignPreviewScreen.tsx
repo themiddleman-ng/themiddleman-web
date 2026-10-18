@@ -404,7 +404,7 @@ function MessagesPreview() {
               {threads.map((thread) => <option key={thread.id} value={thread.id}>{thread.name}</option>)}
             </select>
           </label>
-          <button type="button" aria-label="Conversation options" aria-haspopup="menu" aria-expanded={menuOpen} onClick={() => setMenuOpen((open) => !open)}>
+          <button type="button" className="min-h-11 min-w-11" aria-label="Conversation options" aria-haspopup="menu" aria-expanded={menuOpen} onClick={() => setMenuOpen((open) => !open)}>
             <DotsThreeIcon size={20} weight="bold" aria-hidden="true" />
           </button>
           {menuOpen && (

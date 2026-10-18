@@ -112,8 +112,8 @@ export default function SiteHeader({ isSeller: sellerHint = false, compact = fal
     setMenuOpen(false);
   }
 
-  const desktopLink = 'rounded-full px-3 py-2 text-sm text-[#172B45] transition-colors hover:bg-[#f4eee6] hover:text-[#172B45]';
-  const mobileLink = 'flex min-h-11 items-center justify-between rounded-xl px-3 py-2.5 text-sm text-[#273544] transition-colors hover:bg-[#f5efe7]';
+  const desktopLink = 'rounded-full px-3 py-2 text-sm text-bone transition-colors hover:bg-elevated hover:text-bone';
+  const mobileLink = 'flex min-h-11 items-center justify-between rounded-xl px-3 py-2.5 text-sm text-bone transition-colors hover:bg-elevated';
 
   function submitHeaderSearch(event: FormEvent) {
     event.preventDefault();
@@ -133,16 +133,15 @@ export default function SiteHeader({ isSeller: sellerHint = false, compact = fal
   ) : null;
 
   return (
-    <header className={`${hideOnMobile ? 'hidden md:block ' : ''}sticky top-0 z-30 border-b border-[#e9e2d9] backdrop-blur-xl ${compact ? 'bg-[#faf7f0]/95' : 'bg-[#fbf8f2]/95'}`}>
+    <header className={`${hideOnMobile ? 'hidden md:block ' : ''}sticky top-0 z-30 border-b border-line bg-ink/95 backdrop-blur-xl`}>
       <div className="relative mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-2.5 sm:px-6">
         <div className="z-10 shrink-0">
           <Logo href="/" className="text-lg" markClass="h-7 w-7" variant="horizontal" textClass="text-sm" />
         </div>
 
         <nav className="absolute left-1/2 hidden -translate-x-1/2 items-center gap-1 md:flex" aria-label="Main navigation">
+          <Link href="/#categories" className={desktopLink}>Categories</Link>
           <Link href="/marketplace" className={desktopLink}>Marketplace</Link>
-          <Link href="/#how-it-works" className={`${desktopLink} hidden lg:inline-flex`}>How it works</Link>
-          <Link href="/#faq" className={`${desktopLink} hidden lg:inline-flex`}>FAQ</Link>
           {user && <>
             <Link href="/orders" data-onboarding-target="orders" className={desktopLink}>Orders</Link>
             <Link href="/messages" data-onboarding-target="messages" className={desktopLink}><span className="inline-flex items-center gap-2">Messages{unreadBadge}</span></Link>
@@ -153,7 +152,7 @@ export default function SiteHeader({ isSeller: sellerHint = false, compact = fal
           <form onSubmit={submitHeaderSearch} className="hidden lg:block" role="search">
             <label className="relative block">
               <span className="sr-only">Search products</span>
-              <svg className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#71808B]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
+              <svg className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
                 <circle cx="10.8" cy="10.8" r="6.8" />
                 <path d="m16 16 4.5 4.5" strokeLinecap="round" />
               </svg>
@@ -162,16 +161,21 @@ export default function SiteHeader({ isSeller: sellerHint = false, compact = fal
                 value={searchQuery}
                 onChange={(event) => setSearchQuery(event.target.value)}
                 placeholder="Search products"
-                className="h-10 w-44 rounded-full border border-[#e5ddd3] bg-white pl-9 pr-3 text-sm text-[#172B45] placeholder:text-[#7C8790] transition focus:w-56 focus:border-[#C2410C] focus:outline-none focus:ring-4 focus:ring-[#C2410C]/15 xl:w-56 xl:focus:w-64"
+                className="h-11 w-44 rounded-full border border-line bg-paper pl-9 pr-3 text-sm text-bone placeholder:text-slate transition focus:w-56 focus:border-ember focus:outline-none focus:ring-4 focus:ring-ember/15 xl:w-56 xl:focus:w-64"
               />
             </label>
           </form>
-          <Link href="/browse" aria-label="Search products" className="grid h-10 w-10 place-items-center rounded-full border border-[#e5ddd3] bg-white text-[#172B45] lg:hidden">
+          <Link href="/browse" aria-label="Search products" className="grid h-11 w-11 place-items-center rounded-full border border-line bg-paper text-bone lg:hidden">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
               <circle cx="10.8" cy="10.8" r="6.8" />
               <path d="m16 16 4.5 4.5" strokeLinecap="round" />
             </svg>
           </Link>
+          {!user && authResolved && (
+            <Link href="/signup?mode=signin" className="hidden h-11 items-center rounded-full bg-ember-cta px-4 text-sm font-semibold text-on-ember hover:bg-ember-hover sm:inline-flex">
+              Sign in
+            </Link>
+          )}
           <button
             type="button"
             onClick={() => setMenuOpen((open) => !open)}
@@ -180,15 +184,15 @@ export default function SiteHeader({ isSeller: sellerHint = false, compact = fal
             aria-haspopup="menu"
             aria-controls="account-menu"
             data-onboarding-target="menu"
-            className="relative grid h-10 w-10 place-items-center overflow-hidden rounded-full border border-[#e5ddd3] bg-white text-[#23384d] shadow-sm transition hover:border-[#dc6b2e]/60 hover:bg-[#fffaf3] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#dc6b2e]/15"
+            className="relative grid h-11 w-11 place-items-center overflow-hidden rounded-full border border-line bg-paper text-bone shadow-sm transition hover:border-ember/60 hover:bg-elevated focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-ember/15"
           >
             {user ? (
               <OwnerAvatar
                 url={ownerAvatar.url}
                 name={userLabel(user)}
                 email={user.email}
-                size={40}
-                className="h-10 w-10"
+                size={44}
+                className="h-11 w-11"
               />
             ) : (
               <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" aria-hidden="true">
@@ -236,8 +240,8 @@ export default function SiteHeader({ isSeller: sellerHint = false, compact = fal
                     <button type="button" role="menuitem" onClick={openCookieSettings} className={`${mobileLink} w-full text-left`}>Cookie settings</button>
                   </nav>
                   <div className="mt-2 grid gap-2 border-t border-[#eee7de] px-1 pt-3">
-                    <Link role="menuitem" href="/signup?mode=signin" className="flex min-h-11 items-center justify-center rounded-xl border border-[#172B45] bg-[#172B45] px-3 text-sm font-semibold text-white transition hover:bg-[#0f1e30]">Log in</Link>
-                    <Link role="menuitem" href="/signup?mode=signup" className="flex min-h-11 items-center justify-center rounded-xl bg-[#C2410C] px-3 text-sm font-semibold text-white transition hover:bg-[#9A3412]">Create an account</Link>
+                    <Link role="menuitem" href="/signup?mode=signin" className="flex min-h-11 items-center justify-center rounded-xl border border-line bg-paper px-3 text-sm font-semibold text-bone transition hover:bg-elevated">Log in</Link>
+                    <Link role="menuitem" href="/signup?mode=signup" className="btn-primary flex min-h-11 items-center justify-center rounded-xl px-3 text-sm font-semibold">Create an account</Link>
                   </div>
                 </>
               )}
