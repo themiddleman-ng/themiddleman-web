@@ -35,8 +35,8 @@ const steps = [
     ),
   },
   {
-    title: "Get your files from the seller",
-    body: "After payment, use your order page for confirmation and any files the seller shares.",
+    title: "Get your files",
+    body: "Your payment is held until you confirm. Collect the files from your order page after the seller delivers — this is not an instant download.",
     icon: (
       <svg viewBox="0 0 24 24" className="h-7 w-7" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
         <path d="M7 3.5h7l4 4V20a1.5 1.5 0 0 1-1.5 1.5H7A1.5 1.5 0 0 1 5.5 20V5A1.5 1.5 0 0 1 7 3.5Z" />

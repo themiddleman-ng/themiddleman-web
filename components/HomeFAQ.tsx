@@ -9,6 +9,10 @@ const QUESTIONS = [
     answer: "Eligible purchases use Paystack checkout in Nigerian Naira. Buyers pay the listed price plus any processing fees shown at checkout. Purchases are paused while payment and delivery are verified.",
   },
   {
+    question: "How does payment protection work?",
+    answer: "All payments on The Middleman are held in escrow. When a buyer places an order, the full amount is deducted and held by The Middleman. Your money is never released to the seller until you approve the delivery. If something goes wrong, your funds are protected.",
+  },
+  {
     question: "Can I get a refund?",
     answer: "The refund policy allows a request if a seller fails to deliver, the delivery is materially different from the listing, the files are unsafe, or the seller is unresponsive during an active order. Read the refund policy before paying.",
   },
