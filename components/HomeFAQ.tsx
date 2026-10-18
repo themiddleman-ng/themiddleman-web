@@ -9,7 +9,7 @@ const QUESTIONS = [
   },
   {
     question: "How do payments work?",
-    answer: "Eligible purchases use Paystack checkout. The Middleman does not currently claim escrow, held funds or guaranteed refunds. Check the listing and purchase terms before paying.",
+    answer: "Eligible purchases use Paystack checkout. Check the listing and purchase terms before paying.",
   },
   {
     question: "Can I buy and sell with one account?",

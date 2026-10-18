@@ -49,6 +49,7 @@ const steps = [
   { number: "01", title: "Explore the marketplace", body: "Browse ready-made digital products from independent creators." },
   { number: "02", title: "Check the details", body: "Review the product description, previews, price and seller information before checkout." },
   { number: "03", title: "Purchase with Paystack", body: "Pay in naira through Paystack. Your order page shows the payment status and next steps." },
+  { number: "04", title: "Get your files from the seller", body: "After you pay, collect the files the seller provides for your order." },
 ];
 
 export default function Home() {
@@ -146,7 +147,7 @@ export default function Home() {
             <p className="text-[13px] font-bold uppercase tracking-[.14em] text-[#C2410C]">From browse to order</p>
             <h2 className="mt-4 max-w-md font-display text-[1.85rem] font-semibold leading-[1.08] tracking-[-.05em] text-[#172B45] sm:text-[clamp(2.4rem,4.5vw,3.8rem)] sm:leading-[1.04]">A clearer way to buy digital goods.</h2>
           </div>
-          <div className="grid gap-0 sm:grid-cols-3">
+          <div className="grid gap-0 sm:grid-cols-2">
             {steps.map((step) => (
               <article key={step.number} className="border-t border-[#C9D4DA] py-5 sm:border-l sm:border-t-0 sm:pl-5 sm:pr-4 first:sm:border-l-0 first:sm:pl-0">
                 <span className="font-mono text-[15px] font-bold text-[#C2410C]">{step.number}</span>
