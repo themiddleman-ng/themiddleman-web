@@ -10,7 +10,7 @@ export default function EscrowTrustLine({ compact = false, className = "" }: Esc
     <p
       className={[
         "flex items-start gap-1.5 text-slate",
-        compact ? "text-[11px] leading-4" : "text-[13px] leading-5",
+        compact ? "text-[14px] leading-5" : "text-[14px] leading-5",
         className,
       ]
         .filter(Boolean)
@@ -18,7 +18,7 @@ export default function EscrowTrustLine({ compact = false, className = "" }: Esc
     >
       <svg
         viewBox="0 0 24 24"
-        className={compact ? "mt-px h-3.5 w-3.5 shrink-0 text-ember" : "mt-px h-4 w-4 shrink-0 text-ember"}
+        className={compact ? "mt-px h-3.5 w-3.5 shrink-0 text-eyebrow" : "mt-px h-4 w-4 shrink-0 text-eyebrow"}
         fill="none"
         stroke="currentColor"
         strokeWidth="1.8"

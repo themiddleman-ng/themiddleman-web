@@ -5,6 +5,7 @@ import Image from 'next/image';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabaseClient';
+import { signinHref } from '@/lib/auth/signin-redirect.mjs';
 import { ProductPackageField } from '@/components/ProductPackageUploader';
 import { uploadProductPackage } from '@/lib/client/product-packages';
 
@@ -45,6 +46,16 @@ export default function NewGigPage() {
 	const [packageFeatureLoaded, setPackageFeatureLoaded] = useState(false);
 	const [createdGigId, setCreatedGigId] = useState<string | null>(null);
 	const [packageStage, setPackageStage] = useState('');
+	const [authChecked, setAuthChecked] = useState(false);
+	useEffect(() => {
+		let active = true;
+		supabase.auth.getUser().then(({ data: { user } }) => {
+			if (!active) return;
+			if (!user) router.replace(signinHref('/gigs/new'));
+			else setAuthChecked(true);
+		});
+		return () => { active = false; };
+	}, [router]);
 	useEffect(() => {
 		if (!images[0]) { setPreviewImage(null); return; }
 		const url = URL.createObjectURL(images[0]);
@@ -183,6 +194,14 @@ export default function NewGigPage() {
 	}
 
 	const categoryLabel = CATEGORIES.find((c) => c.value === category)?.label || 'Category';
+
+	if (!authChecked) {
+		return (
+			<main className="min-h-screen bg-ink text-bone">
+				<p className="px-4 py-10 text-[16px] text-slate">Checking your account…</p>
+			</main>
+		);
+	}
 
 	return (
 		<main className="min-h-screen bg-ink text-bone">

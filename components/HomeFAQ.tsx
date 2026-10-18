@@ -40,7 +40,7 @@ export default function HomeFAQ() {
           <p className="text-[13px] font-bold uppercase tracking-[.14em] text-eyebrow">Frequently asked</p>
           <h2 className="mt-4 max-w-sm font-display text-[1.85rem] font-semibold leading-[1.08] tracking-[-.055em] text-bone sm:text-[clamp(2.4rem,4vw,3.4rem)] sm:leading-[1.02]">Good questions.</h2>
           <p className="mt-4 max-w-sm text-[16px] leading-7 text-slate">Answers from the current legal pages and the live payment flow.</p>
-          <Link href="/legal/terms" className="mt-5 inline-flex text-[16px] font-semibold text-ember underline underline-offset-4">Read the terms</Link>
+          <Link href="/legal/terms" className="mt-5 inline-flex min-h-11 items-center text-[16px] font-semibold text-eyebrow underline underline-offset-4">Read the terms</Link>
         </div>
 
         <div className="border-t border-line">
@@ -57,7 +57,7 @@ export default function HomeFAQ() {
                   className="flex min-h-11 w-full items-center justify-between gap-4 py-5 text-left"
                 >
                   <span className="text-[16px] font-semibold text-bone sm:text-[17px]">{item.question}</span>
-                  <span aria-hidden="true" className={`grid h-7 w-7 shrink-0 place-items-center rounded-full border border-line text-base font-normal text-slate transition-transform ${isOpen ? "rotate-45 bg-ember-cta text-on-ember" : ""}`}>+</span>
+                  <span aria-hidden="true" className={`grid h-8 w-8 shrink-0 place-items-center rounded-full border border-line text-base font-normal text-bone transition-transform ${isOpen ? "rotate-45" : ""}`}>+</span>
                 </button>
                 <p id={`faq-answer-${index}`} role="region" aria-labelledby={`faq-question-${index}`} hidden={!isOpen} className="max-w-2xl pb-5 pr-10 text-[16px] leading-7 text-slate">{item.answer}</p>
               </div>

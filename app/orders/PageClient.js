@@ -2,7 +2,9 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabaseClient";
+import { signinHref } from "@/lib/auth/signin-redirect.mjs";
 import { StarRatingInput } from "@/components/StarRating";
 import SiteHeader from "@/components/SiteHeader";
 
@@ -107,6 +109,7 @@ function DisputeForm({ orderId, onSubmitted }) {
 }
 
 export default function OrdersPage() {
+  const router = useRouter();
   const [userId, setUserId] = useState(null);
   const [statusFilter, setStatusFilter] = useState('all');
   const [roleFilter, setRoleFilter] = useState('all');
@@ -127,7 +130,7 @@ export default function OrdersPage() {
     setLoadError("");
 
     const { data: { user } } = await supabase.auth.getUser();
-    if (!user) { setLoadError("Sign in to view your orders."); setLoading(false); return; }
+    if (!user) { router.replace(signinHref("/orders")); return; }
     setUserId(user.id);
 
     const response = await fetch('/api/orders', { cache: 'no-store' });

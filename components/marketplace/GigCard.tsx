@@ -38,7 +38,7 @@ export default function GigCard({ gig, rating }: { gig: CardGig; rating?: CardRa
       </div>
 
       <div className="pt-3">
-        <h2 className="line-clamp-2 text-[15px] font-semibold leading-5 text-bone transition-colors group-hover:text-ember sm:text-[16px]">
+        <h2 className="line-clamp-2 text-[16px] font-semibold leading-5 text-bone transition-colors group-hover:text-eyebrow">
           {gig.title}
         </h2>
 
@@ -52,14 +52,14 @@ export default function GigCard({ gig, rating }: { gig: CardGig; rating?: CardRa
         </div>
 
         <div className="mt-1.5 flex min-w-0 items-center justify-between gap-3">
-          <span className="flex min-w-0 items-center gap-1.5 text-[13px] text-slate">
+          <span className="flex min-w-0 items-center gap-1.5 text-[14px] text-slate">
             <span className="truncate">{seller}</span>
             {verified && (
               <span
                 role="img"
                 aria-label="Verified seller"
                 title="Verified seller"
-                className="shrink-0 text-[13px] font-bold text-ember"
+                className="shrink-0 text-[14px] font-bold text-eyebrow"
               >
                 ✓
               </span>

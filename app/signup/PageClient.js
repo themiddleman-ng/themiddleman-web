@@ -15,6 +15,7 @@ import { applyLoginFailure, classifyLoginError, classifySignupError, validateLog
 import { markSignedIn } from '@/components/feedback/SignedInToast';
 import Link from 'next/link';
 import Logo from '@/components/Logo';
+import { safeNextPath } from '@/lib/auth/signin-redirect.mjs';
 
 const NIGERIAN_STATES = [
   'Abia', 'Adamawa', 'Akwa Ibom', 'Anambra', 'Bauchi', 'Bayelsa', 'Benue', 'Borno',
@@ -278,7 +279,8 @@ function AuthPageInner() {
     setLoginLoading(false);
     setLoginSuccess(true);
     markSignedIn();
-    const next = assurance.data?.nextLevel === 'aal2' && assurance.data?.currentLevel !== 'aal2' ? '/security' : '/marketplace';
+    const requested = safeNextPath(searchParams.get('next'));
+    const next = assurance.data?.nextLevel === 'aal2' && assurance.data?.currentLevel !== 'aal2' ? '/security' : requested || '/marketplace';
     window.setTimeout(() => router.push(next), 700);
   }
 
@@ -288,23 +290,23 @@ function AuthPageInner() {
   const labelClass = 'block text-sm font-medium text-[#33404d]';
 
   return (
-    <main data-mode={flipped ? 'signin' : 'signup'} data-switching={switching || undefined} className="mm-auth relative min-h-[100svh] bg-paper px-4 pb-24 pt-5 text-bone sm:px-6 sm:py-10">
-      <div className="mm-auth-logo-fixed">
-        <Logo variant="horizontal" onPanel textClass="text-[17px]" markClass="h-8 w-8" />
-      </div>
-      <div className="mx-auto grid min-h-[calc(100svh-2.5rem)] w-full max-w-5xl overflow-hidden rounded-[1.75rem] border border-line bg-paper shadow-[0_24px_80px_rgba(65,46,28,.13)] md:min-h-[680px] md:grid-cols-[.85fr_1.15fr]">
+    <main data-mode={flipped ? 'signin' : 'signup'} data-switching={switching || undefined} className="mm-auth relative min-h-[100svh] bg-paper text-bone">
+      <div className="mm-auth-panel mx-auto grid min-h-[100svh] w-full overflow-hidden md:min-h-[680px] md:grid-cols-[.85fr_1.15fr]">
         <aside className="mm-auth-hero relative flex flex-col justify-between overflow-hidden bg-[#eb650c] p-10 text-[#faf4e9] lg:p-12">
           <div aria-hidden="true" />
-          <div className="relative">
-            <Link href="/marketplace" className="mm-auth-browse absolute right-0 top-0 text-sm font-semibold text-logo-navy/80 hover:text-logo-navy">Browse first</Link>
-            <p className="mt-20 max-w-sm font-display text-4xl font-semibold leading-[1.08] tracking-[-.035em]">
+          <div className="mm-auth-hero-bar">
+            <Logo variant="horizontal" onPanel className="mm-auth-logo" textClass="text-[17px]" markClass="h-8 w-8" />
+            <Link href="/marketplace" className="mm-auth-browse inline-flex min-h-11 items-center text-[16px] font-semibold text-logo-navy/80 hover:text-logo-navy">Browse first</Link>
+          </div>
+          <div className="mm-auth-hero-copy relative">
+            <p className="max-w-sm font-display text-4xl font-semibold leading-[1.08] tracking-[-.035em]">
               Ready-made.<br />Made yours.
             </p>
-            <p className="mt-5 max-w-sm text-[15px] leading-7 text-[#e5e4de]/80">
+            <p className="mt-5 max-w-sm text-[16px] leading-7 text-[#e5e4de]/80">
               Find useful digital products. Customize them with the creator.
             </p>
           </div>
-          <p className="mm-auth-hero-note relative text-sm text-[#e5e4de]/70">Pay in Naira through Paystack.</p>
+          <p className="mm-auth-hero-note relative text-[16px] text-[#e5e4de]/70">Pay in Naira through Paystack.</p>
         </aside>
 
         <section className="mm-auth-form min-w-0 w-full flex-col px-5 py-6 sm:px-9 sm:py-9 md:px-12 md:py-10">
@@ -350,8 +352,8 @@ function AuthPageInner() {
 
                   <div className="flex items-start gap-3 rounded-xl bg-[#f7f3ed] p-3.5">
                     <input id="consent-terms" type="checkbox" checked={agreedToTerms} onChange={(e) => setAgreedToTerms(e.target.checked)} className="mt-1 h-4 w-4 shrink-0 accent-[#C2410C]" />
-                    <label htmlFor="consent-terms" className="text-xs leading-5 text-[#596674]">
-                      I agree to the <Link href="/legal/terms" className="font-semibold text-[#9A3412] underline">Terms of Service</Link>, <Link href="/legal/privacy" className="font-semibold text-[#9A3412] underline">Privacy Policy</Link>, and <Link href="/legal/refunds" className="font-semibold text-[#9A3412] underline">Refund Policy</Link>.
+                    <label htmlFor="consent-terms" className="text-[16px] leading-6 text-[#4B5563]">
+                      I agree to the <Link href="/legal/terms" className="inline-flex min-h-11 items-center font-semibold text-[#C2410C] underline">Terms of Service</Link>, <Link href="/legal/privacy" className="inline-flex min-h-11 items-center font-semibold text-[#C2410C] underline">Privacy Policy</Link>, and <Link href="/legal/refunds" className="inline-flex min-h-11 items-center font-semibold text-[#C2410C] underline">Refund Policy</Link>.
                     </label>
                   </div>
                   <AuthCallout alert={signupAlert} onAction={signupAlert?.actionLabel ? () => { switchMode(true); setSignupAlert(null); } : undefined} />
@@ -367,7 +369,7 @@ function AuthPageInner() {
                   )}
                 </form>
 
-                <p className="mt-5 text-center text-sm text-[#63707d]">Already have an account? <button type="button" onClick={() => switchMode(true)} className="font-semibold text-[#9A3412] hover:underline">Log in</button></p>
+                <p className="mt-5 text-center text-[16px] text-[#4B5563]">Already have an account? <button type="button" onClick={() => switchMode(true)} className="inline-flex min-h-11 items-center font-semibold text-[#C2410C] hover:underline">Log in</button></p>
               </>
             ) : (
               <>
@@ -381,7 +383,7 @@ function AuthPageInner() {
                   <div>
                     <div className="flex items-center justify-between gap-3">
                       <label className={labelClass} htmlFor="login-password">Password</label>
-                      <Link href="/reset-password" className="text-xs font-semibold text-[#9A3412] hover:underline">Forgot password?</Link>
+                      <Link href="/reset-password" className="inline-flex min-h-11 items-center text-[16px] font-semibold text-[#C2410C] hover:underline">Forgot password?</Link>
                     </div>
                     <PasswordField
                       id="login-password"
@@ -408,8 +410,8 @@ function AuthPageInner() {
                     {loginSuccess ? 'Continuing…' : loginLoading ? 'Logging in…' : 'Log in'}
                   </button>
                 </form>
-                <p className="mt-6 text-center text-sm text-[#63707d]">New to The Middleman? <button type="button" onClick={() => switchMode(false)} className="font-semibold text-[#9A3412] hover:underline">Create an account</button></p>
-                <p className="mt-8 border-t border-[#eee6dc] pt-5 text-center text-xs leading-5 text-[#71808d]">By continuing, you agree to the <Link href="/legal/terms" className="underline">Terms of Service</Link> and <Link href="/legal/privacy" className="underline">Privacy Policy</Link>.</p>
+                <p className="mt-6 text-center text-[16px] text-[#4B5563]">New to The Middleman? <button type="button" onClick={() => switchMode(false)} className="inline-flex min-h-11 items-center font-semibold text-[#C2410C] hover:underline">Create an account</button></p>
+                <p className="mt-8 border-t border-[#eee6dc] pt-5 text-center text-[14px] leading-6 text-[#4B5563]">By continuing, you agree to the <Link href="/legal/terms" className="inline-flex min-h-11 items-center font-semibold underline">Terms of Service</Link> and <Link href="/legal/privacy" className="inline-flex min-h-11 items-center font-semibold underline">Privacy Policy</Link>.</p>
               </>
             )}
           </div>

@@ -25,9 +25,14 @@ function readPreferences(): CookiePreferences {
 
 const TAB_PREFIXES = ["/marketplace", "/browse", "/gigs", "/orders", "/payments", "/messages", "/profile", "/settings"];
 
+function isProductPath(pathname: string) {
+  return /^\/gigs\/(?!new$|mine$)[^/]+/.test(pathname);
+}
+
 export default function CookieNotice() {
   const pathname = usePathname();
   const aboveTabs = TAB_PREFIXES.some((prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`));
+  const aboveBuyBar = isProductPath(pathname);
   const [visible, setVisible] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [optionalAnalytics, setOptionalAnalytics] = useState(false);
@@ -87,7 +92,11 @@ export default function CookieNotice() {
         <aside
           aria-label="Cookie notice"
           className={`fixed inset-x-0 z-50 border-t border-[#e5dbcf] bg-[#fffdf9] text-[#243344] shadow-[0_-6px_18px_rgba(28,37,47,.08)] ${
-            aboveTabs ? "bottom-[calc(4rem+env(safe-area-inset-bottom))] md:bottom-0" : "bottom-0"
+            aboveBuyBar
+              ? "bottom-[calc(9.25rem+env(safe-area-inset-bottom))] md:bottom-0"
+              : aboveTabs
+                ? "bottom-[calc(4rem+env(safe-area-inset-bottom))] md:bottom-0"
+                : "bottom-0"
           }`}
         >
           <div className="mx-auto flex max-w-7xl items-center gap-3 px-4 py-2 sm:px-6">
@@ -115,6 +124,22 @@ export default function CookieNotice() {
             </div>
           </div>
         </aside>
+      )}
+
+      {!visible && !settingsOpen && (
+        <button
+          type="button"
+          onClick={() => { setOptionalAnalytics(readPreferences().optionalAnalytics); setSettingsOpen(true); }}
+          className={`fixed left-3 z-40 inline-flex min-h-11 items-center rounded-full border border-line bg-paper px-3 text-[14px] font-semibold text-bone shadow-sm hover:bg-elevated ${
+            aboveBuyBar
+              ? "bottom-[calc(9.25rem+env(safe-area-inset-bottom))] md:bottom-4"
+              : aboveTabs
+                ? "bottom-[calc(4.75rem+env(safe-area-inset-bottom))] md:bottom-4"
+                : "bottom-4"
+          }`}
+        >
+          Cookie settings
+        </button>
       )}
 
       {settingsOpen && (
@@ -175,7 +200,7 @@ export default function CookieNotice() {
               </div>
             </div>
 
-            <Link href="/legal/cookies" onClick={() => setSettingsOpen(false)} className="mt-4 inline-block text-xs font-semibold text-[#9A3412] hover:underline">
+            <Link href="/legal/cookies" onClick={() => setSettingsOpen(false)} className="mt-4 inline-flex min-h-11 items-center text-[14px] font-semibold text-[#C2410C] hover:underline">
               Read the cookie policy
             </Link>
             <div className="mt-5 grid grid-cols-2 gap-2">

@@ -244,7 +244,7 @@ export default function GigPageClient({ gigId, purchasesEnabled }: { gigId: stri
       </div>
     </main>
   );
-  if (loadError || !gig) return <main className="grid min-h-screen place-items-center bg-ink px-6 text-bone"><div className="text-center"><p className="mb-4 text-sm text-slate">{loadError}</p><Link href="/marketplace" className="text-sm text-ember hover:underline">Back to marketplace</Link></div></main>;
+  if (loadError || !gig) return <main className="grid min-h-screen place-items-center bg-ink px-6 text-bone"><div className="text-center"><p className="mb-4 text-sm text-slate">{loadError}</p><Link href="/marketplace" className="text-sm text-eyebrow hover:underline">Back to marketplace</Link></div></main>;
 
   const verified = gig.seller_profiles?.verification_status === "approved";
   const imageUrls = (gig.gallery_image_paths ?? []).map(path => supabase.storage.from('gig-media').getPublicUrl(path).data.publicUrl);
@@ -305,13 +305,13 @@ export default function GigPageClient({ gigId, purchasesEnabled }: { gigId: stri
         </section>
       )}
       {actionError && <p className="auth-error mt-4">{actionError}</p>}
-      {reportSuccess && <p className="mt-4 text-[13px] font-semibold text-ember">Thanks. The admin team will review this product.</p>}
+      {reportSuccess && <p className="mt-4 text-[14px] font-semibold text-eyebrow">Thanks. The admin team will review this product.</p>}
     </div>
   );
 
   return <main className="min-h-screen bg-ink text-bone"><SiteHeader /><div className="mx-auto max-w-7xl px-4 py-5 sm:px-6 sm:py-10">
     <div className="flex items-center justify-between gap-3">
-      <Link href="/marketplace" className="inline-flex min-h-11 items-center text-[16px] font-semibold text-slate transition-colors hover:text-ember">← Marketplace</Link>
+      <Link href="/marketplace" className="inline-flex min-h-11 items-center text-[16px] font-semibold text-slate transition-colors hover:text-eyebrow">← Marketplace</Link>
       {!isOwnGig && (
         <div className="relative">
           <button type="button" aria-label="More actions" aria-expanded={moreOpen} onClick={() => setMoreOpen((open) => !open)} className="grid h-11 w-11 place-items-center rounded-full text-bone hover:bg-elevated">
@@ -319,7 +319,7 @@ export default function GigPageClient({ gigId, purchasesEnabled }: { gigId: stri
           </button>
           {moreOpen && (
             <div role="menu" className="absolute right-0 top-12 z-20 min-w-40 rounded-xl border border-line bg-paper p-1.5 shadow-lg">
-              <button type="button" role="menuitem" onClick={() => { setMoreOpen(false); setReportOpen(true); }} className="flex min-h-11 w-full items-center rounded-lg px-3 text-left text-[15px] font-semibold text-ember">
+              <button type="button" role="menuitem" onClick={() => { setMoreOpen(false); setReportOpen(true); }} className="flex min-h-11 w-full items-center rounded-lg px-3 text-left text-[15px] font-semibold text-eyebrow">
                 Report
               </button>
             </div>
@@ -333,7 +333,7 @@ export default function GigPageClient({ gigId, purchasesEnabled }: { gigId: stri
       </div>
       <div className="min-w-0 lg:order-1 lg:col-span-8">
       <div className="overflow-hidden rounded-xl border border-line bg-paper">
-        <div className="relative aspect-[4/3]">
+        <div className="relative aspect-[16/9]">
           {imageUrls[0] ? (
             <Image unoptimized src={imageUrls[0]} fill sizes="(max-width: 1024px) 100vw, 800px" alt={`${gig.title} preview`} className="object-cover" />
           ) : (
@@ -343,7 +343,7 @@ export default function GigPageClient({ gigId, purchasesEnabled }: { gigId: stri
       </div>
       {imageUrls.length > 1 && <div className="mt-3 grid grid-cols-3 gap-3">{imageUrls.slice(1).map((url, index) => <a key={url} href={url} target="_blank" rel="noopener noreferrer" className="relative aspect-video overflow-hidden rounded-lg border border-line"><Image unoptimized src={url} fill sizes="250px" alt={`${gig.title} gallery image ${index + 2}`} className="object-cover" /></a>)}</div>}
       {videoUrl && <section className="mt-8"><h2 className="mb-3 font-display text-xl font-bold">Demo video</h2><video controls preload="none" className="w-full rounded-xl" src={videoUrl}>Your browser does not support video playback.</video></section>}
-      {demoLinks.length > 0 && <section className="mt-8"><h2 className="mb-3 font-display text-xl font-bold">Explore the demo</h2><div className="flex flex-wrap gap-3">{demoLinks.map((url, index) => <a key={url} href={url} target="_blank" rel="noopener noreferrer" className="rounded-full border border-line px-4 py-2 text-sm font-semibold text-[#9A3412] hover:border-[#C2410C]">{index === 0 ? "View live demo" : `View live demo ${index + 1}`} ↗</a>)}</div></section>}
+      {demoLinks.length > 0 && <section className="mt-8"><h2 className="mb-3 font-display text-xl font-bold">Explore the demo</h2><div className="flex flex-wrap gap-3">{demoLinks.map((url, index) => <a key={url} href={url} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-11 items-center rounded-full border border-line px-4 text-[16px] font-semibold text-[#C2410C] hover:border-[#C2410C]">{index === 0 ? "View live demo" : `View live demo ${index + 1}`} ↗</a>)}</div></section>}
       <section className="mt-10"><h2 className="font-display text-xl font-bold">What you&apos;ll get</h2><p className="mt-3 whitespace-pre-wrap text-[15px] leading-relaxed text-slate">{gig.description}</p></section>
       <section className="mt-8"><h2 className="font-display text-xl font-bold">Before you buy</h2><p className="mt-3 text-[15px] leading-relaxed text-slate">The seller&apos;s description is the source of truth for what the product includes, supported formats and any requirements. Confirm those details before checkout.</p>{included.length > 0 && <ul className="mt-4 space-y-3">{included.map((line) => <li key={line} className="flex items-start gap-3 text-[15px] text-bone"><span aria-hidden="true" className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-ember" />{line}</li>)}</ul>}<p className="mt-4 text-[14px] leading-6 text-slate">Optional customization is not included unless the listing says so. Paid product add-ons are not available yet.</p></section>
       <section className="mt-10 rounded-2xl bg-[#EFE7DB] p-6"><h2 className="font-display text-lg font-bold text-[#172B45]">Payment and delivery</h2><p className="mt-2 text-[14px] leading-relaxed text-[#526577]">Paystack processes eligible payments. The Middleman holds the payment until the buyer confirms delivery. Payment confirmation and product delivery are separate steps; use your order page to check the status available for your purchase.</p></section>

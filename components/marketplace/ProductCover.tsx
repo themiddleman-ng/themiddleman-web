@@ -46,7 +46,6 @@ export default function ProductCover({
   title,
   category,
   compact = false,
-  label,
 }: {
   title: string;
   category: string;
@@ -54,7 +53,6 @@ export default function ProductCover({
   label?: string;
 }) {
   const theme = categoryTheme(category);
-  const shownLabel = label ?? theme.label;
   return (
     <div
       className="product-cover relative flex h-full w-full items-center justify-center overflow-hidden"
@@ -62,10 +60,7 @@ export default function ProductCover({
       role="img"
       aria-label={`${title} cover`}
     >
-      <CategoryIcon category={category} className={compact ? "h-10 w-10" : "h-16 w-16 sm:h-[4.5rem] sm:w-[4.5rem]"} />
-      <span className="product-cover-label absolute left-2.5 top-2.5 inline-flex items-center rounded-full bg-paper/80 px-2 py-0.5 text-[13px] font-semibold leading-5">
-        {shownLabel}
-      </span>
+      <CategoryIcon category={category} className={compact ? "relative z-[1] h-14 w-14" : "relative z-[1] h-16 w-16"} />
     </div>
   );
 }

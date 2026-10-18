@@ -2,9 +2,10 @@
 
 import Link from "next/link";
 import { Suspense, useEffect, useRef, useState } from "react";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { supabase } from "@/lib/supabaseClient";
 import SiteHeader from "@/components/SiteHeader";
+import { signinHref } from "@/lib/auth/signin-redirect.mjs";
 
 // Design note: message threads use a calm correspondence layout with a
 // sender, timestamp and message text separated by a thin rule.
@@ -97,7 +98,7 @@ function ConversationRowItem({
         <p className="truncate text-sm font-semibold text-bone">
           {conversation.counterpartName}
         </p>
-        <p className="mt-1 truncate text-[13px] text-slate">
+        <p className="mt-1 truncate text-[14px] text-slate">
           {conversation.gigTitle ?? "General inquiry"}
         </p>
       </div>
@@ -111,17 +112,18 @@ function MessageEntry({ isYou, senderName, message }: { isYou: boolean; senderNa
     <div className={`flex w-full items-end gap-2.5 ${isYou ? "justify-end" : "justify-start"}`}>
       {!isYou && <Avatar initials={initialsFrom(senderName)} />}
       <div className={`max-w-[82%] sm:max-w-[72%] ${isYou ? "items-end" : "items-start"}`}>
-        <p className={`mb-1 px-1 text-[13px] font-medium text-slate ${isYou ? "text-right" : ""}`}>{senderName}</p>
+        <p className={`mb-1 px-1 text-[14px] font-medium text-slate ${isYou ? "text-right" : ""}`}>{senderName}</p>
         <div className={`whitespace-pre-wrap break-words rounded-2xl px-3.5 py-2.5 text-[16px] leading-6 ${isYou ? "rounded-br-md bg-elevated text-bone" : "rounded-bl-md bg-ink text-bone"}`}>
           {message.body}
         </div>
-        <time className={`mt-1 block px-1 text-[13px] text-slate ${isYou ? "text-right" : ""}`} dateTime={message.created_at}>{formatTime(message.created_at)}</time>
+        <time className={`mt-1 block px-1 text-[14px] text-slate ${isYou ? "text-right" : ""}`} dateTime={message.created_at}>{formatTime(message.created_at)}</time>
       </div>
     </div>
   );
 }
 
 function MessagesPageInner() {
+  const router = useRouter();
   const searchParams = useSearchParams();
   const requestedConversationId = searchParams.get("conversation");
   const [conversationQuery, setConversationQuery] = useState("");
@@ -152,10 +154,7 @@ function MessagesPageInner() {
 
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
-        if (!cancelled) {
-          setLoadError("Sign in to view your messages.");
-          setLoading(false);
-        }
+        if (!cancelled) router.replace(signinHref("/messages"));
         return;
       }
       if (!cancelled) setUserId(user.id);
@@ -189,7 +188,7 @@ function MessagesPageInner() {
     return () => {
       cancelled = true;
     };
-  }, [requestedConversationId]);
+  }, [requestedConversationId, router]);
 
   // Load messages for the active conversation, and subscribe to new ones.
   useEffect(() => {
@@ -309,12 +308,12 @@ function MessagesPageInner() {
       <div className="mx-auto flex min-h-0 w-full max-w-6xl flex-1 flex-col px-0 pb-4 md:px-6">
         <div className="flex items-end justify-between gap-3 px-4 py-4 sm:px-6 md:px-0 md:py-6">
           <div>
-            <p className="text-sm font-medium text-eyebrow">Your conversations</p>
+            <p className="text-[14px] font-medium text-eyebrow">Your conversations</p>
             <h1 className="mt-1 font-display text-2xl font-semibold tracking-[-.03em] text-bone sm:text-3xl">Messages</h1>
             <p className="mt-1 text-[16px] text-slate">Keep product conversations in one place.</p>
           </div>
           {!loading && !loadError && conversations.length > 0 && (
-            <span className="mb-1 rounded-full bg-white/80 px-3 py-1.5 text-xs font-medium text-[#62717e]">
+            <span className="mb-1 rounded-full bg-paper px-3 py-1.5 text-[14px] font-medium text-slate">
               {conversations.length} {conversations.length === 1 ? "conversation" : "conversations"}
             </span>
           )}
@@ -335,7 +334,7 @@ function MessagesPageInner() {
         )}
 
         {loading && (
-          <div className="mx-3 flex-1 overflow-hidden rounded-[24px] bg-[#fffdf9] p-4 shadow-[0_12px_40px_rgba(48,40,31,.05)] sm:mx-6 md:mx-0 md:p-6" aria-label="Loading conversations">
+          <div className="flex-1 overflow-hidden border-t border-line bg-ink p-4 sm:p-6" aria-label="Loading conversations">
             <div className="flex animate-pulse gap-4">
               <div className="h-11 w-11 rounded-full bg-[#eee8df]" />
               <div className="flex-1 space-y-2 pt-1"><div className="h-3 w-1/3 rounded bg-[#eee8df]" /><div className="h-3 w-2/3 rounded bg-[#f3eee7]" /></div>
@@ -347,28 +346,27 @@ function MessagesPageInner() {
         )}
 
         {!loading && loadError && (
-          <div className="mx-3 flex flex-1 items-center justify-center rounded-[24px] bg-[#fffdf9] px-6 py-12 text-center shadow-[0_12px_40px_rgba(48,40,31,.05)] sm:mx-6 md:mx-0">
+          <div className="flex flex-1 items-center justify-center border-t border-line px-6 py-12 text-center">
             <div className="max-w-md">
-              <p className="font-display text-xl font-semibold text-[#26384a]">We couldn’t load your messages</p>
-              <p className="mt-2 text-sm leading-6 text-[#6a7783]">{loadError}
+              <p className="font-display text-xl font-semibold text-bone">We couldn’t load your messages</p>
+              <p className="mt-2 text-[16px] leading-6 text-slate">{loadError}
                 {loadError.includes("relation") && (
-                  <> This may mean <code className="rounded bg-[#f3eee7] px-1.5 py-0.5 text-xs text-[#a95320]">supabase/messages_schema.sql</code> hasn’t been run against your project yet.</>
+                  <> This may mean <code className="rounded bg-elevated px-1.5 py-0.5 text-[14px] text-eyebrow">supabase/messages_schema.sql</code> hasn’t been run against your project yet.</>
                 )}
               </p>
-              {loadError.includes("Sign in") && <Link href="/signup?mode=signin" className="mt-4 inline-flex min-h-10 items-center rounded-full bg-[#de641e] px-4 text-sm font-semibold text-white">Log in</Link>}
             </div>
           </div>
         )}
 
         {!loading && !loadError && conversations.length === 0 && (
-          <div className="mx-3 flex flex-1 items-center justify-center rounded-[24px] bg-[#fffdf9] px-6 py-12 text-center shadow-[0_12px_40px_rgba(48,40,31,.05)] sm:mx-6 md:mx-0">
+          <div className="flex flex-1 items-center justify-center border-t border-line px-6 py-12 text-center">
             <div className="max-w-sm">
-              <div className="mx-auto grid h-12 w-12 place-items-center rounded-full bg-[#f2e8dc] text-[#a95320]" aria-hidden="true">
+              <div className="mx-auto grid h-12 w-12 place-items-center rounded-full bg-elevated text-eyebrow" aria-hidden="true">
                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d="M21 11.5a8.5 8.5 0 0 1-8.5 8.5H3l1.8-3.6A8.5 8.5 0 1 1 21 11.5Z" /></svg>
               </div>
-              <h2 className="mt-4 font-display text-xl font-semibold text-[#26384a]">No conversations yet</h2>
-              <p className="mt-2 text-sm leading-6 text-[#6a7783]">Messages about a paid product order will appear here, so you and the creator can keep everything together.</p>
-              <Link href="/marketplace" className="mt-4 inline-flex min-h-10 items-center rounded-full px-4 text-sm font-semibold text-[#a95320] transition hover:bg-[#f7f1e9]">Explore products</Link>
+              <h2 className="mt-4 font-display text-xl font-semibold text-bone">No conversations yet</h2>
+              <p className="mt-2 text-[16px] leading-6 text-slate">Messages about a paid product order will appear here, so you and the creator can keep everything together.</p>
+              <Link href="/marketplace" className="mt-4 inline-flex min-h-11 items-center rounded-full px-4 text-[16px] font-semibold text-eyebrow transition hover:bg-elevated">Explore products</Link>
             </div>
           </div>
         )}
@@ -376,9 +374,9 @@ function MessagesPageInner() {
         {!loading && !loadError && conversations.length > 0 && activeConversation && (
           <div className="flex min-h-[31rem] flex-1 overflow-hidden border-t border-line bg-ink">
             <section className={`${mobileThreadOpen ? "hidden" : "flex"} w-full shrink-0 flex-col overflow-y-auto md:flex md:w-[320px] md:border-r md:border-line`} aria-label="Conversation list">
-              <div className="flex items-center justify-between border-b border-[#eee7de] px-4 py-3.5">
-                <h2 className="text-sm font-semibold text-[#26384a]">Inbox</h2>
-                <span className="text-xs text-[#89929a]">{conversations.length}</span>
+              <div className="flex items-center justify-between border-b border-line px-4 py-3.5">
+                <h2 className="text-[16px] font-semibold text-bone">Inbox</h2>
+                <span className="text-[14px] text-slate">{conversations.length}</span>
               </div>
               <input type="search" aria-label="Search conversations" placeholder="Search conversations" value={conversationQuery} onChange={(event) => setConversationQuery(event.target.value)} className="mx-3 mb-1 mt-3 min-h-11 w-[calc(100%-1.5rem)] rounded-lg border border-[#e1e5ed] px-3 text-sm" />
               {conversations.filter((conversation) => `${conversation.counterpartName} ${conversation.gigTitle || ''}`.toLowerCase().includes(conversationQuery.trim().toLowerCase())).map((conversation) => (
@@ -403,16 +401,16 @@ function MessagesPageInner() {
                 </button>
                 <Avatar initials={activeConversation.counterpartInitials} />
                 <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm font-semibold text-[#24384b]">{activeConversation.counterpartName}</p>
-                  <p className="truncate text-xs text-[#79838c]">{activeConversation.gigTitle ?? "Product conversation"}</p>
+                  <p className="truncate text-[16px] font-semibold text-bone">{activeConversation.counterpartName}</p>
+                  <p className="truncate text-[14px] text-slate">{activeConversation.gigTitle ?? "Product conversation"}</p>
                 </div>
-                <span className="hidden rounded-full bg-[#f5f0e8] px-3 py-1.5 text-[11px] font-medium text-[#61717d] sm:inline-flex">Order conversation</span>
+                <span className="hidden rounded-full bg-elevated px-3 py-1.5 text-[14px] font-medium text-slate sm:inline-flex">Order conversation</span>
               </div>
 
               <div ref={scrollRef} className="min-h-0 flex-1 overflow-y-auto bg-[linear-gradient(180deg,#fffdf9,#fbfaf7)] px-3 py-5 sm:px-5 sm:py-6">
                 <div className="flex min-h-full flex-col justify-end gap-4">
                   {messages.length === 0 && (
-                    <p className="my-auto text-center text-sm text-[#87919a]">Your conversation starts here.</p>
+                    <p className="my-auto text-center text-[16px] text-slate">Your conversation starts here.</p>
                   )}
                   {messages.map((message) => (
                     <MessageEntry
@@ -461,11 +459,11 @@ function MessagesPageInner() {
             </section>
             <aside className="hidden w-60 shrink-0 border-l border-[#e1e5ed] p-6 xl:block" aria-label="Conversation details">
               <h2 className="text-sm font-semibold">Conversation details</h2>
-              <p className="mt-6 text-xs text-[#606b80]">Product</p>
+              <p className="mt-6 text-[14px] text-slate">Product</p>
               <p className="mt-2 text-sm font-semibold">{activeConversation.gigTitle || 'Product conversation'}</p>
               {activeConversation.gig_id && <Link href={`/gigs/${activeConversation.gig_id}`} className="mt-5 block rounded-lg border border-[#e1e5ed] px-4 py-3 text-center text-sm font-medium">View product</Link>}
               <Link href="/orders" className="mt-3 flex min-h-11 items-center justify-center rounded-lg bg-ember-cta text-center text-sm font-semibold text-on-ember hover:bg-ember-hover">View your orders</Link>
-              <p className="mt-6 text-xs leading-5 text-[#606b80]">Keep payments and delivery on The Middleman. Share files through the order flow.</p>
+              <p className="mt-6 text-[14px] leading-5 text-slate">Keep payments and delivery on The Middleman. Share files through the order flow.</p>
             </aside>
           </div>
         )}

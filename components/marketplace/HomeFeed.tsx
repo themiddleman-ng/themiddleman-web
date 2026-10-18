@@ -146,10 +146,10 @@ export default function HomeFeed() {
                 ))}
               </div>
             </div>
-            <Link href="/marketplace" className="inline-flex min-h-11 items-center text-[16px] font-semibold text-ember">View all</Link>
+            <Link href="/marketplace" className="inline-flex min-h-11 items-center text-[16px] font-semibold text-eyebrow">View all</Link>
           </div>
 
-          <div className="homepage-listings grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-5 lg:grid-cols-4">
+          <div className="homepage-listings grid grid-cols-1 gap-3 md:grid-cols-2 md:gap-5 xl:grid-cols-4">
             {loading
               ? Array.from({ length: 8 }, (_, index) => <ListingSkeleton key={index} />)
               : visibleGigs.map((gig) => <GigCard key={gig.id} gig={gig} rating={ratings[gig.id]} />)}
@@ -157,13 +157,13 @@ export default function HomeFeed() {
 
           {!loading && loadError && (
             <div className="mt-5 px-1 py-4 text-[16px] text-slate" role="status">
-              Marketplace listings are unavailable right now. <Link href="/marketplace" className="font-semibold text-ember underline">Open the marketplace</Link>.
+              Marketplace listings are unavailable right now. <Link href="/marketplace" className="font-semibold text-eyebrow underline">Open the marketplace</Link>.
             </div>
           )}
           {!loading && !loadError && visibleGigs.length === 0 && (
             <div className="mt-5 flex flex-col gap-3 py-4 text-[16px] text-slate sm:flex-row sm:items-center sm:justify-between">
               <p>No listings to show yet.</p>
-              <Link href="/marketplace" className="inline-flex min-h-11 w-fit items-center font-semibold text-ember underline">Browse all listings</Link>
+              <Link href="/marketplace" className="inline-flex min-h-11 w-fit items-center font-semibold text-eyebrow underline">Browse all listings</Link>
             </div>
           )}
         </div>

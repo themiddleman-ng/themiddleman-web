@@ -32,7 +32,7 @@ export function StarRatingDisplay({
   size?: number;
 }) {
   if (!count) {
-    return <span className="text-[11px] text-[#8C8C8C]">No reviews yet</span>;
+    return <span className="text-[14px] text-slate">No reviews yet</span>;
   }
   const rounded = Math.round(average * 2) / 2;
   return (
@@ -42,7 +42,7 @@ export function StarRatingDisplay({
           <Star key={n} size={size} filled={rounded >= n} half={rounded + 0.5 === n} />
         ))}
       </span>
-      <span className="text-[11px] text-[#8C8C8C]">
+      <span className="text-[14px] text-slate">
         {average.toFixed(1)} ({count})
       </span>
     </span>
