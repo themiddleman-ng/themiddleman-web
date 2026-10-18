@@ -4,6 +4,8 @@ import { DM_Sans, Outfit } from "next/font/google";
 import EscrowTrustLine from "@/components/EscrowTrustLine";
 import HomeFAQ from "@/components/HomeFAQ";
 import HomeFeed from "@/components/marketplace/HomeFeed";
+import HeroListingStack from "@/components/marketplace/HeroListingStack";
+import CookieSettingsLink from "@/components/legal/CookieSettingsLink";
 import Logo from "@/components/Logo";
 import SiteHeader from "@/components/SiteHeader";
 
@@ -48,11 +50,35 @@ const steps = [
 ];
 
 const developerFeatures = [
-  "Paystack checkout in Naira",
-  "Seller identity verification",
-  "AI-assisted work is labeled",
-  "In-app product messaging",
-  "Previews when a seller uploads them",
+  {
+    title: "Paystack checkout in Naira",
+    body: "Eligible purchases check out in Nigerian Naira through Paystack.",
+    icon: (
+      <svg viewBox="0 0 24 24" className="h-6 w-6" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
+        <rect x="2" y="5" width="20" height="14" rx="2" />
+        <path d="M2 10h20" />
+      </svg>
+    ),
+  },
+  {
+    title: "Seller identity verification",
+    body: "A verified mark appears only after a seller’s identity check is approved.",
+    icon: (
+      <svg viewBox="0 0 24 24" className="h-6 w-6" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
+        <path d="M12 3 5.5 6.2v5.4c0 4.1 2.7 7.8 6.5 8.9 3.8-1.1 6.5-4.8 6.5-8.9V6.2L12 3Z" strokeLinejoin="round" />
+        <path d="m9.2 12.1 1.9 1.9 3.7-3.8" strokeLinecap="round" strokeLinejoin="round" />
+      </svg>
+    ),
+  },
+  {
+    title: "In-app product messaging",
+    body: "Keep product conversations on The Middleman after an order starts.",
+    icon: (
+      <svg viewBox="0 0 24 24" className="h-6 w-6" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
+        <path d="M21 12a8 8 0 0 1-8 8H5l1.6-3.2A8 8 0 1 1 21 12Z" strokeLinejoin="round" />
+      </svg>
+    ),
+  },
 ];
 
 export default function Home() {
@@ -64,27 +90,30 @@ export default function Home() {
         <div className="homepage-confetti" aria-hidden="true">
           <span /><span /><span /><span /><span /><span />
         </div>
-        <div className="relative max-w-2xl">
-          <h1 className="font-display text-[2.05rem] font-bold leading-[1.05] tracking-[-.045em] text-bone sm:text-[clamp(2.6rem,5vw,4.2rem)]">
-            Find <span className="text-ember">digital</span> products that work.
-          </h1>
-          <p className="mt-4 max-w-xl text-[16px] leading-7 text-slate sm:text-[18px]">
-            Browse listings from Nigerian creators and pay through Paystack.
-          </p>
-          <form action="/marketplace" className="mt-5 md:hidden" role="search">
-            <label className="sr-only" htmlFor="hero-search">Search products</label>
-            <input
-              id="hero-search"
-              type="search"
-              name="q"
-              placeholder="Search products"
-              className="h-12 w-full rounded-xl border border-line bg-paper px-4 text-[16px] text-bone placeholder:text-slate focus:border-ember focus:outline-none focus:ring-4 focus:ring-ember/15"
-            />
-          </form>
-          <div className="mt-6 grid gap-3 sm:flex sm:flex-wrap">
-            <Link href="/marketplace" className="btn-primary inline-flex min-h-12 items-center justify-center rounded-md px-5 text-[16px] font-bold">Browse products</Link>
-            <Link href="/signup" className="inline-flex min-h-12 items-center justify-center rounded-md border border-bone px-4 text-[16px] font-semibold text-bone hover:bg-elevated">Start selling</Link>
+        <div className="relative grid items-center gap-10 md:grid-cols-2">
+          <div className="max-w-2xl">
+            <h1 className="font-display text-[2.05rem] font-bold leading-[1.05] tracking-[-.045em] text-bone sm:text-[clamp(2.6rem,5vw,4.2rem)]">
+              Find <span className="text-ember">digital</span> products that work.
+            </h1>
+            <p className="mt-4 max-w-xl text-[16px] leading-7 text-slate sm:text-[18px]">
+              Browse listings from Nigerian creators and pay through Paystack.
+            </p>
+            <form action="/marketplace" className="mt-5 md:hidden" role="search">
+              <label className="sr-only" htmlFor="hero-search">Search products</label>
+              <input
+                id="hero-search"
+                type="search"
+                name="q"
+                placeholder="Search products"
+                className="h-12 w-full rounded-xl border border-line bg-paper px-4 text-[16px] text-bone placeholder:text-slate focus:border-ember focus:outline-none focus:ring-4 focus:ring-ember/15"
+              />
+            </form>
+            <div className="mt-6 grid gap-3 sm:flex sm:flex-wrap">
+              <Link href="/marketplace" className="btn-primary inline-flex min-h-12 items-center justify-center rounded-md px-5 text-[16px] font-bold">Browse products</Link>
+              <Link href="/signup" className="inline-flex min-h-12 items-center justify-center rounded-md border border-bone px-4 text-[16px] font-semibold text-bone hover:bg-elevated">Start selling</Link>
+            </div>
           </div>
+          <HeroListingStack />
         </div>
       </section>
 
@@ -97,7 +126,7 @@ export default function Home() {
           <div className="mt-8 grid gap-4 sm:grid-cols-3">
             {steps.map((step, index) => (
               <article key={step.title} className="rounded-2xl border border-line bg-paper p-5">
-                <span className="text-ember">{step.icon}</span>
+                <span className="text-eyebrow">{step.icon}</span>
                 <h3 className="mt-4 text-[18px] font-bold text-bone">{step.title}</h3>
                 <p className="mt-2 text-[16px] leading-7 text-slate">{step.body}</p>
                 {index === 2 ? <EscrowTrustLine className="mt-3" /> : null}
@@ -111,9 +140,15 @@ export default function Home() {
         <div className="mx-auto max-w-7xl px-5 py-12 sm:px-8">
           <p className="text-[13px] font-bold uppercase tracking-[.14em] text-eyebrow">Built for developers</p>
           <h2 className="mt-3 font-display text-[1.7rem] font-semibold tracking-[-.04em] text-bone">What the marketplace already does.</h2>
-          <ul className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          <ul className="mt-6 grid gap-5 md:grid-cols-3">
             {developerFeatures.map((feature) => (
-              <li key={feature} className="rounded-xl bg-paper/70 px-4 py-3 text-[16px] font-semibold text-bone">{feature}</li>
+              <li key={feature.title} className="flex gap-3">
+                <span className="mt-0.5 text-eyebrow">{feature.icon}</span>
+                <div>
+                  <p className="text-[16px] font-bold text-bone">{feature.title}</p>
+                  <p className="mt-1 text-[16px] leading-6 text-slate">{feature.body}</p>
+                </div>
+              </li>
             ))}
           </ul>
         </div>
@@ -139,43 +174,44 @@ export default function Home() {
         </div>
       </section>
 
-      <footer className="bg-paper">
-        <div className="mx-auto grid max-w-7xl gap-8 px-5 py-10 sm:px-8 md:grid-cols-4">
-          <div>
+      <footer className="overflow-x-clip bg-paper">
+        <div className="mx-auto grid max-w-7xl gap-8 px-5 py-10 sm:grid-cols-2 sm:px-8 xl:grid-cols-4">
+          <div className="min-w-0">
             <Logo variant="horizontal" />
             <p className="mt-3 text-[14px] leading-6 text-slate">Digital products from independent Nigerian creators.</p>
           </div>
-          <div>
-            <p className="text-[13px] font-bold text-bone">Marketplace</p>
-            <div className="mt-3 grid gap-2 text-[14px] text-slate">
-              <Link href="/marketplace" className="hover:text-ember">Browse products</Link>
-              <Link href="/#how-it-works" className="hover:text-ember">How it works</Link>
-              <Link href="/#faq" className="hover:text-ember">FAQ</Link>
+          <div className="min-w-0">
+            <p className="text-[14px] font-bold text-bone">Marketplace</p>
+            <div className="mt-3 grid text-[16px] text-slate">
+              <Link href="/marketplace" className="inline-flex min-h-11 items-center hover:text-eyebrow">Browse products</Link>
+              <Link href="/#how-it-works" className="inline-flex min-h-11 items-center hover:text-eyebrow">How it works</Link>
+              <Link href="/#faq" className="inline-flex min-h-11 items-center hover:text-eyebrow">FAQ</Link>
             </div>
           </div>
-          <div>
-            <p className="text-[13px] font-bold text-bone">Legal</p>
-            <div className="mt-3 grid gap-2 text-[14px] text-slate">
-              <Link href="/legal/terms" className="hover:text-ember">Terms</Link>
-              <Link href="/legal/privacy" className="hover:text-ember">Privacy</Link>
-              <Link href="/legal/refunds" className="hover:text-ember">Refunds</Link>
+          <div className="min-w-0">
+            <p className="text-[14px] font-bold text-bone">Legal</p>
+            <div className="mt-3 grid text-[16px] text-slate">
+              <Link href="/legal/terms" className="inline-flex min-h-11 items-center hover:text-eyebrow">Terms</Link>
+              <Link href="/legal/privacy" className="inline-flex min-h-11 items-center hover:text-eyebrow">Privacy</Link>
+              <Link href="/legal/refunds" className="inline-flex min-h-11 items-center hover:text-eyebrow">Refunds</Link>
+              <CookieSettingsLink className="inline-flex min-h-11 items-center text-left hover:text-eyebrow" />
             </div>
           </div>
-          <div>
-            <p className="text-[13px] font-bold text-bone">Contact</p>
-            <div className="mt-3 grid gap-2 text-[14px] text-slate">
-              <a href="mailto:hello@themiddleman.com.ng" className="hover:text-ember">hello@themiddleman.com.ng</a>
-              <p className="text-[13px] font-semibold text-bone">Payments by Paystack</p>
+          <div className="min-w-0">
+            <p className="text-[14px] font-bold text-bone">Contact</p>
+            <div className="mt-3 grid gap-2 text-[16px] text-slate">
+              <a href="mailto:hello@themiddleman.com.ng" className="inline-flex min-h-11 items-center break-all hover:text-eyebrow">hello@themiddleman.com.ng</a>
+              <p className="text-[14px] font-semibold text-bone">Payments by Paystack</p>
             </div>
           </div>
         </div>
-        <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-3 border-t border-line px-5 py-4 text-[13px] text-slate sm:px-8">
+        <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-3 border-t border-line px-5 py-4 text-[14px] text-slate sm:px-8">
           <p>© The Middleman</p>
           <a
             href="https://www.codehype.ai/product/the-middleman?utm_source=codehype_badge"
             target="_blank"
             rel="noopener noreferrer"
-            className="hover:text-ember"
+            className="inline-flex min-h-11 items-center hover:text-eyebrow"
           >
             Listed on CodeHype
           </a>

@@ -7,6 +7,7 @@ import { isSupabaseConfigured, supabase } from "@/lib/supabaseClient";
 import SiteHeader from "@/components/SiteHeader";
 import GigCard, { type CardGig, type CardRating } from "@/components/marketplace/GigCard";
 import { DESIGN_PREVIEW_GIGS } from "@/lib/design-preview/catalog";
+import { countActiveMarketplaceFilters, clearedMarketplaceFilters } from "@/lib/marketplace/active-filters.mjs";
 
 type GigCategory = "development" | "design" | "marketing" | "writing" | "ai_assisted";
 
@@ -198,6 +199,21 @@ export default function MarketplacePage({ designPreview = false }: { designPrevi
     return matchesCategory && matchesQuery && matchesPrice;
   }).sort((a, b) => sort === 'low' ? a.price_ngn - b.price_ngn : sort === 'high' ? b.price_ngn - a.price_ngn : Date.parse(b.created_at) - Date.parse(a.created_at));
 
+  const activeFilterCount = countActiveMarketplaceFilters({
+    category: activeCategory,
+    query,
+    priceRange,
+    sort,
+  });
+
+  function clearAllFilters() {
+    const next = clearedMarketplaceFilters();
+    setActiveCategory(next.category as typeof activeCategory);
+    setQuery(next.query);
+    setPriceRange(next.priceRange);
+    setSort(next.sort);
+  }
+
   const gridClass = "mm-product-grid";
 
   return (
@@ -250,7 +266,7 @@ export default function MarketplacePage({ designPreview = false }: { designPrevi
                 aria-pressed={active}
                 onClick={() => setActiveCategory(category.value)}
                 className={
-                  "mp-tab inline-flex min-h-11 shrink-0 items-center whitespace-nowrap rounded-md px-3 text-[13px] font-medium transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-focus " +
+                  "mp-tab inline-flex min-h-11 shrink-0 items-center whitespace-nowrap rounded-md px-3 text-[14px] font-medium transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-focus " +
                   (active
                     ? "bg-ember-cta text-on-ember"
                     : "text-slate hover:bg-elevated hover:text-bone")
@@ -264,11 +280,28 @@ export default function MarketplacePage({ designPreview = false }: { designPrevi
 
         <div className="mm-catalogue">
           <aside id="marketplace-filters" className="mm-filters" data-open={filtersOpen} aria-label="Product filters">
-            <fieldset><legend>Price range</legend>{[['all', 'Any price'], ['under5', 'Under ₦5,000'], ['5to10', '₦5,000 – ₦10,000'], ['10to25', '₦10,000 – ₦25,000'], ['over25', 'Over ₦25,000']].map(([value, label]) => <label key={value}><input type="radio" name="price-range" checked={priceRange === value} onChange={() => setPriceRange(value)} />{label}</label>)}</fieldset>
-            <button type="button" onClick={() => { setPriceRange('all'); }}>Clear filters</button>
+            <fieldset><legend>Price range</legend>{[['all', 'Any price'], ['under5', 'Under ₦5,000'], ['5to10', '₦5,000 – ₦10,000'], ['10to25', '₦10,000 – ₦25,000'], ['over25', 'Over ₦25,000']].map(([value, label]) => <label key={value} className="min-h-11"><input type="radio" name="price-range" checked={priceRange === value} onChange={() => setPriceRange(value)} />{label}</label>)}</fieldset>
+            {activeFilterCount > 0 ? (
+              <button type="button" onClick={clearAllFilters}>Clear filters</button>
+            ) : null}
           </aside>
           <div className="min-w-0">
-            <div className="mm-catalogue-toolbar"><button type="button" className="mm-filter-toggle" aria-controls="marketplace-filters" aria-expanded={filtersOpen} onClick={() => setFiltersOpen(!filtersOpen)}>Filters</button><span role="status">{loading ? 'Loading products…' : `${filteredGigs.length} products`}</span><label>Sort by<select value={sort} onChange={(event) => setSort(event.target.value)}><option value="newest">Newest</option><option value="low">Price: low to high</option><option value="high">Price: high to low</option></select></label></div>
+            <div className="mm-catalogue-toolbar">
+              <button type="button" className="mm-filter-toggle" aria-controls="marketplace-filters" aria-expanded={filtersOpen} onClick={() => setFiltersOpen(!filtersOpen)}>Filters</button>
+              <div className="flex min-w-0 items-center gap-2">
+                <span role="status">{loading ? 'Loading products…' : `${filteredGigs.length} products`}</span>
+                {activeFilterCount > 0 ? (
+                  <button
+                    type="button"
+                    onClick={clearAllFilters}
+                    className="inline-flex min-h-11 min-w-11 items-center justify-center bg-transparent px-2 text-[13px] font-medium text-[#C2410C]"
+                  >
+                    {`Clear all (${activeFilterCount})`}
+                  </button>
+                ) : null}
+              </div>
+              <label>Sort by<select value={sort} onChange={(event) => setSort(event.target.value)}><option value="newest">Newest</option><option value="low">Price: low to high</option><option value="high">Price: high to low</option></select></label>
+            </div>
           {loading && <LoadingState />}
 
           {!loading && fetchError && (

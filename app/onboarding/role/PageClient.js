@@ -1,15 +1,27 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabaseClient';
+import { signinHref } from '@/lib/auth/signin-redirect.mjs';
 
 export default function RoleSelectionPage() {
   const router = useRouter();
+  const [ready, setReady] = useState(false);
   const [wantsToBuy, setWantsToBuy] = useState(true);
   const [wantsToSell, setWantsToSell] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+
+  useEffect(() => {
+    let active = true;
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (!active) return;
+      if (!user) router.replace(signinHref('/onboarding/role'));
+      else setReady(true);
+    });
+    return () => { active = false; };
+  }, [router]);
 
   const hasSelection = wantsToBuy || wantsToSell;
 
@@ -60,6 +72,14 @@ export default function RoleSelectionPage() {
       tag: 'Seller',
     },
   ];
+
+  if (!ready) {
+    return (
+      <main className="grid min-h-[100svh] place-items-center bg-ink px-4">
+        <p className="text-[16px] text-slate">Checking your account…</p>
+      </main>
+    );
+  }
 
   return (
     <main className="grid min-h-[100svh] place-items-center overflow-hidden bg-ink px-4 py-6 sm:px-6 sm:py-10">
