@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { LogoMark } from "@/components/Logo";
+import SiteHeader from "@/components/SiteHeader";
 
 export const metadata = {
   title: "Careers",
@@ -19,12 +19,7 @@ export const metadata = {
 export default function CareersPage() {
   return (
     <main className="min-h-screen bg-ink text-bone">
-      <header className="border-b border-line">
-        <div className="mx-auto flex max-w-4xl items-center justify-between gap-3 px-4 py-4 sm:px-6 sm:py-5">
-          <Link href="/" className="flex min-w-0 items-center gap-2.5"><LogoMark className="h-6 w-6 shrink-0" /><span className="truncate font-display text-base font-bold tracking-tight sm:text-lg">The Middleman</span></Link>
-          <Link href="/" className="shrink-0 text-sm font-semibold text-slate transition-colors hover:text-bone">Home</Link>
-        </div>
-      </header>
+      <SiteHeader />
 
       <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6 sm:py-12">
         <p className="text-xs font-bold uppercase tracking-[.16em] text-ember">Careers</p>
@@ -46,7 +41,7 @@ export default function CareersPage() {
           <p className="text-xs font-bold uppercase tracking-[.16em] text-ember">Introduce yourself</p>
           <p className="mt-4 text-sm leading-relaxed text-slate">When roles open, they will be listed on this page first. Until then, send us a note - what you build, what you&apos;ve shipped, and why this problem interests you.</p>
           <div className="mt-6 flex flex-wrap gap-3">
-            <a href="mailto:hello@themiddleman.com.ng?subject=Introduction" className="rounded-full bg-ember px-6 py-3 text-sm font-bold text-ink transition-colors hover:bg-ember/90">hello@themiddleman.com.ng</a>
+            <a href="mailto:hello@themiddleman.com.ng?subject=Introduction" className="rounded-full bg-[#C2410C] px-6 py-3 text-sm font-bold text-white transition-colors hover:bg-[#9A3412]">hello@themiddleman.com.ng</a>
           </div>
         </div>
       </div>

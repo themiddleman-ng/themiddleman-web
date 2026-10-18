@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type FormEvent } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabaseClient';
@@ -31,6 +31,7 @@ export default function SiteHeader({ isSeller: sellerHint = false, compact = fal
   const [notificationCount, setNotificationCount] = useState(0);
   const [menuOpen, setMenuOpen] = useState(false);
   const [sellerAccount, setSellerAccount] = useState(sellerHint);
+  const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
     let cancelled = false;
@@ -111,8 +112,15 @@ export default function SiteHeader({ isSeller: sellerHint = false, compact = fal
     setMenuOpen(false);
   }
 
-  const desktopLink = 'rounded-full px-3 py-2 text-sm transition-colors hover:bg-[#f4eee6] hover:text-[#182d41]';
+  const desktopLink = 'rounded-full px-3 py-2 text-sm text-[#172B45] transition-colors hover:bg-[#f4eee6] hover:text-[#172B45]';
   const mobileLink = 'flex min-h-11 items-center justify-between rounded-xl px-3 py-2.5 text-sm text-[#273544] transition-colors hover:bg-[#f5efe7]';
+
+  function submitHeaderSearch(event: FormEvent) {
+    event.preventDefault();
+    const next = searchQuery.trim();
+    router.push(next ? `/marketplace?q=${encodeURIComponent(next)}` : '/marketplace');
+    setMenuOpen(false);
+  }
   const unreadBadge = unreadCount > 0 ? (
     <span className="inline-flex min-w-5 items-center justify-center rounded-full bg-[#e56b27] px-1.5 py-0.5 text-[11px] font-semibold leading-none text-white">
       {unreadCount > 99 ? '99+' : unreadCount}
@@ -127,22 +135,43 @@ export default function SiteHeader({ isSeller: sellerHint = false, compact = fal
   return (
     <header className={`${hideOnMobile ? 'hidden md:block ' : ''}sticky top-0 z-30 border-b border-[#e9e2d9] backdrop-blur-xl ${compact ? 'bg-[#faf7f0]/95' : 'bg-[#fbf8f2]/95'}`}>
       <div className="relative mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-2.5 sm:px-6">
-        <div className="shrink-0">
-          <Logo href="/marketplace" className="text-lg" markClass="h-7 w-7" variant="horizontal" textClass="text-sm" />
+        <div className="z-10 shrink-0">
+          <Logo href="/" className="text-lg" markClass="h-7 w-7" variant="horizontal" textClass="text-sm" />
         </div>
 
-        <nav className="hidden items-center gap-1 md:flex" aria-label="Main navigation">
+        <nav className="absolute left-1/2 hidden -translate-x-1/2 items-center gap-1 md:flex" aria-label="Main navigation">
           <Link href="/marketplace" className={desktopLink}>Marketplace</Link>
+          <Link href="/#how-it-works" className={`${desktopLink} hidden lg:inline-flex`}>How it works</Link>
+          <Link href="/#faq" className={`${desktopLink} hidden lg:inline-flex`}>FAQ</Link>
           {user && <>
-            <Link href="/orders" data-onboarding-target="orders" className={desktopLink}>My Orders</Link>
-            {sellerAccount && <Link href="/gigs/mine" className={desktopLink}>My Products</Link>}
+            <Link href="/orders" data-onboarding-target="orders" className={desktopLink}>Orders</Link>
             <Link href="/messages" data-onboarding-target="messages" className={desktopLink}><span className="inline-flex items-center gap-2">Messages{unreadBadge}</span></Link>
-            <Link href="/notifications" className={desktopLink}><span className="inline-flex items-center gap-2">Alerts{notificationBadge}</span></Link>
-            <Link href="/payments" className={desktopLink}>Payments</Link>
           </>}
         </nav>
 
-        <div className="relative flex shrink-0 items-center gap-2">
+        <div className="relative z-10 flex shrink-0 items-center gap-2">
+          <form onSubmit={submitHeaderSearch} className="hidden lg:block" role="search">
+            <label className="relative block">
+              <span className="sr-only">Search products</span>
+              <svg className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#71808B]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
+                <circle cx="10.8" cy="10.8" r="6.8" />
+                <path d="m16 16 4.5 4.5" strokeLinecap="round" />
+              </svg>
+              <input
+                type="search"
+                value={searchQuery}
+                onChange={(event) => setSearchQuery(event.target.value)}
+                placeholder="Search products"
+                className="h-10 w-44 rounded-full border border-[#e5ddd3] bg-white pl-9 pr-3 text-sm text-[#172B45] placeholder:text-[#7C8790] transition focus:w-56 focus:border-[#C2410C] focus:outline-none focus:ring-4 focus:ring-[#C2410C]/15 xl:w-56 xl:focus:w-64"
+              />
+            </label>
+          </form>
+          <Link href="/browse" aria-label="Search products" className="grid h-10 w-10 place-items-center rounded-full border border-[#e5ddd3] bg-white text-[#172B45] lg:hidden">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
+              <circle cx="10.8" cy="10.8" r="6.8" />
+              <path d="m16 16 4.5 4.5" strokeLinecap="round" />
+            </svg>
+          </Link>
           <button
             type="button"
             onClick={() => setMenuOpen((open) => !open)}
@@ -182,11 +211,11 @@ export default function SiteHeader({ isSeller: sellerHint = false, compact = fal
                     </div>
                   </div>
                   <nav aria-label="Account navigation" className="space-y-0.5">
-                    <Link role="menuitem" href="/profile" data-onboarding-target="profile" className="hidden min-h-11 items-center justify-between rounded-xl px-3 py-2.5 text-sm text-[#273544] transition-colors hover:bg-[#f5efe7] md:flex">Profile</Link>
+                    <Link role="menuitem" href="/profile" data-onboarding-target="profile" className={mobileLink}>Profile</Link>
                     <Link role="menuitem" href="/orders" data-onboarding-target="orders" className={`${mobileLink} md:hidden`}>My orders</Link>
-                    {sellerAccount && <Link role="menuitem" href="/gigs/mine" className={`${mobileLink} md:hidden`}>My products</Link>}
-                    <Link role="menuitem" href="/notifications" className={`${mobileLink} md:hidden`}><span>Notifications</span>{notificationBadge}</Link>
-                    <Link role="menuitem" href="/payments" className={`${mobileLink} md:hidden`}>Payments</Link>
+                    {sellerAccount && <Link role="menuitem" href="/gigs/mine" className={mobileLink}>My products</Link>}
+                    <Link role="menuitem" href="/notifications" className={mobileLink}><span>Notifications</span>{notificationBadge}</Link>
+                    <Link role="menuitem" href="/payments" className={mobileLink}>Payments</Link>
                     <Link role="menuitem" href="/settings" className={mobileLink}>Settings</Link>
                     <Link role="menuitem" href="/security" className={mobileLink}>Authenticator &amp; security</Link>
                     {isAdmin && <Link role="menuitem" href="/admin" className={mobileLink}>Admin workspace</Link>}
@@ -207,8 +236,8 @@ export default function SiteHeader({ isSeller: sellerHint = false, compact = fal
                     <button type="button" role="menuitem" onClick={openCookieSettings} className={`${mobileLink} w-full text-left`}>Cookie settings</button>
                   </nav>
                   <div className="mt-2 grid gap-2 border-t border-[#eee7de] px-1 pt-3">
-                    <Link role="menuitem" href="/signup?mode=signin" className="flex min-h-11 items-center justify-center rounded-xl border border-[#ddd3c8] px-3 text-sm font-semibold text-[#25384b] transition hover:bg-[#f5efe7]">Log in</Link>
-                    <Link role="menuitem" href="/signup?mode=signup" className="flex min-h-11 items-center justify-center rounded-xl bg-[#de641e] px-3 text-sm font-semibold text-white transition hover:bg-[#c95415]">Create an account</Link>
+                    <Link role="menuitem" href="/signup?mode=signin" className="flex min-h-11 items-center justify-center rounded-xl border border-[#172B45] bg-[#172B45] px-3 text-sm font-semibold text-white transition hover:bg-[#0f1e30]">Log in</Link>
+                    <Link role="menuitem" href="/signup?mode=signup" className="flex min-h-11 items-center justify-center rounded-xl bg-[#C2410C] px-3 text-sm font-semibold text-white transition hover:bg-[#9A3412]">Create an account</Link>
                   </div>
                 </>
               )}

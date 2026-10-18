@@ -3,14 +3,14 @@ import Image from "next/image";
 
 type LogoVariant = "responsive" | "horizontal" | "vertical" | "symbol" | "dark" | "mono";
 
-export function LogoMark({ className = "h-7 w-7" }: { className?: string }) {
+export function LogoMark({ className = "h-7 w-7", inverted = false }: { className?: string; inverted?: boolean }) {
   return (
     <Image
       src="/brand/middleman-approved-master.png"
       alt="The Middleman"
       width={1254}
       height={1254}
-      className={`${className} object-contain`}
+      className={`${className} object-contain ${inverted ? "brightness-0 invert" : ""}`}
     />
   );
 }
@@ -21,13 +21,16 @@ export default function Logo({
   markClass = "h-8 w-8",
   textClass = "text-[15px]",
   variant = "responsive",
+  inverted = false,
 }: {
   href?: string;
   className?: string;
   markClass?: string;
   textClass?: string;
   variant?: LogoVariant;
+  inverted?: boolean;
 }) {
+  const invertClass = inverted ? "brightness-0 invert" : "";
   if (variant === "horizontal") {
     return (
       <Link href={href} aria-label="The Middleman homepage" className={`inline-flex items-center gap-2.5 ${className}`}>
@@ -38,10 +41,10 @@ export default function Logo({
           width={1254}
           height={1254}
           priority
-          className={`${markClass} shrink-0 object-contain`}
+          className={`${markClass} shrink-0 object-contain ${invertClass}`}
         />
-        <span className={`font-display font-extrabold tracking-[-.045em] text-[#172B45] ${textClass}`}>
-          The <span className="text-[#0B3D91]">Middleman</span>
+        <span className={`font-display font-extrabold tracking-[-.045em] ${inverted ? "text-white" : "text-[#172B45]"} ${textClass}`}>
+          The <span className={inverted ? "text-white" : "text-[#0B3D91]"}>Middleman</span>
         </span>
       </Link>
     );
@@ -54,7 +57,7 @@ export default function Logo({
         alt="The Middleman"
         width={1254}
         height={1254}
-        className="h-auto w-24 object-contain sm:w-28 md:w-32"
+        className={`h-auto w-24 object-contain sm:w-28 md:w-32 ${invertClass}`}
       />
     </Link>
   );

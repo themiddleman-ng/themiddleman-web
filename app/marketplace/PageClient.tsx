@@ -206,8 +206,8 @@ export default function MarketplacePage({ designPreview = false }: { designPrevi
       <main className="mp-content mx-auto max-w-7xl px-4 pb-12 pt-5 sm:px-6 sm:pb-16 sm:pt-7 lg:px-8">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <p className="mb-2 flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[.16em] text-[#c65316]">
-              <span className="h-px w-5 bg-[#de641e]" aria-hidden="true" />
+            <p className="mb-2 flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[.16em] text-[#C2410C]">
+              <span className="h-px w-5 bg-[#C2410C]" aria-hidden="true" />
               Marketplace
             </p>
             <h1 className="font-display text-[26px] font-semibold leading-tight tracking-[-.035em] text-[#172B45] sm:text-[30px]">
@@ -219,7 +219,7 @@ export default function MarketplacePage({ designPreview = false }: { designPrevi
           </div>
           <Link
             href="/gigs/new"
-            className="inline-flex w-full shrink-0 items-center justify-center rounded-xl bg-[#fff0e5] px-4 py-2.5 text-sm font-semibold text-[#b64d18] transition-colors hover:bg-[#fbe1cf] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#de641e] sm:w-fit sm:rounded-full"
+            className="inline-flex w-full shrink-0 items-center justify-center rounded-xl border border-[#172B45] px-4 py-2.5 text-sm font-semibold text-[#172B45] transition-colors hover:bg-[#f5efe7] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#C2410C] sm:w-fit sm:rounded-full"
           >
             Sell a digital product
           </Link>
@@ -250,10 +250,10 @@ export default function MarketplacePage({ designPreview = false }: { designPrevi
                 aria-pressed={active}
                 onClick={() => setActiveCategory(category.value)}
                 className={
-                  "mp-tab shrink-0 whitespace-nowrap rounded-md px-3 py-2 text-[13px] font-medium transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-[#0B3D91] " +
+                  "mp-tab shrink-0 whitespace-nowrap rounded-md px-3 py-2 text-[13px] font-medium transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-[#C2410C] " +
                   (active
-                    ? "bg-[#de641e] text-white shadow-[0_2px_8px_rgba(190,81,25,.18)]"
-                    : "text-[#526777] hover:bg-[#e8f2ef] hover:text-[#244f57]")
+                    ? "bg-[#C2410C] text-white shadow-[0_2px_8px_rgba(190,81,25,.18)]"
+                    : "text-[#526777] hover:bg-[#f5efe7] hover:text-[#172B45]")
                 }
               >
                 {category.label}
@@ -264,9 +264,8 @@ export default function MarketplacePage({ designPreview = false }: { designPrevi
 
         <div className="mm-catalogue">
           <aside id="marketplace-filters" className="mm-filters" data-open={filtersOpen} aria-label="Product filters">
-            <fieldset><legend>Category</legend>{CATEGORIES.map((category) => <label key={category.value}><input type="radio" name="filter-category" checked={activeCategory === category.value} onChange={() => setActiveCategory(category.value)} />{category.value === 'all' ? 'All products' : category.label}</label>)}</fieldset>
             <fieldset><legend>Price range</legend>{[['all', 'Any price'], ['under5', 'Under ₦5,000'], ['5to10', '₦5,000 – ₦10,000'], ['10to25', '₦10,000 – ₦25,000'], ['over25', 'Over ₦25,000']].map(([value, label]) => <label key={value}><input type="radio" name="price-range" checked={priceRange === value} onChange={() => setPriceRange(value)} />{label}</label>)}</fieldset>
-            <button type="button" onClick={() => { setPriceRange('all'); setActiveCategory('all'); setQuery(''); }}>Clear filters</button>
+            <button type="button" onClick={() => { setPriceRange('all'); }}>Clear filters</button>
           </aside>
           <div className="min-w-0">
             <div className="mm-catalogue-toolbar"><button type="button" className="mm-filter-toggle" aria-controls="marketplace-filters" aria-expanded={filtersOpen} onClick={() => setFiltersOpen(!filtersOpen)}>Filters</button><span role="status">{loading ? 'Loading products…' : `${filteredGigs.length} products`}</span><label>Sort by<select value={sort} onChange={(event) => setSort(event.target.value)}><option value="newest">Newest</option><option value="low">Price: low to high</option><option value="high">Price: high to low</option></select></label></div>
@@ -280,7 +279,7 @@ export default function MarketplacePage({ designPreview = false }: { designPrevi
                 <button
                   type="button"
                   onClick={() => setRetryCount((count) => count + 1)}
-                  className="mt-3 rounded-md bg-[#172B45] px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-[#24466B] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#D87B36]"
+                  className="mt-3 rounded-md bg-[#C2410C] px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-[#9A3412] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#C2410C]"
                 >
                   Try again
                 </button>

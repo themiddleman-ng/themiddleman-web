@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import SiteHeader from "@/components/SiteHeader";
+import ProductCover from "@/components/marketplace/ProductCover";
 
 const CATEGORIES = [
   { value: "development", label: "Development", blurb: "Websites, apps, APIs, code" },
@@ -39,7 +40,7 @@ export default function BrowsePage() {
             placeholder="Search products, code, templates, sellers"
             className="w-full rounded-xl border border-line bg-paper px-4 py-3.5 text-sm text-bone placeholder-slate outline-none transition-colors focus:border-ember sm:rounded-full sm:px-5"
           />
-          <button type="submit" className="mt-3 min-h-12 w-full rounded-xl bg-[#ed6509] px-6 text-sm font-semibold text-white sm:w-auto sm:min-h-11 sm:rounded-lg">Search products</button>
+          <button type="submit" className="mt-3 min-h-12 w-full rounded-xl bg-[#C2410C] px-6 text-sm font-semibold text-white sm:w-auto sm:min-h-11 sm:rounded-lg">Search products</button>
         </form>
 
         <p className="mb-3 mt-7 font-mono text-[10px] font-semibold uppercase tracking-[.18em] text-slate sm:mt-8">Categories</p>
@@ -48,15 +49,20 @@ export default function BrowsePage() {
             <Link
               key={c.value}
               href={`/marketplace?category=${c.value}`}
-              className="mm-category-tile rounded-xl border border-line bg-paper p-5 transition-colors hover:border-ember/40"
+              className="overflow-hidden rounded-xl border border-line bg-paper transition-colors hover:border-[#C2410C]/40"
             >
-              <span className="block font-display text-base font-bold">{c.label}</span>
-              <span className="mt-1 block text-xs text-slate">{c.blurb}</span>
+              <div className="h-28">
+                <ProductCover title={c.label} category={c.value} compact />
+              </div>
+              <div className="p-4">
+                <span className="block font-display text-base font-bold">{c.label}</span>
+                <span className="mt-1 block text-xs text-slate">{c.blurb}</span>
+              </div>
             </Link>
           ))}
         </div>
 
-        <Link href="/marketplace" className="mt-6 inline-flex text-sm font-semibold text-ember hover:underline">
+        <Link href="/marketplace" className="mt-6 inline-flex text-sm font-semibold text-[#9A3412] hover:underline">
           See everything on the marketplace →
         </Link>
       </div>

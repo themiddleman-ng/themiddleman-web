@@ -36,7 +36,7 @@ html {
 }
 
 .homepage-fonts :is(a, button):focus-visible {
-  outline: 2px solid #0B3D91;
+  outline: 2px solid #C2410C;
   outline-offset: 3px;
 }
 

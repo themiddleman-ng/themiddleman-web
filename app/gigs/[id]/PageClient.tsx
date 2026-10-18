@@ -4,9 +4,11 @@ import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
-import { supabase } from "@/lib/supabaseClient";
+import { isSupabaseConfigured, supabase } from "@/lib/supabaseClient";
 import { StarRatingDisplay } from "@/components/StarRating";
 import SiteHeader from "@/components/SiteHeader";
+import ProductCover from "@/components/marketplace/ProductCover";
+import { DESIGN_PREVIEW_GIGS } from "@/lib/design-preview/catalog";
 
 type SellerProfile = { user_id: string; display_name: string; bio: string | null; verification_status: string };
 type GigRow = {
@@ -58,6 +60,7 @@ export default function GigPageClient({ gigId, purchasesEnabled }: { gigId: stri
   const [reportDetails, setReportDetails] = useState("");
   const [reporting, setReporting] = useState(false);
   const [reportSuccess, setReportSuccess] = useState(false);
+  const [reportOpen, setReportOpen] = useState(false);
   const orderRequestKey = useRef<string | null>(null);
 
   useEffect(() => {
@@ -74,6 +77,33 @@ export default function GigPageClient({ gigId, purchasesEnabled }: { gigId: stri
       setLoading(true); setLoadError("");
       const { data: { user } } = await supabase.auth.getUser();
       if (!cancelled && user) { setUserId(user.id); setUserEmail(user.email ?? null); }
+      if (!isSupabaseConfigured) {
+        const preview = DESIGN_PREVIEW_GIGS.find((item) => item.id === gigId);
+        if (preview) {
+          setGig({
+            id: preview.id,
+            title: preview.title,
+            description: preview.description,
+            category: preview.category,
+            price_ngn: preview.price_ngn,
+            is_ai_assisted: preview.is_ai_assisted,
+            gallery_image_paths: preview.gallery_image_paths ?? [],
+            seller_id: "preview-seller",
+            delivery_days: 3,
+            experience_tier: null,
+            demo_video_path: null,
+            demo_links: ["https://example.com"],
+            seller_profiles: {
+              user_id: "preview-seller",
+              display_name: preview.seller_profiles?.display_name ?? "Unknown seller",
+              bio: null,
+              verification_status: preview.seller_profiles?.verification_status ?? "approved",
+            },
+          });
+          setLoading(false);
+          return;
+        }
+      }
       const { data: gigData, error: gigError } = await supabase.from("gigs").select(
         "id, title, description, category, price_ngn, is_ai_assisted, seller_id, delivery_days, experience_tier, gallery_image_paths, demo_video_path, demo_links, seller_profiles ( user_id, display_name, bio, verification_status )"
       ).eq("id", gigId).single();
@@ -177,8 +207,17 @@ export default function GigPageClient({ gigId, purchasesEnabled }: { gigId: stri
     setReporting(true);
     const { error } = await supabase.from("gig_reports").insert({ gig_id: gig.id, reported_by: userId, reason: reportReason, details: reportDetails.trim() || null });
     if (error) { setActionError(error.message); setReporting(false); return; }
-    setReportSuccess(true); setReportDetails(""); setReporting(false);
+    setReportSuccess(true); setReportDetails(""); setReporting(false); setReportOpen(false);
   }
+
+  useEffect(() => {
+    if (!reportOpen) return;
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setReportOpen(false);
+    };
+    window.addEventListener("keydown", closeOnEscape);
+    return () => window.removeEventListener("keydown", closeOnEscape);
+  }, [reportOpen]);
 
   if (loading) return (
     <main className="min-h-screen bg-ink text-bone" aria-busy="true" aria-label="Loading product">
@@ -215,47 +254,108 @@ export default function GigPageClient({ gigId, purchasesEnabled }: { gigId: stri
     gig.is_ai_assisted ? "Seller disclosed that AI tools are used." : null,
   ].filter(Boolean) as string[];
 
-  const purchasePanel = <div className="rounded-2xl border border-line bg-paper p-4 shadow-[0_18px_50px_rgba(31,21,12,.08)] sm:p-6">
-    <div className="flex items-baseline justify-between"><span className="text-sm text-slate">Price</span><span className="font-mono text-2xl font-semibold text-bone">₦{gig.price_ngn.toLocaleString()}</span></div>
-    {isOwnGig ? <div className="mt-5 space-y-3"><p className="text-center text-xs text-slate">This is your product.{" "}<Link href="/gigs/mine" className="text-ember hover:underline">Manage it</Link></p><button onClick={handleDeleteGig} className="w-full rounded-full border border-red-900/20 bg-red-950/10 px-5 py-3 text-sm font-semibold text-red-500 transition-colors hover:border-red-900/40 hover:bg-red-950/20">Delete product</button></div> : purchasesEnabled ? <div className="mt-5 space-y-3"><button onClick={handleBuyAndPay} disabled={paying} className="auth-button w-full">{paying ? "Opening Paystack…" : "Buy this product"}</button><p className="text-center text-xs text-slate">Checkout is enabled only in an isolated Paystack test environment.</p></div> : <div className="mt-5 rounded-xl bg-[#EFE7DB] p-4 text-center"><p className="text-sm font-semibold text-[#172B45]">Purchases are paused</p><p className="mt-2 text-xs leading-5 text-[#526577]">Payment and delivery are being verified before live checkout is enabled.</p></div>}
-    {checkout && <section className="mt-5 border-t border-line pt-5" aria-label="Checkout summary">
-      <h2 className="font-semibold">Review your total</h2>
-      <dl className="mt-3 space-y-2 text-sm">{(checkout.fees ? [['Product',checkout.fees.price_kobo],['Service fee (3%)',checkout.fees.buyer_fee_kobo],['Platform fee ($1)',checkout.fees.flat_fee_kobo],['VAT on fees',checkout.fees.buyer_vat_kobo],['Total',checkout.fees.buyer_total_kobo]] : [['Total',Number(checkout.order.amount)*100]]).map(([label,value])=><div key={String(label)} className="flex justify-between gap-3"><dt>{label}</dt><dd>₦{(Number(value)/100).toLocaleString('en-NG',{minimumFractionDigits:2})}</dd></div>)}</dl>
-      {checkout.display && <p className="mt-3 text-sm text-slate">Estimated USD total: {new Intl.NumberFormat('en-US',{style:'currency',currency:'USD'}).format(checkout.display.buyer_total_minor/100)}</p>}
-      {checkout.fees && <p className="mt-3 text-xs text-slate">You pay in NGN. The USD-to-NGN rate used for the $1 platform fee is locked to this order. Your bank sets its own conversion rate.</p>}
-      <button onClick={payReviewedCheckout} disabled={paying} className="auth-button mt-4 w-full">{paying?'Opening payment…':'Continue to Paystack'}</button>
-      <button className="mt-3 text-sm text-slate underline" disabled={paying} onClick={()=>{setCheckout(null);orderRequestKey.current=null;}}>Close checkout</button>
-    </section>}
-    {actionError && <p className="auth-error mt-4">{actionError}</p>}
-  </div>;
+  const showAiPill = gig.is_ai_assisted && gig.category !== "ai_assisted";
 
-  const reportBox = !isOwnGig && <div className="rounded-2xl border border-line bg-paper p-5">
-    <p className="text-xs font-bold tracking-[.16em] text-ember">REPORT PRODUCT</p><p className="mt-2 text-sm text-slate">Send this product to admin for review if it looks unsafe, misleading, or abusive.</p>
-    <label className="mt-4 block text-sm font-medium text-bone">Reason<select value={reportReason} onChange={(e) => setReportReason(e.target.value)} className="auth-input mt-2"><option>Spam or misleading content</option><option>Inappropriate or abusive content</option><option>Wrong category or pricing</option><option>Suspicious seller activity</option><option>Other</option></select></label>
-    <label className="mt-4 block text-sm font-medium text-bone">Details<textarea value={reportDetails} onChange={(e) => setReportDetails(e.target.value)} className="auth-input mt-2 min-h-24" placeholder="Add any extra context for the admin team." /></label>
-    <button onClick={handleReportGig} disabled={reporting} className="mt-4 w-full rounded-full border border-line bg-amber-50 px-5 py-3 text-sm font-semibold text-bone transition-colors hover:border-ember/40 hover:bg-amber-100 disabled:opacity-50">{reporting ? "Sending report…" : "Report product"}</button>
-    {reportSuccess && <p className="mt-3 text-xs text-ember">Thanks. The admin team will review this product.</p>}
-  </div>;
+  const buyPanel = (
+    <div className="rounded-2xl border border-line bg-paper p-4 sm:p-6">
+      <div className="flex flex-wrap items-center gap-2">
+        <p className="font-mono text-[10px] font-semibold uppercase tracking-[.18em] text-slate">{CATEGORY_LABELS[gig.category] ?? gig.category}</p>
+        {showAiPill && <span className="rounded-full bg-[#C2410C]/12 px-3 py-1 text-xs font-semibold text-[#9A3412]">AI-assisted</span>}
+      </div>
+      <h1 className="mt-2 break-words font-display text-[1.55rem] font-bold tracking-tight sm:text-[1.85rem]">{gig.title}</h1>
+      <div className="mt-4 flex flex-wrap items-center gap-3">
+        <div className="grid h-10 w-10 place-items-center rounded-full border border-line bg-[#FBF4EC] font-display text-sm font-bold text-bone">{initialsFrom(gig.seller_profiles?.display_name ?? "?")}</div>
+        <div>
+          <p className="text-sm font-medium">{gig.seller_profiles?.display_name ?? "Unknown seller"}</p>
+          {verified ? <p className="text-xs font-semibold text-[#9A3412]">Verified seller</p> : <p className="text-xs text-slate">Verification in progress</p>}
+        </div>
+        <div className="sm:ml-auto"><StarRatingDisplay average={rating.average} count={rating.count} size={13} /></div>
+      </div>
+      <div className="mt-5 flex items-baseline justify-between border-t border-line pt-5">
+        <span className="text-sm text-slate">Price</span>
+        <span className="font-mono text-2xl font-semibold text-bone">₦{gig.price_ngn.toLocaleString()}</span>
+      </div>
+      {isOwnGig ? (
+        <div className="mt-5 space-y-3">
+          <p className="text-center text-xs text-slate">This is your product.{" "}<Link href="/gigs/mine" className="font-semibold text-[#9A3412] hover:underline">Manage it</Link></p>
+          <button onClick={handleDeleteGig} className="w-full rounded-full border border-red-900/20 bg-red-950/10 px-5 py-3 text-sm font-semibold text-red-500 transition-colors hover:border-red-900/40 hover:bg-red-950/20">Delete product</button>
+        </div>
+      ) : purchasesEnabled ? (
+        <div className="mt-5 space-y-3">
+          <button onClick={handleBuyAndPay} disabled={paying} className="auth-button w-full">{paying ? "Opening Paystack…" : "Buy this product"}</button>
+          <p className="text-center text-xs text-slate">Checkout is enabled only in an isolated Paystack test environment.</p>
+        </div>
+      ) : (
+        <div className="mt-5 rounded-xl bg-[#EFE7DB] p-4 text-center">
+          <p className="text-sm font-semibold text-[#172B45]">Purchases are paused</p>
+          <p className="mt-2 text-xs leading-5 text-[#526577]">Payment and delivery are being verified before live checkout is enabled.</p>
+        </div>
+      )}
+      {checkout && (
+        <section className="mt-5 border-t border-line pt-5" aria-label="Checkout summary">
+          <h2 className="font-semibold">Review your total</h2>
+          <dl className="mt-3 space-y-2 text-sm">{(checkout.fees ? [['Product',checkout.fees.price_kobo],['Service fee (3%)',checkout.fees.buyer_fee_kobo],['Platform fee ($1)',checkout.fees.flat_fee_kobo],['VAT on fees',checkout.fees.buyer_vat_kobo],['Total',checkout.fees.buyer_total_kobo]] : [['Total',Number(checkout.order.amount)*100]]).map(([label,value])=><div key={String(label)} className="flex justify-between gap-3"><dt>{label}</dt><dd>₦{(Number(value)/100).toLocaleString('en-NG',{minimumFractionDigits:2})}</dd></div>)}</dl>
+          {checkout.display && <p className="mt-3 text-sm text-slate">Estimated USD total: {new Intl.NumberFormat('en-US',{style:'currency',currency:'USD'}).format(checkout.display.buyer_total_minor/100)}</p>}
+          {checkout.fees && <p className="mt-3 text-xs text-slate">You pay in NGN. The USD-to-NGN rate used for the $1 platform fee is locked to this order. Your bank sets its own conversion rate.</p>}
+          <button onClick={payReviewedCheckout} disabled={paying} className="auth-button mt-4 w-full">{paying?'Opening payment…':'Continue to Paystack'}</button>
+          <button className="mt-3 text-sm text-slate underline" disabled={paying} onClick={()=>{setCheckout(null);orderRequestKey.current=null;}}>Close checkout</button>
+        </section>
+      )}
+      {actionError && <p className="auth-error mt-4">{actionError}</p>}
+      {reportSuccess && <p className="mt-4 text-xs font-semibold text-[#9A3412]">Thanks. The admin team will review this product.</p>}
+      {!isOwnGig && (
+        <button type="button" onClick={() => setReportOpen(true)} className="mt-4 text-sm font-semibold text-[#9A3412] underline-offset-2 hover:underline">
+          Report
+        </button>
+      )}
+    </div>
+  );
 
   return <main className="min-h-screen bg-ink text-bone"><SiteHeader /><div className="mx-auto max-w-7xl px-4 py-5 sm:px-6 sm:py-10">
-    <Link href="/marketplace" className="text-xs font-semibold text-slate transition-colors hover:text-ember">← Marketplace</Link>
-    <div className="mt-4 grid min-w-0 grid-cols-1 gap-7 lg:mt-5 lg:grid-cols-12 lg:gap-10"><div className="min-w-0 lg:col-span-8">
-      <div className="overflow-hidden rounded-2xl border border-line bg-paper shadow-[0_18px_50px_rgba(31,21,12,.08)]"><div className="relative aspect-[4/3] sm:aspect-[16/9]">{imageUrls[0] ? <Image unoptimized src={imageUrls[0]} fill sizes="(max-width: 1024px) 100vw, 800px" alt={`${gig.title} preview`} className="object-cover" /> : <div className="grid h-full w-full place-items-center bg-[#EEF1F2] p-8 text-center"><p className="max-w-sm text-base font-medium text-[#526577]">The seller has not uploaded a product preview yet.</p></div>}</div></div>
+    <Link href="/marketplace" className="text-xs font-semibold text-slate transition-colors hover:text-[#9A3412]">← Marketplace</Link>
+    <div className="mt-4 grid min-w-0 grid-cols-1 gap-7 lg:mt-5 lg:grid-cols-12 lg:gap-10">
+      <div className="min-w-0 lg:order-2 lg:col-span-4">
+        <div className="lg:sticky lg:top-24">{buyPanel}</div>
+      </div>
+      <div className="min-w-0 lg:order-1 lg:col-span-8">
+      <div className="overflow-hidden rounded-xl border border-line bg-paper">
+        <div className="relative h-44 sm:h-56 lg:h-64">
+          {imageUrls[0] ? (
+            <Image unoptimized src={imageUrls[0]} fill sizes="(max-width: 1024px) 100vw, 800px" alt={`${gig.title} preview`} className="object-cover" />
+          ) : (
+            <ProductCover title={gig.title} category={gig.category} />
+          )}
+        </div>
+      </div>
       {imageUrls.length > 1 && <div className="mt-3 grid grid-cols-3 gap-3">{imageUrls.slice(1).map((url, index) => <a key={url} href={url} target="_blank" rel="noopener noreferrer" className="relative aspect-video overflow-hidden rounded-lg border border-line"><Image unoptimized src={url} fill sizes="250px" alt={`${gig.title} gallery image ${index + 2}`} className="object-cover" /></a>)}</div>}
       {videoUrl && <section className="mt-8"><h2 className="mb-3 font-display text-xl font-bold">Demo video</h2><video controls preload="none" className="w-full rounded-xl" src={videoUrl}>Your browser does not support video playback.</video></section>}
-      {demoLinks.length > 0 && <section className="mt-8"><h2 className="mb-3 font-display text-xl font-bold">Explore the demo</h2><div className="flex flex-wrap gap-3">{demoLinks.map((url, index) => <a key={url} href={url} target="_blank" rel="noopener noreferrer" className="rounded-full border border-line px-4 py-2 text-sm text-ember hover:border-ember">Open demo {index + 1} ↗</a>)}</div></section>}
-      <div className="mt-8 flex flex-wrap items-center gap-3"><p className="font-mono text-[10px] font-semibold uppercase tracking-[.18em] text-slate">{CATEGORY_LABELS[gig.category] ?? gig.category}</p>{gig.is_ai_assisted && <span className="rounded-full bg-ember/15 px-3 py-1 text-xs font-semibold text-ember">AI-assisted</span>}</div>
-      <h1 className="mt-2 break-words font-display text-[1.65rem] font-bold tracking-tight sm:text-4xl">{gig.title}</h1>
-      <div className="mt-6 flex flex-wrap items-center gap-4 border-y border-line py-4"><div className="flex items-center gap-3"><div className="grid h-10 w-10 place-items-center rounded-full border border-line bg-[#FBF4EC] font-display text-sm font-bold text-bone">{initialsFrom(gig.seller_profiles?.display_name ?? "?")}</div><div><p className="text-sm font-medium">{gig.seller_profiles?.display_name ?? "Unknown seller"}</p>{verified ? <p className="text-xs font-semibold text-ember">Verified seller</p> : <p className="text-xs text-slate">Verification in progress</p>}</div></div><div className="sm:ml-auto"><StarRatingDisplay average={rating.average} count={rating.count} size={13} /></div></div>
-      <div className="mt-6 lg:hidden">{purchasePanel}</div>
+      {demoLinks.length > 0 && <section className="mt-8"><h2 className="mb-3 font-display text-xl font-bold">Explore the demo</h2><div className="flex flex-wrap gap-3">{demoLinks.map((url, index) => <a key={url} href={url} target="_blank" rel="noopener noreferrer" className="rounded-full border border-line px-4 py-2 text-sm font-semibold text-[#9A3412] hover:border-[#C2410C]">{index === 0 ? "View live demo" : `View live demo ${index + 1}`} ↗</a>)}</div></section>}
       <section className="mt-10"><h2 className="font-display text-xl font-bold">What you&apos;ll get</h2><p className="mt-3 whitespace-pre-wrap text-[15px] leading-relaxed text-slate">{gig.description}</p></section>
       <section className="mt-8"><h2 className="font-display text-xl font-bold">Before you buy</h2><p className="mt-3 text-[15px] leading-relaxed text-slate">The seller&apos;s description is the source of truth for what the product includes, supported formats and any requirements. Confirm those details before checkout.</p>{included.length > 0 && <ul className="mt-4 space-y-3">{included.map((line) => <li key={line} className="flex items-start gap-3 text-[15px] text-bone"><span aria-hidden="true" className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-ember" />{line}</li>)}</ul>}<p className="mt-4 text-[14px] leading-6 text-slate">Optional customization is not included unless the listing says so. Paid product add-ons are not available yet.</p></section>
       <section className="mt-10 rounded-2xl bg-[#EFE7DB] p-6"><h2 className="font-display text-lg font-bold text-[#172B45]">Payment and delivery</h2><p className="mt-2 text-[14px] leading-relaxed text-[#526577]">Paystack processes eligible payments. The Middleman does not currently hold funds in escrow or guarantee refunds. Payment confirmation and product delivery are separate steps; use your order page to check the status available for your purchase.</p></section>
       <section className="mt-10 border-t border-line pt-8"><h2 className="font-display text-xl font-bold">Reviews {rating.count > 0 && `(${rating.count})`}</h2>{reviews.length === 0 && <p className="mt-4 text-sm text-slate">No reviews yet for this product.</p>}<div className="mt-5 space-y-5">{reviews.map((review, i) => <div key={i} className="border-b border-line pb-5 last:border-0"><div className="mb-2 flex items-center justify-between"><StarRatingDisplay average={review.rating} count={1} size={12} /><span className="text-xs text-slate">{review.reviewer_name || "Buyer"}</span></div>{review.comment && <p className="text-sm leading-relaxed text-slate">{review.comment}</p>}</div>)}</div></section>
-      <div className="mt-10 lg:hidden">{reportBox}</div>
-    </div><div className="hidden lg:col-span-4 lg:block"><div className="sticky top-24 space-y-5">{purchasePanel}{reportBox}</div></div></div>
+    </div></div>
   </div>
-  {!isOwnGig && (
+  {reportOpen && (
+    <div
+      className="fixed inset-0 z-[70] flex items-end justify-center bg-[#182d41]/40 p-3 backdrop-blur-[2px] sm:items-center sm:p-6"
+      onMouseDown={(event) => { if (event.target === event.currentTarget) setReportOpen(false); }}
+    >
+      <section role="dialog" aria-modal="true" aria-labelledby="report-product-title" className="w-full max-w-md rounded-2xl border border-line bg-paper p-5 shadow-[0_24px_80px_rgba(18,34,49,.25)] sm:p-6">
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <h2 id="report-product-title" className="font-display text-xl font-semibold">Report this product</h2>
+            <p className="mt-2 text-sm leading-6 text-slate">Send this product to admin for review if it looks unsafe, misleading, or abusive.</p>
+          </div>
+          <button type="button" aria-label="Close report form" onClick={() => setReportOpen(false)} className="grid h-9 w-9 shrink-0 place-items-center rounded-full text-xl leading-none text-slate hover:bg-[#f4eee6] hover:text-bone">×</button>
+        </div>
+        <label className="mt-4 block text-sm font-medium text-bone">Reason<select value={reportReason} onChange={(e) => setReportReason(e.target.value)} className="auth-input mt-2"><option>Spam or misleading content</option><option>Inappropriate or abusive content</option><option>Wrong category or pricing</option><option>Suspicious seller activity</option><option>Other</option></select></label>
+        <label className="mt-4 block text-sm font-medium text-bone">Details<textarea value={reportDetails} onChange={(e) => setReportDetails(e.target.value)} className="auth-input mt-2 min-h-24" placeholder="Add any extra context for the admin team." /></label>
+        <button onClick={handleReportGig} disabled={reporting} className="mt-4 w-full rounded-full bg-[#C2410C] px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-[#9A3412] disabled:opacity-50">{reporting ? "Sending report…" : "Submit report"}</button>
+      </section>
+    </div>
+  )}
+  {!isOwnGig && purchasesEnabled && (
     <>
       <div className="h-[4.75rem] lg:hidden" aria-hidden="true" />
       <div className="fixed inset-x-0 z-30 border-t border-[#e8e0d6] bg-[#fffdf9]/96 p-3 backdrop-blur lg:hidden" style={{ bottom: "calc(4rem + env(safe-area-inset-bottom))" }}>
@@ -264,13 +364,9 @@ export default function GigPageClient({ gigId, purchasesEnabled }: { gigId: stri
             <p className="text-[11px] text-[#687886]">Price</p>
             <p className="font-mono text-lg font-semibold text-[#172B45]">₦{gig.price_ngn.toLocaleString()}</p>
           </div>
-          {purchasesEnabled ? (
-            <button type="button" onClick={checkout ? payReviewedCheckout : handleBuyAndPay} disabled={paying} className="ml-auto inline-flex min-h-11 flex-1 items-center justify-center rounded-xl bg-[#de641e] px-4 text-sm font-semibold text-white disabled:opacity-50">
-              {paying ? "Opening…" : checkout ? "Continue to Paystack" : "Buy this product"}
-            </button>
-          ) : (
-            <p className="ml-auto max-w-[58%] text-right text-xs leading-5 text-[#526577]">Purchases are paused while checkout is verified.</p>
-          )}
+          <button type="button" onClick={checkout ? payReviewedCheckout : handleBuyAndPay} disabled={paying} className="ml-auto inline-flex min-h-11 flex-1 items-center justify-center rounded-xl bg-[#C2410C] px-4 text-sm font-semibold text-white disabled:opacity-50">
+            {paying ? "Opening…" : checkout ? "Continue to Paystack" : "Buy this product"}
+          </button>
         </div>
       </div>
     </>

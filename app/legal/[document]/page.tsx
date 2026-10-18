@@ -1,5 +1,6 @@
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
+import SiteHeader from '@/components/SiteHeader';
 
 type LegalDocument = {
   title: string;
@@ -145,15 +146,7 @@ export default async function LegalPage({ params }: { params: Promise<{ document
   return (
     <main className="min-h-screen bg-ink text-bone">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbs) }} />
-      <header className="border-b border-line">
-        <div className="mx-auto flex max-w-4xl items-center justify-between gap-3 px-4 py-4 sm:px-6 sm:py-5">
-          <Link href="/" className="flex min-w-0 items-center gap-2 font-display text-base font-bold tracking-tight sm:text-lg">
-            <span className="h-2 w-2 shrink-0 rounded-full bg-ember" />
-            <span className="truncate">The Middleman</span>
-          </Link>
-          <Link href="/" className="shrink-0 text-sm font-semibold text-slate transition-colors hover:text-bone">Home</Link>
-        </div>
-      </header>
+      <SiteHeader />
 
       <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6 sm:py-12">
         <nav aria-label="Breadcrumb" className="mb-8 text-sm text-slate">

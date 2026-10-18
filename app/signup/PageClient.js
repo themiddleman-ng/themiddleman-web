@@ -82,7 +82,7 @@ function PasswordField({ id, value, onChange, autoComplete, placeholder, shown, 
         onChange={onChange}
         aria-invalid={invalid || undefined}
         aria-describedby={invalid ? describedBy : undefined}
-        className={`w-full rounded-xl border bg-white py-3 pl-3.5 pr-12 text-[15px] text-[#1d2733] outline-none transition placeholder:text-[#89919a] focus:ring-4 ${invalid ? 'border-[#b42318] focus:border-[#b42318] focus:ring-[#b42318]/15' : 'border-[#ded6cb] focus:border-[#de641e] focus:ring-[#de641e]/10'}`}
+        className={`w-full rounded-xl border bg-white py-3 pl-3.5 pr-12 text-[15px] text-[#1d2733] outline-none transition placeholder:text-[#89919a] focus:ring-4 ${invalid ? 'border-[#b42318] focus:border-[#b42318] focus:ring-[#b42318]/15' : 'border-[#ded6cb] focus:border-[#C2410C] focus:ring-[#C2410C]/10'}`}
       />
       <button
         type="button"
@@ -90,7 +90,7 @@ function PasswordField({ id, value, onChange, autoComplete, placeholder, shown, 
         aria-label={shown ? 'Hide password' : 'Show password'}
         onMouseDown={(event) => event.preventDefault()}
         onClick={onToggle}
-        className="absolute inset-y-0 right-0 grid w-11 place-items-center rounded-r-xl text-[#5d6874] hover:text-[#c95415] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0B3D91]"
+        className="absolute inset-y-0 right-0 grid w-11 place-items-center rounded-r-xl text-[#5d6874] hover:text-[#C2410C] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#C2410C]"
       >
         {shown ? <EyeSlashIcon size={18} aria-hidden="true" /> : <EyeIcon size={18} aria-hidden="true" />}
       </button>
@@ -283,7 +283,7 @@ function AuthPageInner() {
   }
 
   const inputClass = 'mt-1.5 w-full rounded-xl border bg-white px-3.5 py-3 text-[15px] text-[#1d2733] outline-none transition placeholder:text-[#89919a] focus:ring-4';
-  const validInput = 'border-[#ded6cb] focus:border-[#de641e] focus:ring-[#de641e]/10';
+  const validInput = 'border-[#ded6cb] focus:border-[#C2410C] focus:ring-[#C2410C]/10';
   const invalidInput = 'border-[#b42318] focus:border-[#b42318] focus:ring-[#b42318]/15';
   const labelClass = 'block text-sm font-medium text-[#33404d]';
 
@@ -293,7 +293,7 @@ function AuthPageInner() {
         <aside className="mm-auth-hero relative flex flex-col justify-between overflow-hidden bg-[#eb650c] p-10 text-[#faf4e9] lg:p-12">
           <div aria-hidden="true" />
           <div className="relative">
-            <Logo variant="vertical" />
+            <Logo variant="vertical" inverted />
             <Link href="/marketplace" className="mm-auth-browse absolute right-0 top-0 text-sm font-semibold text-[#172b45]/80 hover:text-[#172b45]">Browse first</Link>
             <p className="mt-20 max-w-sm font-display text-4xl font-semibold leading-[1.08] tracking-[-.035em]">
               Ready-made.<br />Made yours.
@@ -347,9 +347,9 @@ function AuthPageInner() {
                   <PasswordChecklist value={password} />
 
                   <div className="flex items-start gap-3 rounded-xl bg-[#f7f3ed] p-3.5">
-                    <input id="consent-terms" type="checkbox" checked={agreedToTerms} onChange={(e) => setAgreedToTerms(e.target.checked)} className="mt-1 h-4 w-4 shrink-0 accent-[#de641e]" />
+                    <input id="consent-terms" type="checkbox" checked={agreedToTerms} onChange={(e) => setAgreedToTerms(e.target.checked)} className="mt-1 h-4 w-4 shrink-0 accent-[#C2410C]" />
                     <label htmlFor="consent-terms" className="text-xs leading-5 text-[#596674]">
-                      I agree to the <Link href="/legal/terms" className="font-semibold text-[#b84d13] underline">Terms of Service</Link>, <Link href="/legal/privacy" className="font-semibold text-[#b84d13] underline">Privacy Policy</Link>, and <Link href="/legal/refunds" className="font-semibold text-[#b84d13] underline">Refund Policy</Link>.
+                      I agree to the <Link href="/legal/terms" className="font-semibold text-[#9A3412] underline">Terms of Service</Link>, <Link href="/legal/privacy" className="font-semibold text-[#9A3412] underline">Privacy Policy</Link>, and <Link href="/legal/refunds" className="font-semibold text-[#9A3412] underline">Refund Policy</Link>.
                     </label>
                   </div>
                   <AuthCallout alert={signupAlert} onAction={signupAlert?.actionLabel ? () => { switchMode(true); setSignupAlert(null); } : undefined} />
@@ -359,13 +359,13 @@ function AuthPageInner() {
                       <button type="button" onClick={() => switchMode(true)} className="mt-2 font-semibold underline">Go to sign in</button>
                     </div>
                   ) : (
-                    <button className="w-full rounded-xl bg-[#de641e] px-5 py-3.5 text-sm font-bold text-white transition hover:bg-[#c95415] focus:outline-none focus:ring-4 focus:ring-[#de641e]/20 disabled:cursor-not-allowed disabled:opacity-50" type="submit" disabled={signupLoading || !signupReady}>
+                    <button className="w-full rounded-xl bg-[#C2410C] px-5 py-3.5 text-sm font-bold text-white transition hover:bg-[#9A3412] focus:outline-none focus:ring-4 focus:ring-[#C2410C]/20 disabled:cursor-not-allowed disabled:opacity-50" type="submit" disabled={signupLoading || !signupReady}>
                       {signupLoading ? 'Creating account…' : 'Create account'}
                     </button>
                   )}
                 </form>
 
-                <p className="mt-5 text-center text-sm text-[#63707d]">Already have an account? <button type="button" onClick={() => switchMode(true)} className="font-semibold text-[#b84d13] hover:underline">Log in</button></p>
+                <p className="mt-5 text-center text-sm text-[#63707d]">Already have an account? <button type="button" onClick={() => switchMode(true)} className="font-semibold text-[#9A3412] hover:underline">Log in</button></p>
               </>
             ) : (
               <>
@@ -379,7 +379,7 @@ function AuthPageInner() {
                   <div>
                     <div className="flex items-center justify-between gap-3">
                       <label className={labelClass} htmlFor="login-password">Password</label>
-                      <Link href="/reset-password" className="text-xs font-semibold text-[#b84d13] hover:underline">Forgot password?</Link>
+                      <Link href="/reset-password" className="text-xs font-semibold text-[#9A3412] hover:underline">Forgot password?</Link>
                     </div>
                     <PasswordField
                       id="login-password"
@@ -402,11 +402,11 @@ function AuthPageInner() {
                   ) : (
                     <AuthCallout alert={loginAlert} />
                   )}
-                  <button className="w-full rounded-xl bg-[#de641e] px-5 py-3.5 text-sm font-bold text-white transition hover:bg-[#c95415] focus:outline-none focus:ring-4 focus:ring-[#de641e]/20 disabled:cursor-not-allowed disabled:opacity-50" type="submit" disabled={loginLoading || loginSuccess}>
+                  <button className="w-full rounded-xl bg-[#C2410C] px-5 py-3.5 text-sm font-bold text-white transition hover:bg-[#9A3412] focus:outline-none focus:ring-4 focus:ring-[#C2410C]/20 disabled:cursor-not-allowed disabled:opacity-50" type="submit" disabled={loginLoading || loginSuccess}>
                     {loginSuccess ? 'Continuing…' : loginLoading ? 'Logging in…' : 'Log in'}
                   </button>
                 </form>
-                <p className="mt-6 text-center text-sm text-[#63707d]">New to The Middleman? <button type="button" onClick={() => switchMode(false)} className="font-semibold text-[#b84d13] hover:underline">Create an account</button></p>
+                <p className="mt-6 text-center text-sm text-[#63707d]">New to The Middleman? <button type="button" onClick={() => switchMode(false)} className="font-semibold text-[#9A3412] hover:underline">Create an account</button></p>
                 <p className="mt-8 border-t border-[#eee6dc] pt-5 text-center text-xs leading-5 text-[#71808d]">By continuing, you agree to the <Link href="/legal/terms" className="underline">Terms of Service</Link> and <Link href="/legal/privacy" className="underline">Privacy Policy</Link>.</p>
               </>
             )}
