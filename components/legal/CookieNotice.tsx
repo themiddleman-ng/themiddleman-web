@@ -126,22 +126,6 @@ export default function CookieNotice() {
         </aside>
       )}
 
-      {!visible && !settingsOpen && (
-        <button
-          type="button"
-          onClick={() => { setOptionalAnalytics(readPreferences().optionalAnalytics); setSettingsOpen(true); }}
-          className={`fixed left-3 z-40 inline-flex min-h-11 items-center rounded-full border border-line bg-paper px-3 text-[14px] font-semibold text-bone shadow-sm hover:bg-elevated ${
-            aboveBuyBar
-              ? "bottom-[calc(9.25rem+env(safe-area-inset-bottom))] md:bottom-4"
-              : aboveTabs
-                ? "bottom-[calc(4.75rem+env(safe-area-inset-bottom))] md:bottom-4"
-                : "bottom-4"
-          }`}
-        >
-          Cookie settings
-        </button>
-      )}
-
       {settingsOpen && (
         <div
           className="fixed inset-0 z-[70] flex items-end justify-center bg-[#182d41]/40 p-3 backdrop-blur-[2px] sm:items-center sm:p-6"

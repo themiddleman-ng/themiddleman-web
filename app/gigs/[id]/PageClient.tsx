@@ -269,7 +269,7 @@ export default function GigPageClient({ gigId, purchasesEnabled }: { gigId: stri
         <div className="grid h-10 w-10 place-items-center rounded-full border border-line bg-[#FBF4EC] font-display text-sm font-bold text-bone">{initialsFrom(gig.seller_profiles?.display_name ?? "?")}</div>
         <div>
           <p className="text-sm font-medium">{gig.seller_profiles?.display_name ?? "Unknown seller"}</p>
-          {verified ? <p className="text-xs font-semibold text-[#9A3412]">Verified seller</p> : <p className="text-xs text-slate">Verification in progress</p>}
+          {verified ? <p className="text-xs font-semibold text-eyebrow">Verified seller</p> : <p className="text-xs text-slate">Verification in progress</p>}
         </div>
         <div className="sm:ml-auto"><StarRatingDisplay average={rating.average} count={rating.count} size={13} /></div>
       </div>

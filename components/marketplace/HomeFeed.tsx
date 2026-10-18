@@ -149,7 +149,7 @@ export default function HomeFeed() {
             <Link href="/marketplace" className="inline-flex min-h-11 items-center text-[16px] font-semibold text-eyebrow">View all</Link>
           </div>
 
-          <div className="homepage-listings grid grid-cols-1 gap-3 md:grid-cols-2 md:gap-5 xl:grid-cols-4">
+          <div className="homepage-listings grid grid-cols-1 gap-3 md:gap-5">
             {loading
               ? Array.from({ length: 8 }, (_, index) => <ListingSkeleton key={index} />)
               : visibleGigs.map((gig) => <GigCard key={gig.id} gig={gig} rating={ratings[gig.id]} />)}
