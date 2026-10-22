@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { LogoMark } from "@/components/Logo";
+import SiteHeader from "@/components/SiteHeader";
 
 export const metadata = {
   title: "About",
@@ -12,19 +12,11 @@ export const metadata = {
 export default function AboutPage() {
   return (
     <main className="min-h-screen bg-ink text-bone">
-      <header className="border-b border-line">
-        <div className="mx-auto flex max-w-4xl items-center justify-between px-6 py-5">
-          <Link href="/" className="flex items-center gap-2.5">
-            <LogoMark className="h-6 w-6" />
-            <span className="font-display text-lg font-bold tracking-tight">The Middleman</span>
-          </Link>
-          <Link href="/" className="text-sm text-slate transition-colors hover:text-bone">&larr; Back to Home</Link>
-        </div>
-      </header>
+      <SiteHeader />
 
-      <div className="mx-auto max-w-4xl px-6 py-12">
+      <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6 sm:py-12">
         <p className="text-xs font-bold uppercase tracking-[.16em] text-ember">About us</p>
-        <h1 className="mt-2 font-display text-4xl font-bold tracking-tight sm:text-5xl">A marketplace for useful digital products.</h1>
+        <h1 className="mt-2 font-display text-[1.85rem] font-bold tracking-tight sm:text-5xl">A marketplace for useful digital products.</h1>
 
         <div className="mt-10 space-y-6 text-[15px] leading-relaxed text-slate">
           <p>The Middleman is a marketplace for ready-made digital products from independent creators, built with Nigeria first in mind. Buyers can review listing details and previews before purchasing, and pay in Naira through Paystack.</p>
@@ -32,9 +24,9 @@ export default function AboutPage() {
           <p>The Middleman was founded by Samuel Oguntona and built at Obafemi Awolowo University, Ile-Ife. It began as a campus project and is growing into a marketplace for digital products from creators across Nigeria.</p>
         </div>
 
-        <div className="relative mt-12 rounded-2xl border border-line bg-paper p-8">
-          <div className="absolute -left-2 top-1/2 h-4 w-4 -translate-y-1/2 rounded-full border border-line bg-ink" />
-          <div className="absolute -right-2 top-1/2 h-4 w-4 -translate-y-1/2 rounded-full border border-line bg-ink" />
+        <div className="relative mt-8 rounded-2xl border border-line bg-paper p-5 sm:mt-12 sm:p-8">
+          <div className="absolute -left-2 top-1/2 hidden h-4 w-4 -translate-y-1/2 rounded-full border border-line bg-ink sm:block" />
+          <div className="absolute -right-2 top-1/2 hidden h-4 w-4 -translate-y-1/2 rounded-full border border-line bg-ink sm:block" />
           <p className="text-xs font-bold uppercase tracking-[.16em] text-ember">What we hold to</p>
           <ul className="mt-5 space-y-4">
             {[
@@ -51,9 +43,9 @@ export default function AboutPage() {
           </ul>
         </div>
 
-        <div className="mt-10 flex flex-wrap gap-3">
-          <Link href="/marketplace" className="rounded-full bg-ember px-6 py-3 text-sm font-bold text-ink transition-colors hover:bg-ember/90">Browse the marketplace</Link>
-          <Link href="/signup" className="rounded-full border border-line px-6 py-3 text-sm font-semibold text-bone transition-colors hover:border-ember/40">Create an account</Link>
+        <div className="mt-8 grid gap-3 sm:mt-10 sm:flex sm:flex-wrap">
+          <Link href="/marketplace" className="inline-flex min-h-12 items-center justify-center rounded-xl bg-[#C2410C] px-6 py-3 text-sm font-bold text-white transition-colors hover:bg-[#9A3412] sm:rounded-full">Browse the marketplace</Link>
+          <Link href="/signup" className="inline-flex min-h-12 items-center justify-center rounded-xl border border-line px-6 py-3 text-sm font-semibold text-bone transition-colors hover:border-ember/40 sm:rounded-full">Create an account</Link>
         </div>
       </div>
     </main>

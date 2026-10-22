@@ -1,15 +1,27 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabaseClient';
+import { signinHref } from '@/lib/auth/signin-redirect.mjs';
 
 export default function RoleSelectionPage() {
   const router = useRouter();
+  const [ready, setReady] = useState(false);
   const [wantsToBuy, setWantsToBuy] = useState(true);
   const [wantsToSell, setWantsToSell] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+
+  useEffect(() => {
+    let active = true;
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (!active) return;
+      if (!user) router.replace(signinHref('/onboarding/role'));
+      else setReady(true);
+    });
+    return () => { active = false; };
+  }, [router]);
 
   const hasSelection = wantsToBuy || wantsToSell;
 
@@ -61,6 +73,14 @@ export default function RoleSelectionPage() {
     },
   ];
 
+  if (!ready) {
+    return (
+      <main className="grid min-h-[100svh] place-items-center bg-ink px-4">
+        <p className="text-[16px] text-slate">Checking your account…</p>
+      </main>
+    );
+  }
+
   return (
     <main className="grid min-h-[100svh] place-items-center overflow-hidden bg-ink px-4 py-6 sm:px-6 sm:py-10">
       <section className="w-full max-w-4xl">
@@ -75,7 +95,7 @@ export default function RoleSelectionPage() {
         <div className="overflow-hidden rounded-2xl border border-line bg-[#fffdf9] shadow-[0_20px_70px_rgba(31,21,12,.12)]">
           <div className="border-b border-line bg-[radial-gradient(circle_at_top_right,_rgba(242,100,25,.18),_transparent_42%),linear-gradient(180deg,rgba(255,255,255,.88),rgba(247,243,236,.92))] px-5 py-6 sm:px-10 sm:py-10">
             <p className="text-xs font-semibold tracking-[.2em] text-ember">MAKE IT YOURS</p>
-            <h1 className="mt-2 font-display text-3xl font-bold tracking-tight sm:mt-3 sm:text-5xl">
+            <h1 className="mt-2 font-display text-[1.65rem] font-bold tracking-tight sm:mt-3 sm:text-5xl">
               How would you like to use<br className="hidden sm:block" /> The Middleman?
             </h1>
             <p className="mt-4 max-w-xl text-sm leading-relaxed text-slate sm:text-base">

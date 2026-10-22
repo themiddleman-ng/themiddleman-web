@@ -2,7 +2,9 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabaseClient";
+import { signinHref } from "@/lib/auth/signin-redirect.mjs";
 import { StarRatingInput } from "@/components/StarRating";
 import SiteHeader from "@/components/SiteHeader";
 
@@ -107,6 +109,7 @@ function DisputeForm({ orderId, onSubmitted }) {
 }
 
 export default function OrdersPage() {
+  const router = useRouter();
   const [userId, setUserId] = useState(null);
   const [statusFilter, setStatusFilter] = useState('all');
   const [roleFilter, setRoleFilter] = useState('all');
@@ -127,7 +130,7 @@ export default function OrdersPage() {
     setLoadError("");
 
     const { data: { user } } = await supabase.auth.getUser();
-    if (!user) { setLoadError("Sign in to view your orders."); setLoading(false); return; }
+    if (!user) { router.replace(signinHref("/orders")); return; }
     setUserId(user.id);
 
     const response = await fetch('/api/orders', { cache: 'no-store' });
@@ -224,10 +227,10 @@ export default function OrdersPage() {
         <p className="text-xs font-semibold tracking-[.2em] text-ember">MY ORDERS</p>
         <h1 className="mt-2 font-display text-2xl font-bold sm:text-3xl">My orders</h1><p className="mt-2 text-sm text-slate">Track and manage your purchases and sales of digital products.</p><Link href="/disputes" className="mt-3 inline-block min-h-10 text-sm font-medium text-ember hover:underline">Respond to a dispute</Link>
 
-        <div className="mm-order-controls mt-5 flex flex-wrap items-end gap-3 rounded-xl border border-line bg-white p-4">
-          <label className="min-w-40 flex-1 text-xs font-semibold">Search orders<input type="search" value={orderQuery} onChange={(event) => setOrderQuery(event.target.value)} placeholder="Product or order ID" className="mt-2 block min-h-11 w-full border px-3 text-sm font-normal" /></label>
-          <label className="text-xs font-semibold">Status<select value={statusFilter} onChange={(event) => setStatusFilter(event.target.value)} className="mt-2 block min-h-11 border px-3 text-sm font-normal"><option value="all">All statuses</option>{Object.entries(STATUS_LABELS).map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></label>
-          <label className="text-xs font-semibold">Role<select value={roleFilter} onChange={(event) => setRoleFilter(event.target.value)} className="mt-2 block min-h-11 border px-3 text-sm font-normal"><option value="all">Buying & selling</option><option value="buyer">Buying</option><option value="seller">Selling</option></select></label>
+        <div className="mm-order-controls mt-5 flex flex-col gap-3 rounded-xl border border-line bg-white p-4 sm:flex-row sm:flex-wrap sm:items-end">
+          <label className="min-w-0 flex-1 text-xs font-semibold">Search orders<input type="search" value={orderQuery} onChange={(event) => setOrderQuery(event.target.value)} placeholder="Product or order ID" className="mt-2 block min-h-11 w-full border px-3 text-sm font-normal" /></label>
+          <label className="min-w-0 flex-1 text-xs font-semibold sm:flex-none">Status<select value={statusFilter} onChange={(event) => setStatusFilter(event.target.value)} className="mt-2 block min-h-11 w-full border px-3 text-sm font-normal"><option value="all">All statuses</option>{Object.entries(STATUS_LABELS).map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></label>
+          <label className="min-w-0 flex-1 text-xs font-semibold sm:flex-none">Role<select value={roleFilter} onChange={(event) => setRoleFilter(event.target.value)} className="mt-2 block min-h-11 w-full border px-3 text-sm font-normal"><option value="all">Buying & selling</option><option value="buyer">Buying</option><option value="seller">Selling</option></select></label>
         </div>
         {loadError && <p className="mt-6 text-sm text-slate">{loadError}</p>}
         {actionError && <p role="alert" className="mt-6 text-sm text-red-300">{actionError}</p>}

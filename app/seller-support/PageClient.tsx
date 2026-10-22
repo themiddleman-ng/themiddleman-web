@@ -1,12 +1,16 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState, FormEvent } from "react";
+import { useRouter } from "next/navigation";
+import { InfoIcon } from "@phosphor-icons/react/dist/csr/Info";
 import SiteHeader from "@/components/SiteHeader";
+import { signinHref } from "@/lib/auth/signin-redirect.mjs";
 
 type Message = { id: string; sender_kind: "seller" | "admin" | "system"; body: string; created_at: string };
 type Thread = { id: string; subject: string; status: "open" | "closed"; updated_at: string; messages: Message[] };
 
 export default function SellerSupportPage() {
+  const router = useRouter();
   const [threads, setThreads] = useState<Thread[]>([]);
   const [activeId, setActiveId] = useState("");
   const [mobileThreadOpen, setMobileThreadOpen] = useState(false);
@@ -14,6 +18,7 @@ export default function SellerSupportPage() {
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+  const [unavailable, setUnavailable] = useState(false);
 
   const activeThread = useMemo(() => threads.find((thread) => thread.id === activeId) ?? null, [threads, activeId]);
 
@@ -24,8 +29,19 @@ export default function SellerSupportPage() {
   const load = useCallback(async () => {
     setLoading(true);
     setError("");
+    setUnavailable(false);
     try {
       const response = await fetch("/api/seller/communications", { cache: "no-store" });
+      if (response.status === 401) {
+        router.replace(signinHref("/seller-support"));
+        return;
+      }
+      if (response.status === 404) {
+        setUnavailable(true);
+        setThreads([]);
+        setActiveId("");
+        return;
+      }
       const result = await response.json();
       if (!response.ok) throw new Error(result.error || "Could not load Operations messages.");
       setThreads(result.threads ?? []);
@@ -39,7 +55,7 @@ export default function SellerSupportPage() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [router]);
 
   useEffect(() => { void load(); }, [load]);
 
@@ -54,6 +70,10 @@ export default function SellerSupportPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ threadId: activeThread.id, text: reply }),
       });
+      if (response.status === 401) {
+        router.replace(signinHref("/seller-support"));
+        return;
+      }
       const result = await response.json();
       if (!response.ok) throw new Error(result.error || "Could not send your reply.");
       setReply("");
@@ -73,7 +93,14 @@ export default function SellerSupportPage() {
         <h1 className="mt-2 font-display text-3xl font-bold md:text-4xl">Operations messages</h1>
         <p className="mt-2 max-w-2xl text-sm leading-6 text-slate">Private notes from The Middleman team about your seller account and product operations.</p>
 
-        {error && <p role="alert" className="mt-5 rounded-xl border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-200">{error}</p>}
+        {unavailable && (
+          <div role="status" className="mm-info-panel">
+            <InfoIcon size={20} className="mt-0.5 shrink-0 text-slate" aria-hidden="true" />
+            <p>{"Operations messages aren't available yet"}</p>
+          </div>
+        )}
+        {error && !unavailable && <p role="alert" className="mt-5 rounded-xl border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-200">{error}</p>}
+        {!unavailable && (
         <div className="mt-5 grid min-h-[28rem] gap-4 sm:mt-7 sm:min-h-[32rem] sm:gap-5 lg:grid-cols-[.7fr_1.3fr]">
           <aside className={`${mobileThreadOpen ? "hidden" : "block"} rounded-2xl border border-line bg-paper p-4 lg:block`}>
             <div className="flex items-center justify-between">
@@ -137,6 +164,7 @@ export default function SellerSupportPage() {
             )}
           </section>
         </div>
+        )}
       </div>
     </main>
   );
