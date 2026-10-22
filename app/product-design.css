@@ -1,6 +1,6 @@
 /* Product screens: deliberately scoped away from the landing page and SiteHeader. */
 .mm-design { --mm-orange:var(--ember-cta); --mm-text:var(--bone); --mm-muted:var(--muted); --mm-link:var(--link); --mm-border:var(--line); --mm-cool:var(--ink); color:var(--mm-text); flex:1; min-width:0; background:var(--ink); }
-.mm-design > main,.mm-design > .mp-shell { background:#fff!important; color:var(--mm-text); }
+.mm-design > main,.mm-design > .mp-shell { background:var(--ink)!important; color:var(--mm-text); }
 .mm-design main > :not(header) h1 { letter-spacing:-.04em; color:var(--mm-text); }
 .mm-design main > :not(header) h2 { letter-spacing:-.025em; }
 .mm-design main > :not(header) :is(input:not([type=checkbox]):not([type=radio]):not([type=file]),select,textarea) { border-color:var(--mm-border); border-radius:8px; background-color:#fff; color:var(--mm-text); }
@@ -771,6 +771,291 @@
   }
 }
 
+/* ============================================================
+   DARK THEME REMAPS — colour pass only
+   Hardcoded light surfaces from the UI8 pass inherit dark tokens.
+   ============================================================ */
+.mm-design main > :not(header) :is(input:not([type=checkbox]):not([type=radio]):not([type=file]),select,textarea) {
+  background-color: var(--elevated);
+  color: var(--bone);
+  border-color: var(--line);
+}
+.mm-design main > :not(header) :is(input,select,textarea):focus-visible,
+.mm-design main > :not(header) :is(button,a):focus-visible {
+  outline-color: var(--ember);
+}
+.mm-design main > :not(header) .bg-paper,
+.mm-design main > :not(header) [class*="bg-paper"] {
+  background: var(--paper);
+}
+.mm-design main > :not(header) .text-red-300 { color: #f0a090; }
+.mm-design main > :not(header) .text-emerald-300 { color: #7fd4a4; }
+.mm-design main > :not(header) .text-amber-200 { color: #f0c56e; }
+.mm-workspace-rail a { color: var(--slate); }
+.mm-workspace-rail a:hover { background: var(--elevated); color: var(--bone); }
+.mm-workspace-rail a[aria-current=page] { background: color-mix(in srgb, var(--ember) 16%, var(--paper)); color: var(--ember); }
+.mm-rail-label { color: var(--slate); }
+.mm-admin,.mm-analytics,.mm-orders,.mm-payments,.mm-settings,.mm-security,.mm-gigs,.mm-notifications,.mm-profile { background: var(--ink); }
+.mm-with-rail > main { background: var(--ink)!important; }
+.mm-admin main > :not(header) [class*="bg-paper"] { background: var(--paper); }
+.mm-profile main > :not(header) section { background: var(--paper); }
+.mm-profile main > :not(header) aside { background: var(--elevated); border-color: var(--line); }
+.mm-messages main { background: var(--ink)!important; }
+.mm-messages [aria-label="Conversation list"],
+.mm-messages [aria-label="Active conversation"] { background: var(--paper); }
+.mm-messages [aria-label="Active conversation"] > div:nth-child(2) { background: var(--ink); }
+.mm-marketplace .mp-content > div:first-child p { color: var(--slate); }
+.mm-preview-note { color: var(--slate); }
+.mm-preview-note a { color: var(--ember); }
+.mm-marketplace .gm-card { background: var(--paper); border-color: var(--line); }
+.mm-marketplace .gm-card h2,
+.mm-marketplace .gm-card > div:last-child > p { color: var(--bone); }
+.mm-filters { background: var(--paper); border-color: var(--line); }
+.mm-filters label { color: var(--slate); }
+.mm-filters button { color: var(--ember); }
+.mm-auth,
+.mm-auth { background: var(--ink)!important; }
+.mm-auth .mm-auth-form { background: var(--paper); color: var(--bone); }
+.mm-auth .mm-auth-hero { background: #C2410C; }
+.mm-auth .mm-auth-hero > div:first-child {
+  display: none;
+}
+.mm-auth .mm-auth-hero p { color: #FFFFFF; }
+.mm-auth .mm-auth-hero p.font-display { color: #FFFFFF; }
+.mm-auth-logo { color: #FFFFFF; }
+.mm-auth-logo .text-logo-navy { color: #FFFFFF; }
+.mm-auth-logo .text-logo-blue { color: #3B82F6; }
+.mm-auth-logo .text-logo-orange { color: #E8590C; }
+.mm-auth-browse { color: #FFFFFF !important; }
+.mm-auth .mm-auth-form h1,
+.mm-auth .mm-auth-form p,
+.mm-auth .mm-auth-form label { color: inherit; }
+.mm-auth .mm-auth-form p { color: var(--slate); }
+.mm-performance-chart { background: var(--paper); border-color: var(--line); }
+.mm-performance-chart p { color: var(--slate); }
+.mm-legal-contents a { color: var(--slate); }
+.mm-legal-contents a:hover { color: var(--ember); }
+.mm-category-tile:nth-child(3n+1) { background: #1a2430!important; }
+.mm-category-tile:nth-child(3n+2) { background: #2a1c14!important; }
+.mm-category-tile:nth-child(3n+3) { background: #1a241c!important; }
+.mm-order-progress { background: var(--elevated); border-color: var(--line); }
+.mm-order-progress li { color: var(--slate); border-color: var(--line); }
+.mm-order-progress li[data-reached=true] { color: var(--bone); border-color: var(--ember); }
+
+.mm-design-preview { background: var(--ink); color: var(--bone); }
+.mm-demo-heading p { color: var(--ember); }
+.mm-demo-heading h1,
+.mm-demo-hero h1,
+.mm-demo-buy h1,
+.mm-demo-product-heading h2,
+.mm-demo-profile-head h2 { color: var(--bone); }
+.mm-demo-heading span,
+.mm-demo-hero p,
+.mm-demo-buy p { color: var(--slate); }
+.mm-demo-heading > a { color: var(--ember); }
+.mm-demo-screen-nav,
+.mm-demo-screen,
+.mm-demo-panel,
+.mm-demo-product,
+.mm-demo-menu { background: var(--paper); border-color: var(--line); color: var(--bone); }
+.mm-demo-screen-nav a,
+.mm-demo-filter,
+.mm-demo-toolbar,
+.mm-demo-product > span { color: var(--slate); }
+.mm-demo-screen-nav a[aria-current=page] { background: color-mix(in srgb, var(--ember) 16%, var(--paper)); color: var(--ember); }
+.mm-demo-outline { background: var(--paper); border-color: var(--ember); color: var(--ember); }
+.mm-demo-search,
+.mm-demo-pills button,
+.mm-demo-filter-pills button,
+.mm-demo-form input,
+.mm-demo-form textarea,
+.mm-demo-form select,
+.mm-demo-composer input,
+.mm-demo-composer button,
+.mm-demo-conversations > input { background: var(--elevated); border-color: var(--line); color: var(--bone); }
+.mm-demo-search span,
+.mm-demo-search { color: var(--slate); }
+.mm-demo-cover-sheet { background: var(--elevated); border-color: var(--line); color: var(--slate); }
+.mm-demo-cover-sheet i { background: #3a3a3a; }
+.mm-demo-cover-sheet i:nth-of-type(2) { background: color-mix(in srgb, var(--ember) 45%, #3a3a3a); }
+.mm-demo-cover.cover-1,
+.mm-demo-product-visual.compact { background: #2a221c; }
+.mm-demo-cover.cover-2 { background: #221e2a; }
+.mm-demo-cover.cover-3 { background: #1c241e; }
+.mm-demo-chip { background: var(--elevated); color: var(--slate); }
+.mm-demo-chip.tone-orange { background: color-mix(in srgb, var(--ember) 16%, var(--paper)); color: var(--ember); }
+.mm-demo-chat p { background: var(--elevated); color: var(--bone); }
+.mm-demo-chat p.outgoing { background: color-mix(in srgb, var(--ember) 16%, var(--paper)); }
+.mm-demo-table-head { background: var(--elevated); color: var(--slate); }
+.mm-demo-preview-alert { background: color-mix(in srgb, var(--ember) 16%, var(--paper)); color: #f3b08a!important; }
+.mm-demo-conversations > button.selected { background: color-mix(in srgb, var(--ember) 12%, var(--paper)); }
+.mm-demo-account-nav span.active,
+.mm-demo-account-nav a[aria-current=page] { background: color-mix(in srgb, var(--ember) 16%, var(--paper)); color: var(--ember); }
+.mm-demo-profile-photo { background: var(--elevated); color: var(--bone); }
+.mm-demo-toggle { border-color: var(--line); color: var(--slate); }
+.mm-demo-toggle.on { border-color: #3d6a4e; background: #1c2a22; color: #7fd4a4; }
+
+@media (max-width: 767px) {
+  .mp-shell .gm-card,
+  .mm-marketplace .gm-card,
+  .homepage-listings .gm-card {
+    background: var(--paper) !important;
+    border-color: var(--line) !important;
+  }
+  .marketplace-skeleton {
+    background: var(--paper);
+    border-color: var(--line);
+  }
+  .mm-auth { background: var(--ink) !important; }
+  .mm-auth .mm-auth-hero { background: #C2410C !important; }
+  .mm-auth .mm-auth-hero::after {
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 390 44' preserveAspectRatio='none'%3E%3Cpath fill='%231A1A1A' d='M0 44V20C65 4 130 36 195 20S325 4 390 24v20z'/%3E%3Cpath fill='none' stroke='%23F26419' stroke-width='2' d='M0 20C65 4 130 36 195 20S325 4 390 24'/%3E%3Cpath fill='none' stroke='%23f3c9a8' stroke-width='3.5' d='M0 16C65 0 130 32 195 16S325 0 390 20'/%3E%3C/svg%3E") no-repeat center bottom / 100% 44px;
+  }
+  .mm-marketplace .mp-content {
+    background:
+      radial-gradient(120% 70% at 100% -8%, rgba(242, 100, 25, .16), transparent 48%),
+      linear-gradient(var(--ink), var(--ink) 38%);
+  }
+}
+
+/* Common light-theme hex utilities used across homepage, marketplace, and chrome. */
+html [class*="text-[#172B45]"],
+html [class*="text-[#172b45]"],
+html [class*="text-[#11172b]"],
+html [class*="text-[#10172b]"],
+html [class*="text-[#101c2c]"],
+html [class*="text-[#1d2733]"],
+html [class*="text-[#1a2438]"],
+html [class*="text-[#1c2a40]"],
+html [class*="text-[#19243a]"],
+html [class*="text-[#182238]"],
+html [class*="text-[#121a2e]"],
+html [class*="text-[#253650]"],
+html [class*="text-[#28374d]"],
+html [class*="text-[#24334b]"],
+html [class*="text-[#26384a]"],
+html [class*="text-[#24384b]"],
+html [class*="text-[#273849]"],
+html [class*="text-[#203A53]"],
+html [class*="text-[#203a53]"],
+html [class*="text-[#263E55]"],
+html [class*="text-[#263e55]"],
+html [class*="text-[#253E55]"],
+html [class*="text-[#243344]"],
+html [class*="text-[#273544]"],
+html [class*="text-[#23384d]"],
+html [class*="text-[#33404d]"],
+html [class*="text-[#0B3D91]"],
+html [class*="text-[#0b3d91]"] {
+  color: var(--bone);
+}
+html [class*="text-[#435465]"],
+html [class*="text-[#526273]"],
+html [class*="text-[#526577]"],
+html [class*="text-[#526777]"],
+html [class*="text-[#53647a]"],
+html [class*="text-[#536078]"],
+html [class*="text-[#536179]"],
+html [class*="text-[#596674]"],
+html [class*="text-[#596B7A]"],
+html [class*="text-[#63707d]"],
+html [class*="text-[#64717c]"],
+html [class*="text-[#647485]"],
+html [class*="text-[#65738a]"],
+html [class*="text-[#667381]"],
+html [class*="text-[#67748a]"],
+html [class*="text-[#677582]"],
+html [class*="text-[#68758a]"],
+html [class*="text-[#687886]"],
+html [class*="text-[#6B7A87]"],
+html [class*="text-[#6C7A87]"],
+html [class*="text-[#6d7883]"],
+html [class*="text-[#6f7c91]"],
+html [class*="text-[#71808d]"],
+html [class*="text-[#71808B]"],
+html [class*="text-[#74818D]"],
+html [class*="text-[#748196]"],
+html [class*="text-[#7C8790]"],
+html [class*="text-[#89919a]"],
+html [class*="text-[#606b80]"],
+html [class*="text-[#4e5d72]"],
+html [class*="text-[#4e5c73]"],
+html [class*="text-[#42516a]"],
+html [class*="text-[#394860]"],
+html [class*="placeholder:text-[#7C8790]"],
+html [class*="placeholder:text-[#89919a]"] {
+  color: var(--slate);
+}
+html [class*="text-[#9A3412]"],
+html [class*="text-[#9a3412]"],
+html [class*="text-[#a94708]"],
+html [class*="text-[#ab4500]"],
+html [class*="text-[#ac4904]"],
+html [class*="text-[#b84b00]"],
+html [class*="text-[#bd530c]"],
+html [class*="text-[#b4510b]"] {
+  color: var(--ember);
+}
+html [class*="bg-[#F8F6F1]"],
+html [class*="bg-[#f8f6f1]"],
+html [class*="bg-[#fbf8f2]"],
+html [class*="bg-[#faf7f0]"],
+html [class*="bg-[#F1F0EB]"],
+html [class*="bg-[#EAF0F3]"],
+html [class*="bg-[#f5f7fa]"],
+html [class*="bg-[#f6f8fc]"],
+html [class*="bg-[#0B2F62]"] {
+  background-color: var(--ink);
+}
+html [class*="bg-[#fffdf9]"],
+html [class*="bg-[#fffaf3]"],
+html [class*="bg-[#f7f3ed]"],
+html [class*="bg-[#f5efe7]"],
+html [class*="bg-[#f4eee6]"],
+html [class*="bg-[#f7f1e9]"],
+html [class*="bg-[#E9E0D6]"],
+html [class*="bg-[#E8EDF0]"],
+html [class*="bg-[#EEF1F2]"],
+html [class*="bg-[#edf4fb]"],
+html [class*="bg-[#fff0e5]"],
+html [class*="bg-[#f0f5ed]"],
+html [class*="bg-[#f0f6ef]"],
+html [class*="bg-[#eef7f0]"],
+html [class*="bg-[#FBF4EC]"],
+html [class*="bg-[#EFE7DB]"] {
+  background-color: var(--elevated);
+}
+html [class*="bg-white"] {
+  background-color: var(--paper);
+}
+html [class*="border-[#e9e2d9]"],
+html [class*="border-[#e9dfd3]"],
+html [class*="border-[#e8e0d6]"],
+html [class*="border-[#e8e0d5]"],
+html [class*="border-[#e7dfd5]"],
+html [class*="border-[#e6ddd1]"],
+html [class*="border-[#e5ddd3]"],
+html [class*="border-[#e5dbcf]"],
+html [class*="border-[#eadfd3]"],
+html [class*="border-[#eee7de]"],
+html [class*="border-[#eee6dc]"],
+html [class*="border-[#ded6cb]"],
+html [class*="border-[#ddd3c8]"],
+html [class*="border-[#dce6e5]"],
+html [class*="border-[#DCE2E5]"],
+html [class*="border-[#dce2eb]"],
+html [class*="border-[#E8ECEE]"],
+html [class*="border-[#ECE8E1]"],
+html [class*="border-[#C9D4DA]"],
+html [class*="border-[#e1e5ed]"],
+html [class*="border-[#172B45]"],
+html [class*="border-[#172b45]"] {
+  border-color: var(--line);
+}
+
+.homepage-fonts { background: var(--ink); color: var(--bone); }
+.homepage-fonts :is(a, button):focus-visible { outline-color: var(--ember); }
+
 .homepage-listings {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
@@ -786,11 +1071,85 @@
   }
 }
 .mm-auth { position: relative; }
+.mm-demo-order-link {
+  background: var(--elevated);
+  border-color: var(--line);
+  color: var(--bone);
+}
+.mm-demo-order-link a {
+  background: none;
+  border: 0;
+  color: #FB923C;
+}
+.mm-demo-thumb {
+  background: var(--elevated);
+  border-color: var(--line);
+  color: var(--ember);
+}
+.mm-demo-file,
+.mm-demo-file-chip {
+  background: var(--elevated);
+  border-color: var(--line);
+  color: var(--bone);
+}
+.mm-demo-file small {
+  color: var(--slate);
+}
+.mm-demo-composer button {
+  background: var(--elevated);
+  border-color: var(--line);
+  color: var(--bone);
+}
+.mm-demo-composer button.send {
+  background: var(--ember-cta);
+  border-color: var(--ember-cta);
+  color: var(--on-ember);
+}
+.mm-demo-avatar.navy {
+  background: var(--ember-cta);
+  color: var(--on-ember);
+}
 .mm-demo-primary {
   background: var(--ember-cta);
   border-color: var(--ember-cta);
   color: var(--on-ember);
   min-height: 44px;
+}
+
+/* Desktop/tablet login only. Keep the 375px rust + wave layout untouched. */
+@media (min-width: 768px) {
+  .mm-auth .mm-auth-hero {
+    background: #C2410C !important;
+  }
+  .mm-auth .mm-auth-hero > div:first-child {
+    display: none !important;
+    filter: none;
+  }
+  .mm-auth .mm-auth-hero::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    right: -1px;
+    bottom: 0;
+    width: 56px;
+    z-index: 2;
+    pointer-events: none;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 56 800' preserveAspectRatio='none'%3E%3Cpath fill='%231A1A1A' d='M56 0H30C10 80 50 160 30 240S10 400 30 480 50 640 30 720 10 800 30 800H56Z'/%3E%3Cpath fill='none' stroke='%23E8590C' stroke-width='3' d='M30 0C10 80 50 160 30 240S10 400 30 480 50 640 30 720 10 800 30 800'/%3E%3C/svg%3E") no-repeat center right / 56px 100%;
+  }
+  .mm-auth[data-mode=signup] .mm-auth-hero::after {
+    right: auto;
+    left: -1px;
+    transform: scaleX(-1);
+    background-position: center left;
+  }
+  .mm-auth .mm-auth-hero p,
+  .mm-auth .mm-auth-hero p.mt-5,
+  .mm-auth .mm-auth-hero-note {
+    color: #FFFFFF;
+  }
+  .mm-auth .mm-auth-hero p.font-display {
+    color: #FFFFFF;
+  }
 }
 .mm-demo-thread-header > button,
 .mm-demo-composer button {

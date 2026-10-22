@@ -140,7 +140,7 @@ export default function MobileTabBar() {
         <span className="relative">
           {tab.icon}
           {tab.badge ? (
-            <span className="absolute -right-2 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-ember px-1 text-[9px] font-bold text-ink">
+            <span className="absolute -right-2 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-ember px-1 text-[9px] font-bold text-on-ember">
               {tab.badge > 9 ? "9+" : tab.badge}
             </span>
           ) : null}
@@ -163,12 +163,12 @@ export default function MobileTabBar() {
         style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
         aria-label="Mobile navigation"
       >
-        <div className="relative border-t border-[#e8e0d6] bg-[#fffdf9]/96 shadow-[0_-8px_24px_rgba(35,40,45,.06)] backdrop-blur-xl">
+        <div className="relative border-t border-line bg-paper/96 shadow-[0_-8px_24px_rgba(0,0,0,.4)] backdrop-blur-xl">
           {showCreateButton ? (
             <Link
               href="/gigs/new"
               aria-label="List a product"
-              className="absolute left-1/2 top-0 z-10 flex h-[3.25rem] w-[3.25rem] -translate-x-1/2 -translate-y-[42%] items-center justify-center rounded-full border-[3px] border-[#fffdf9] bg-[#de641e] text-white shadow-[0_10px_24px_rgba(214,94,28,.32)] transition-transform active:scale-95"
+              className="absolute left-1/2 top-0 z-10 flex h-[3.25rem] w-[3.25rem] -translate-x-1/2 -translate-y-[42%] items-center justify-center rounded-full border-[3px] border-paper bg-ember text-on-ember shadow-[0_10px_24px_rgba(242,100,25,.32)] transition-transform active:scale-95"
             >
               <IconPlus />
             </Link>
