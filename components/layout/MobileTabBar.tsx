@@ -133,8 +133,8 @@ export default function MobileTabBar() {
         href={tab.href}
         data-onboarding-target={tab.href === "/profile" || tab.href === "/messages" ? tab.href.slice(1) : undefined}
         aria-current={active ? "page" : undefined}
-        className={`flex h-16 flex-col items-center justify-center gap-1 text-[10px] font-semibold tracking-wide transition-colors ${
-          active ? "text-ember" : "text-slate"
+        className={`flex h-16 flex-col items-center justify-center gap-1 text-[14px] font-semibold tracking-wide transition-colors md:text-[10px] ${
+          active ? "text-link" : "text-muted"
         }`}
       >
         <span className="relative">

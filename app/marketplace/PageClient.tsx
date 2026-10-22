@@ -222,14 +222,14 @@ export default function MarketplacePage({ designPreview = false }: { designPrevi
       <main className="mp-content mx-auto max-w-7xl px-4 pb-12 pt-5 sm:px-6 sm:pb-16 sm:pt-7 lg:px-8">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <p className="mb-2 flex items-center gap-2 text-[13px] font-semibold uppercase tracking-[.16em] text-eyebrow">
-              <span className="h-px w-5 bg-[#C2410C]" aria-hidden="true" />
+            <p className="mb-2 flex items-center gap-2 text-[13px] font-semibold uppercase tracking-[.16em] text-link">
+              <span className="h-px w-5 bg-ember-cta" aria-hidden="true" />
               Marketplace
             </p>
             <h1 className="font-display text-[26px] font-semibold leading-tight tracking-[-.035em] text-[#172B45] sm:text-[30px]">
               Find your next useful starting point.
             </h1>
-            <p className="mt-1.5 max-w-2xl text-[14px] leading-6 text-[#526273]">
+            <p className="mt-1.5 max-w-2xl text-[14px] leading-6 text-muted">
               Discover ready-made digital products. Make them yours with the creator.
             </p>
           </div>
@@ -242,7 +242,7 @@ export default function MarketplacePage({ designPreview = false }: { designPrevi
         </div>
 
         <div className="relative mt-5">
-          <svg className="pointer-events-none absolute left-4 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-[#71808B]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
+          <svg className="pointer-events-none absolute left-4 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
             <circle cx="10.8" cy="10.8" r="6.8" />
             <path d="m16 16 4.5 4.5" strokeLinecap="round" />
           </svg>
@@ -252,7 +252,7 @@ export default function MarketplacePage({ designPreview = false }: { designPrevi
             onChange={(event) => setQuery(event.target.value)}
             placeholder="Search products, creators, templates..."
             aria-label="Search products, creators, and templates"
-            className="h-12 w-full rounded-2xl border border-[#eadfd3] bg-white pl-11 pr-4 text-[15px] text-[#172B45] shadow-[0_8px_24px_rgba(39,30,20,.06)] placeholder:text-[#7C8790] transition focus:border-[#D87B36] focus:outline-none focus:ring-4 focus:ring-[#E89A5C]/15"
+            className="h-12 min-h-11 w-full rounded-2xl border border-[#eadfd3] bg-white pl-11 pr-4 text-[16px] text-bone shadow-[0_8px_24px_rgba(39,30,20,.06)] placeholder:text-muted transition focus:border-[#D87B36] focus:outline-none focus:ring-4 focus:ring-[#E89A5C]/15"
           />
         </div>
 
@@ -298,8 +298,8 @@ export default function MarketplacePage({ designPreview = false }: { designPrevi
           {loading && <LoadingState />}
 
           {!loading && fetchError && (
-            <div className="text-sm text-[#596B7A]" role="alert">
-              <p className="font-semibold text-[#172B45]">{fetchError.title}</p>
+            <div className="text-sm text-muted" role="alert">
+              <p className="font-semibold text-bone">{fetchError.title}</p>
               <p className="mt-1 leading-relaxed">{fetchError.message}</p>
               {fetchError.canRetry && (
                 <button
@@ -314,7 +314,7 @@ export default function MarketplacePage({ designPreview = false }: { designPrevi
           )}
 
           {!loading && !fetchError && filteredGigs.length === 0 && (
-            <p className="py-2 text-sm text-[#596B7A]" role="status">
+            <p className="py-2 text-sm text-muted" role="status">
               No products match that search yet. Try another term or category.
             </p>
           )}

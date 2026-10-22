@@ -424,8 +424,8 @@ function MessagesPreview() {
           {notice && <p role="status">{notice}</p>}
         </div>
         <form className="mm-demo-composer" onSubmit={send}>
-          <label className="relative grid size-[38px] place-items-center overflow-hidden rounded-[6px] border border-[#dce2eb] text-[#253650]">
-            <input ref={fileRef} type="file" className="absolute inset-0 cursor-pointer opacity-0" aria-label="Attach a file" onChange={(event) => setAttachment(event.target.files?.[0] ?? null)} />
+          <label className="relative grid size-11 min-h-11 min-w-11 place-items-center overflow-hidden rounded-[6px] border border-[#dce2eb] text-[#253650]">
+            <input ref={fileRef} type="file" tabIndex={-1} className="absolute inset-0 cursor-pointer opacity-0" aria-label="Attach a file" onChange={(event) => setAttachment(event.target.files?.[0] ?? null)} />
             <PaperclipIcon size={16} aria-hidden="true" />
           </label>
           {attachment && <span className="mm-demo-file-chip">{attachment.name} <button type="button" aria-label="Remove attachment" onClick={() => setAttachment(null)}><XIcon size={12} /></button></span>}

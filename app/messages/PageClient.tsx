@@ -91,7 +91,7 @@ function ConversationRowItem({
       type="button"
       onClick={onClick}
       aria-current={active ? "true" : undefined}
-      className={`flex min-h-11 w-full gap-3 border-b border-line px-4 py-4 text-left transition-colors ${active ? "bg-elevated" : "hover:bg-ink"}`}
+      className={`flex min-h-14 w-full gap-3 border-b border-line px-4 py-4 text-left transition-colors ${active ? "bg-elevated" : "hover:bg-ink"}`}
     >
       <Avatar initials={conversation.counterpartInitials} />
       <div className="min-w-0 flex-1">
@@ -324,10 +324,10 @@ function MessagesPageInner() {
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#b5632b" strokeWidth="1.8" className="mt-0.5 shrink-0" aria-hidden="true">
               <path d="M12 9v4m0 4h.01M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z" />
             </svg>
-            <p className="flex-1 text-xs leading-5">
+            <p className="flex-1 text-[14px] leading-5 text-muted sm:text-xs sm:text-slate">
               Keep messages about the product. Links, phone numbers and email addresses are blocked to help protect order conversations.
             </p>
-            <button type="button" onClick={() => setNoticeDismissed(true)} aria-label="Dismiss safety note" className="-mr-1 grid h-7 w-7 shrink-0 place-items-center rounded-full text-sm text-[#75808a] transition hover:bg-[#f5e9dc] hover:text-[#26384a]">
+            <button type="button" onClick={() => setNoticeDismissed(true)} aria-label="Dismiss safety note" className="-mr-1 grid h-11 w-11 shrink-0 place-items-center rounded-full text-sm text-muted transition hover:bg-[#f5e9dc] hover:text-bone">
               ×
             </button>
           </div>
@@ -378,7 +378,7 @@ function MessagesPageInner() {
                 <h2 className="text-[16px] font-semibold text-bone">Inbox</h2>
                 <span className="text-[14px] text-slate">{conversations.length}</span>
               </div>
-              <input type="search" aria-label="Search conversations" placeholder="Search conversations" value={conversationQuery} onChange={(event) => setConversationQuery(event.target.value)} className="mx-3 mb-1 mt-3 min-h-11 w-[calc(100%-1.5rem)] rounded-lg border border-[#e1e5ed] px-3 text-sm" />
+              <input type="search" aria-label="Search conversations" placeholder="Search conversations" value={conversationQuery} onChange={(event) => setConversationQuery(event.target.value)} className="mx-3 mb-1 mt-3 min-h-11 w-[calc(100%-1.5rem)] rounded-lg border border-[#e1e5ed] px-3 text-[16px] text-bone placeholder:text-muted" />
               {conversations.filter((conversation) => `${conversation.counterpartName} ${conversation.gigTitle || ''}`.toLowerCase().includes(conversationQuery.trim().toLowerCase())).map((conversation) => (
                 <ConversationRowItem
                   key={conversation.id}
@@ -396,7 +396,7 @@ function MessagesPageInner() {
 
             <section className={`${mobileThreadOpen ? "flex" : "hidden"} min-w-0 flex-1 flex-col md:flex`} aria-label="Active conversation">
               <div className="flex min-h-[4.5rem] items-center gap-3 border-b border-[#eee7de] px-3 py-3 sm:px-5">
-                <button type="button" onClick={() => setMobileThreadOpen(false)} aria-label="Back to conversations" className="grid h-9 w-9 shrink-0 place-items-center rounded-full text-[#516170] transition hover:bg-[#f4eee6] md:hidden">
+                <button type="button" onClick={() => setMobileThreadOpen(false)} aria-label="Back to conversations" className="grid h-11 w-11 shrink-0 place-items-center rounded-full text-muted transition hover:bg-[#f4eee6] md:hidden">
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6" /></svg>
                 </button>
                 <Avatar initials={activeConversation.counterpartInitials} />
@@ -442,19 +442,19 @@ function MessagesPageInner() {
                     onKeyDown={handleKeyDown}
                     placeholder="Write a message…"
                     aria-label="Write a message"
-                    className="max-h-28 min-h-10 flex-1 resize-y border-0 bg-transparent px-2 py-2 text-sm leading-5 text-[#273849] outline-none placeholder:text-[#89929a]"
+                    className="max-h-28 min-h-11 flex-1 resize-y border-0 bg-transparent px-2 py-2 text-[16px] leading-5 text-bone outline-none placeholder:text-muted"
                   />
                   <button
                     type="button"
                     onClick={handleSend}
                     disabled={!draft.trim()}
-                    className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-[#de641e] text-white transition hover:bg-[#c95415] disabled:cursor-not-allowed disabled:bg-[#e8dfd7] disabled:text-[#9b968f]"
+                    className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-[#de641e] text-white transition hover:bg-[#c95415] disabled:cursor-not-allowed disabled:bg-[#e8dfd7] disabled:text-[#9b968f]"
                     aria-label="Send message"
                   >
                     <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="m21 3-7.2 18-3.9-7.9L2 9.2 21 3Z" /><path d="M21 3 9.9 13.1" /></svg>
                   </button>
                 </div>
-                <p className="mt-2 px-1 text-[10px] text-[#89929a]">Enter to send · Shift + Enter for a new line</p>
+                <p className="mt-2 px-1 text-[14px] text-muted md:text-xs md:text-slate">Enter to send · Shift + Enter for a new line</p>
               </div>
             </section>
             <aside className="hidden w-60 shrink-0 border-l border-[#e1e5ed] p-6 xl:block" aria-label="Conversation details">

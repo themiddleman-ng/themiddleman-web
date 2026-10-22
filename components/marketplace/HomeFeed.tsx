@@ -23,10 +23,10 @@ function ListingSkeleton() {
 }
 
 function CategoryIcon({ category }: { category: string }) {
-  if (category === "design") return <svg viewBox="0 0 24 24" className="h-7 w-7" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true"><path d="M12 3.5 20.5 12 12 20.5 3.5 12 12 3.5Z" /></svg>;
-  if (category === "marketing") return <svg viewBox="0 0 24 24" className="h-7 w-7" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true"><path d="M4 16V8l10-3v14L4 16Z" /><path d="M14 9.5h4.5L20 7v10l-1.5-2.5H14" /></svg>;
-  if (category === "writing") return <svg viewBox="0 0 24 24" className="h-7 w-7" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true"><path d="M6 20h12M8 4h5.5a3.5 3.5 0 0 1 0 7H8v9" strokeLinecap="round" /></svg>;
-  return <svg viewBox="0 0 24 24" className="h-7 w-7" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true"><path d="M8 8.5h3.8L8.6 16H6.4L9.2 8.5H8V7h6v1.5h-2.2L8.8 16H7" strokeLinecap="round" /><path d="M14.2 16V8.5L18.4 16V8.5" strokeLinecap="round" /></svg>;
+  if (category === "design") return <svg viewBox="0 0 24 24" className="h-14 w-14 sm:h-16 sm:w-16" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true"><path d="M12 3.5 20.5 12 12 20.5 3.5 12 12 3.5Z" /></svg>;
+  if (category === "marketing") return <svg viewBox="0 0 24 24" className="h-14 w-14 sm:h-16 sm:w-16" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true"><path d="M4 16V8l10-3v14L4 16Z" /><path d="M14 9.5h4.5L20 7v10l-1.5-2.5H14" /></svg>;
+  if (category === "writing") return <svg viewBox="0 0 24 24" className="h-14 w-14 sm:h-16 sm:w-16" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true"><path d="M6 20h12M8 4h5.5a3.5 3.5 0 0 1 0 7H8v9" strokeLinecap="round" /></svg>;
+  return <svg viewBox="0 0 24 24" className="h-14 w-14 sm:h-16 sm:w-16" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true"><path d="M8 8.5h3.8L8.6 16H6.4L9.2 8.5H8V7h6v1.5h-2.2L8.8 16H7" strokeLinecap="round" /><path d="M14.2 16V8.5L18.4 16V8.5" strokeLinecap="round" /></svg>;
 }
 
 export default function HomeFeed() {

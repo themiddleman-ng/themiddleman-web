@@ -6,12 +6,14 @@
   --ember-cta: #C2410C;
   --ember-hover: #E8590C;
   --bone: #F5F2EC;
-  --slate: #A1A1AA;
+  --muted: #A1A1AA;
+  --link: #FB923C;
+  --slate: var(--muted);
   --paper: #1A1A1A;
   --line: #2C2C2C;
   --elevated: #222222;
   --on-ember: #FFFFFF;
-  --eyebrow: #FB923C;
+  --eyebrow: var(--link);
   --focus: #E8590C;
   --logo-blue: #3B82F6;
   --logo-orange: #E8590C;
@@ -32,8 +34,10 @@
 html.dark {
   --auth-hero-bg: #C2410C;
   --auth-hero-ink: #FFFFFF;
-  --eyebrow: #FB923C;
-  --slate: #A1A1AA;
+  --muted: #A1A1AA;
+  --link: #FB923C;
+  --slate: var(--muted);
+  --eyebrow: var(--link);
 }
 
 @theme inline {
@@ -42,6 +46,8 @@ html.dark {
   --color-ember-cta: var(--ember-cta);
   --color-ember-hover: var(--ember-hover);
   --color-bone: var(--bone);
+  --color-muted: var(--muted);
+  --color-link: var(--link);
   --color-slate: var(--slate);
   --color-paper: var(--paper);
   --color-line: var(--line);
@@ -1945,3 +1951,21 @@ html, body {
   .mp-shell .gm-card,
   .mp-shell .gm-preview-inner { transition: none; }
 }
+
+/* UI8 round 5: readable phone type and meta floors */
+@media (max-width: 767px) {
+  :where(.mp-shell, .mm-design, .homepage-fonts) {
+    font-size: 16px;
+  }
+  :where(.mp-shell, .mm-design, .homepage-fonts, main) :is(.text-xs, [class*="text-[10px]"], [class*="text-[11px]"], [class*="text-[12px]"]) {
+    font-size: 14px !important;
+    line-height: 1.35;
+  }
+}
+@media (min-width: 768px) {
+  :where(.mp-shell, .mm-design) :is(.text-xs, [class*="text-[10px]"], [class*="text-[11px]"]) {
+    font-size: 12px !important;
+  }
+}
+.text-link { color: var(--link); }
+.text-muted { color: var(--muted); }
