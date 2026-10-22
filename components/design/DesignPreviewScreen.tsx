@@ -955,7 +955,7 @@ export default function DesignPreviewScreen({ initialScreen = "marketplace" }: {
             <h1>{current.label}</h1>
             <span>Controls on this page work with sample data only. Nothing is saved to an account.</span>
           </div>
-          <Link href="/marketplace">Return to marketplace</Link>
+          <Link href="/marketplace" className="inline-flex min-h-11 items-center">Return to marketplace</Link>
         </div>
         <label className="mm-demo-screen-select">
           <span>Preview screen</span>

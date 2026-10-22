@@ -112,7 +112,7 @@ export default function SiteHeader({ isSeller: sellerHint = false, compact = fal
     setMenuOpen(false);
   }
 
-  const desktopLink = 'rounded-full px-3 py-2 text-sm text-bone transition-colors hover:bg-elevated hover:text-bone';
+  const desktopLink = 'inline-flex min-h-11 items-center rounded-full px-3 text-sm text-bone transition-colors hover:bg-elevated hover:text-bone';
   const mobileLink = 'flex min-h-11 items-center justify-between rounded-xl px-3 py-2.5 text-sm text-bone transition-colors hover:bg-elevated';
 
   function submitHeaderSearch(event: FormEvent) {

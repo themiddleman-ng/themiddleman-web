@@ -16,6 +16,8 @@
   --logo-blue: #3B82F6;
   --logo-orange: #E8590C;
   --logo-navy: #0B1E3F;
+  --auth-hero-bg: #C2410C;
+  --auth-hero-ink: #FFFFFF;
   --accent-violet: #A78BFA;
   --accent-teal: #2DD4BF;
   --accent-pink: #F472B6;
@@ -25,6 +27,13 @@
   --font-syne: "Segoe UI", "Avenir Next", "Helvetica Neue", Arial, sans-serif;
   --font-dm-sans: "Inter", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
   --font-dm-mono: "Consolas", "SFMono-Regular", "Roboto Mono", "Liberation Mono", Menlo, monospace;
+}
+
+html.dark {
+  --auth-hero-bg: #C2410C;
+  --auth-hero-ink: #FFFFFF;
+  --eyebrow: #FB923C;
+  --slate: #A1A1AA;
 }
 
 @theme inline {
