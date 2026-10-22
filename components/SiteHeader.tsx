@@ -112,7 +112,21 @@ export default function SiteHeader({ isSeller: sellerHint = false, compact = fal
     setMenuOpen(false);
   }
 
-  const desktopLink = 'inline-flex min-h-11 items-center rounded-full px-3 text-sm text-bone transition-colors hover:bg-elevated hover:text-bone';
+  function desktopLinkClass(href: string) {
+    const active =
+      href === '/marketplace'
+        ? pathname.startsWith('/marketplace') || pathname.startsWith('/browse')
+        : href === '/messages'
+          ? pathname.startsWith('/messages')
+          : href === '/orders'
+            ? pathname.startsWith('/orders')
+            : href === '/#categories'
+              ? pathname === '/'
+              : false;
+    return `inline-flex min-h-11 items-center rounded-full px-3 text-sm transition-colors hover:bg-elevated ${
+      active ? 'font-semibold text-link' : 'text-bone hover:text-bone'
+    }`;
+  }
   const mobileLink = 'flex min-h-11 items-center justify-between rounded-xl px-3 py-2.5 text-sm text-bone transition-colors hover:bg-elevated';
 
   function submitHeaderSearch(event: FormEvent) {
@@ -140,11 +154,11 @@ export default function SiteHeader({ isSeller: sellerHint = false, compact = fal
         </div>
 
         <nav className="absolute left-1/2 hidden -translate-x-1/2 items-center gap-1 md:flex" aria-label="Main navigation">
-          <Link href="/#categories" className={desktopLink}>Categories</Link>
-          <Link href="/marketplace" className={desktopLink}>Marketplace</Link>
+          <Link href="/#categories" className={desktopLinkClass('/#categories')}>Categories</Link>
+          <Link href="/marketplace" className={desktopLinkClass('/marketplace')}>Marketplace</Link>
           {user && <>
-            <Link href="/orders" data-onboarding-target="orders" className={desktopLink}>Orders</Link>
-            <Link href="/messages" data-onboarding-target="messages" className={desktopLink}><span className="inline-flex items-center gap-2">Messages{unreadBadge}</span></Link>
+            <Link href="/orders" data-onboarding-target="orders" className={desktopLinkClass('/orders')}>Orders</Link>
+            <Link href="/messages" data-onboarding-target="messages" className={desktopLinkClass('/messages')}><span className="inline-flex items-center gap-2">Messages{unreadBadge}</span></Link>
           </>}
         </nav>
 
@@ -161,7 +175,7 @@ export default function SiteHeader({ isSeller: sellerHint = false, compact = fal
                 value={searchQuery}
                 onChange={(event) => setSearchQuery(event.target.value)}
                 placeholder="Search products"
-                className="h-11 w-44 rounded-full border border-line bg-paper pl-9 pr-3 text-sm text-bone placeholder:text-slate transition focus:w-56 focus:border-ember focus:outline-none focus:ring-4 focus:ring-ember/15 xl:w-56 xl:focus:w-64"
+                className="h-11 w-44 rounded-full border border-line bg-paper pl-9 pr-3 text-sm text-bone placeholder:text-muted transition focus:w-56 focus:border-ember focus:outline-none focus:ring-4 focus:ring-ember/15 xl:w-56 xl:focus:w-64"
               />
             </label>
           </form>
