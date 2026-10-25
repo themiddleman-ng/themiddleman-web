@@ -47,7 +47,7 @@ node -e "import { assertIsolatedSupabaseUrl } from './scripts/db-isolated-guard.
 supabase db push --db-url "$SUPABASE_DB_URL"
 ```
 
-Run `supabase/migrations/20261025140001_validate_messages_body_max_length.sql` only after `supabase/preflight/2026-10-25_preflight.sql` shows `long_message_count = 0` on production (Samuel runs preflight on prod; validate on isolated after the same check there).
+Run `supabase/manual/20261025140001_validate_messages_body_max_length.sql` by hand only after `supabase/preflight/2026-10-25_preflight.sql` shows `long_message_count = 0`. It is not under `supabase/migrations`, so `supabase db push` will not validate the constraint early. Samuel runs preflight on production; on the isolated project, run the same preflight there before validating.
 
 ## Seed data
 

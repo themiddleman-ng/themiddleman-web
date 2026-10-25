@@ -56,7 +56,8 @@ select exists(
   where table_schema = 'public' and table_name = 'gig_wishlists'
 ) as gig_wishlists_exists;
 
--- Applied migrations
+-- Applied migrations. 20261025140001 is manual (supabase/manual/, not db push).
+-- A row here means someone already ran the validation file by hand.
 select version, name
 from supabase_migrations.schema_migrations
 where version in (
