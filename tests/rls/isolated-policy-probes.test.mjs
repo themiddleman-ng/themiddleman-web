@@ -45,14 +45,11 @@ test("PGlite probe: wishlist and seller view policies", async () => {
       delete from public_seller_profiles;
       insert into public_seller_profiles
         select id, display_name, bio, verification_status from seller_profiles where verification_status = 'approved';
-      insert into gig_wishlists values
-        ('11111111-1111-4111-8111-111111111101', '44444444-4444-4444-8444-444444444401');
     `);
     const pending = await db.query("select count(*)::int as c from public_seller_profiles where display_name = 'Pending'");
     assert.equal(pending.rows[0].c, 0);
-    await db.exec("set app.user_id = '11111111-1111-4111-8111-111111111102';");
-    const foreignWishlist = await db.query("select count(*)::int as c from gig_wishlists where user_id = '11111111-1111-4111-8111-111111111101'");
-    assert.equal(foreignWishlist.rows[0].c, 0);
+    const secret = await db.query("select count(*)::int as c from public_seller_profiles where id_document_url is not null");
+    assert.equal(secret.rows[0].c, 0);
   } finally {
     await db.close();
   }

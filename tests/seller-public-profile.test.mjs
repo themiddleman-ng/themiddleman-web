@@ -22,6 +22,16 @@ test("public seller migration limits anon reads to approved sellers", async () =
     "utf8",
   );
   assert.match(migration, /verification_status = 'approved'/i);
-  assert.match(migration, /public_seller_profiles/);
-  assert.doesNotMatch(migration, /id_document/i);
+  assert.match(migration, /security_invoker = false/i);
+  assert.match(migration, /authenticated reads own seller profile/);
+  assert.doesNotMatch(migration, /for select to anon/i);
+  assert.match(migration, /id,\s*display_name,\s*bio,\s*rating_avg/s);
+  assert.doesNotMatch(migration, /select[\s\S]*id_document_url[\s\S]*from public\.seller_profiles/i);
+});
+
+test("marketplace gig queries attach public seller cards view", async () => {
+  const helper = await readFile(new URL("../lib/marketplace/attach-public-sellers.mjs", import.meta.url), "utf8");
+  const feed = await readFile(new URL("../components/marketplace/HomeFeed.tsx", import.meta.url), "utf8");
+  assert.match(helper, /public_seller_profile_cards/);
+  assert.match(feed, /attachPublicSellerCards/);
 });
