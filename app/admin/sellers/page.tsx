@@ -1,4 +1,5 @@
 import Link from "next/link";
+import SellerDirectoryFocus from "@/components/admin/SellerDirectoryFocus";
 import SiteHeader from "@/components/SiteHeader";
 import { requireAdminPage } from "@/lib/server/admin-page";
 
@@ -16,13 +17,22 @@ function VerificationStatus({ value }: { value: string }) {
   return <span className={"inline-flex rounded-full border px-2.5 py-1 text-xs font-semibold capitalize " + style}>{label}</span>;
 }
 
-export default async function AdminSellersPage() {
+export default async function AdminSellersPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ focus?: string; status?: string }>;
+}) {
+  const { focus, status } = await searchParams;
   const administrator = await requireAdminPage();
   const db = administrator.db;
-  const sellerResult = await db.from("seller_profiles")
+  let sellerQuery = db.from("seller_profiles")
     .select("id,user_id,display_name,verification_status")
     .order("display_name", { ascending: true })
     .limit(200);
+  if (status === "pending") {
+    sellerQuery = sellerQuery.eq("verification_status", "pending");
+  }
+  const sellerResult = await sellerQuery;
   const sellers = sellerResult.data ?? [];
   const sellerIds = sellers.map((seller: { id: string }) => seller.id);
   const userIds = sellers.map((seller: { user_id: string }) => seller.user_id);
@@ -50,6 +60,7 @@ export default async function AdminSellersPage() {
 
   return (
     <main className="min-h-screen bg-ink text-bone">
+      <SellerDirectoryFocus focusId={focus ?? null} />
       <SiteHeader />
       <div className="mx-auto max-w-7xl px-5 py-8 md:py-12">
         <Link href="/admin" className="text-sm font-medium text-ember hover:underline">← Admin workspace</Link>
@@ -61,7 +72,9 @@ export default async function AdminSellersPage() {
               Review each seller’s verification status, listings and paid orders from the records already in the marketplace.
             </p>
           </div>
-          <span className="rounded-full border border-line px-3 py-1.5 text-xs text-slate">{sellers.length} shown · maximum 200</span>
+          <span className="rounded-full border border-line px-3 py-1.5 text-xs text-slate">
+            {sellers.length} shown · maximum 200{status === "pending" ? " · pending verification" : ""}
+          </span>
         </div>
 
         {sellerResult.error ? (
@@ -86,7 +99,11 @@ export default async function AdminSellersPage() {
                   const user = usersById.get(seller.user_id) as { email?: string; full_name?: string | null } | undefined;
                   const products = productCounts.get(seller.id) ?? { total: 0, active: 0 };
                   return (
-                    <tr key={seller.id} className="align-middle">
+                    <tr
+                      key={seller.id}
+                      id={`seller-${seller.id}`}
+                      className={`align-middle scroll-mt-24 ${focus === seller.id ? "bg-ember/5 ring-1 ring-inset ring-ember/30" : ""}`}
+                    >
                       <td className="px-5 py-4">
                         <p className="font-semibold">{seller.display_name || user?.full_name || "Creator"}</p>
                         <p className="mt-1 text-xs text-slate">{user?.email || "Email unavailable"}</p>

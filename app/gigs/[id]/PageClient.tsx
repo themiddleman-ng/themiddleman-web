@@ -7,7 +7,10 @@ import Image from "next/image";
 import { CaretLeftIcon } from "@phosphor-icons/react/dist/csr/CaretLeft";
 import { CaretRightIcon } from "@phosphor-icons/react/dist/csr/CaretRight";
 import { DotsThreeIcon } from "@phosphor-icons/react/dist/csr/DotsThree";
+import { HeartIcon } from "@phosphor-icons/react/dist/csr/Heart";
 import { SealCheckIcon } from "@phosphor-icons/react/dist/csr/SealCheck";
+import { ShareNetworkIcon } from "@phosphor-icons/react/dist/csr/ShareNetwork";
+import { signinHref } from "@/lib/auth/signin-redirect.mjs";
 import { isSupabaseConfigured, supabase } from "@/lib/supabaseClient";
 import { StarRatingDisplay } from "@/components/StarRating";
 import SiteHeader from "@/components/SiteHeader";
@@ -88,7 +91,17 @@ export default function GigPageClient({
   const [moreOpen, setMoreOpen] = useState(false);
   const [activeSlide, setActiveSlide] = useState(0);
   const [detailTab, setDetailTab] = useState<DetailTabId>("overview");
+  const [wishlisted, setWishlisted] = useState(false);
+  const [wishlistBusy, setWishlistBusy] = useState(false);
+  const [wishlistNotice, setWishlistNotice] = useState("");
+  const [shareNotice, setShareNotice] = useState("");
+  const [messageBusy, setMessageBusy] = useState(false);
+  const [messageError, setMessageError] = useState("");
   const orderRequestKey = useRef<string | null>(null);
+  const moreMenuRef = useRef<HTMLDivElement | null>(null);
+  const returnPath = `/gigs/${gigId}`;
+  const purchasesPausedTitle =
+    "Checkout is paused while payment and delivery verification continues.";
 
   useEffect(() => {
     void fetch("/api/gigs/" + gigId + "/view", {
@@ -151,11 +164,48 @@ export default function GigPageClient({
     return () => { cancelled = true; };
   }, [gigId]);
 
+  useEffect(() => {
+    let cancelled = false;
+    async function loadWishlist() {
+      if (!userId) {
+        setWishlisted(false);
+        return;
+      }
+      try {
+        const response = await fetch(`/api/gigs/${gigId}/wishlist`, { cache: "no-store" });
+        const result = await response.json();
+        if (!cancelled && response.ok) setWishlisted(Boolean(result.saved));
+      } catch {
+        /* Wishlist is optional when the table is not migrated yet. */
+      }
+    }
+    void loadWishlist();
+    return () => { cancelled = true; };
+  }, [gigId, userId]);
+
+  useEffect(() => {
+    if (!moreOpen) return;
+    function closeOnPointer(event: MouseEvent) {
+      if (!moreMenuRef.current?.contains(event.target as Node)) setMoreOpen(false);
+    }
+    window.addEventListener("mousedown", closeOnPointer);
+    return () => window.removeEventListener("mousedown", closeOnPointer);
+  }, [moreOpen]);
+
+  useEffect(() => {
+    if (!shareNotice && !wishlistNotice) return;
+    const timer = window.setTimeout(() => {
+      setShareNotice("");
+      setWishlistNotice("");
+    }, 3200);
+    return () => window.clearTimeout(timer);
+  }, [shareNotice, wishlistNotice]);
+
   const [checkout, setCheckout] = useState<Checkout | null>(null);
 
   async function handleBuyAndPay() {
     setActionError("");
-    if (!userId) { router.push("/signup?mode=signin"); return; }
+    if (!userId) { router.push(signinHref(returnPath)); return; }
     if (!gig) return;
     const sellerUserId = gig.seller_profiles?.user_id;
     if (!sellerUserId) { setActionError("We could not verify the seller account for this product."); return; }
@@ -227,9 +277,77 @@ export default function GigPageClient({
     router.push("/gigs/mine");
   }
 
+  async function toggleWishlist() {
+    setWishlistNotice("");
+    if (!userId) {
+      router.push(signinHref(returnPath));
+      return;
+    }
+    setWishlistBusy(true);
+    try {
+      const response = await fetch(`/api/gigs/${gigId}/wishlist`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: "{}",
+      });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || "Could not update your saved list.");
+      setWishlisted(Boolean(result.saved));
+      setWishlistNotice(result.saved ? "Saved to your list." : "Removed from your saved list.");
+    } catch (cause) {
+      setWishlistNotice(cause instanceof Error ? cause.message : "Could not update your saved list.");
+    } finally {
+      setWishlistBusy(false);
+    }
+  }
+
+  async function handleShare() {
+    setShareNotice("");
+    const url = window.location.href;
+    const title = gig?.title ?? "Product on The Middleman";
+    try {
+      if (typeof navigator.share === "function") {
+        await navigator.share({ title, url });
+        return;
+      }
+    } catch (cause) {
+      if (cause instanceof Error && cause.name === "AbortError") return;
+    }
+    try {
+      await navigator.clipboard.writeText(url);
+      setShareNotice("Link copied to clipboard.");
+    } catch {
+      setShareNotice("Copy this link from your browser address bar.");
+    }
+  }
+
+  async function openProductMessages() {
+    setMessageError("");
+    if (!userId) {
+      router.push(signinHref("/messages"));
+      return;
+    }
+    setMessageBusy(true);
+    try {
+      const response = await fetch("/api/conversations", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ gigId }),
+      });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || "Messaging is not available for this product yet.");
+      if (result.id) router.push(`/messages?conversation=${result.id}`);
+      else router.push("/messages");
+    } catch (cause) {
+      setMessageError(cause instanceof Error ? cause.message : "Could not open messages.");
+    } finally {
+      setMessageBusy(false);
+    }
+  }
+
   async function handleReportGig() {
     setActionError(""); setReportSuccess(false);
-    if (!userId) { router.push("/signup?mode=signin"); return; }
+    if (!userId) { router.push(signinHref(returnPath)); return; }
     if (!gig || userId === gig.seller_profiles?.user_id) { setActionError("You cannot report your own product."); return; }
     setReporting(true);
     const { error } = await supabase.from("gig_reports").insert({ gig_id: gig.id, reported_by: userId, reason: reportReason, details: reportDetails.trim() || null });
@@ -332,7 +450,12 @@ export default function GigPageClient({
       {paying ? "Opening Paystack…" : "Buy this product"}
     </button>
   ) : (
-    <button type="button" disabled className="w-full min-h-11 rounded-xl bg-ember-cta/40 px-5 py-3 text-sm font-semibold text-on-ember opacity-80">
+    <button
+      type="button"
+      disabled
+      title={purchasesPausedTitle}
+      className="w-full min-h-11 rounded-xl bg-ember-cta/40 px-5 py-3 text-sm font-semibold text-on-ember opacity-80"
+    >
       Purchases paused
     </button>
   );
@@ -515,9 +638,15 @@ export default function GigPageClient({
           <p className="mt-2 text-xs leading-5 text-muted">
             Messaging opens once you have a paid order for this product.
           </p>
-          <Link href="/messages" className="mt-4 inline-flex min-h-11 items-center text-sm font-semibold text-link hover:underline">
-            Go to messages
-          </Link>
+          <button
+            type="button"
+            disabled={messageBusy}
+            onClick={() => void openProductMessages()}
+            className="mt-4 inline-flex min-h-11 items-center text-sm font-semibold text-link hover:underline disabled:opacity-50"
+          >
+            {messageBusy ? "Opening messages…" : "Message about this product"}
+          </button>
+          {messageError ? <p className="mt-2 text-xs text-red-500">{messageError}</p> : null}
         </aside>
       </div>
     );
@@ -532,40 +661,69 @@ export default function GigPageClient({
             <ol className="flex flex-wrap items-center gap-1.5">
               <li><Link href="/marketplace" className="font-semibold hover:text-link">Marketplace</Link></li>
               <li aria-hidden="true">/</li>
-              <li><span>{categoryLabel}</span></li>
+              <li>
+                <Link href={`/marketplace?category=${encodeURIComponent(gig.category)}`} className="hover:text-link">
+                  {categoryLabel}
+                </Link>
+              </li>
               <li aria-hidden="true">/</li>
               <li className="truncate text-bone">{gig.title}</li>
             </ol>
           </nav>
           {!isOwnGig ? (
-            <div className="relative shrink-0">
+            <div className="flex shrink-0 items-center gap-1">
               <button
                 type="button"
-                aria-label="More actions"
-                aria-expanded={moreOpen}
-                onClick={() => setMoreOpen((open) => !open)}
+                aria-label={wishlisted ? "Remove from saved list" : "Save product"}
+                aria-pressed={wishlisted}
+                disabled={wishlistBusy}
+                onClick={() => void toggleWishlist()}
+                className="grid h-11 w-11 place-items-center rounded-full text-bone hover:bg-elevated disabled:opacity-50"
+              >
+                <HeartIcon size={22} weight={wishlisted ? "fill" : "regular"} className={wishlisted ? "text-link" : ""} aria-hidden="true" />
+              </button>
+              <button
+                type="button"
+                aria-label="Share product"
+                onClick={() => void handleShare()}
                 className="grid h-11 w-11 place-items-center rounded-full text-bone hover:bg-elevated"
               >
-                <DotsThreeIcon size={22} weight="bold" aria-hidden="true" />
+                <ShareNetworkIcon size={22} weight="regular" aria-hidden="true" />
               </button>
-              {moreOpen ? (
-                <div role="menu" className="absolute right-0 top-12 z-20 min-w-40 rounded-xl border border-line bg-paper p-1.5 shadow-lg">
-                  <button
-                    type="button"
-                    role="menuitem"
-                    onClick={() => {
-                      setMoreOpen(false);
-                      setReportOpen(true);
-                    }}
-                    className="flex min-h-11 w-full items-center rounded-lg px-3 text-left text-[15px] font-semibold text-link"
-                  >
-                    Report
-                  </button>
-                </div>
-              ) : null}
+              <div className="relative" ref={moreMenuRef}>
+                <button
+                  type="button"
+                  aria-label="More actions"
+                  aria-expanded={moreOpen}
+                  onClick={() => setMoreOpen((open) => !open)}
+                  className="grid h-11 w-11 place-items-center rounded-full text-bone hover:bg-elevated"
+                >
+                  <DotsThreeIcon size={22} weight="bold" aria-hidden="true" />
+                </button>
+                {moreOpen ? (
+                  <div role="menu" className="absolute right-0 top-12 z-20 min-w-40 rounded-xl border border-line bg-paper p-1.5 shadow-lg">
+                    <button
+                      type="button"
+                      role="menuitem"
+                      onClick={() => {
+                        setMoreOpen(false);
+                        setReportOpen(true);
+                      }}
+                      className="flex min-h-11 w-full items-center rounded-lg px-3 text-left text-[15px] font-semibold text-link"
+                    >
+                      Report
+                    </button>
+                  </div>
+                ) : null}
+              </div>
             </div>
           ) : null}
         </div>
+        {shareNotice || wishlistNotice ? (
+          <p className="mt-2 text-right text-xs font-semibold text-link" role="status">
+            {shareNotice || wishlistNotice}
+          </p>
+        ) : null}
 
         <div className="mt-6 grid min-w-0 grid-cols-1 gap-8 lg:grid-cols-12 lg:gap-10">
           <div className="min-w-0 lg:col-span-7">
@@ -721,7 +879,12 @@ export default function GigPageClient({
               {paying ? "Opening…" : checkout ? "Continue to Paystack" : "Buy this product"}
             </button>
           ) : (
-            <button type="button" disabled className="ml-auto inline-flex min-h-11 flex-1 items-center justify-center rounded-xl bg-line px-4 text-sm font-semibold text-slate">
+            <button
+              type="button"
+              disabled
+              title={purchasesPausedTitle}
+              className="ml-auto inline-flex min-h-11 flex-1 items-center justify-center rounded-xl bg-line px-4 text-sm font-semibold text-slate"
+            >
               Purchases paused
             </button>
           )}

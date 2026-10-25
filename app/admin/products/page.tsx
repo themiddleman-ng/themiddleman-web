@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { Suspense } from "react";
 import AdminProductReviewQueue from "@/components/AdminProductReviewQueue";
 import { adminUser } from "@/lib/server/marketplace";
 import { productPackagesEnabled } from "@/lib/server/product-package-config.mjs";
@@ -27,7 +28,11 @@ export default async function AdminProductsPage() {
           Review the product listing and private package before publication. Structural checks are not a malware scan, and pricing feedback never changes a seller’s price.
         </p>
         {productPackagesEnabled()
-          ? <AdminProductReviewQueue />
+          ? (
+            <Suspense fallback={<p className="mt-8 text-sm text-slate">Loading product reviews…</p>}>
+              <AdminProductReviewQueue />
+            </Suspense>
+          )
           : <p className="mt-8 rounded-xl border border-white/10 p-4 text-sm text-slate">Product package review is disabled until this preview has an isolated database and the package migration is verified.</p>}
       </div>
     </main>
