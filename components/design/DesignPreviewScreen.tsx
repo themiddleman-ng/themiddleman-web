@@ -84,18 +84,18 @@ export const DESIGN_PREVIEW_SCREENS: PreviewScreen[] = [
 ];
 
 const listings: Listing[] = [
-  ["Invoice & Expense Tracker", "Ada Studio", "₦8,500", "development"],
-  ["Business Landing Page Kit", "Tobi Builds", "₦25,000", "development"],
-  ["Social Media Brand Pack", "Nneka Design", "₦12,000", "design"],
-  ["Student Planner", "Ife Tools", "₦4,000", "writing"],
-  ["Restaurant Menu Template", "Kemi Studio", "₦6,500", "design"],
-  ["Storefront Starter Kit", "Dev Kole", "₦32,000", "development"],
+  ["Invoice & Expense Tracker", "Sample seller", "₦8,500", "development"],
+  ["Business Landing Page Kit", "Sample seller", "₦25,000", "development"],
+  ["Social Media Brand Pack", "Sample seller", "₦12,000", "design"],
+  ["Student Planner", "Sample seller", "₦4,000", "writing"],
+  ["Restaurant Menu Template", "Sample seller", "₦6,500", "design"],
+  ["Storefront Starter Kit", "Sample seller", "₦32,000", "development"],
 ];
 
 const purchaseOrders = [
-  ["MM-1042", "Invoice & Expense Tracker", "Ada Studio", "₦8,500", "In progress", "15 Oct 2026"],
-  ["MM-0987", "Business Landing Page Kit", "PixelForge", "₦12,000", "Delivered", "10 Oct 2026"],
-  ["MM-0761", "Social Media Brand Pack", "Creative Hub", "₦6,500", "Completed", "03 Oct 2026"],
+  ["MM-1042", "Invoice & Expense Tracker", "Sample seller", "₦8,500", "In progress", "15 Oct 2026"],
+  ["MM-0987", "Business Landing Page Kit", "Sample seller", "₦12,000", "Delivered", "10 Oct 2026"],
+  ["MM-0761", "Social Media Brand Pack", "Sample seller", "₦6,500", "Completed", "03 Oct 2026"],
 ];
 
 const saleOrders = [
@@ -109,7 +109,7 @@ const CATEGORIES = ["All products", "development", "design", "marketing", "writi
 const threadSeed: Thread[] = [
   {
     id: "ada",
-    name: "Ada Studio",
+    name: "Sample seller",
     product: "Invoice & Expense Tracker",
     preview: "Thanks! I’ll send a preview…",
     time: "11:24 AM",
@@ -119,15 +119,15 @@ const threadSeed: Thread[] = [
     price: "₦8,500",
     status: "In progress",
     messages: [
-      { from: "you", text: "Hi Ada, can you add my business name to the invoice template?" },
+      { from: "you", text: "Can you add my business name to the invoice template?" },
       { from: "them", text: "Yes. Please send the name and your logo here." },
-      { from: "you", text: "Buks Studio. I’ve attached the logo." },
+      { from: "you", text: "Sample Business. I’ve attached the logo." },
       { from: "them", text: "Thanks! I’ll send a preview here for you to check." },
     ],
   },
   {
     id: "tobi",
-    name: "Tobi Builds",
+    name: "Sample seller",
     product: "Business Landing Page Kit",
     preview: "Sounds good. I’ll make these…",
     time: "Yesterday",
@@ -143,7 +143,7 @@ const threadSeed: Thread[] = [
   },
   {
     id: "nneka",
-    name: "Nneka Design",
+    name: "Sample seller",
     product: "Social Media Brand Pack",
     preview: "Perfect! Here is the final file…",
     time: "Mon",
@@ -275,7 +275,7 @@ function OrdersPreview({ detail = false }: { detail?: boolean }) {
         </div>
         <div className="mm-demo-detail-grid">
           <section className="mm-demo-panel">
-            <div className="mm-demo-product-heading"><div className="mm-demo-thumb"><FileIcon size={18} aria-hidden="true" /></div><div><h2>Invoice &amp; Expense Tracker</h2><p>Order #MM-1042 · Ada Studio</p></div></div>
+            <div className="mm-demo-product-heading"><div className="mm-demo-thumb"><FileIcon size={18} aria-hidden="true" /></div><div><h2>Invoice &amp; Expense Tracker</h2><p>Order #MM-1042 · Sample seller</p></div></div>
             <ol className="mm-demo-steps"><li className="done">Payment confirmed <small>15 Oct 2026, 14:22</small></li><li className="current">In progress <small>Creator is preparing your files</small></li><li>Delivery</li><li>Completed</li></ol>
             <div className="mm-demo-update"><strong>Latest update</strong><p>Your order is in progress. The creator is working on your files.</p><Link href="?screen=messages">Message creator</Link></div>
           </section>
@@ -554,16 +554,16 @@ function AdminPreview({ section }: { section: string }) {
   const [activityOpen, setActivityOpen] = useState(false);
   const title = section === "admin" ? "Operations overview" : formatTitle(section);
   const baseRows = section === "admin-sellers"
-    ? [["Ada Studio", "Seller application", "15 Oct 2026", "Review"], ["Tobi Builds", "Verified", "14 Oct 2026", "View"]]
+    ? [["Sample seller", "Seller application", "15 Oct 2026", "Review"], ["Sample seller", "Verified", "14 Oct 2026", "View"]]
     : section === "admin-escrow"
       ? [["MM-1042", "In escrow", "₦8,500", "View order"], ["MM-0987", "Delivered", "₦12,000", "View order"]]
       : section === "admin-communications" || section === "admin-email"
         ? [["Order update", "Email delivered", "Today, 14:22", "Preview"], ["Payment receipt", "Retry needed", "Today, 12:17", "Review"]]
-        : [["Invoice & Expense Tracker", "New seller · #P10432", "2h 14m", "Review"], ["Ada Studio", "Seller application · #S2781", "5h 36m", "Review"], ["Business Landing Page Kit", "Delivery review · #D6623", "1d 4h", "Review"], ["Social Media Brand Pack", "Updated details · #P10411", "1d 22h", "Review"]];
+        : [["Invoice & Expense Tracker", "New seller · #P10432", "2h 14m", "Review"], ["Sample seller", "Seller application · #S2781", "5h 36m", "Review"], ["Business Landing Page Kit", "Delivery review · #D6623", "1d 4h", "Review"], ["Social Media Brand Pack", "Updated details · #P10411", "1d 22h", "Review"]];
   const extraRows = [["Storefront Starter Kit", "New seller · #P10490", "2d 1h", "Review"], ["Student Planner", "Updated price · #P10310", "3d 4h", "Review"]];
   const rows = queueOpen ? [...baseRows, ...extraRows] : baseRows;
   const visible = rows.filter((row) => row.join(" ").toLowerCase().includes(filter.toLowerCase()));
-  const activity = ["Product submitted · Invoice & Expense Tracker", "Delivery review received · Business Landing Page Kit", "Seller application · Ada Studio", "Notification failed · Sample event"];
+  const activity = ["Product submitted · Invoice & Expense Tracker", "Delivery review received · Business Landing Page Kit", "Seller application · Sample seller", "Notification failed · Sample event"];
   const older = ["Payout recorded · MM-0761", "Email resent · Payment receipt", "Product approved · Restaurant Menu Template"];
   const selectedRow = rows.find((row) => row.join(":") === selected);
 
@@ -592,7 +592,7 @@ function AdminPreview({ section }: { section: string }) {
             const done = reviewed.includes(id);
             return (
               <div className="mm-demo-table-row" key={id}>
-                <span><Chip tone={row[0].includes("Seller") || row[0] === "Ada Studio" ? "blue" : "orange"}>{row[0]}</Chip></span>
+                <span><Chip tone={row[0].includes("Seller") || row[0] === "Sample seller" ? "blue" : "orange"}>{row[0]}</Chip></span>
                 <strong>{row[1]}</strong>
                 <span>{row[2]}</span>
                 <button type="button" aria-pressed={selected === id} onClick={() => setSelected(selected === id ? "" : id)}>{done ? "Reviewed" : row[3]}</button>
@@ -627,7 +627,7 @@ const productTabs = [
   { id: "overview", label: "Overview", body: "Keep track of income, expenses and outstanding invoices with this easy to use spreadsheet. Customize it with the creator to fit your workflow." },
   { id: "included", label: "What’s included", body: "Editable spreadsheet, a setup guide, and short instructions for income, expenses, and outstanding invoices." },
   { id: "requirements", label: "Requirements", body: "A spreadsheet app that opens .xlsx files. Custom names and a logo are sent to the creator after purchase, when checkout is live." },
-  { id: "creator", label: "Creator", body: "Ada Studio builds digital templates and tools. Verified creators are marked on the listing." },
+  { id: "creator", label: "Creator", body: "Sample seller builds digital templates and tools. Verified creators are marked on the listing." },
 ];
 
 function ProductPreview() {
@@ -655,7 +655,7 @@ function ProductPreview() {
           <strong className="mm-demo-big-price">₦8,500</strong>
           <p>A simple, editable spreadsheet to manage invoices, track expenses and see your business performance.</p>
           <hr />
-          <h2>Ada Studio <Verified /></h2>
+          <h2>Sample seller <Verified /></h2>
           <p>Digital templates &amp; tools</p>
           {step === "buy" && <button className="mm-demo-primary" type="button" onClick={() => setStep("review")}>Continue to checkout</button>}
           {step === "review" && (
@@ -853,7 +853,7 @@ function DisputesPreview() {
 
 function NotificationsPreview() {
   const [items, setItems] = useState([
-    { id: "1", title: "Order in progress", body: "Ada Studio started Invoice & Expense Tracker.", read: false },
+    { id: "1", title: "Order in progress", body: "Sample seller started Invoice & Expense Tracker.", read: false },
     { id: "2", title: "Delivery ready", body: "Business Landing Page Kit is ready to download.", read: false },
     { id: "3", title: "Account", body: "Your preview profile was saved on this device only.", read: true },
   ]);

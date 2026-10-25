@@ -3,12 +3,12 @@ import test from "node:test";
 import { filterListings, filterThreads, matchesPrice } from "../lib/design-preview/filters.mjs";
 
 const listings = [
-  ["Invoice & Expense Tracker", "Ada Studio", "₦8,500", "development"],
-  ["Business Landing Page Kit", "Tobi Builds", "₦25,000", "development"],
-  ["Social Media Brand Pack", "Nneka Design", "₦12,000", "design"],
-  ["Student Planner", "Ife Tools", "₦4,000", "writing"],
-  ["Restaurant Menu Template", "Kemi Studio", "₦6,500", "design"],
-  ["Storefront Starter Kit", "Dev Kole", "₦32,000", "development"],
+  ["Invoice & Expense Tracker", "Sample seller", "₦8,500", "development"],
+  ["Business Landing Page Kit", "Sample seller", "₦25,000", "development"],
+  ["Social Media Brand Pack", "Sample seller", "₦12,000", "design"],
+  ["Student Planner", "Sample seller", "₦4,000", "writing"],
+  ["Restaurant Menu Template", "Sample seller", "₦6,500", "design"],
+  ["Storefront Starter Kit", "Sample seller", "₦32,000", "development"],
 ];
 
 test("price ranges include the boundaries buyers expect", () => {
@@ -29,7 +29,7 @@ test("marketplace filters combine search, category, price, and sort", () => {
   const design = filterListings(listings, { category: "design", sort: "Price: low to high" }).map((item) => item[0]);
   assert.deepEqual(design, ["Restaurant Menu Template", "Social Media Brand Pack"]);
 
-  const searched = filterListings(listings, { query: " ada ", category: "development" }).map((item) => item[0]);
+  const searched = filterListings(listings, { query: " invoice ", category: "development" }).map((item) => item[0]);
   assert.deepEqual(searched, ["Invoice & Expense Tracker"]);
 
   const expensive = filterListings(listings, { price: "Over ₦25,000", sort: "Price: high to low" }).map((item) => item[2]);
@@ -38,13 +38,13 @@ test("marketplace filters combine search, category, price, and sort", () => {
 
 test("conversation search matches the person, product, or latest line", () => {
   const threads = [
-    { name: "Ada Studio", product: "Invoice & Expense Tracker", preview: "Thanks! I’ll send a preview" },
-    { name: "Tobi Builds", product: "Business Landing Page Kit", preview: "Sounds good" },
-    { name: "Nneka Design", product: "Social Media Brand Pack", preview: "Final file" },
+    { name: "Sample seller", product: "Invoice & Expense Tracker", preview: "Thanks! I’ll send a preview" },
+    { name: "Sample seller", product: "Business Landing Page Kit", preview: "Sounds good" },
+    { name: "Sample seller", product: "Social Media Brand Pack", preview: "Final file" },
   ];
-  assert.equal(filterThreads(threads, "tobi").length, 1);
+  assert.equal(filterThreads(threads, "landing").length, 1);
   assert.equal(filterThreads(threads, "brand").length, 1);
-  assert.equal(filterThreads(threads, "preview")[0].name, "Ada Studio");
+  assert.equal(filterThreads(threads, "preview")[0].name, "Sample seller");
   assert.equal(filterThreads(threads, "   ").length, 3);
   assert.equal(filterThreads(threads, "missing").length, 0);
 });

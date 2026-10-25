@@ -4,6 +4,7 @@ import { supabase } from "@/lib/supabaseClient";
 import { StarRatingDisplay } from "@/components/StarRating";
 import ProductCover from "./ProductCover";
 import { categoryTheme } from "@/lib/marketplace/categories";
+import { listingImageSrc } from "@/lib/marketplace/listing-image.mjs";
 
 export type CardGig = { id: string; title: string; description: string; category: string; price_ngn: number; is_ai_assisted: boolean; gallery_image_paths?: string[]; seller_profiles: { display_name: string; verification_status: string } | null };
 export type CardRating = { average_rating: number; review_count: number };
@@ -11,7 +12,10 @@ export default function GigCard({ gig, rating }: { gig: CardGig; rating?: CardRa
   const seller = gig.seller_profiles?.display_name ?? "Unknown seller";
   const verified = gig.seller_profiles?.verification_status === "approved";
   const cover = gig.gallery_image_paths?.[0];
-  const imageUrl = cover ? supabase.storage.from("gig-media").getPublicUrl(cover).data.publicUrl : null;
+  const imageUrl = listingImageSrc(
+    cover,
+    cover && !cover.startsWith("/") ? supabase.storage.from("gig-media").getPublicUrl(cover).data.publicUrl : null,
+  );
   const theme = categoryTheme(gig.category);
   const coverLabel = gig.is_ai_assisted ? "AI-assisted" : theme.label;
 

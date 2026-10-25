@@ -449,7 +449,9 @@ export default function GigPageClient({
 
   const verified = gig.seller_profiles?.verification_status === "approved";
   const imageUrls = (gig.gallery_image_paths ?? []).map((path) =>
-    supabase.storage.from("gig-media").getPublicUrl(path).data.publicUrl,
+    path.startsWith("/") || path.startsWith("http")
+      ? path
+      : supabase.storage.from("gig-media").getPublicUrl(path).data.publicUrl,
   );
   const videoUrl = gig.demo_video_path
     ? supabase.storage.from("gig-media").getPublicUrl(gig.demo_video_path).data.publicUrl
