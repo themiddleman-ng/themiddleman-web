@@ -123,7 +123,7 @@ export default function SiteHeader({ isSeller: sellerHint = false, compact = fal
             : href === '/#categories'
               ? pathname === '/'
               : false;
-    return `inline-flex min-h-11 items-center rounded-full px-3 text-sm transition-colors hover:bg-elevated ${
+    return `inline-flex h-11 min-h-11 items-center rounded-full px-3 text-sm transition-colors hover:bg-elevated ${
       active ? 'font-semibold text-link' : 'text-bone hover:text-bone'
     }`;
   }

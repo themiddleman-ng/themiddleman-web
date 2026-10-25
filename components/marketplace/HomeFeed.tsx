@@ -63,7 +63,7 @@ export default function HomeFeed() {
         return;
       }
 
-      const rows = await attachPublicSellerCards(supabase, (gigsResult.data as GigRow[]) ?? []);
+      const rows = await attachPublicSellerCards(supabase, (gigsResult.data as unknown as GigRow[]) ?? []);
       setGigs(rows as GigRow[]);
       const ratingMap: Record<string, CardRating> = {};
       ((ratingsResult.data as Array<{ gig_id: string } & CardRating>) ?? []).forEach((row) => {

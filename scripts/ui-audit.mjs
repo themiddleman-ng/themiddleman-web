@@ -40,9 +40,34 @@ async function auditPage(page, route, viewport) {
   }
   const overflow = await page.evaluate(() => {
     const doc = document.documentElement;
-    return doc.scrollWidth > doc.clientWidth + 1;
+    const active = doc.scrollWidth > doc.clientWidth + 1;
+    if (!active) return { active: false, culprits: [] };
+    const vw = doc.clientWidth;
+    const culprits = [];
+    for (const el of document.querySelectorAll("*")) {
+      const rect = el.getBoundingClientRect();
+      if (rect.width === 0 && rect.height === 0) continue;
+      if (rect.right > vw + 1 || rect.left < -1) {
+        const id = el.id ? `#${el.id}` : "";
+        const cls =
+          el.className && typeof el.className === "string"
+            ? `.${el.className.trim().split(/\s+/).slice(0, 3).join(".")}`
+            : "";
+        culprits.push({
+          tag: el.tagName,
+          sel: id || cls || el.tagName,
+          left: Math.round(rect.left),
+          right: Math.round(rect.right),
+          width: Math.round(rect.width),
+        });
+      }
+    }
+    culprits.sort((a, b) => b.right - a.right);
+    return { active: true, culprits: culprits.slice(0, 6) };
   });
-  if (overflow) issues.push({ type: "overflow", detail: "horizontal scroll detected" });
+  if (overflow.active) {
+    issues.push({ type: "overflow", detail: "horizontal scroll detected", culprits: overflow.culprits });
+  }
 
   const smallTargets = await page.evaluate(() => {
     const bad = [];

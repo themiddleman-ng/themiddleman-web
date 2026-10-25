@@ -1,0 +1,47 @@
+{
+  "base": "http://127.0.0.1:3000",
+  "routes": [
+    {
+      "route": "/admin",
+      "status": 200,
+      "title": "Create an account | The Middleman",
+      "likelyGuest": false
+    },
+    {
+      "route": "/admin/products",
+      "status": 404,
+      "title": "Page Not Found | The Middleman",
+      "likelyGuest": false
+    },
+    {
+      "route": "/admin/sellers",
+      "status": 200,
+      "title": "Create an account | The Middleman",
+      "likelyGuest": false
+    },
+    {
+      "route": "/admin/review",
+      "status": 200,
+      "title": "Create an account | The Middleman",
+      "likelyGuest": false
+    },
+    {
+      "route": "/admin/escrow",
+      "status": 200,
+      "title": "Create an account | The Middleman",
+      "likelyGuest": false
+    },
+    {
+      "route": "/admin/communications",
+      "status": 200,
+      "title": "Create an account | The Middleman",
+      "likelyGuest": false
+    },
+    {
+      "route": "/admin/email-preview",
+      "status": 200,
+      "title": "Create an account | The Middleman",
+      "likelyGuest": false
+    }
+  ]
+}

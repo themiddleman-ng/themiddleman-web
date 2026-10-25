@@ -1,92 +1,23 @@
 {
   "base": "http://127.0.0.1:3000",
-  "generatedAt": "2026-10-25T09:03:43.733Z",
+  "generatedAt": "2026-10-25T09:42:43.011Z",
   "routes": {
     "375:/": [
-      {
-        "type": "overflow",
-        "detail": "horizontal scroll detected"
-      },
-      {
-        "type": "tap",
-        "detail": [
-          {
-            "w": 1254,
-            "h": 35,
-            "label": "The Middleman homepage"
-          },
-          {
-            "w": 68,
-            "h": 17,
-            "label": "Categories"
-          },
-          {
-            "w": 80,
-            "h": 17,
-            "label": "Marketplace"
-          },
-          {
-            "w": 16,
-            "h": 17,
-            "label": "Search products"
-          },
-          {
-            "w": 35,
-            "h": 28,
-            "label": "Open account menu"
-          },
-          {
-            "w": 108,
-            "h": 17,
-            "label": "Browse products"
-          },
-          {
-            "w": 77,
-            "h": 17,
-            "label": "Start selling"
-          },
-          {
-            "w": 359,
-            "h": 35,
-            "label": "Web & Software"
-          },
-          {
-            "w": 359,
-            "h": 35,
-            "label": "Design"
-          },
-          {
-            "w": 359,
-            "h": 35,
-            "label": "Marketing"
-          },
-          {
-            "w": 359,
-            "h": 35,
-            "label": "Writing"
-          },
-          {
-            "w": 43,
-            "h": 21,
-            "label": "New"
-          }
-        ]
-      },
       {
         "type": "contrast-sample",
         "detail": [
           {
-            "fg": "rgb(0, 0, 0)",
-            "bg": "rgba(0, 0, 0, 0)",
+            "fg": "rgb(245, 242, 236)",
+            "bg": "rgb(17, 17, 17)",
             "tag": "MAIN"
           },
           {
-            "fg": "rgb(0, 0, 0)",
-            "bg": "rgba(0, 0, 0, 0)",
+            "fg": "rgb(245, 242, 236)",
+            "bg": "oklab(0.177624 0.00000809133 0.00000356138 / 0.95)",
             "tag": "HEADER"
           },
           {
-            "fg": "rgb(0, 0, 0)",
+            "fg": "rgb(245, 242, 236)",
             "bg": "rgba(0, 0, 0, 0)",
             "tag": "NAV"
           }
@@ -95,180 +26,22 @@
     ],
     "375:/marketplace": [
       {
-        "type": "contrast-sample",
-        "detail": []
-      }
-    ],
-    "375:/browse": [
-      {
-        "type": "contrast-sample",
-        "detail": []
-      }
-    ],
-    "375:/about": [
-      {
-        "type": "overflow",
-        "detail": "horizontal scroll detected"
-      },
-      {
         "type": "tap",
         "detail": [
           {
-            "w": 1254,
-            "h": 35,
-            "label": "The Middleman homepage"
+            "w": 85,
+            "h": 16,
+            "label": "Cookie policy"
           },
           {
-            "w": 68,
-            "h": 17,
-            "label": "Categories"
+            "w": 65,
+            "h": 36,
+            "label": "Choose"
           },
           {
-            "w": 80,
-            "h": 17,
-            "label": "Marketplace"
-          },
-          {
-            "w": 16,
-            "h": 17,
-            "label": "Search products"
-          },
-          {
-            "w": 35,
-            "h": 28,
-            "label": "Open account menu"
-          },
-          {
-            "w": 155,
-            "h": 17,
-            "label": "Browse the marketplace"
-          },
-          {
-            "w": 115,
-            "h": 17,
-            "label": "Create an account"
-          }
-        ]
-      },
-      {
-        "type": "contrast-sample",
-        "detail": []
-      }
-    ],
-    "375:/signup?mode=signin": [
-      {
-        "type": "tap",
-        "detail": [
-          {
-            "w": 103,
-            "h": 17,
-            "label": "The Middleman homepage"
-          },
-          {
-            "w": 79,
-            "h": 17,
-            "label": "Browse first"
-          },
-          {
-            "w": 114,
-            "h": 17,
-            "label": "Forgot password?"
-          },
-          {
-            "w": 34,
-            "h": 27,
-            "label": "Show password"
-          },
-          {
-            "w": 52,
-            "h": 21,
-            "label": "Log in"
-          },
-          {
-            "w": 125,
-            "h": 21,
-            "label": "Create an account"
-          },
-          {
-            "w": 109,
-            "h": 17,
-            "label": "Terms of Service"
-          },
-          {
-            "w": 93,
-            "h": 17,
-            "label": "Privacy Policy"
-          }
-        ]
-      },
-      {
-        "type": "contrast-sample",
-        "detail": []
-      }
-    ],
-    "375:/gigs/new": [
-      {
-        "type": "contrast-sample",
-        "detail": []
-      }
-    ],
-    "375:/messages": [
-      {
-        "type": "overflow",
-        "detail": "horizontal scroll detected"
-      },
-      {
-        "type": "tap",
-        "detail": [
-          {
-            "w": 1254,
-            "h": 35,
-            "label": "The Middleman homepage"
-          },
-          {
-            "w": 68,
-            "h": 17,
-            "label": "Categories"
-          },
-          {
-            "w": 80,
-            "h": 17,
-            "label": "Marketplace"
-          },
-          {
-            "w": 16,
-            "h": 17,
-            "label": "Search products"
-          },
-          {
-            "w": 35,
-            "h": 28,
-            "label": "Open account menu"
-          },
-          {
-            "w": 24,
-            "h": 21,
-            "label": "Dismiss safety note"
-          },
-          {
-            "w": 102,
-            "h": 17,
-            "label": "Marketplace"
-          },
-          {
-            "w": 71,
-            "h": 17,
-            "label": "Browse"
-          },
-          {
-            "w": 84,
-            "h": 17,
-            "label": "Messages"
-          },
-          {
-            "w": 66,
-            "h": 17,
-            "label": "Profile"
+            "w": 42,
+            "h": 36,
+            "label": "OK"
           }
         ]
       },
@@ -276,17 +49,197 @@
         "type": "contrast-sample",
         "detail": [
           {
-            "fg": "rgb(0, 0, 0)",
+            "fg": "rgb(245, 242, 236)",
             "bg": "rgba(0, 0, 0, 0)",
             "tag": "MAIN"
           },
           {
-            "fg": "rgb(0, 0, 0)",
-            "bg": "rgba(0, 0, 0, 0)",
+            "fg": "rgb(245, 242, 236)",
+            "bg": "oklab(0.177624 0.00000809133 0.00000356138 / 0.95)",
             "tag": "HEADER"
           },
           {
-            "fg": "rgb(0, 0, 0)",
+            "fg": "rgb(245, 242, 236)",
+            "bg": "rgba(0, 0, 0, 0)",
+            "tag": "NAV"
+          }
+        ]
+      }
+    ],
+    "375:/browse": [
+      {
+        "type": "tap",
+        "detail": [
+          {
+            "w": 253,
+            "h": 20,
+            "label": "See everything on the marketplace →"
+          },
+          {
+            "w": 85,
+            "h": 16,
+            "label": "Cookie policy"
+          },
+          {
+            "w": 65,
+            "h": 36,
+            "label": "Choose"
+          },
+          {
+            "w": 42,
+            "h": 36,
+            "label": "OK"
+          }
+        ]
+      },
+      {
+        "type": "contrast-sample",
+        "detail": [
+          {
+            "fg": "rgb(245, 242, 236)",
+            "bg": "rgb(17, 17, 17)",
+            "tag": "MAIN"
+          },
+          {
+            "fg": "rgb(245, 242, 236)",
+            "bg": "oklab(0.177624 0.00000809133 0.00000356138 / 0.95)",
+            "tag": "HEADER"
+          },
+          {
+            "fg": "rgb(245, 242, 236)",
+            "bg": "rgba(0, 0, 0, 0)",
+            "tag": "NAV"
+          }
+        ]
+      }
+    ],
+    "375:/about": [
+      {
+        "type": "tap",
+        "detail": [
+          {
+            "w": 85,
+            "h": 16,
+            "label": "Cookie policy"
+          },
+          {
+            "w": 65,
+            "h": 36,
+            "label": "Choose"
+          },
+          {
+            "w": 42,
+            "h": 36,
+            "label": "OK"
+          }
+        ]
+      },
+      {
+        "type": "contrast-sample",
+        "detail": [
+          {
+            "fg": "rgb(245, 242, 236)",
+            "bg": "rgb(17, 17, 17)",
+            "tag": "MAIN"
+          },
+          {
+            "fg": "rgb(245, 242, 236)",
+            "bg": "oklab(0.177624 0.00000809133 0.00000356138 / 0.95)",
+            "tag": "HEADER"
+          },
+          {
+            "fg": "rgb(245, 242, 236)",
+            "bg": "rgba(0, 0, 0, 0)",
+            "tag": "NAV"
+          }
+        ]
+      }
+    ],
+    "375:/signup?mode=signin": [
+      {
+        "type": "contrast-sample",
+        "detail": [
+          {
+            "fg": "rgb(245, 242, 236)",
+            "bg": "rgb(17, 17, 17)",
+            "tag": "MAIN"
+          }
+        ]
+      }
+    ],
+    "375:/gigs/new": [
+      {
+        "type": "tap",
+        "detail": [
+          {
+            "w": 85,
+            "h": 16,
+            "label": "Cookie policy"
+          },
+          {
+            "w": 65,
+            "h": 36,
+            "label": "Choose"
+          },
+          {
+            "w": 42,
+            "h": 36,
+            "label": "OK"
+          }
+        ]
+      },
+      {
+        "type": "contrast-sample",
+        "detail": [
+          {
+            "fg": "rgb(245, 242, 236)",
+            "bg": "rgb(17, 17, 17)",
+            "tag": "MAIN"
+          },
+          {
+            "fg": "rgb(245, 242, 236)",
+            "bg": "rgba(0, 0, 0, 0)",
+            "tag": "NAV"
+          }
+        ]
+      }
+    ],
+    "375:/messages": [
+      {
+        "type": "tap",
+        "detail": [
+          {
+            "w": 85,
+            "h": 16,
+            "label": "Cookie policy"
+          },
+          {
+            "w": 65,
+            "h": 36,
+            "label": "Choose"
+          },
+          {
+            "w": 42,
+            "h": 36,
+            "label": "OK"
+          }
+        ]
+      },
+      {
+        "type": "contrast-sample",
+        "detail": [
+          {
+            "fg": "rgb(245, 242, 236)",
+            "bg": "rgb(17, 17, 17)",
+            "tag": "MAIN"
+          },
+          {
+            "fg": "rgb(245, 242, 236)",
+            "bg": "oklab(0.177624 0.00000809133 0.00000356138 / 0.95)",
+            "tag": "HEADER"
+          },
+          {
+            "fg": "rgb(245, 242, 236)",
             "bg": "rgba(0, 0, 0, 0)",
             "tag": "NAV"
           }
@@ -295,20 +248,128 @@
     ],
     "375:/orders": [
       {
+        "type": "tap",
+        "detail": [
+          {
+            "w": 85,
+            "h": 16,
+            "label": "Cookie policy"
+          },
+          {
+            "w": 65,
+            "h": 36,
+            "label": "Choose"
+          },
+          {
+            "w": 42,
+            "h": 36,
+            "label": "OK"
+          }
+        ]
+      },
+      {
         "type": "contrast-sample",
-        "detail": []
+        "detail": [
+          {
+            "fg": "rgb(245, 242, 236)",
+            "bg": "rgb(17, 17, 17)",
+            "tag": "MAIN"
+          },
+          {
+            "fg": "rgb(245, 242, 236)",
+            "bg": "oklab(0.177624 0.00000809133 0.00000356138 / 0.95)",
+            "tag": "HEADER"
+          },
+          {
+            "fg": "rgb(245, 242, 236)",
+            "bg": "rgba(0, 0, 0, 0)",
+            "tag": "NAV"
+          }
+        ]
       }
     ],
     "375:/profile": [
       {
+        "type": "tap",
+        "detail": [
+          {
+            "w": 85,
+            "h": 16,
+            "label": "Cookie policy"
+          },
+          {
+            "w": 65,
+            "h": 36,
+            "label": "Choose"
+          },
+          {
+            "w": 42,
+            "h": 36,
+            "label": "OK"
+          }
+        ]
+      },
+      {
         "type": "contrast-sample",
-        "detail": []
+        "detail": [
+          {
+            "fg": "rgb(245, 242, 236)",
+            "bg": "rgb(17, 17, 17)",
+            "tag": "MAIN"
+          },
+          {
+            "fg": "rgb(245, 242, 236)",
+            "bg": "oklab(0.177624 0.00000809133 0.00000356138 / 0.95)",
+            "tag": "HEADER"
+          },
+          {
+            "fg": "rgb(245, 242, 236)",
+            "bg": "rgba(0, 0, 0, 0)",
+            "tag": "NAV"
+          }
+        ]
       }
     ],
     "375:/settings": [
       {
+        "type": "tap",
+        "detail": [
+          {
+            "w": 85,
+            "h": 16,
+            "label": "Cookie policy"
+          },
+          {
+            "w": 65,
+            "h": 36,
+            "label": "Choose"
+          },
+          {
+            "w": 42,
+            "h": 36,
+            "label": "OK"
+          }
+        ]
+      },
+      {
         "type": "contrast-sample",
-        "detail": []
+        "detail": [
+          {
+            "fg": "rgb(245, 242, 236)",
+            "bg": "rgb(17, 17, 17)",
+            "tag": "MAIN"
+          },
+          {
+            "fg": "rgb(245, 242, 236)",
+            "bg": "oklab(0.177624 0.00000809133 0.00000356138 / 0.95)",
+            "tag": "HEADER"
+          },
+          {
+            "fg": "rgb(245, 242, 236)",
+            "bg": "rgba(0, 0, 0, 0)",
+            "tag": "NAV"
+          }
+        ]
       }
     ],
     "375:/admin": [
@@ -316,302 +377,178 @@
         "type": "tap",
         "detail": [
           {
-            "w": 103,
-            "h": 17,
-            "label": "The Middleman homepage"
+            "w": 85,
+            "h": 16,
+            "label": "Cookie policy"
           },
           {
-            "w": 79,
-            "h": 17,
-            "label": "Browse first"
+            "w": 65,
+            "h": 36,
+            "label": "Choose"
           },
           {
-            "w": 114,
-            "h": 17,
-            "label": "Forgot password?"
-          },
-          {
-            "w": 34,
-            "h": 27,
-            "label": "Show password"
-          },
-          {
-            "w": 52,
-            "h": 21,
-            "label": "Log in"
-          },
-          {
-            "w": 125,
-            "h": 21,
-            "label": "Create an account"
-          },
-          {
-            "w": 109,
-            "h": 17,
-            "label": "Terms of Service"
-          },
-          {
-            "w": 93,
-            "h": 17,
-            "label": "Privacy Policy"
+            "w": 42,
+            "h": 36,
+            "label": "OK"
           }
         ]
       },
       {
         "type": "contrast-sample",
-        "detail": []
+        "detail": [
+          {
+            "fg": "rgb(245, 242, 236)",
+            "bg": "rgb(17, 17, 17)",
+            "tag": "MAIN"
+          }
+        ]
       }
     ],
     "375:/design-review": [
       {
         "type": "contrast-sample",
-        "detail": []
+        "detail": [
+          {
+            "fg": "rgb(245, 242, 236)",
+            "bg": "rgb(17, 17, 17)",
+            "tag": "MAIN"
+          }
+        ]
       }
     ],
     "375:/legal/terms": [
       {
+        "type": "tap",
+        "detail": [
+          {
+            "w": 39,
+            "h": 17,
+            "label": "Home"
+          },
+          {
+            "w": 133,
+            "h": 38,
+            "label": "1. Acceptance of Terms"
+          },
+          {
+            "w": 140,
+            "h": 38,
+            "label": "2. Nature of the Platform"
+          },
+          {
+            "w": 160,
+            "h": 38,
+            "label": "3. Account Registration & Verification"
+          },
+          {
+            "w": 160,
+            "h": 38,
+            "label": "4. Escrow Payment Mechanism"
+          },
+          {
+            "w": 114,
+            "h": 38,
+            "label": "5. Buyer Obligations"
+          },
+          {
+            "w": 113,
+            "h": 38,
+            "label": "6. Seller Obligations"
+          },
+          {
+            "w": 121,
+            "h": 38,
+            "label": "7. Prohibited Conduct"
+          },
+          {
+            "w": 125,
+            "h": 38,
+            "label": "8. Fees & Commission"
+          },
+          {
+            "w": 128,
+            "h": 38,
+            "label": "9. Intellectual Property"
+          },
+          {
+            "w": 125,
+            "h": 38,
+            "label": "10. Dispute Resolution"
+          },
+          {
+            "w": 133,
+            "h": 38,
+            "label": "11. Limitation of Liability"
+          }
+        ]
+      },
+      {
         "type": "contrast-sample",
-        "detail": []
+        "detail": [
+          {
+            "fg": "rgb(245, 242, 236)",
+            "bg": "rgb(17, 17, 17)",
+            "tag": "MAIN"
+          },
+          {
+            "fg": "rgb(245, 242, 236)",
+            "bg": "oklab(0.177624 0.00000809133 0.00000356138 / 0.95)",
+            "tag": "HEADER"
+          },
+          {
+            "fg": "rgb(245, 242, 236)",
+            "bg": "rgba(0, 0, 0, 0)",
+            "tag": "NAV"
+          }
+        ]
       }
     ],
     "375:/sellers/00000000-0000-4000-8000-000000000001": [
       {
-        "type": "overflow",
-        "detail": "horizontal scroll detected"
-      },
-      {
-        "type": "tap",
-        "detail": [
-          {
-            "w": 1254,
-            "h": 35,
-            "label": "The Middleman homepage"
-          },
-          {
-            "w": 119,
-            "h": 17,
-            "label": "Back to homepage"
-          },
-          {
-            "w": 155,
-            "h": 17,
-            "label": "Browse the marketplace"
-          },
-          {
-            "w": 46,
-            "h": 17,
-            "label": "Sign in"
-          }
-        ]
-      },
-      {
         "type": "contrast-sample",
-        "detail": [
-          {
-            "fg": "rgb(0, 0, 0)",
-            "bg": "rgba(0, 0, 0, 0)",
-            "tag": "MAIN"
-          }
-        ]
+        "detail": []
       }
     ],
     "768:/": [
       {
         "type": "contrast-sample",
-        "detail": []
+        "detail": [
+          {
+            "fg": "rgb(245, 242, 236)",
+            "bg": "rgb(17, 17, 17)",
+            "tag": "MAIN"
+          },
+          {
+            "fg": "rgb(245, 242, 236)",
+            "bg": "oklab(0.177624 0.00000809133 0.00000356138 / 0.95)",
+            "tag": "HEADER"
+          },
+          {
+            "fg": "rgb(245, 242, 236)",
+            "bg": "rgba(0, 0, 0, 0)",
+            "tag": "NAV"
+          }
+        ]
       }
     ],
     "768:/marketplace": [
       {
-        "type": "overflow",
-        "detail": "horizontal scroll detected"
-      },
-      {
-        "type": "contrast-sample",
-        "detail": []
-      }
-    ],
-    "768:/browse": [
-      {
-        "type": "overflow",
-        "detail": "horizontal scroll detected"
-      },
-      {
         "type": "tap",
         "detail": [
           {
-            "w": 1254,
-            "h": 35,
-            "label": "The Middleman homepage"
+            "w": 85,
+            "h": 16,
+            "label": "Cookie policy"
           },
           {
-            "w": 68,
-            "h": 17,
-            "label": "Categories"
+            "w": 65,
+            "h": 36,
+            "label": "Choose"
           },
           {
-            "w": 80,
-            "h": 17,
-            "label": "Marketplace"
-          },
-          {
-            "w": 16,
-            "h": 17,
-            "label": "Search products"
-          },
-          {
-            "w": 35,
-            "h": 28,
-            "label": "Open account menu"
-          },
-          {
-            "w": 113,
-            "h": 21,
-            "label": "Search products"
-          },
-          {
-            "w": 241,
-            "h": 17,
-            "label": "See everything on the marketplace →"
-          },
-          {
-            "w": 102,
-            "h": 17,
-            "label": "Marketplace"
-          },
-          {
-            "w": 71,
-            "h": 17,
-            "label": "Browse"
-          },
-          {
-            "w": 84,
-            "h": 17,
-            "label": "Messages"
-          },
-          {
-            "w": 66,
-            "h": 17,
-            "label": "Profile"
-          }
-        ]
-      },
-      {
-        "type": "contrast-sample",
-        "detail": []
-      }
-    ],
-    "768:/about": [
-      {
-        "type": "overflow",
-        "detail": "horizontal scroll detected"
-      },
-      {
-        "type": "contrast-sample",
-        "detail": []
-      }
-    ],
-    "768:/signup?mode=signin": [
-      {
-        "type": "contrast-sample",
-        "detail": []
-      }
-    ],
-    "768:/gigs/new": [
-      {
-        "type": "contrast-sample",
-        "detail": []
-      }
-    ],
-    "768:/messages": [
-      {
-        "type": "contrast-sample",
-        "detail": []
-      }
-    ],
-    "768:/orders": [
-      {
-        "type": "overflow",
-        "detail": "horizontal scroll detected"
-      },
-      {
-        "type": "contrast-sample",
-        "detail": []
-      }
-    ],
-    "768:/profile": [
-      {
-        "type": "contrast-sample",
-        "detail": []
-      }
-    ],
-    "768:/settings": [
-      {
-        "type": "overflow",
-        "detail": "horizontal scroll detected"
-      },
-      {
-        "type": "tap",
-        "detail": [
-          {
-            "w": 97,
-            "h": 17,
-            "label": "Your profile"
-          },
-          {
-            "w": 63,
-            "h": 17,
-            "label": "Orders"
-          },
-          {
-            "w": 81,
-            "h": 17,
-            "label": "Messages"
-          },
-          {
-            "w": 81,
-            "h": 17,
-            "label": "Payments"
-          },
-          {
-            "w": 103,
-            "h": 17,
-            "label": "Notifications"
-          },
-          {
-            "w": 71,
-            "h": 17,
-            "label": "Settings"
-          },
-          {
-            "w": 72,
-            "h": 17,
-            "label": "Security"
-          },
-          {
-            "w": 133,
-            "h": 17,
-            "label": "Explore marketplace"
-          },
-          {
-            "w": 80,
-            "h": 17,
-            "label": "Buy and sell"
-          },
-          {
-            "w": 1254,
-            "h": 35,
-            "label": "The Middleman homepage"
-          },
-          {
-            "w": 68,
-            "h": 17,
-            "label": "Categories"
-          },
-          {
-            "w": 80,
-            "h": 17,
-            "label": "Marketplace"
+            "w": 42,
+            "h": 36,
+            "label": "OK"
           }
         ]
       },
@@ -619,17 +556,343 @@
         "type": "contrast-sample",
         "detail": [
           {
-            "fg": "rgb(0, 0, 0)",
+            "fg": "rgb(245, 242, 236)",
             "bg": "rgba(0, 0, 0, 0)",
             "tag": "MAIN"
           },
           {
-            "fg": "rgb(0, 0, 0)",
-            "bg": "rgba(0, 0, 0, 0)",
+            "fg": "rgb(245, 242, 236)",
+            "bg": "oklab(0.177624 0.00000809133 0.00000356138 / 0.95)",
             "tag": "HEADER"
           },
           {
-            "fg": "rgb(0, 0, 0)",
+            "fg": "rgb(245, 242, 236)",
+            "bg": "rgba(0, 0, 0, 0)",
+            "tag": "NAV"
+          }
+        ]
+      }
+    ],
+    "768:/browse": [
+      {
+        "type": "tap",
+        "detail": [
+          {
+            "w": 253,
+            "h": 20,
+            "label": "See everything on the marketplace →"
+          },
+          {
+            "w": 85,
+            "h": 16,
+            "label": "Cookie policy"
+          },
+          {
+            "w": 65,
+            "h": 36,
+            "label": "Choose"
+          },
+          {
+            "w": 42,
+            "h": 36,
+            "label": "OK"
+          }
+        ]
+      },
+      {
+        "type": "contrast-sample",
+        "detail": [
+          {
+            "fg": "rgb(245, 242, 236)",
+            "bg": "rgb(17, 17, 17)",
+            "tag": "MAIN"
+          },
+          {
+            "fg": "rgb(245, 242, 236)",
+            "bg": "oklab(0.177624 0.00000809133 0.00000356138 / 0.95)",
+            "tag": "HEADER"
+          },
+          {
+            "fg": "rgb(245, 242, 236)",
+            "bg": "rgba(0, 0, 0, 0)",
+            "tag": "NAV"
+          }
+        ]
+      }
+    ],
+    "768:/about": [
+      {
+        "type": "tap",
+        "detail": [
+          {
+            "w": 85,
+            "h": 16,
+            "label": "Cookie policy"
+          },
+          {
+            "w": 65,
+            "h": 36,
+            "label": "Choose"
+          },
+          {
+            "w": 42,
+            "h": 36,
+            "label": "OK"
+          }
+        ]
+      },
+      {
+        "type": "contrast-sample",
+        "detail": [
+          {
+            "fg": "rgb(245, 242, 236)",
+            "bg": "rgb(17, 17, 17)",
+            "tag": "MAIN"
+          },
+          {
+            "fg": "rgb(245, 242, 236)",
+            "bg": "oklab(0.177624 0.00000809133 0.00000356138 / 0.95)",
+            "tag": "HEADER"
+          },
+          {
+            "fg": "rgb(245, 242, 236)",
+            "bg": "rgba(0, 0, 0, 0)",
+            "tag": "NAV"
+          }
+        ]
+      }
+    ],
+    "768:/signup?mode=signin": [
+      {
+        "type": "tap",
+        "detail": [
+          {
+            "w": 85,
+            "h": 16,
+            "label": "Cookie policy"
+          },
+          {
+            "w": 65,
+            "h": 36,
+            "label": "Choose"
+          },
+          {
+            "w": 42,
+            "h": 36,
+            "label": "OK"
+          }
+        ]
+      },
+      {
+        "type": "contrast-sample",
+        "detail": [
+          {
+            "fg": "rgb(245, 242, 236)",
+            "bg": "rgb(17, 17, 17)",
+            "tag": "MAIN"
+          }
+        ]
+      }
+    ],
+    "768:/gigs/new": [
+      {
+        "type": "tap",
+        "detail": [
+          {
+            "w": 85,
+            "h": 16,
+            "label": "Cookie policy"
+          },
+          {
+            "w": 65,
+            "h": 36,
+            "label": "Choose"
+          },
+          {
+            "w": 42,
+            "h": 36,
+            "label": "OK"
+          }
+        ]
+      },
+      {
+        "type": "contrast-sample",
+        "detail": [
+          {
+            "fg": "rgb(245, 242, 236)",
+            "bg": "rgb(17, 17, 17)",
+            "tag": "MAIN"
+          },
+          {
+            "fg": "rgb(245, 242, 236)",
+            "bg": "rgba(0, 0, 0, 0)",
+            "tag": "NAV"
+          }
+        ]
+      }
+    ],
+    "768:/messages": [
+      {
+        "type": "tap",
+        "detail": [
+          {
+            "w": 85,
+            "h": 16,
+            "label": "Cookie policy"
+          },
+          {
+            "w": 65,
+            "h": 36,
+            "label": "Choose"
+          },
+          {
+            "w": 42,
+            "h": 36,
+            "label": "OK"
+          }
+        ]
+      },
+      {
+        "type": "contrast-sample",
+        "detail": [
+          {
+            "fg": "rgb(245, 242, 236)",
+            "bg": "rgb(17, 17, 17)",
+            "tag": "MAIN"
+          },
+          {
+            "fg": "rgb(245, 242, 236)",
+            "bg": "oklab(0.177624 0.00000809133 0.00000356138 / 0.95)",
+            "tag": "HEADER"
+          },
+          {
+            "fg": "rgb(245, 242, 236)",
+            "bg": "rgba(0, 0, 0, 0)",
+            "tag": "NAV"
+          }
+        ]
+      }
+    ],
+    "768:/orders": [
+      {
+        "type": "tap",
+        "detail": [
+          {
+            "w": 85,
+            "h": 16,
+            "label": "Cookie policy"
+          },
+          {
+            "w": 65,
+            "h": 36,
+            "label": "Choose"
+          },
+          {
+            "w": 42,
+            "h": 36,
+            "label": "OK"
+          }
+        ]
+      },
+      {
+        "type": "contrast-sample",
+        "detail": [
+          {
+            "fg": "rgb(245, 242, 236)",
+            "bg": "rgb(17, 17, 17)",
+            "tag": "MAIN"
+          },
+          {
+            "fg": "rgb(245, 242, 236)",
+            "bg": "oklab(0.177624 0.00000809133 0.00000356138 / 0.95)",
+            "tag": "HEADER"
+          },
+          {
+            "fg": "rgb(245, 242, 236)",
+            "bg": "rgba(0, 0, 0, 0)",
+            "tag": "NAV"
+          }
+        ]
+      }
+    ],
+    "768:/profile": [
+      {
+        "type": "tap",
+        "detail": [
+          {
+            "w": 85,
+            "h": 16,
+            "label": "Cookie policy"
+          },
+          {
+            "w": 65,
+            "h": 36,
+            "label": "Choose"
+          },
+          {
+            "w": 42,
+            "h": 36,
+            "label": "OK"
+          }
+        ]
+      },
+      {
+        "type": "contrast-sample",
+        "detail": [
+          {
+            "fg": "rgb(245, 242, 236)",
+            "bg": "rgb(17, 17, 17)",
+            "tag": "MAIN"
+          },
+          {
+            "fg": "rgb(245, 242, 236)",
+            "bg": "oklab(0.177624 0.00000809133 0.00000356138 / 0.95)",
+            "tag": "HEADER"
+          },
+          {
+            "fg": "rgb(245, 242, 236)",
+            "bg": "rgba(0, 0, 0, 0)",
+            "tag": "NAV"
+          }
+        ]
+      }
+    ],
+    "768:/settings": [
+      {
+        "type": "tap",
+        "detail": [
+          {
+            "w": 85,
+            "h": 16,
+            "label": "Cookie policy"
+          },
+          {
+            "w": 65,
+            "h": 36,
+            "label": "Choose"
+          },
+          {
+            "w": 42,
+            "h": 36,
+            "label": "OK"
+          }
+        ]
+      },
+      {
+        "type": "contrast-sample",
+        "detail": [
+          {
+            "fg": "rgb(245, 242, 236)",
+            "bg": "rgb(17, 17, 17)",
+            "tag": "MAIN"
+          },
+          {
+            "fg": "rgb(245, 242, 236)",
+            "bg": "oklab(0.177624 0.00000809133 0.00000356138 / 0.95)",
+            "tag": "HEADER"
+          },
+          {
+            "fg": "rgb(245, 242, 236)",
             "bg": "rgba(0, 0, 0, 0)",
             "tag": "NAV"
           }
@@ -641,91 +904,108 @@
         "type": "tap",
         "detail": [
           {
-            "w": 103,
-            "h": 17,
-            "label": "The Middleman homepage"
+            "w": 85,
+            "h": 16,
+            "label": "Cookie policy"
           },
           {
-            "w": 79,
-            "h": 17,
-            "label": "Browse first"
+            "w": 65,
+            "h": 36,
+            "label": "Choose"
           },
           {
-            "w": 114,
-            "h": 17,
-            "label": "Forgot password?"
-          },
-          {
-            "w": 34,
-            "h": 27,
-            "label": "Show password"
-          },
-          {
-            "w": 52,
-            "h": 21,
-            "label": "Log in"
-          },
-          {
-            "w": 125,
-            "h": 21,
-            "label": "Create an account"
-          },
-          {
-            "w": 109,
-            "h": 17,
-            "label": "Terms of Service"
-          },
-          {
-            "w": 93,
-            "h": 17,
-            "label": "Privacy Policy"
+            "w": 42,
+            "h": 36,
+            "label": "OK"
           }
         ]
       },
       {
         "type": "contrast-sample",
-        "detail": []
+        "detail": [
+          {
+            "fg": "rgb(245, 242, 236)",
+            "bg": "rgb(17, 17, 17)",
+            "tag": "MAIN"
+          }
+        ]
       }
     ],
     "768:/design-review": [
       {
         "type": "contrast-sample",
-        "detail": []
+        "detail": [
+          {
+            "fg": "rgb(245, 242, 236)",
+            "bg": "rgb(17, 17, 17)",
+            "tag": "MAIN"
+          }
+        ]
       }
     ],
     "768:/legal/terms": [
       {
-        "type": "contrast-sample",
-        "detail": []
-      }
-    ],
-    "768:/sellers/00000000-0000-4000-8000-000000000001": [
-      {
-        "type": "overflow",
-        "detail": "horizontal scroll detected"
-      },
-      {
         "type": "tap",
         "detail": [
           {
-            "w": 1254,
-            "h": 35,
-            "label": "The Middleman homepage"
+            "w": 39,
+            "h": 17,
+            "label": "Home"
           },
           {
-            "w": 119,
-            "h": 17,
-            "label": "Back to homepage"
+            "w": 230,
+            "h": 19,
+            "label": "1. Acceptance of Terms"
           },
           {
-            "w": 155,
-            "h": 17,
-            "label": "Browse the marketplace"
+            "w": 230,
+            "h": 19,
+            "label": "2. Nature of the Platform"
           },
           {
-            "w": 46,
-            "h": 17,
-            "label": "Sign in"
+            "w": 230,
+            "h": 19,
+            "label": "3. Account Registration & Verification"
+          },
+          {
+            "w": 230,
+            "h": 19,
+            "label": "4. Escrow Payment Mechanism"
+          },
+          {
+            "w": 230,
+            "h": 19,
+            "label": "5. Buyer Obligations"
+          },
+          {
+            "w": 230,
+            "h": 19,
+            "label": "6. Seller Obligations"
+          },
+          {
+            "w": 230,
+            "h": 19,
+            "label": "7. Prohibited Conduct"
+          },
+          {
+            "w": 230,
+            "h": 19,
+            "label": "8. Fees & Commission"
+          },
+          {
+            "w": 230,
+            "h": 19,
+            "label": "9. Intellectual Property"
+          },
+          {
+            "w": 230,
+            "h": 19,
+            "label": "10. Dispute Resolution"
+          },
+          {
+            "w": 230,
+            "h": 19,
+            "label": "11. Limitation of Liability"
           }
         ]
       },
@@ -733,8 +1013,30 @@
         "type": "contrast-sample",
         "detail": [
           {
-            "fg": "rgb(0, 0, 0)",
+            "fg": "rgb(245, 242, 236)",
+            "bg": "rgb(17, 17, 17)",
+            "tag": "MAIN"
+          },
+          {
+            "fg": "rgb(245, 242, 236)",
+            "bg": "oklab(0.177624 0.00000809133 0.00000356138 / 0.95)",
+            "tag": "HEADER"
+          },
+          {
+            "fg": "rgb(245, 242, 236)",
             "bg": "rgba(0, 0, 0, 0)",
+            "tag": "NAV"
+          }
+        ]
+      }
+    ],
+    "768:/sellers/00000000-0000-4000-8000-000000000001": [
+      {
+        "type": "contrast-sample",
+        "detail": [
+          {
+            "fg": "rgb(245, 242, 236)",
+            "bg": "rgb(17, 17, 17)",
             "tag": "MAIN"
           }
         ]
@@ -743,25 +1045,119 @@
     "1440:/": [
       {
         "type": "contrast-sample",
-        "detail": []
+        "detail": [
+          {
+            "fg": "rgb(245, 242, 236)",
+            "bg": "rgb(17, 17, 17)",
+            "tag": "MAIN"
+          },
+          {
+            "fg": "rgb(245, 242, 236)",
+            "bg": "oklab(0.177624 0.00000809133 0.00000356138 / 0.95)",
+            "tag": "HEADER"
+          },
+          {
+            "fg": "rgb(245, 242, 236)",
+            "bg": "rgba(0, 0, 0, 0)",
+            "tag": "NAV"
+          }
+        ]
       }
     ],
     "1440:/marketplace": [
       {
         "type": "contrast-sample",
-        "detail": []
+        "detail": [
+          {
+            "fg": "rgb(245, 242, 236)",
+            "bg": "rgba(0, 0, 0, 0)",
+            "tag": "MAIN"
+          },
+          {
+            "fg": "rgb(245, 242, 236)",
+            "bg": "oklab(0.177624 0.00000809133 0.00000356138 / 0.95)",
+            "tag": "HEADER"
+          },
+          {
+            "fg": "rgb(245, 242, 236)",
+            "bg": "rgba(0, 0, 0, 0)",
+            "tag": "NAV"
+          }
+        ]
       }
     ],
     "1440:/browse": [
       {
+        "type": "tap",
+        "detail": [
+          {
+            "w": 253,
+            "h": 20,
+            "label": "See everything on the marketplace →"
+          }
+        ]
+      },
+      {
         "type": "contrast-sample",
-        "detail": []
+        "detail": [
+          {
+            "fg": "rgb(245, 242, 236)",
+            "bg": "rgb(17, 17, 17)",
+            "tag": "MAIN"
+          },
+          {
+            "fg": "rgb(245, 242, 236)",
+            "bg": "oklab(0.177624 0.00000809133 0.00000356138 / 0.95)",
+            "tag": "HEADER"
+          },
+          {
+            "fg": "rgb(245, 242, 236)",
+            "bg": "rgba(0, 0, 0, 0)",
+            "tag": "NAV"
+          }
+        ]
       }
     ],
     "1440:/about": [
       {
+        "type": "tap",
+        "detail": [
+          {
+            "w": 85,
+            "h": 16,
+            "label": "Cookie policy"
+          },
+          {
+            "w": 65,
+            "h": 36,
+            "label": "Choose"
+          },
+          {
+            "w": 42,
+            "h": 36,
+            "label": "OK"
+          }
+        ]
+      },
+      {
         "type": "contrast-sample",
-        "detail": []
+        "detail": [
+          {
+            "fg": "rgb(245, 242, 236)",
+            "bg": "rgb(17, 17, 17)",
+            "tag": "MAIN"
+          },
+          {
+            "fg": "rgb(245, 242, 236)",
+            "bg": "oklab(0.177624 0.00000809133 0.00000356138 / 0.95)",
+            "tag": "HEADER"
+          },
+          {
+            "fg": "rgb(245, 242, 236)",
+            "bg": "rgba(0, 0, 0, 0)",
+            "tag": "NAV"
+          }
+        ]
       }
     ],
     "1440:/signup?mode=signin": [
@@ -769,62 +1165,125 @@
         "type": "tap",
         "detail": [
           {
-            "w": 103,
-            "h": 17,
-            "label": "The Middleman homepage"
+            "w": 85,
+            "h": 16,
+            "label": "Cookie policy"
           },
           {
-            "w": 79,
-            "h": 17,
-            "label": "Browse first"
+            "w": 65,
+            "h": 36,
+            "label": "Choose"
           },
           {
-            "w": 114,
-            "h": 17,
-            "label": "Forgot password?"
-          },
-          {
-            "w": 34,
-            "h": 27,
-            "label": "Show password"
-          },
-          {
-            "w": 52,
-            "h": 21,
-            "label": "Log in"
-          },
-          {
-            "w": 125,
-            "h": 21,
-            "label": "Create an account"
-          },
-          {
-            "w": 109,
-            "h": 17,
-            "label": "Terms of Service"
-          },
-          {
-            "w": 93,
-            "h": 17,
-            "label": "Privacy Policy"
+            "w": 42,
+            "h": 36,
+            "label": "OK"
           }
         ]
       },
       {
         "type": "contrast-sample",
-        "detail": []
+        "detail": [
+          {
+            "fg": "rgb(245, 242, 236)",
+            "bg": "rgb(17, 17, 17)",
+            "tag": "MAIN"
+          }
+        ]
       }
     ],
     "1440:/gigs/new": [
       {
+        "type": "tap",
+        "detail": [
+          {
+            "w": 183,
+            "h": 44,
+            "label": "My products"
+          },
+          {
+            "w": 183,
+            "h": 44,
+            "label": "Create a product"
+          },
+          {
+            "w": 183,
+            "h": 44,
+            "label": "Analytics"
+          },
+          {
+            "w": 183,
+            "h": 44,
+            "label": "Seller support"
+          },
+          {
+            "w": 183,
+            "h": 44,
+            "label": "Explore marketplace"
+          },
+          {
+            "w": 183,
+            "h": 44,
+            "label": "Buy and sell"
+          }
+        ]
+      },
+      {
         "type": "contrast-sample",
-        "detail": []
+        "detail": [
+          {
+            "fg": "rgb(245, 242, 236)",
+            "bg": "rgb(17, 17, 17)",
+            "tag": "MAIN"
+          },
+          {
+            "fg": "rgb(245, 242, 236)",
+            "bg": "rgba(0, 0, 0, 0)",
+            "tag": "NAV"
+          }
+        ]
       }
     ],
     "1440:/messages": [
       {
+        "type": "tap",
+        "detail": [
+          {
+            "w": 85,
+            "h": 16,
+            "label": "Cookie policy"
+          },
+          {
+            "w": 65,
+            "h": 36,
+            "label": "Choose"
+          },
+          {
+            "w": 42,
+            "h": 36,
+            "label": "OK"
+          }
+        ]
+      },
+      {
         "type": "contrast-sample",
-        "detail": []
+        "detail": [
+          {
+            "fg": "rgb(245, 242, 236)",
+            "bg": "rgb(17, 17, 17)",
+            "tag": "MAIN"
+          },
+          {
+            "fg": "rgb(245, 242, 236)",
+            "bg": "oklab(0.177624 0.00000809133 0.00000356138 / 0.95)",
+            "tag": "HEADER"
+          },
+          {
+            "fg": "rgb(245, 242, 236)",
+            "bg": "rgba(0, 0, 0, 0)",
+            "tag": "NAV"
+          }
+        ]
       }
     ],
     "1440:/orders": [
@@ -832,70 +1291,86 @@
         "type": "tap",
         "detail": [
           {
-            "w": 97,
-            "h": 17,
+            "w": 183,
+            "h": 44,
             "label": "Your profile"
           },
           {
-            "w": 63,
-            "h": 17,
+            "w": 183,
+            "h": 44,
             "label": "Orders"
           },
           {
-            "w": 81,
-            "h": 17,
+            "w": 183,
+            "h": 44,
             "label": "Messages"
           },
           {
-            "w": 81,
-            "h": 17,
+            "w": 183,
+            "h": 44,
             "label": "Payments"
           },
           {
-            "w": 103,
-            "h": 17,
+            "w": 183,
+            "h": 44,
             "label": "Notifications"
           },
           {
-            "w": 71,
-            "h": 17,
+            "w": 183,
+            "h": 44,
             "label": "Settings"
           },
           {
-            "w": 72,
-            "h": 17,
+            "w": 183,
+            "h": 44,
             "label": "Security"
           },
           {
-            "w": 133,
-            "h": 17,
+            "w": 183,
+            "h": 44,
             "label": "Explore marketplace"
           },
           {
-            "w": 80,
-            "h": 17,
+            "w": 183,
+            "h": 44,
             "label": "Buy and sell"
           },
           {
-            "w": 1357,
-            "h": 17,
-            "label": "The Middleman homepage"
+            "w": 85,
+            "h": 16,
+            "label": "Cookie policy"
           },
           {
-            "w": 68,
-            "h": 17,
-            "label": "Categories"
+            "w": 65,
+            "h": 36,
+            "label": "Choose"
           },
           {
-            "w": 80,
-            "h": 17,
-            "label": "Marketplace"
+            "w": 42,
+            "h": 36,
+            "label": "OK"
           }
         ]
       },
       {
         "type": "contrast-sample",
-        "detail": []
+        "detail": [
+          {
+            "fg": "rgb(245, 242, 236)",
+            "bg": "rgb(17, 17, 17)",
+            "tag": "MAIN"
+          },
+          {
+            "fg": "rgb(245, 242, 236)",
+            "bg": "oklab(0.177624 0.00000809133 0.00000356138 / 0.95)",
+            "tag": "HEADER"
+          },
+          {
+            "fg": "rgb(245, 242, 236)",
+            "bg": "rgba(0, 0, 0, 0)",
+            "tag": "NAV"
+          }
+        ]
       }
     ],
     "1440:/profile": [
@@ -903,70 +1378,86 @@
         "type": "tap",
         "detail": [
           {
-            "w": 97,
-            "h": 17,
+            "w": 183,
+            "h": 44,
             "label": "Your profile"
           },
           {
-            "w": 63,
-            "h": 17,
+            "w": 183,
+            "h": 44,
             "label": "Orders"
           },
           {
-            "w": 81,
-            "h": 17,
+            "w": 183,
+            "h": 44,
             "label": "Messages"
           },
           {
-            "w": 81,
-            "h": 17,
+            "w": 183,
+            "h": 44,
             "label": "Payments"
           },
           {
-            "w": 103,
-            "h": 17,
+            "w": 183,
+            "h": 44,
             "label": "Notifications"
           },
           {
-            "w": 71,
-            "h": 17,
+            "w": 183,
+            "h": 44,
             "label": "Settings"
           },
           {
-            "w": 72,
-            "h": 17,
+            "w": 183,
+            "h": 44,
             "label": "Security"
           },
           {
-            "w": 133,
-            "h": 17,
+            "w": 183,
+            "h": 44,
             "label": "Explore marketplace"
           },
           {
-            "w": 80,
-            "h": 17,
+            "w": 183,
+            "h": 44,
             "label": "Buy and sell"
           },
           {
-            "w": 1357,
-            "h": 17,
-            "label": "The Middleman homepage"
+            "w": 85,
+            "h": 16,
+            "label": "Cookie policy"
           },
           {
-            "w": 68,
-            "h": 17,
-            "label": "Categories"
+            "w": 65,
+            "h": 36,
+            "label": "Choose"
           },
           {
-            "w": 80,
-            "h": 17,
-            "label": "Marketplace"
+            "w": 42,
+            "h": 36,
+            "label": "OK"
           }
         ]
       },
       {
         "type": "contrast-sample",
-        "detail": []
+        "detail": [
+          {
+            "fg": "rgb(245, 242, 236)",
+            "bg": "rgb(17, 17, 17)",
+            "tag": "MAIN"
+          },
+          {
+            "fg": "rgb(245, 242, 236)",
+            "bg": "oklab(0.177624 0.00000809133 0.00000356138 / 0.95)",
+            "tag": "HEADER"
+          },
+          {
+            "fg": "rgb(245, 242, 236)",
+            "bg": "rgba(0, 0, 0, 0)",
+            "tag": "NAV"
+          }
+        ]
       }
     ],
     "1440:/settings": [
@@ -974,64 +1465,64 @@
         "type": "tap",
         "detail": [
           {
-            "w": 97,
-            "h": 17,
+            "w": 183,
+            "h": 44,
             "label": "Your profile"
           },
           {
-            "w": 63,
-            "h": 17,
+            "w": 183,
+            "h": 44,
             "label": "Orders"
           },
           {
-            "w": 81,
-            "h": 17,
+            "w": 183,
+            "h": 44,
             "label": "Messages"
           },
           {
-            "w": 81,
-            "h": 17,
+            "w": 183,
+            "h": 44,
             "label": "Payments"
           },
           {
-            "w": 103,
-            "h": 17,
+            "w": 183,
+            "h": 44,
             "label": "Notifications"
           },
           {
-            "w": 71,
-            "h": 17,
+            "w": 183,
+            "h": 44,
             "label": "Settings"
           },
           {
-            "w": 72,
-            "h": 17,
+            "w": 183,
+            "h": 44,
             "label": "Security"
           },
           {
-            "w": 133,
-            "h": 17,
+            "w": 183,
+            "h": 44,
             "label": "Explore marketplace"
           },
           {
-            "w": 80,
-            "h": 17,
+            "w": 183,
+            "h": 44,
             "label": "Buy and sell"
           },
           {
-            "w": 1357,
-            "h": 17,
-            "label": "The Middleman homepage"
+            "w": 85,
+            "h": 16,
+            "label": "Cookie policy"
           },
           {
-            "w": 68,
-            "h": 17,
-            "label": "Categories"
+            "w": 65,
+            "h": 36,
+            "label": "Choose"
           },
           {
-            "w": 80,
-            "h": 17,
-            "label": "Marketplace"
+            "w": 42,
+            "h": 36,
+            "label": "OK"
           }
         ]
       },
@@ -1039,17 +1530,17 @@
         "type": "contrast-sample",
         "detail": [
           {
-            "fg": "rgb(0, 0, 0)",
-            "bg": "rgba(0, 0, 0, 0)",
+            "fg": "rgb(245, 242, 236)",
+            "bg": "rgb(17, 17, 17)",
             "tag": "MAIN"
           },
           {
-            "fg": "rgb(0, 0, 0)",
-            "bg": "rgba(0, 0, 0, 0)",
+            "fg": "rgb(245, 242, 236)",
+            "bg": "oklab(0.177624 0.00000809133 0.00000356138 / 0.95)",
             "tag": "HEADER"
           },
           {
-            "fg": "rgb(0, 0, 0)",
+            "fg": "rgb(245, 242, 236)",
             "bg": "rgba(0, 0, 0, 0)",
             "tag": "NAV"
           }
@@ -1058,45 +1549,22 @@
     ],
     "1440:/admin": [
       {
-        "type": "contrast-sample",
-        "detail": []
-      }
-    ],
-    "1440:/design-review": [
-      {
-        "type": "contrast-sample",
-        "detail": []
-      }
-    ],
-    "1440:/legal/terms": [
-      {
-        "type": "contrast-sample",
-        "detail": []
-      }
-    ],
-    "1440:/sellers/00000000-0000-4000-8000-000000000001": [
-      {
         "type": "tap",
         "detail": [
           {
-            "w": 1357,
-            "h": 17,
-            "label": "The Middleman homepage"
+            "w": 85,
+            "h": 16,
+            "label": "Cookie policy"
           },
           {
-            "w": 119,
-            "h": 17,
-            "label": "Back to homepage"
+            "w": 65,
+            "h": 36,
+            "label": "Choose"
           },
           {
-            "w": 155,
-            "h": 17,
-            "label": "Browse the marketplace"
-          },
-          {
-            "w": 46,
-            "h": 17,
-            "label": "Sign in"
+            "w": 42,
+            "h": 36,
+            "label": "OK"
           }
         ]
       },
@@ -1104,8 +1572,139 @@
         "type": "contrast-sample",
         "detail": [
           {
-            "fg": "rgb(0, 0, 0)",
+            "fg": "rgb(245, 242, 236)",
+            "bg": "rgb(17, 17, 17)",
+            "tag": "MAIN"
+          }
+        ]
+      }
+    ],
+    "1440:/design-review": [
+      {
+        "type": "contrast-sample",
+        "detail": [
+          {
+            "fg": "rgb(245, 242, 236)",
+            "bg": "rgb(17, 17, 17)",
+            "tag": "MAIN"
+          }
+        ]
+      }
+    ],
+    "1440:/legal/terms": [
+      {
+        "type": "tap",
+        "detail": [
+          {
+            "w": 39,
+            "h": 17,
+            "label": "Home"
+          },
+          {
+            "w": 230,
+            "h": 19,
+            "label": "1. Acceptance of Terms"
+          },
+          {
+            "w": 230,
+            "h": 19,
+            "label": "2. Nature of the Platform"
+          },
+          {
+            "w": 230,
+            "h": 19,
+            "label": "3. Account Registration & Verification"
+          },
+          {
+            "w": 230,
+            "h": 19,
+            "label": "4. Escrow Payment Mechanism"
+          },
+          {
+            "w": 230,
+            "h": 19,
+            "label": "5. Buyer Obligations"
+          },
+          {
+            "w": 230,
+            "h": 19,
+            "label": "6. Seller Obligations"
+          },
+          {
+            "w": 230,
+            "h": 19,
+            "label": "7. Prohibited Conduct"
+          },
+          {
+            "w": 230,
+            "h": 19,
+            "label": "8. Fees & Commission"
+          },
+          {
+            "w": 230,
+            "h": 19,
+            "label": "9. Intellectual Property"
+          },
+          {
+            "w": 230,
+            "h": 19,
+            "label": "10. Dispute Resolution"
+          },
+          {
+            "w": 230,
+            "h": 19,
+            "label": "11. Limitation of Liability"
+          }
+        ]
+      },
+      {
+        "type": "contrast-sample",
+        "detail": [
+          {
+            "fg": "rgb(245, 242, 236)",
+            "bg": "rgb(17, 17, 17)",
+            "tag": "MAIN"
+          },
+          {
+            "fg": "rgb(245, 242, 236)",
+            "bg": "oklab(0.177624 0.00000809133 0.00000356138 / 0.95)",
+            "tag": "HEADER"
+          },
+          {
+            "fg": "rgb(245, 242, 236)",
             "bg": "rgba(0, 0, 0, 0)",
+            "tag": "NAV"
+          }
+        ]
+      }
+    ],
+    "1440:/sellers/00000000-0000-4000-8000-000000000001": [
+      {
+        "type": "tap",
+        "detail": [
+          {
+            "w": 85,
+            "h": 16,
+            "label": "Cookie policy"
+          },
+          {
+            "w": 65,
+            "h": 36,
+            "label": "Choose"
+          },
+          {
+            "w": 42,
+            "h": 36,
+            "label": "OK"
+          }
+        ]
+      },
+      {
+        "type": "contrast-sample",
+        "detail": [
+          {
+            "fg": "rgb(245, 242, 236)",
+            "bg": "rgb(17, 17, 17)",
             "tag": "MAIN"
           }
         ]

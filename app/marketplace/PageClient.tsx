@@ -164,7 +164,7 @@ export default function MarketplacePage({ designPreview = false }: { designPrevi
         if (cancelled) return;
 
         if (gigsResult.error) throw gigsResult.error;
-        const rows = await attachPublicSellerCards(supabase, (gigsResult.data as GigRow[]) ?? []);
+        const rows = await attachPublicSellerCards(supabase, (gigsResult.data as unknown as GigRow[]) ?? []);
         setGigs(rows as GigRow[]);
 
         const ratingsMap: Record<string, GigRating> = {};

@@ -27,7 +27,7 @@ test("PGlite probe: wishlist and seller view policies", async () => {
         id_document_url text
       );
       create table public_seller_profiles as
-        select id, display_name, bio, verification_status
+        select id, display_name, bio
         from seller_profiles
         where verification_status = 'approved';
       create table gig_wishlists (
@@ -44,12 +44,16 @@ test("PGlite probe: wishlist and seller view policies", async () => {
         ('33333333-3333-4333-8333-333333333302', '22222222-2222-4222-8222-222222222202', 'Pending', 'bio', 'pending', 'secret2.pdf');
       delete from public_seller_profiles;
       insert into public_seller_profiles
-        select id, display_name, bio, verification_status from seller_profiles where verification_status = 'approved';
+        select id, display_name, bio from seller_profiles where verification_status = 'approved';
     `);
     const pending = await db.query("select count(*)::int as c from public_seller_profiles where display_name = 'Pending'");
     assert.equal(pending.rows[0].c, 0);
-    const secret = await db.query("select count(*)::int as c from public_seller_profiles where id_document_url is not null");
-    assert.equal(secret.rows[0].c, 0);
+    const columns = await db.query(`
+      select column_name from information_schema.columns
+      where table_name = 'public_seller_profiles'
+    `);
+    const names = columns.rows.map((row) => row.column_name);
+    assert.deepEqual(names.sort(), ["bio", "display_name", "id"]);
   } finally {
     await db.close();
   }
