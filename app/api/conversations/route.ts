@@ -1,4 +1,5 @@
 import { authenticatedUser, privateJson, serviceClient, uuidPattern } from '@/lib/server/marketplace';
+import { ENQUIRY_DAILY_THREAD_LIMIT } from '@/lib/server/enquiry-limits.mjs';
 import { prePurchaseEnquiryEnabled } from '@/lib/server/messaging-config.mjs';
 import { sameOriginMutation } from '@/lib/server/same-origin.mjs';
 
@@ -73,6 +74,21 @@ export async function POST(request: Request) {
   if (orderError) return privateJson({ error: 'Could not verify the order.' }, 500);
   if (!paidOrder && !prePurchaseEnquiryEnabled()) {
     return privateJson({ error: 'Messaging is available only after a paid order for this product.' }, 403);
+  }
+
+  if (user.id === seller) {
+    return privateJson({ error: 'You cannot message yourself about this product.' }, 409);
+  }
+
+  const dayStart = new Date();
+  dayStart.setUTCHours(0, 0, 0, 0);
+  const { count: threadsToday, error: limitError } = await db.from('conversations')
+    .select('id', { count: 'exact', head: true })
+    .eq('buyer_id', user.id)
+    .gte('created_at', dayStart.toISOString());
+  if (limitError) return privateJson({ error: 'Could not verify enquiry limits.' }, 500);
+  if ((threadsToday ?? 0) >= ENQUIRY_DAILY_THREAD_LIMIT) {
+    return privateJson({ error: `You can start up to ${ENQUIRY_DAILY_THREAD_LIMIT} new product conversations per day.` }, 429);
   }
 
   const { data: existing } = await db.from('conversations').select('id')

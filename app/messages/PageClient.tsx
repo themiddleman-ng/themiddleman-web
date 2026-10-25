@@ -109,7 +109,17 @@ function ConversationRowItem({
   );
 }
 
-function MessageEntry({ isYou, senderName, message }: { isYou: boolean; senderName: string; message: MessageRow }) {
+function MessageEntry({
+  isYou,
+  senderName,
+  message,
+  onReport,
+}: {
+  isYou: boolean;
+  senderName: string;
+  message: MessageRow;
+  onReport?: () => void;
+}) {
   return (
     <div className={`flex w-full items-end gap-2.5 ${isYou ? "justify-end" : "justify-start"}`}>
       {!isYou && <Avatar initials={initialsFrom(senderName)} />}
@@ -118,7 +128,18 @@ function MessageEntry({ isYou, senderName, message }: { isYou: boolean; senderNa
         <div className={`whitespace-pre-wrap break-words rounded-2xl px-3.5 py-2.5 text-[16px] leading-6 ${isYou ? "rounded-br-md bg-elevated text-bone" : "rounded-bl-md bg-ink text-bone"}`}>
           {message.body}
         </div>
-        <time className={`mt-1 block px-1 text-[14px] text-slate ${isYou ? "text-right" : ""}`} dateTime={message.created_at}>{formatTime(message.created_at)}</time>
+        <div className={`mt-1 flex items-center gap-2 px-1 ${isYou ? "justify-end" : ""}`}>
+          <time className="text-[14px] text-slate" dateTime={message.created_at}>{formatTime(message.created_at)}</time>
+          {!isYou && onReport && (
+            <button
+              type="button"
+              onClick={onReport}
+              className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-full px-2 text-[13px] font-semibold text-muted transition hover:bg-elevated hover:text-link"
+            >
+              Report
+            </button>
+          )}
+        </div>
       </div>
     </div>
   );
