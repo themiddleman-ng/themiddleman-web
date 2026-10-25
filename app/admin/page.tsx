@@ -1,9 +1,10 @@
 import Link from "next/link";
 import AdminActivityList from "@/components/admin/AdminActivityList";
+import AdminOverviewToolbar from "@/components/admin/AdminOverviewToolbar";
+import AdminPriorityQueue from "@/components/admin/AdminPriorityQueue";
+import type { AdminQueueRow } from "@/components/admin/admin-queue";
 import AdminStatCard, { type AdminStatIcon } from "@/components/admin/AdminStatCard";
 import AdminWorkspaceShell from "@/components/admin/AdminWorkspaceShell";
-import ProductCover from "@/components/marketplace/ProductCover";
-import { formatWaitingSince } from "@/lib/admin/format-waiting";
 import { requireAdminPage } from "@/lib/server/admin-page";
 import { productPackagesEnabled } from "@/lib/server/product-package-config.mjs";
 import NotificationRetryButton from "./notification-retry-button";
@@ -18,33 +19,6 @@ const FLOW = [
   ["disputed", "Disputed"],
   ["refunded", "Refunded"],
 ] as const;
-
-type QueueKind = "product" | "seller" | "delivery";
-
-type QueueRow = {
-  id: string;
-  kind: QueueKind;
-  title: string;
-  detail: string;
-  since: string;
-  href: string;
-  thumb?: { title: string; category: string; imageUrl?: string };
-};
-
-function QueueTypePill({ kind }: { kind: QueueKind }) {
-  const tone =
-    kind === "seller"
-      ? "bg-sky-50 text-sky-800 border-sky-200"
-      : kind === "delivery"
-        ? "bg-zinc-100 text-zinc-700 border-zinc-200"
-        : "bg-orange-50 text-orange-800 border-orange-200";
-  const label = kind === "seller" ? "Seller" : kind === "delivery" ? "Delivery review" : "Product";
-  return (
-    <span className={`inline-flex rounded-full border px-2.5 py-0.5 text-xs font-semibold ${tone}`}>
-      {label}
-    </span>
-  );
-}
 
 function StatusPill({ status }: { status: string }) {
   const tone =
@@ -150,7 +124,7 @@ export default async function AdminPage() {
   const sellersAwaiting = sellerPendingCount.count ?? 0;
   const deliveriesAwaiting = deliveryCount.count ?? 0;
 
-  const queue: QueueRow[] = [];
+  const queue: AdminQueueRow[] = [];
 
   for (const row of productQueue.data ?? []) {
     if (packagesOn && "gig_id" in row) {
@@ -168,7 +142,7 @@ export default async function AdminPage() {
         title,
         detail: `#${version.gig_id.slice(0, 8)}`,
         since: version.uploaded_at,
-        href: "/admin/products",
+        href: `/admin/products?version=${version.id}`,
         thumb: { title, category: gig?.category ?? "development" },
       });
     } else {
@@ -179,7 +153,7 @@ export default async function AdminPage() {
         title: gigRow.title,
         detail: `#${gigRow.id.slice(0, 8)}`,
         since: gigRow.updated_at,
-        href: "/admin/products",
+        href: `/admin/products?gig=${gigRow.id}`,
         thumb: { title: gigRow.title, category: gigRow.category ?? "development" },
       });
     }
@@ -192,7 +166,7 @@ export default async function AdminPage() {
       title: seller.display_name ?? "Seller application",
       detail: "Verification pending",
       since: seller.created_at,
-      href: "/admin/sellers",
+      href: `/admin/sellers?focus=${seller.id}&status=pending`,
     });
   }
 
@@ -210,7 +184,7 @@ export default async function AdminPage() {
       title: gig?.title ?? "Delivery submission",
       detail: `Order ${delivery.order_id.slice(0, 8)}`,
       since: delivery.created_at,
-      href: "/admin/review",
+      href: `/admin/review?delivery=${delivery.id}`,
       thumb: gig
         ? { title: gig.title, category: gig.category ?? "development" }
         : undefined,
@@ -265,10 +239,7 @@ export default async function AdminPage() {
   return (
     <AdminWorkspaceShell>
       <div className="rounded-2xl border border-line bg-paper p-5 shadow-sm md:p-7">
-        <header className="border-b border-line pb-5">
-          <h1 className="font-display text-2xl font-bold md:text-3xl">Operations overview</h1>
-          <p className="mt-1 text-sm text-muted">{overviewDate} · Live workspace data</p>
-        </header>
+        <AdminOverviewToolbar overviewDate={overviewDate} />
 
         {statCards.length > 0 ? (
           <section className="mt-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-4" aria-label="Operations metrics">
@@ -278,87 +249,7 @@ export default async function AdminPage() {
           </section>
         ) : null}
 
-        <section className="mt-8" aria-labelledby="priority-queue-title">
-          <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-            <h2 id="priority-queue-title" className="font-display text-lg font-semibold">Priority queue</h2>
-            <Link href="/admin/review" className="text-sm font-semibold text-link hover:underline">
-              View all
-            </Link>
-          </div>
-
-          {queue.length === 0 ? (
-            <p className="rounded-xl border border-line bg-elevated px-4 py-8 text-center text-sm text-muted">
-              Nothing is waiting in the priority queue right now.
-            </p>
-          ) : (
-            <>
-              <div className="hidden overflow-hidden rounded-xl border border-line md:block">
-                <div className="grid grid-cols-[7rem_minmax(0,1fr)_7rem_6.5rem] gap-3 border-b border-line bg-elevated px-4 py-2 text-xs font-semibold uppercase tracking-wide text-muted">
-                  <span>Type</span>
-                  <span>Item</span>
-                  <span>Waiting time</span>
-                  <span className="text-right">Action</span>
-                </div>
-                {queue.slice(0, 10).map((row) => (
-                  <div
-                    key={row.id}
-                    className="grid grid-cols-[7rem_minmax(0,1fr)_7rem_6.5rem] items-center gap-3 border-b border-line px-4 py-3 last:border-b-0"
-                  >
-                    <QueueTypePill kind={row.kind} />
-                    <div className="flex min-w-0 items-center gap-3">
-                      {row.thumb ? (
-                        <div className="relative h-11 w-16 shrink-0 overflow-hidden rounded-md border border-line bg-elevated">
-                          <ProductCover title={row.thumb.title} category={row.thumb.category} compact />
-                        </div>
-                      ) : (
-                        <div className="grid h-11 w-11 shrink-0 place-items-center rounded-full border border-line bg-elevated text-xs font-bold">
-                          {(row.title.slice(0, 2) || "?").toUpperCase()}
-                        </div>
-                      )}
-                      <div className="min-w-0">
-                        <p className="truncate text-sm font-semibold">{row.title}</p>
-                        <p className="truncate text-xs text-muted">{row.detail}</p>
-                      </div>
-                    </div>
-                    <span className="text-sm text-muted">{formatWaitingSince(row.since)}</span>
-                    <Link
-                      href={row.href}
-                      className="inline-flex min-h-11 items-center justify-center rounded-lg bg-ember-cta px-3 text-center text-sm font-semibold text-on-ember hover:bg-ember-hover"
-                    >
-                      Review
-                    </Link>
-                  </div>
-                ))}
-              </div>
-
-              <div className="space-y-3 md:hidden">
-                {queue.slice(0, 8).map((row) => (
-                  <article key={row.id} className="rounded-xl border border-line p-4">
-                    <div className="flex items-start gap-3">
-                      {row.thumb ? (
-                        <div className="relative h-14 w-20 shrink-0 overflow-hidden rounded-md border border-line">
-                          <ProductCover title={row.thumb.title} category={row.thumb.category} compact />
-                        </div>
-                      ) : null}
-                      <div className="min-w-0 flex-1">
-                        <QueueTypePill kind={row.kind} />
-                        <p className="mt-2 font-semibold">{row.title}</p>
-                        <p className="text-xs text-muted">{row.detail}</p>
-                        <p className="mt-1 text-xs text-muted">Waiting {formatWaitingSince(row.since)}</p>
-                      </div>
-                    </div>
-                    <Link
-                      href={row.href}
-                      className="mt-4 flex min-h-11 w-full items-center justify-center rounded-lg bg-ember-cta text-sm font-semibold text-on-ember"
-                    >
-                      Review
-                    </Link>
-                  </article>
-                ))}
-              </div>
-            </>
-          )}
-        </section>
+        <AdminPriorityQueue rows={queue} />
 
         <section className="mt-10" aria-labelledby="recent-activity-title">
           <h2 id="recent-activity-title" className="font-display text-lg font-semibold">Recent activity</h2>

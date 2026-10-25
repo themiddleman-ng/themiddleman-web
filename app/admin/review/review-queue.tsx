@@ -1,13 +1,15 @@
 'use client';
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 
 type Delivery = { id: string; order_id: string; created_at: string;
   orders: { amount: number; gigs: { title: string } | null } | null };
 
 export default function ReviewQueue({ deliveries }: { deliveries: Delivery[] }) {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const focusDelivery = searchParams.get('delivery');
   const [notes, setNotes] = useState<Record<string, string>>({});
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -18,6 +20,12 @@ export default function ReviewQueue({ deliveries }: { deliveries: Delivery[] }) 
     if (!response.ok) { setError(body.error || 'File unavailable.'); return; }
     window.open(body.url, '_blank', 'noopener,noreferrer');
   }
+  useEffect(() => {
+    if (!focusDelivery) return;
+    const target = document.getElementById(`delivery-${focusDelivery}`);
+    if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, [focusDelivery, deliveries.length]);
+
   async function decide(deliveryId: string, decision: 'approve' | 'reject') {
     setBusy(deliveryId); setError(null);
     try {
@@ -35,7 +43,7 @@ export default function ReviewQueue({ deliveries }: { deliveries: Delivery[] }) 
     {error && <p role="alert" className="mt-4 text-red-300">{error}</p>}
     {deliveries.length === 0 && <p className="mt-5 rounded-2xl border border-line bg-paper p-6 text-slate">Your review queue is empty.</p>}
     <div className="mt-5 grid gap-4">
-      {deliveries.map(delivery => <article key={delivery.id} className="rounded-2xl border border-line bg-paper p-5 md:p-6">
+      {deliveries.map(delivery => <article key={delivery.id} id={`delivery-${delivery.id}`} className="scroll-mt-24 rounded-2xl border border-line bg-paper p-5 md:p-6">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div><h3 className="font-display text-lg font-semibold">{delivery.orders?.gigs?.title ?? 'Digital product'}</h3>
             <p className="mt-1 text-xs text-slate">Order {delivery.order_id.slice(0, 8)} · Submitted {new Date(delivery.created_at).toLocaleString('en-NG', { timeZone: 'Africa/Lagos' })}</p></div>
