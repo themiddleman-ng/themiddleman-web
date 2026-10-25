@@ -15,6 +15,11 @@ grant insert (user_id, display_name, bio, skills, portfolio_links, linkedin_url,
 grant update (display_name, bio, skills, portfolio_links, linkedin_url,
   years_experience, gig_categories, id_document_type, id_document_url)
   on public.seller_profiles to authenticated;
+-- Own row only. Column privileges are not row filters: without a policy for
+-- other sellers, authenticated cannot select these columns on anyone else's row.
+-- linkedin_url stays on this grant so the owner can read their own value.
+-- It is not on either public view. id_document_*, bank, and contact columns
+-- are not granted here and are not on the views.
 grant select (
   id, user_id, display_name, bio, skills, portfolio_links, verification_status,
   rating_avg, total_orders_completed, created_at, updated_at, gig_categories,
@@ -25,9 +30,9 @@ create policy "authenticated reads own seller profile" on public.seller_profiles
   for select to authenticated
   using (user_id = (select auth.uid()));
 
-create policy "authenticated reads approved seller profiles" on public.seller_profiles
-  for select to authenticated
-  using (verification_status = 'approved');
+-- No "authenticated reads approved seller profiles" policy. Other sellers'
+-- public fields come only from the views below (security_invoker = false,
+-- approved rows only).
 
 drop view if exists public.public_seller_profiles;
 
@@ -45,7 +50,7 @@ with (security_invoker = false) as
   where sp.verification_status = 'approved';
 
 comment on view public.public_seller_profiles is
-  'Directory-safe seller fields for approved sellers only (no ID docs, bank, or contact fields).';
+  'Approved sellers only. Columns: id, user_id, display_name, bio, rating_avg, total_orders_completed, created_at. Excludes id_document_*, linkedin_url, bank, email, and phone.';
 
 revoke all on public.public_seller_profiles from public;
 grant select on public.public_seller_profiles to anon, authenticated;

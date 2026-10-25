@@ -1,6 +1,10 @@
 begin;
 
 -- Restore seller_profiles access exactly as the migration chain left it before 20261025130000.
+-- The forward migration does not create "authenticated reads approved seller profiles".
+-- This rollback drops that policy if a previous draft created it, and it does not
+-- recreate it. Public reads return to the pre-migration "public can read seller profiles"
+-- policy (including the broader column grant to anon). Apply this only to undo 20261025130000.
 drop view if exists public.public_seller_profile_cards;
 drop view if exists public.public_seller_profiles;
 

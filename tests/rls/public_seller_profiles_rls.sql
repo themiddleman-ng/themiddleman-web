@@ -1,8 +1,9 @@
 -- Manual RLS checks for public_seller_profiles (local Supabase only).
 -- Run via scripts/run-rls-tests.mjs after seeding.
 
--- Expect: anon cannot read id_document_url from seller_profiles (0 rows).
--- select id_document_url from public.seller_profiles limit 1;
+-- Expect: anon and authenticated cannot read another seller's row, including
+-- id_document_url and linkedin_url. Authenticated may read only their own row.
+-- select id_document_url, linkedin_url from public.seller_profiles limit 1;
 
 -- Expect: anon can read approved directory rows from the view only.
 -- select id, display_name from public.public_seller_profiles limit 1;

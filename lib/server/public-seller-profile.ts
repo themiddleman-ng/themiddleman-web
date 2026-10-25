@@ -52,7 +52,7 @@ export async function loadPublicSellerProfile(sellerId: string): Promise<PublicS
 
   const { data: seller, error } = await supabase
     .from('public_seller_profiles')
-    .select('id, display_name, bio, rating_avg, total_orders_completed, created_at')
+    .select('id, user_id, display_name, bio, rating_avg, total_orders_completed, created_at')
     .eq('id', sellerId)
     .maybeSingle();
   if (error || !seller) return null;
@@ -65,15 +65,8 @@ export async function loadPublicSellerProfile(sellerId: string): Promise<PublicS
     .order('created_at', { ascending: false });
 
   let avatar_url: string | null = null;
-  const admin = serviceClient();
-  if (admin) {
-    const { data: owner } = await admin
-      .from('seller_profiles')
-      .select('user_id')
-      .eq('id', sellerId)
-      .eq('verification_status', 'approved')
-      .maybeSingle();
-    if (owner?.user_id) avatar_url = await resolveAvatarUrl(owner.user_id);
+  if (seller.user_id && serviceClient()) {
+    avatar_url = await resolveAvatarUrl(seller.user_id);
   }
 
   return {

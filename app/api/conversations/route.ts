@@ -22,7 +22,7 @@ export async function GET() {
     : `buyer_id.eq.${user.id}`;
   const [conversationsResult, ordersResult] = await Promise.all([
     db.from('conversations')
-      .select('id,buyer_id,seller_id,gig_id,buyer_last_read_at,seller_last_read_at,gigs(title),seller:seller_profiles!conversations_seller_id_fkey(display_name),messages(sender_id,created_at)')
+      .select('id,buyer_id,seller_id,gig_id,buyer_last_read_at,seller_last_read_at,gigs(title),messages(sender_id,created_at)')
       .or(participantFilter),
     db.from('orders')
       .select('buyer_id,seller_id,gig_id')
@@ -37,15 +37,32 @@ export async function GET() {
     enquiryEnabled || paidOrderKeys.has(`${row.buyer_id}:${row.seller_id}:${row.gig_id}`)
   );
 
+  const sellerKeys = [...new Set(visibleConversations.map(row => row.seller_id).filter(Boolean))];
+  const sellerNames = new Map<string, string>();
+  if (sellerKeys.length) {
+    const { data: publicSellers, error: sellerNameError } = await db
+      .from('public_seller_profiles')
+      .select('id, user_id, display_name')
+      .or(`id.in.(${sellerKeys.join(',')}),user_id.in.(${sellerKeys.join(',')})`);
+    if (sellerNameError) return privateJson({ error: 'Could not load conversations.' }, 500);
+    for (const seller of publicSellers ?? []) {
+      if (seller.display_name) {
+        sellerNames.set(seller.id, seller.display_name);
+        sellerNames.set(seller.user_id, seller.display_name);
+      }
+    }
+  }
+
   let unreadCount = 0;
   const conversations = visibleConversations.map(row => {
     const lastReadAt = row.buyer_id === user.id ? row.buyer_last_read_at : row.seller_last_read_at;
     if ((row.messages ?? []).some(message => message.sender_id !== user.id &&
       (!lastReadAt || Date.parse(message.created_at) > Date.parse(lastReadAt)))) unreadCount++;
+    const gig = Array.isArray(row.gigs) ? row.gigs[0] : row.gigs;
     return {
       id: row.id, gig_id: row.gig_id, role: row.buyer_id === user.id ? 'buyer' : 'seller',
-      counterpartName: row.buyer_id === user.id ? row.seller?.[0]?.display_name ?? 'Seller' : 'Private buyer',
-      gigTitle: row.gigs?.[0]?.title ?? null,
+      counterpartName: row.buyer_id === user.id ? sellerNames.get(row.seller_id) ?? 'Seller' : 'Private buyer',
+      gigTitle: gig?.title ?? null,
       lastReadAt,
     };
   });
