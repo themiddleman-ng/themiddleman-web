@@ -52,7 +52,7 @@ export default function SettingsPageClient() {
       <SiteHeader />
       <div className="mx-auto max-w-4xl px-4 pb-12 pt-7 sm:px-6 sm:pt-10">
         <div className="mb-7">
-          <p className="text-sm font-medium text-[#a95320]">Your account</p>
+          <p className="text-sm font-medium text-[#111111] underline decoration-[#F97316] underline-offset-2">Your account</p>
           <h1 className="mt-1 font-display text-3xl font-semibold tracking-[-.035em] text-[#1b3044] sm:text-4xl">Settings</h1>
           <p className="mt-2 max-w-xl text-sm leading-6 text-[#687581]">Manage your profile, the welcome tour and privacy choices.</p>
         </div>

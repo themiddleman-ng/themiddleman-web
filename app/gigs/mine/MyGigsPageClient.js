@@ -105,7 +105,7 @@ export default function MyGigsPage() {
             <Link href="/analytics" className="inline-flex min-h-10 items-center rounded-full border border-line px-4 py-2 text-sm text-slate hover:text-bone">Analytics</Link>
             <Link
               href="/gigs/new"
-              className="inline-flex min-h-10 flex-1 items-center justify-center rounded-full bg-ember px-4 py-2 text-center text-sm font-semibold text-ink transition-colors hover:bg-ember/90 sm:flex-none sm:px-5"
+              className="inline-flex min-h-10 flex-1 items-center justify-center rounded-full bg-ember px-4 py-2 text-center text-sm font-semibold text-[#111111] transition-colors hover:bg-ember-hover sm:flex-none sm:px-5"
             >
               + List a new product
             </Link>

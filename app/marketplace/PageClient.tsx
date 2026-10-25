@@ -252,7 +252,7 @@ export default function MarketplacePage({ designPreview = false }: { designPrevi
             onChange={(event) => setQuery(event.target.value)}
             placeholder="Search products, creators, templates..."
             aria-label="Search products, creators, and templates"
-            className="h-12 min-h-11 w-full rounded-2xl border border-[#eadfd3] bg-white pl-11 pr-4 text-[16px] text-bone shadow-[0_8px_24px_rgba(39,30,20,.06)] placeholder:text-muted transition focus:border-[#D87B36] focus:outline-none focus:ring-4 focus:ring-[#E89A5C]/15"
+            className="h-12 min-h-11 w-full rounded-2xl border border-[#eadfd3] bg-white pl-11 pr-4 text-[16px] text-bone shadow-[0_8px_24px_rgba(39,30,20,.06)] placeholder:text-muted transition focus:border-[#F97316] focus:outline-none focus:ring-4 focus:ring-[#F97316]/15"
           />
         </div>
 
@@ -305,7 +305,7 @@ export default function MarketplacePage({ designPreview = false }: { designPrevi
                 <button
                   type="button"
                   onClick={() => setRetryCount((count) => count + 1)}
-                  className="mt-3 rounded-md bg-[#C2410C] px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-[#9A3412] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#C2410C]"
+                  className="mt-3 rounded-md bg-[#F97316] px-4 py-2 text-sm font-semibold text-[#111111] transition-colors hover:bg-[#FB923C] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#F97316]"
                 >
                   Try again
                 </button>

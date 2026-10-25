@@ -63,9 +63,9 @@ function AuthCallout({ alert, onAction }) {
         <p className="text-[13px] font-semibold leading-5 text-[#7a271a]">{alert.title}</p>
         {alert.message ? <p className="mt-0.5 text-[12px] leading-5 text-[#5c4036]">{alert.message}</p> : null}
         {alert.actionHref ? (
-          <Link href={alert.actionHref} className="mt-1.5 inline-flex text-[12px] font-semibold text-[#9a3412] underline decoration-[#e7b49a] underline-offset-2">{alert.actionLabel}</Link>
+          <Link href={alert.actionHref} className="mt-1.5 inline-flex text-[12px] font-semibold text-[#111111] underline decoration-[#F97316] underline-offset-2">{alert.actionLabel}</Link>
         ) : alert.actionLabel && onAction ? (
-          <button type="button" onClick={onAction} className="mt-1.5 text-[12px] font-semibold text-[#9a3412] underline decoration-[#e7b49a] underline-offset-2">{alert.actionLabel}</button>
+          <button type="button" onClick={onAction} className="mt-1.5 text-[12px] font-semibold text-[#111111] underline decoration-[#F97316] underline-offset-2">{alert.actionLabel}</button>
         ) : null}
       </div>
     </div>
@@ -85,7 +85,7 @@ function PasswordField({ id, value, onChange, autoComplete, placeholder, shown, 
         onChange={onChange}
         aria-invalid={invalid || undefined}
         aria-describedby={invalid ? describedBy : undefined}
-        className={`w-full rounded-xl border bg-white py-3 pl-3.5 pr-12 text-[15px] text-[#1d2733] outline-none transition placeholder:text-[#89919a] focus:ring-4 ${invalid ? 'border-[#b42318] focus:border-[#b42318] focus:ring-[#b42318]/15' : 'border-[#ded6cb] focus:border-[#C2410C] focus:ring-[#C2410C]/10'}`}
+        className={`w-full rounded-xl border bg-white py-3 pl-3.5 pr-12 text-[15px] text-[#1d2733] outline-none transition placeholder:text-[#89919a] focus:ring-4 ${invalid ? 'border-[#b42318] focus:border-[#b42318] focus:ring-[#b42318]/15' : 'border-[#ded6cb] focus:border-[#F97316] focus:ring-[#F97316]/10'}`}
       />
       <button
         type="button"
@@ -93,7 +93,7 @@ function PasswordField({ id, value, onChange, autoComplete, placeholder, shown, 
         aria-label={shown ? 'Hide password' : 'Show password'}
         onMouseDown={(event) => event.preventDefault()}
         onClick={onToggle}
-        className="absolute inset-y-0 right-0 grid w-11 place-items-center rounded-r-xl text-[#5d6874] hover:text-[#C2410C] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#C2410C]"
+        className="absolute inset-y-0 right-0 grid w-11 place-items-center rounded-r-xl text-[#5d6874] hover:text-[#111111] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#F97316]"
       >
         {shown ? <EyeSlashIcon size={18} aria-hidden="true" /> : <EyeIcon size={18} aria-hidden="true" />}
       </button>
@@ -384,7 +384,7 @@ function AuthPageInner() {
   }
 
   const inputClass = 'mt-1.5 w-full rounded-xl border bg-white px-3.5 py-3 text-[15px] text-[#1d2733] outline-none transition placeholder:text-[#89919a] focus:ring-4';
-  const validInput = 'border-[#ded6cb] focus:border-[#C2410C] focus:ring-[#C2410C]/10';
+  const validInput = 'border-[#ded6cb] focus:border-[#F97316] focus:ring-[#F97316]/10';
   const invalidInput = 'border-[#b42318] focus:border-[#b42318] focus:ring-[#b42318]/15';
   const labelClass = 'block text-sm font-medium text-[#33404d]';
 
@@ -460,7 +460,7 @@ function AuthPageInner() {
                   <PasswordChecklist value={password} />
 
                   <div className="flex items-start gap-3 rounded-xl bg-[#f7f3ed] p-3.5">
-                    <input id="consent-terms" type="checkbox" checked={agreedToTerms} onChange={(e) => setAgreedToTerms(e.target.checked)} className="mt-1 h-4 w-4 shrink-0 accent-[#C2410C]" />
+                    <input id="consent-terms" type="checkbox" checked={agreedToTerms} onChange={(e) => setAgreedToTerms(e.target.checked)} className="mt-1 h-4 w-4 shrink-0 accent-[#F97316]" />
                     <label htmlFor="consent-terms" className="text-[16px] leading-6 text-[#4B5563]">
                       I agree to the <Link href="/legal/terms" className="inline-flex min-h-11 items-center font-semibold text-eyebrow underline">Terms of Service</Link>, <Link href="/legal/privacy" className="inline-flex min-h-11 items-center font-semibold text-eyebrow underline">Privacy Policy</Link>, and <Link href="/legal/refunds" className="inline-flex min-h-11 items-center font-semibold text-eyebrow underline">Refund Policy</Link>.
                     </label>
@@ -472,7 +472,7 @@ function AuthPageInner() {
                       <button type="button" onClick={() => switchMode(true)} className="mt-2 font-semibold underline">Go to sign in</button>
                     </div>
                   ) : (
-                    <button className="w-full rounded-xl bg-[#C2410C] px-5 py-3.5 text-sm font-bold text-white transition hover:bg-[#9A3412] focus:outline-none focus:ring-4 focus:ring-[#C2410C]/20 disabled:cursor-not-allowed disabled:opacity-50" type="submit" disabled={signupLoading || !signupReady}>
+                    <button className="w-full rounded-xl bg-[#F97316] px-5 py-3.5 text-sm font-bold text-[#111111] transition hover:bg-[#FB923C] focus:outline-none focus:ring-4 focus:ring-[#F97316]/20 disabled:cursor-not-allowed disabled:opacity-50" type="submit" disabled={signupLoading || !signupReady}>
                       {signupLoading ? 'Creating account…' : 'Create account'}
                     </button>
                   )}
@@ -520,7 +520,7 @@ function AuthPageInner() {
                   ) : (
                     <AuthCallout alert={loginAlert} />
                   )}
-                  <button className="w-full rounded-xl bg-[#C2410C] px-5 py-3.5 text-sm font-bold text-white transition hover:bg-[#9A3412] focus:outline-none focus:ring-4 focus:ring-[#C2410C]/20 disabled:cursor-not-allowed disabled:opacity-50" type="submit" disabled={loginLoading || loginSuccess}>
+                  <button className="w-full rounded-xl bg-[#F97316] px-5 py-3.5 text-sm font-bold text-[#111111] transition hover:bg-[#FB923C] focus:outline-none focus:ring-4 focus:ring-[#F97316]/20 disabled:cursor-not-allowed disabled:opacity-50" type="submit" disabled={loginLoading || loginSuccess}>
                     {loginSuccess ? 'Continuing…' : loginLoading ? 'Logging in…' : 'Log in'}
                   </button>
                 </form>

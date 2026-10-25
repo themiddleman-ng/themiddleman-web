@@ -136,12 +136,12 @@ export default function SiteHeader({ isSeller: sellerHint = false, compact = fal
     setMenuOpen(false);
   }
   const unreadBadge = unreadCount > 0 ? (
-    <span className="inline-flex min-w-5 items-center justify-center rounded-full bg-[#e56b27] px-1.5 py-0.5 text-[11px] font-semibold leading-none text-white">
+    <span className="inline-flex min-w-5 items-center justify-center rounded-full bg-[#F97316] px-1.5 py-0.5 text-[11px] font-semibold leading-none text-[#111111]">
       {unreadCount > 99 ? '99+' : unreadCount}
     </span>
   ) : null;
   const notificationBadge = notificationCount > 0 ? (
-    <span className="inline-flex min-w-5 items-center justify-center rounded-full bg-[#e56b27] px-1.5 py-0.5 text-[11px] font-semibold leading-none text-white">
+    <span className="inline-flex min-w-5 items-center justify-center rounded-full bg-[#F97316] px-1.5 py-0.5 text-[11px] font-semibold leading-none text-[#111111]">
       {notificationCount > 99 ? '99+' : notificationCount}
     </span>
   ) : null;
@@ -214,7 +214,7 @@ export default function SiteHeader({ isSeller: sellerHint = false, compact = fal
               </svg>
             )}
             {!authResolved && <span className="absolute inset-0 rounded-full ring-2 ring-[#e8e0d6]" aria-hidden="true" />}
-            {(unreadCount + notificationCount) > 0 && <span className="absolute -right-0.5 -top-0.5 h-2.5 w-2.5 rounded-full border-2 border-[#fbf8f2] bg-[#e56b27]" aria-label="You have unread updates" />}
+            {(unreadCount + notificationCount) > 0 && <span className="absolute -right-0.5 -top-0.5 h-2.5 w-2.5 rounded-full border-2 border-[#fbf8f2] bg-[#F97316]" aria-label="You have unread updates" />}
           </button>
 
           {menuOpen && (
@@ -239,7 +239,7 @@ export default function SiteHeader({ isSeller: sellerHint = false, compact = fal
                     {isAdmin && <Link role="menuitem" href="/admin" className={mobileLink}>Admin workspace</Link>}
                   </nav>
                   <div className="my-2 border-t border-[#eee7de] pt-2">
-                    <button type="button" role="menuitem" onClick={handleSignOut} className={`${mobileLink} w-full text-left text-[#8e3b28] hover:bg-[#fff0ea]`}>Sign out</button>
+                    <button type="button" role="menuitem" onClick={handleSignOut} className={`${mobileLink} w-full text-left text-[#111111] underline decoration-[#F97316] underline-offset-2 hover:bg-[#fff7ed]`}>Sign out</button>
                   </div>
                 </>
               ) : (

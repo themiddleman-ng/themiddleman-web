@@ -137,7 +137,7 @@ export default function AdminCommunicationsClient() {
             Message
             <textarea required maxLength={5000} value={firstMessage} onChange={(event) => setFirstMessage(event.target.value)} className="auth-input mt-2 min-h-28" placeholder="Write a clear note for the seller." />
           </label>
-          <button disabled={busy || !sellerId || !subject.trim() || !firstMessage.trim()} className="mt-4 rounded-full bg-ember px-5 py-2.5 text-sm font-semibold text-ink disabled:opacity-50">
+          <button disabled={busy || !sellerId || !subject.trim() || !firstMessage.trim()} className="mt-4 rounded-full bg-ember px-5 py-2.5 text-sm font-semibold text-[#111111] disabled:opacity-50">
             {busy ? "Saving…" : "Start conversation"}
           </button>
         </form>
@@ -195,7 +195,7 @@ export default function AdminCommunicationsClient() {
                   Reply
                   <textarea value={reply} onChange={(event) => setReply(event.target.value)} maxLength={5000} className="auth-input mt-2 min-h-24" placeholder="Write a message to the seller." />
                 </label>
-                <button disabled={busy || !reply.trim()} className="mt-3 rounded-full bg-ember px-5 py-2.5 text-sm font-semibold text-ink disabled:opacity-50">
+                <button disabled={busy || !reply.trim()} className="mt-3 rounded-full bg-ember px-5 py-2.5 text-sm font-semibold text-[#111111] disabled:opacity-50">
                   {busy ? "Sending…" : "Send reply"}
                 </button>
               </form>

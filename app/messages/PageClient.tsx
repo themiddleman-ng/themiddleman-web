@@ -339,7 +339,7 @@ function MessagesPageInner() {
 
         {!noticeDismissed && (
           <div className="mx-3 mb-3 flex items-start gap-3 rounded-2xl border border-[#ecd9c8] bg-[#fffaf4] px-4 py-3 text-[#5e5a54] sm:mx-6 md:mx-0">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#b5632b" strokeWidth="1.8" className="mt-0.5 shrink-0" aria-hidden="true">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#111111" strokeWidth="1.8" className="mt-0.5 shrink-0" aria-hidden="true">
               <path d="M12 9v4m0 4h.01M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z" />
             </svg>
             <p className="flex-1 text-[14px] leading-5 text-muted sm:text-xs sm:text-slate">
@@ -457,8 +457,8 @@ function MessagesPageInner() {
                     setComposerDraft({ body: "" });
                   }}
                 />
-                {warning && <p role="alert" className="mb-2 rounded-xl bg-[#fff2e8] px-3 py-2 text-xs leading-5 text-[#9a4b1e]">{warning}</p>}
-                <div className="flex items-end gap-2 rounded-2xl border border-[#e7e1d8] bg-[#faf8f4] p-2 focus-within:border-[#d8895e] focus-within:ring-4 focus-within:ring-[#de641e]/10">
+                {warning && <p role="alert" className="mb-2 rounded-xl bg-[#fff2e8] px-3 py-2 text-xs leading-5 text-[#111111]">{warning}</p>}
+                <div className="flex items-end gap-2 rounded-2xl border border-[#e7e1d8] bg-[#faf8f4] p-2 focus-within:border-[#F97316] focus-within:ring-4 focus-within:ring-[#F97316]/10">
                   <textarea
                     rows={1}
                     maxLength={2000}
@@ -473,7 +473,7 @@ function MessagesPageInner() {
                     type="button"
                     onClick={handleSend}
                     disabled={!draft.trim()}
-                    className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-[#de641e] text-white transition hover:bg-[#c95415] disabled:cursor-not-allowed disabled:bg-[#e8dfd7] disabled:text-[#9b968f]"
+                    className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-[#F97316] text-[#111111] transition hover:bg-[#FB923C] disabled:cursor-not-allowed disabled:bg-[#e8dfd7] disabled:text-[#9b968f]"
                     aria-label="Send message"
                   >
                     <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="m21 3-7.2 18-3.9-7.9L2 9.2 21 3Z" /><path d="M21 3 9.9 13.1" /></svg>

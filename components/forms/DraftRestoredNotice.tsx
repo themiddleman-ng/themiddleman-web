@@ -16,7 +16,7 @@ export default function DraftRestoredNotice({ visible, onDiscard }: DraftRestore
       <button
         type="button"
         onClick={onDiscard}
-        className="font-semibold text-[#9a3412] underline decoration-[#e7b49a] underline-offset-2"
+        className="font-semibold text-[#111111] underline decoration-[#F97316] underline-offset-2"
       >
         Discard
       </button>

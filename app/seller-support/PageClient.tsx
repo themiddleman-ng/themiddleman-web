@@ -175,7 +175,7 @@ export default function SellerSupportPage() {
                       Reply
                       <textarea value={reply} onChange={(event) => setReply(event.target.value)} maxLength={5000} className="auth-input mt-2 min-h-24" placeholder="Write a reply to The Middleman team." />
                     </label>
-                    <button disabled={busy || !reply.trim()} className="mt-3 rounded-full bg-ember px-5 py-2.5 text-sm font-semibold text-ink disabled:opacity-50">
+                    <button disabled={busy || !reply.trim()} className="mt-3 rounded-full bg-ember px-5 py-2.5 text-sm font-semibold text-[#111111] disabled:opacity-50">
                       {busy ? "Sending…" : "Send reply"}
                     </button>
                   </form>

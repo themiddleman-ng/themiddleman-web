@@ -7,7 +7,7 @@ export default function PendingReviewPage() {
         We&apos;re reviewing your application. This usually takes up to 48 hours.
         We&apos;ll notify you by email the moment you&apos;re approved to start listing products.
       </p>
-      <p className="mt-4 text-slate">In the meantime, feel free to browse the marketplace as a buyer.</p><Link href="/marketplace" className="mt-7 inline-flex rounded-full bg-ember px-5 py-2.5 text-sm font-medium text-ink">Browse marketplace</Link>
+      <p className="mt-4 text-slate">In the meantime, feel free to browse the marketplace as a buyer.</p><Link href="/marketplace" className="mt-7 inline-flex rounded-full bg-ember px-5 py-2.5 text-sm font-medium text-[#111111]">Browse marketplace</Link>
     </div></main>
   );
 }

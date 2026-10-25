@@ -134,7 +134,7 @@ export default function ProductPackageManager({ gigId, compact = false, onComple
         <ProductPackageField file={file} onChange={setFile} required={false} />
       </div>
       <div className="mt-3 flex flex-wrap items-center gap-3">
-        <button type="button" disabled={!file || Boolean(stage && stage !== "complete")} onClick={submit} className="rounded-full bg-ember px-4 py-2 text-xs font-semibold text-ink disabled:opacity-50">
+        <button type="button" disabled={!file || Boolean(stage && stage !== "complete")} onClick={submit} className="rounded-full bg-ember px-4 py-2 text-xs font-semibold text-[#111111] disabled:opacity-50">
           {stage && stage !== "complete" ? <StageLabel stage={stage} /> : current ? "Submit a new version" : "Upload and submit"}
         </button>
         {stage === "complete" ? <span className="text-xs text-emerald-300">Submitted for review.</span> : null}

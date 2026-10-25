@@ -67,7 +67,7 @@ export default function SellerAnalyticsPage() {
         <button type="button" disabled={!data || loading} onClick={() => data && downloadCsv('middleman-product-analytics.csv', [['Product', 'Views', 'Downloads', 'Sales', 'Sales value (NGN)', 'Conversion (%)'], ...data.products.map((row) => [row.title, row.views, row.downloads, row.sales, row.salesValue, row.conversionRate])])} className="mt-5 min-h-11 rounded-lg border border-line bg-white px-4 text-sm disabled:opacity-50">Export report</button>
         <div className="mt-5 flex flex-wrap gap-2" role="group" aria-label="Analytics time period">
           {[7, 30, 90, 0].map((period) => (
-            <button key={period} onClick={() => setDays(period)} aria-pressed={days === period} className={"rounded-full px-4 py-2 text-xs " + (days === period ? "bg-ember text-ink" : "border border-line text-slate")}>
+            <button key={period} onClick={() => setDays(period)} aria-pressed={days === period} className={"rounded-full px-4 py-2 text-xs " + (days === period ? "bg-ember text-[#111111]" : "border border-line text-slate")}>
               {period ? period + " days" : "All time"}
             </button>
           ))}

@@ -41,7 +41,7 @@ export default function CareersPage() {
           <p className="text-xs font-bold uppercase tracking-[.16em] text-ember">Introduce yourself</p>
           <p className="mt-4 text-sm leading-relaxed text-slate">When roles open, they will be listed on this page first. Until then, send us a note - what you build, what you&apos;ve shipped, and why this problem interests you.</p>
           <div className="mt-6 flex flex-wrap gap-3">
-            <a href="mailto:hello@themiddleman.com.ng?subject=Introduction" className="rounded-full bg-[#C2410C] px-6 py-3 text-sm font-bold text-white transition-colors hover:bg-[#9A3412]">hello@themiddleman.com.ng</a>
+            <a href="mailto:hello@themiddleman.com.ng?subject=Introduction" className="rounded-full bg-[#F97316] px-6 py-3 text-sm font-bold text-[#111111] transition-colors hover:bg-[#FB923C]">hello@themiddleman.com.ng</a>
           </div>
         </div>
       </div>

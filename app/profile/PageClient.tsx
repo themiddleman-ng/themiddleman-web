@@ -47,7 +47,7 @@ function profileValue(value: string | null | undefined, empty = 'Not added') {
 function VerificationBadge({ status }: { status: SellerProfile['verification_status'] }) {
   const classes: Record<SellerProfile['verification_status'], string> = {
     approved: 'bg-[#edf4ed] text-[#3f6446]',
-    pending: 'bg-[#f6eee2] text-[#8c5a22]',
+    pending: 'bg-[#fff1e4] text-[#111111]',
     rejected: 'bg-[#faece8] text-[#9a4434]',
     draft: 'bg-[#f1f1ee] text-[#606b73]',
   };
@@ -64,7 +64,7 @@ function orderStatusStyle(status: string) {
   const normalized = status.toLowerCase();
   if (['completed', 'approved', 'delivered'].includes(normalized)) return 'bg-[#e5f2ea] text-[#3c704e]';
   if (['in_progress', 'in_escrow', 'paid'].includes(normalized)) return 'bg-[#e7eff8] text-[#365d83]';
-  if (['pending_payment', 'pending'].includes(normalized)) return 'bg-[#fff0e5] text-[#a6531e]';
+  if (['pending_payment', 'pending'].includes(normalized)) return 'bg-[#fff0e5] text-[#111111]';
   if (['cancelled', 'canceled', 'refunded', 'rejected'].includes(normalized)) return 'bg-[#f8e9e7] text-[#9b493d]';
   return 'bg-[#f0f1f3] text-[#5c6874]';
 }
@@ -318,7 +318,7 @@ export default function ProfilePage() {
 
             <div className="flex w-full flex-col gap-2 sm:w-auto sm:min-w-48">
               <PhotoPicker id="profile-avatar-file" label="Choose a profile photo" disabled={avatarLoading} onFile={(file) => { void handleAvatarSelected(file); }}>
-                <span className="inline-flex min-h-11 w-full items-center justify-center rounded-xl bg-[#de641e] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#c95415]">
+                <span className="inline-flex min-h-11 w-full items-center justify-center rounded-xl bg-[#F97316] px-4 py-2.5 text-sm font-semibold text-[#111111] transition hover:bg-[#FB923C]">
                   {avatarLoading ? 'Uploading photo…' : ownerAvatar.url ? 'Change photo' : 'Add profile photo'}
                 </span>
               </PhotoPicker>
@@ -389,7 +389,7 @@ export default function ProfilePage() {
               <label className="text-sm font-medium">State of residence<input autoComplete="address-level1" maxLength={80} value={location} onChange={(event) => setLocation(event.target.value)} className="mt-2 block min-h-12 w-full border px-3" /></label>
               <div className="flex flex-wrap items-end justify-end gap-3">
                 <button type="button" onClick={() => { resetProfileForm(); setEditingProfile(false); }} className="min-h-11 rounded-lg border border-[#e1e5ed] px-4 text-sm">Cancel</button>
-                <button type="submit" disabled={profileSaving || !fullName.trim()} className="min-h-11 rounded-lg bg-[#ed6509] px-5 text-sm font-semibold text-white disabled:opacity-50">{profileSaving ? 'Saving…' : 'Save changes'}</button>
+                <button type="submit" disabled={profileSaving || !fullName.trim()} className="min-h-11 rounded-lg bg-[#F97316] px-5 text-sm font-semibold text-[#111111] disabled:opacity-50">{profileSaving ? 'Saving…' : 'Save changes'}</button>
               </div>
               {profileNotice && <p role="status" className="text-sm text-[#13724a] sm:col-span-2">{profileNotice}</p>}
               {profileError && <p role="alert" className="text-sm text-[#b42318] sm:col-span-2">{profileError}</p>}
@@ -405,16 +405,16 @@ export default function ProfilePage() {
           <section className="rounded-[24px] bg-[#fffdf9] p-5 shadow-[0_10px_34px_rgba(48,40,31,.045)] ring-1 ring-[#dce8ea] sm:p-6">
             <div className="flex items-center justify-between gap-4">
               <div>
-                <p className="text-sm font-medium text-[#a95320]">Recent activity</p>
+                <p className="text-sm font-medium text-[#111111] underline decoration-[#F97316] underline-offset-2">Recent activity</p>
                 <h2 className="mt-1 font-display text-xl font-semibold text-[#1b3044] sm:text-2xl">Your orders</h2>
               </div>
-              <Link href="/orders" className="text-sm font-semibold text-[#a95320] hover:underline">View all</Link>
+              <Link href="/orders" className="text-sm font-semibold text-[#111111] underline decoration-[#F97316] underline-offset-2 hover:underline">View all</Link>
             </div>
 
             {orders.length === 0 ? (
               <div className="mt-5 rounded-2xl bg-[#edf4f6] px-4 py-7 text-center">
                 <p className="text-sm text-[#65727d]">Your purchases and their progress will appear here.</p>
-                <Link href="/marketplace" className="mt-3 inline-flex min-h-10 items-center rounded-full px-3 text-sm font-semibold text-[#a95320] hover:bg-white">
+                <Link href="/marketplace" className="mt-3 inline-flex min-h-10 items-center rounded-full px-3 text-sm font-semibold text-[#111111] underline decoration-[#F97316] underline-offset-2 hover:bg-white">
                   Explore products
                 </Link>
               </div>
@@ -447,7 +447,7 @@ export default function ProfilePage() {
                 {sellerProfile && <VerificationBadge status={sellerProfile.verification_status} />}
               </div>
             ) : (
-              <Link href="/onboarding/role" className="mt-5 inline-flex min-h-11 items-center justify-center rounded-xl bg-[#de641e] px-4 text-sm font-semibold text-white transition hover:bg-[#c95415]">
+              <Link href="/onboarding/role" className="mt-5 inline-flex min-h-11 items-center justify-center rounded-xl bg-[#F97316] px-4 text-sm font-semibold text-[#111111] transition hover:bg-[#FB923C]">
                 Set up selling
               </Link>
             )}

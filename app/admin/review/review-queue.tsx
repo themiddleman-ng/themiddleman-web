@@ -56,7 +56,7 @@ export default function ReviewQueue({ deliveries }: { deliveries: Delivery[] }) 
           placeholder="Confirm listing match, package checks and preview commit parity, or explain required changes" />
         <div className="mt-4 flex flex-wrap gap-3">
           <button disabled={busy === delivery.id} onClick={() => decide(delivery.id, 'approve')}
-            className="rounded-full bg-ember px-5 py-2 text-sm font-semibold text-ink disabled:opacity-50">Approve delivery</button>
+            className="rounded-full bg-ember px-5 py-2 text-sm font-semibold text-[#111111] disabled:opacity-50">Approve delivery</button>
           <button disabled={busy === delivery.id} onClick={() => decide(delivery.id, 'reject')}
             className="rounded-full border border-line px-5 py-2 text-sm font-semibold disabled:opacity-50">Request changes</button>
         </div>

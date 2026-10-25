@@ -98,7 +98,7 @@ export default function PaymentsPage() {
               </div>
               <Link
                 href="/marketplace"
-                className="rounded-full bg-ember px-5 py-3 text-center text-sm font-semibold text-ink hover:bg-ember/90 transition-colors shrink-0"
+                className="rounded-full bg-ember px-5 py-3 text-center text-sm font-semibold text-[#111111] hover:bg-ember-hover transition-colors shrink-0"
               >
                 Explore products
               </Link>

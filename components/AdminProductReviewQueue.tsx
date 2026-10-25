@@ -164,7 +164,7 @@ function ReviewCard({ item, onReviewed }: { item: ProductReview; onReviewed: (em
         {error ? <p role="alert" className="text-sm text-red-300 sm:col-span-2">{error}</p> : null}
         <div className="flex flex-wrap items-center justify-between gap-3 sm:col-span-2">
           <p className="text-xs text-slate">This decision creates a seller notification and an operational message.</p>
-          <button disabled={busy} className="rounded-full bg-ember px-5 py-2.5 text-xs font-semibold text-ink disabled:opacity-50">
+          <button disabled={busy} className="rounded-full bg-ember px-5 py-2.5 text-xs font-semibold text-[#111111] disabled:opacity-50">
             {busy ? "Saving…" : decision === "approve" ? "Approve product" : decision === "reject" ? "Reject product" : "Request changes"}
           </button>
         </div>

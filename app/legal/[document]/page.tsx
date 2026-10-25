@@ -191,7 +191,7 @@ export default async function LegalPage({ params }: { params: Promise<{ document
               href={`/legal/${key}`}
               className={`rounded-full px-4 py-2 text-xs font-semibold transition-colors ${
                 key === document
-                  ? 'bg-ember text-ink'
+                  ? 'bg-ember text-[#111111]'
                   : 'border border-line text-slate hover:border-ember/40 hover:text-bone'
               }`}
             >

@@ -60,7 +60,7 @@ function ReviewForm({ orderId, onSubmitted }) {
       <button
         onClick={submit}
         disabled={submitting}
-        className="mt-3 rounded-full bg-ember px-4 py-2 text-xs font-semibold text-ink hover:bg-ember/90 transition-colors disabled:opacity-50"
+        className="mt-3 rounded-full bg-ember px-4 py-2 text-xs font-semibold text-[#111111] hover:bg-ember-hover transition-colors disabled:opacity-50"
       >
         {submitting ? "Submitting…" : "Submit review"}
       </button>
@@ -275,7 +275,7 @@ export default function OrdersPage() {
                     ["in_escrow", "delivered", "approved", "disputed"].includes(order.status) && (
                     <a
                       href={"/api/orders/" + order.id + "/product-file"}
-                      className="rounded-full bg-ember px-4 py-2 text-xs font-semibold text-ink hover:bg-ember/90 transition-colors"
+                      className="rounded-full bg-ember px-4 py-2 text-xs font-semibold text-[#111111] hover:bg-ember-hover transition-colors"
                     >
                       Download product · v{order.productVersion.version_number}
                     </a>
@@ -287,7 +287,7 @@ export default function OrdersPage() {
                       <input id={`delivery-${order.id}`} type="file" accept=".pdf,.zip,.png,.jpg,.jpeg,.txt"
                         className="mt-2 block max-w-full text-sm" onChange={event => setFiles({ ...files, [order.id]: event.target.files?.[0] })} />
                       <button onClick={() => submitDelivery(order.id)} disabled={busyOrderId === order.id}
-                        className="mt-3 rounded-full bg-ember px-4 py-2 text-xs font-semibold text-ink disabled:opacity-50">
+                        className="mt-3 rounded-full bg-ember px-4 py-2 text-xs font-semibold text-[#111111] disabled:opacity-50">
                         {busyOrderId === order.id ? 'Uploading…' : 'Submit for admin review'}
                       </button>
                     </div>
@@ -298,7 +298,7 @@ export default function OrdersPage() {
                     <button
                       onClick={() => retryPaymentVerification(order.id)}
                       disabled={busyOrderId === order.id}
-                      className="rounded-full bg-ember px-4 py-2 text-xs font-semibold text-ink hover:bg-ember/90 transition-colors disabled:opacity-50"
+                      className="rounded-full bg-ember px-4 py-2 text-xs font-semibold text-[#111111] hover:bg-ember-hover transition-colors disabled:opacity-50"
                     >
                       {busyOrderId === order.id ? "Checking payment…" : "Retry payment verification"}
                     </button>
@@ -308,7 +308,7 @@ export default function OrdersPage() {
                     <button
                       onClick={() => approveOrder(order.id)}
                       disabled={busyOrderId === order.id}
-                      className="rounded-full bg-ember px-4 py-2 text-xs font-semibold text-ink hover:bg-ember/90 transition-colors disabled:opacity-50"
+                      className="rounded-full bg-ember px-4 py-2 text-xs font-semibold text-[#111111] hover:bg-ember-hover transition-colors disabled:opacity-50"
                     >
                       Accept delivery
                     </button>

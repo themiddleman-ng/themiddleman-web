@@ -26,7 +26,7 @@ function StatusPill({ status }: { status: string }) {
       ? "border-emerald-500/30 text-emerald-700"
       : status === "failed"
         ? "border-red-500/30 text-red-700"
-        : "border-amber-500/30 text-amber-800";
+        : "border-[#F97316]/40 text-[#111111]";
   return <span className={`rounded-full border px-2.5 py-1 text-xs font-semibold ${tone}`}>{status}</span>;
 }
 

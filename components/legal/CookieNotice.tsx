@@ -102,7 +102,7 @@ export default function CookieNotice() {
           <div className="mx-auto flex max-w-7xl items-center gap-3 px-4 py-2 sm:px-6">
             <p className="min-w-0 flex-1 truncate text-[13px] leading-5 text-[#243344]">
               Essential cookies keep sign-in working.{" "}
-              <Link href="/legal/cookies" className="font-semibold text-[#9A3412] hover:underline">
+              <Link href="/legal/cookies" className="font-semibold text-[#111111] underline decoration-[#F97316] underline-offset-2 hover:underline">
                 Cookie policy
               </Link>
             </p>
@@ -117,7 +117,7 @@ export default function CookieNotice() {
               <button
                 type="button"
                 onClick={() => savePreferences(false)}
-                className="min-h-9 rounded-lg bg-[#C2410C] px-3 text-xs font-semibold text-white hover:bg-[#9A3412]"
+                className="min-h-9 rounded-lg bg-[#F97316] px-3 text-xs font-semibold text-[#111111] hover:bg-[#FB923C]"
               >
                 OK
               </button>
@@ -139,7 +139,7 @@ export default function CookieNotice() {
           >
             <div className="flex items-start justify-between gap-4">
               <div>
-                <p className="text-xs font-semibold text-[#9A3412]">Privacy</p>
+                <p className="text-xs font-semibold text-[#111111] underline decoration-[#F97316] underline-offset-2">Privacy</p>
                 <h2 id="cookie-settings-title" className="mt-1 font-display text-xl font-semibold">Cookie settings</h2>
                 <p className="mt-2 text-sm leading-6 text-[#64717c]">
                   Essential storage keeps your account signed in and secure. Change optional preferences below.
@@ -177,14 +177,14 @@ export default function CookieNotice() {
                   aria-checked={optionalAnalytics}
                   aria-label="Allow optional analytics"
                   onClick={() => setOptionalAnalytics((value) => !value)}
-                  className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#C2410C]/20 ${optionalAnalytics ? "bg-[#C2410C]" : "bg-[#c9c3ba]"}`}
+                  className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#F97316]/20 ${optionalAnalytics ? "bg-[#F97316]" : "bg-[#c9c3ba]"}`}
                 >
                   <span className={`h-5 w-5 rounded-full bg-white shadow-sm transition-transform ${optionalAnalytics ? "translate-x-[22px]" : "translate-x-0.5"}`} />
                 </button>
               </div>
             </div>
 
-            <Link href="/legal/cookies" onClick={() => setSettingsOpen(false)} className="mt-4 inline-flex min-h-11 items-center text-[14px] font-semibold text-[#C2410C] hover:underline">
+            <Link href="/legal/cookies" onClick={() => setSettingsOpen(false)} className="mt-4 inline-flex min-h-11 items-center text-[14px] font-semibold text-[#111111] underline decoration-[#F97316] underline-offset-2 hover:underline">
               Read the cookie policy
             </Link>
             <div className="mt-5 grid grid-cols-2 gap-2">
@@ -198,7 +198,7 @@ export default function CookieNotice() {
               <button
                 type="button"
                 onClick={() => savePreferences(optionalAnalytics)}
-                className="min-h-11 rounded-xl bg-[#C2410C] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#9A3412]"
+                className="min-h-11 rounded-xl bg-[#F97316] px-4 py-2.5 text-sm font-semibold text-[#111111] transition hover:bg-[#FB923C]"
               >
                 Save choice
               </button>
