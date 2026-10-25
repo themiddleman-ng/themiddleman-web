@@ -4,12 +4,18 @@ import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
+import { CaretLeftIcon } from "@phosphor-icons/react/dist/csr/CaretLeft";
+import { CaretRightIcon } from "@phosphor-icons/react/dist/csr/CaretRight";
+import { DotsThreeIcon } from "@phosphor-icons/react/dist/csr/DotsThree";
+import { SealCheckIcon } from "@phosphor-icons/react/dist/csr/SealCheck";
 import { isSupabaseConfigured, supabase } from "@/lib/supabaseClient";
 import { StarRatingDisplay } from "@/components/StarRating";
 import SiteHeader from "@/components/SiteHeader";
 import ProductCover from "@/components/marketplace/ProductCover";
 import EscrowTrustLine from "@/components/EscrowTrustLine";
+import FileTypeIcon, { fileKindFromName } from "@/components/gigs/FileTypeIcon";
 import { DESIGN_PREVIEW_GIGS } from "@/lib/design-preview/catalog";
+import type { GigPackageListing } from "@/lib/gig-package-listing";
 
 type SellerProfile = { user_id: string; display_name: string; bio: string | null; verification_status: string };
 type GigRow = {
@@ -46,7 +52,24 @@ function initialsFrom(name: string): string {
   return (parts[0][0] + parts[1][0]).toUpperCase();
 }
 
-export default function GigPageClient({ gigId, purchasesEnabled }: { gigId: string; purchasesEnabled: boolean }) {
+const DETAIL_TABS = [
+  { id: "overview", label: "Overview" },
+  { id: "included", label: "What's included" },
+  { id: "requirements", label: "Requirements" },
+  { id: "creator", label: "Creator" },
+] as const;
+
+type DetailTabId = (typeof DETAIL_TABS)[number]["id"];
+
+export default function GigPageClient({
+  gigId,
+  purchasesEnabled,
+  packageListing = null,
+}: {
+  gigId: string;
+  purchasesEnabled: boolean;
+  packageListing?: GigPackageListing | null;
+}) {
   const router = useRouter();
   const [userId, setUserId] = useState<string | null>(null);
   const [userEmail, setUserEmail] = useState<string | null>(null);
@@ -63,6 +86,8 @@ export default function GigPageClient({ gigId, purchasesEnabled }: { gigId: stri
   const [reportSuccess, setReportSuccess] = useState(false);
   const [reportOpen, setReportOpen] = useState(false);
   const [moreOpen, setMoreOpen] = useState(false);
+  const [activeSlide, setActiveSlide] = useState(0);
+  const [detailTab, setDetailTab] = useState<DetailTabId>("overview");
   const orderRequestKey = useRef<string | null>(null);
 
   useEffect(() => {
@@ -247,109 +272,422 @@ export default function GigPageClient({ gigId, purchasesEnabled }: { gigId: stri
   if (loadError || !gig) return <main className="grid min-h-screen place-items-center bg-ink px-6 text-bone"><div className="text-center"><p className="mb-4 text-sm text-slate">{loadError}</p><Link href="/marketplace" className="text-sm text-eyebrow hover:underline">Back to marketplace</Link></div></main>;
 
   const verified = gig.seller_profiles?.verification_status === "approved";
-  const imageUrls = (gig.gallery_image_paths ?? []).map(path => supabase.storage.from('gig-media').getPublicUrl(path).data.publicUrl);
-  const videoUrl = gig.demo_video_path ? supabase.storage.from('gig-media').getPublicUrl(gig.demo_video_path).data.publicUrl : null;
-  const demoLinks = (gig.demo_links ?? []).filter(link => { try { return new URL(link).protocol === 'https:'; } catch { return false; } });
+  const imageUrls = (gig.gallery_image_paths ?? []).map((path) =>
+    supabase.storage.from("gig-media").getPublicUrl(path).data.publicUrl,
+  );
+  const videoUrl = gig.demo_video_path
+    ? supabase.storage.from("gig-media").getPublicUrl(gig.demo_video_path).data.publicUrl
+    : null;
+  const demoLinks = (gig.demo_links ?? []).filter((link) => {
+    try {
+      return new URL(link).protocol === "https:";
+    } catch {
+      return false;
+    }
+  });
   const isOwnGig = userId === gig.seller_profiles?.user_id;
-  const included = [
-    gig.delivery_days ? `Seller's estimated delivery: ${gig.delivery_days} day${gig.delivery_days > 1 ? "s" : ""}` : null,
-    gig.is_ai_assisted ? "Seller disclosed that AI tools are used." : null,
+  const requirementLines = [
+    gig.delivery_days
+      ? `Allow up to ${gig.delivery_days} day${gig.delivery_days > 1 ? "s" : ""} for the seller to deliver after purchase.`
+      : null,
+    gig.is_ai_assisted ? "This listing discloses that AI tools are used in the product." : null,
   ].filter(Boolean) as string[];
 
   const showAiPill = gig.is_ai_assisted && gig.category !== "ai_assisted";
+  const categoryLabel = CATEGORY_LABELS[gig.category] ?? gig.category;
+  const summaryLine = gig.description.replace(/\s+/g, " ").trim().slice(0, 180);
+
+  const names = new Set<string>();
+  const packageFiles: { name: string; kind: ReturnType<typeof fileKindFromName> }[] = [];
+  if (packageListing?.originalFilename) {
+    names.add(packageListing.originalFilename);
+    packageFiles.push({
+      name: packageListing.originalFilename,
+      kind: fileKindFromName(packageListing.originalFilename, packageListing.contentType),
+    });
+  }
+  for (const path of packageListing?.innerPaths ?? []) {
+    const leaf = path.split("/").pop();
+    if (!leaf || names.has(leaf)) continue;
+    names.add(leaf);
+    packageFiles.push({ name: leaf, kind: fileKindFromName(leaf) });
+  }
+
+  type Slide = { type: "image"; url: string } | { type: "pdf" };
+  const slides: Slide[] = imageUrls.map((url) => ({ type: "image", url }));
+  if (
+    packageListing &&
+    fileKindFromName(packageListing.originalFilename, packageListing.contentType) === "pdf" &&
+    !slides.some((item) => item.type === "pdf")
+  ) {
+    slides.push({ type: "pdf" });
+  }
+  if (slides.length === 0) slides.push({ type: "image", url: "" });
+
+  const safeSlide = Math.min(activeSlide, slides.length - 1);
+  const currentSlide = slides[safeSlide];
+
+  const purchaseAction = isOwnGig ? null : purchasesEnabled ? (
+    <button onClick={handleBuyAndPay} disabled={paying} className="auth-button w-full min-h-11 rounded-xl">
+      {paying ? "Opening Paystack…" : "Buy this product"}
+    </button>
+  ) : (
+    <button type="button" disabled className="w-full min-h-11 rounded-xl bg-ember-cta/40 px-5 py-3 text-sm font-semibold text-on-ember opacity-80">
+      Purchases paused
+    </button>
+  );
 
   const buyPanel = (
-    <div className="rounded-2xl border border-line bg-paper p-4 sm:p-6">
-      <div className="flex flex-wrap items-center gap-2">
-        <p className="font-mono text-[13px] font-semibold uppercase tracking-[.14em] text-slate">{CATEGORY_LABELS[gig.category] ?? gig.category}</p>
-        {showAiPill && <span className="rounded-full bg-[#C2410C]/12 px-3 py-1 text-xs font-semibold text-[#9A3412]">AI-assisted</span>}
+    <div className="rounded-2xl border border-line bg-paper p-5 shadow-sm sm:p-6">
+      <h1 className="break-words font-display text-2xl font-bold tracking-tight sm:text-[1.65rem]">{gig.title}</h1>
+      <div className="mt-4 flex flex-wrap items-center gap-2">
+        <p className="font-mono text-2xl font-semibold text-ember-cta">₦{gig.price_ngn.toLocaleString()}</p>
+        {showAiPill ? (
+          <span className="rounded-full bg-ember-cta/10 px-3 py-1 text-xs font-semibold text-link">AI-assisted</span>
+        ) : null}
       </div>
-      <h1 className="mt-2 break-words font-display text-[1.55rem] font-bold tracking-tight sm:text-[1.85rem]">{gig.title}</h1>
-      <div className="mt-4 flex flex-wrap items-center gap-3">
-        <div className="grid h-10 w-10 place-items-center rounded-full border border-line bg-[#FBF4EC] font-display text-sm font-bold text-bone">{initialsFrom(gig.seller_profiles?.display_name ?? "?")}</div>
-        <div>
-          <p className="text-sm font-medium">{gig.seller_profiles?.display_name ?? "Unknown seller"}</p>
-          {verified ? <p className="text-xs font-semibold text-eyebrow">Verified seller</p> : <p className="text-xs text-slate">Verification in progress</p>}
+      {summaryLine ? <p className="mt-3 text-[15px] leading-relaxed text-muted">{summaryLine}{gig.description.length > summaryLine.length ? "…" : ""}</p> : null}
+      <div className="my-5 border-t border-line" />
+      <div className="flex items-center gap-3">
+        <div className="grid h-11 w-11 place-items-center rounded-full border border-line bg-elevated font-display text-sm font-bold">
+          {initialsFrom(gig.seller_profiles?.display_name ?? "?")}
         </div>
-        <div className="sm:ml-auto"><StarRatingDisplay average={rating.average} count={rating.count} size={13} /></div>
+        <div className="min-w-0 flex-1">
+          <p className="flex flex-wrap items-center gap-1.5 text-sm font-semibold">
+            {gig.seller_profiles?.display_name ?? "Unknown seller"}
+            {verified ? (
+              <SealCheckIcon size={18} weight="fill" className="text-sky-600" aria-label="Verified seller" />
+            ) : null}
+          </p>
+          <p className="text-xs text-muted">{categoryLabel}</p>
+        </div>
+        <StarRatingDisplay average={rating.average} count={rating.count} size={13} />
       </div>
-      <div className="mt-5 flex items-baseline justify-between border-t border-line pt-5">
-        <span className="text-sm text-slate">Price</span>
-        <span className="font-mono text-2xl font-semibold text-bone">₦{gig.price_ngn.toLocaleString()}</span>
-      </div>
-      <EscrowTrustLine className="mt-3" />
       {isOwnGig ? (
         <div className="mt-5 space-y-3">
-          <p className="text-center text-xs text-slate">This is your product.{" "}<Link href="/gigs/mine" className="font-semibold text-[#9A3412] hover:underline">Manage it</Link></p>
-          <button onClick={handleDeleteGig} className="w-full rounded-full border border-red-900/20 bg-red-950/10 px-5 py-3 text-sm font-semibold text-red-500 transition-colors hover:border-red-900/40 hover:bg-red-950/20">Delete product</button>
-        </div>
-      ) : purchasesEnabled ? (
-        <div className="mt-5 space-y-3">
-          <button onClick={handleBuyAndPay} disabled={paying} className="auth-button w-full">{paying ? "Opening Paystack…" : "Buy this product"}</button>
-          <p className="text-center text-xs text-slate">Checkout is enabled only in an isolated Paystack test environment.</p>
+          <p className="text-center text-xs text-muted">
+            This is your product. <Link href="/gigs/mine" className="font-semibold text-link hover:underline">Manage it</Link>
+          </p>
+          <button
+            onClick={handleDeleteGig}
+            className="w-full min-h-11 rounded-xl border border-red-900/20 bg-red-950/10 px-5 py-3 text-sm font-semibold text-red-500"
+          >
+            Delete product
+          </button>
         </div>
       ) : (
-        <div className="mt-5 rounded-xl bg-[#EFE7DB] p-4 text-center">
-          <p className="text-sm font-semibold text-[#172B45]">Purchases are paused</p>
-          <p className="mt-2 text-xs leading-5 text-[#526577]">Payment and delivery are being verified before live checkout is enabled.</p>
+        <div className="mt-5 space-y-3">
+          {purchaseAction}
+          {!purchasesEnabled ? (
+            <p className="text-center text-xs leading-5 text-muted">
+              Payment and delivery are being verified before live checkout is enabled.
+            </p>
+          ) : (
+            <p className="text-center text-xs text-muted">Checkout is enabled only in an isolated Paystack test environment.</p>
+          )}
+          <EscrowTrustLine className="mt-3" />
         </div>
       )}
-      {checkout && (
+      {checkout ? (
         <section className="mt-5 border-t border-line pt-5" aria-label="Checkout summary">
           <h2 className="font-semibold">Review your total</h2>
-          <dl className="mt-3 space-y-2 text-sm">{(checkout.fees ? [['Product',checkout.fees.price_kobo],['Service fee (3%)',checkout.fees.buyer_fee_kobo],['Platform fee ($1)',checkout.fees.flat_fee_kobo],['VAT on fees',checkout.fees.buyer_vat_kobo],['Total',checkout.fees.buyer_total_kobo]] : [['Total',Number(checkout.order.amount)*100]]).map(([label,value])=><div key={String(label)} className="flex justify-between gap-3"><dt>{label}</dt><dd>₦{(Number(value)/100).toLocaleString('en-NG',{minimumFractionDigits:2})}</dd></div>)}</dl>
-          {checkout.display && <p className="mt-3 text-sm text-slate">Estimated USD total: {new Intl.NumberFormat('en-US',{style:'currency',currency:'USD'}).format(checkout.display.buyer_total_minor/100)}</p>}
-          {checkout.fees && <p className="mt-3 text-xs text-slate">You pay in NGN. The USD-to-NGN rate used for the $1 platform fee is locked to this order. Your bank sets its own conversion rate.</p>}
-          <button onClick={payReviewedCheckout} disabled={paying} className="auth-button mt-4 w-full">{paying?'Opening payment…':'Continue to Paystack'}</button>
-          <button className="mt-3 text-sm text-slate underline" disabled={paying} onClick={()=>{setCheckout(null);orderRequestKey.current=null;}}>Close checkout</button>
+          <dl className="mt-3 space-y-2 text-sm">
+            {(checkout.fees
+              ? [
+                  ["Product", checkout.fees.price_kobo],
+                  ["Service fee (3%)", checkout.fees.buyer_fee_kobo],
+                  ["Platform fee ($1)", checkout.fees.flat_fee_kobo],
+                  ["VAT on fees", checkout.fees.buyer_vat_kobo],
+                  ["Total", checkout.fees.buyer_total_kobo],
+                ]
+              : [["Total", Number(checkout.order.amount) * 100]]
+            ).map(([label, value]) => (
+              <div key={String(label)} className="flex justify-between gap-3">
+                <dt>{label}</dt>
+                <dd>₦{(Number(value) / 100).toLocaleString("en-NG", { minimumFractionDigits: 2 })}</dd>
+              </div>
+            ))}
+          </dl>
+          {checkout.display ? (
+            <p className="mt-3 text-sm text-muted">
+              Estimated USD total:{" "}
+              {new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(
+                checkout.display.buyer_total_minor / 100,
+              )}
+            </p>
+          ) : null}
+          {checkout.fees ? (
+            <p className="mt-3 text-xs text-muted">
+              You pay in NGN. The USD-to-NGN rate used for the $1 platform fee is locked to this order. Your bank sets its own conversion rate.
+            </p>
+          ) : null}
+          <button onClick={payReviewedCheckout} disabled={paying} className="auth-button mt-4 w-full min-h-11">
+            {paying ? "Opening payment…" : "Continue to Paystack"}
+          </button>
+          <button
+            className="mt-3 min-h-11 text-sm text-muted underline"
+            disabled={paying}
+            onClick={() => {
+              setCheckout(null);
+              orderRequestKey.current = null;
+            }}
+          >
+            Close checkout
+          </button>
         </section>
-      )}
-      {actionError && <p className="auth-error mt-4">{actionError}</p>}
-      {reportSuccess && <p className="mt-4 text-[14px] font-semibold text-eyebrow">Thanks. The admin team will review this product.</p>}
+      ) : null}
+      {actionError ? <p className="auth-error mt-4">{actionError}</p> : null}
+      {reportSuccess ? <p className="mt-4 text-[14px] font-semibold text-link">Thanks. The admin team will review this product.</p> : null}
     </div>
   );
 
-  return <main className="min-h-screen bg-ink text-bone"><SiteHeader /><div className="mx-auto max-w-7xl px-4 py-5 sm:px-6 sm:py-10">
-    <div className="flex items-center justify-between gap-3">
-      <Link href="/marketplace" className="inline-flex min-h-11 items-center text-[16px] font-semibold text-slate transition-colors hover:text-eyebrow">← Marketplace</Link>
-      {!isOwnGig && (
-        <div className="relative">
-          <button type="button" aria-label="More actions" aria-expanded={moreOpen} onClick={() => setMoreOpen((open) => !open)} className="grid h-11 w-11 place-items-center rounded-full text-bone hover:bg-elevated">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="5" cy="12" r="1.6" /><circle cx="12" cy="12" r="1.6" /><circle cx="19" cy="12" r="1.6" /></svg>
-          </button>
-          {moreOpen && (
-            <div role="menu" className="absolute right-0 top-12 z-20 min-w-40 rounded-xl border border-line bg-paper p-1.5 shadow-lg">
-              <button type="button" role="menuitem" onClick={() => { setMoreOpen(false); setReportOpen(true); }} className="flex min-h-11 w-full items-center rounded-lg px-3 text-left text-[15px] font-semibold text-eyebrow">
-                Report
-              </button>
+  const tabPanel = (() => {
+    if (detailTab === "overview") {
+      return (
+        <div className="space-y-4 text-[15px] leading-relaxed text-muted">
+          <p className="whitespace-pre-wrap text-bone">{gig.description}</p>
+          {videoUrl ? (
+            <div>
+              <h3 className="font-display text-lg font-semibold text-bone">Demo video</h3>
+              <video controls preload="none" className="mt-3 w-full rounded-xl" src={videoUrl}>
+                Your browser does not support video playback.
+              </video>
             </div>
-          )}
+          ) : null}
+          {demoLinks.length > 0 ? (
+            <div className="flex flex-wrap gap-3">
+              {demoLinks.map((url, index) => (
+                <a
+                  key={url}
+                  href={url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex min-h-11 items-center rounded-full border border-line px-4 text-sm font-semibold text-link hover:border-ember-cta"
+                >
+                  {index === 0 ? "View live demo" : `View live demo ${index + 1}`}
+                </a>
+              ))}
+            </div>
+          ) : null}
         </div>
-      )}
-    </div>
-    <div className="mt-4 grid min-w-0 grid-cols-1 gap-7 lg:mt-5 lg:grid-cols-12 lg:gap-10">
-      <div className="min-w-0 lg:order-2 lg:col-span-4">
-        <div className="lg:sticky lg:top-24">{buyPanel}</div>
-      </div>
-      <div className="min-w-0 lg:order-1 lg:col-span-8">
-      <div className="overflow-hidden rounded-xl border border-line bg-paper">
-        <div className="relative aspect-[16/9]">
-          {imageUrls[0] ? (
-            <Image unoptimized src={imageUrls[0]} fill sizes="(max-width: 1024px) 100vw, 800px" alt={`${gig.title} preview`} className="object-cover" />
+      );
+    }
+    if (detailTab === "included") {
+      return packageFiles.length > 0 ? (
+        <ul className="space-y-3">
+          {packageFiles.map((file) => (
+            <li key={file.name} className="flex items-center gap-3 text-sm text-bone">
+              <FileTypeIcon kind={file.kind} />
+              <span>{file.name}</span>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p className="text-sm text-muted">
+          File-level deliverables are described in the listing. Package filenames appear here when a reviewed product file is on record.
+        </p>
+      );
+    }
+    if (detailTab === "requirements") {
+      return requirementLines.length > 0 ? (
+        <ul className="list-disc space-y-2 pl-5 text-sm text-muted">
+          {requirementLines.map((line) => <li key={line}>{line}</li>)}
+        </ul>
+      ) : (
+        <p className="text-sm text-muted">
+          The seller&apos;s description is the source of truth for supported formats and any requirements. Confirm those details before checkout.
+        </p>
+      );
+    }
+    return (
+      <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_220px]">
+        <div>
+          <p className="text-sm font-semibold text-bone">{gig.seller_profiles?.display_name ?? "Unknown seller"}</p>
+          {verified ? <p className="mt-1 text-xs font-semibold text-link">Verified seller</p> : null}
+          {gig.seller_profiles?.bio ? (
+            <p className="mt-3 whitespace-pre-wrap text-sm leading-relaxed text-muted">{gig.seller_profiles.bio}</p>
           ) : (
-            <ProductCover title={gig.title} category={gig.category} label={showAiPill ? "AI-assisted" : undefined} />
+            <p className="mt-3 text-sm text-muted">This creator has not added a bio yet.</p>
           )}
         </div>
+        <aside className="rounded-xl border border-line bg-elevated p-4">
+          <p className="text-sm font-semibold text-bone">Ask about customization after purchase</p>
+          <p className="mt-2 text-xs leading-5 text-muted">
+            Messaging opens once you have a paid order for this product.
+          </p>
+          <Link href="/messages" className="mt-4 inline-flex min-h-11 items-center text-sm font-semibold text-link hover:underline">
+            Go to messages
+          </Link>
+        </aside>
       </div>
-      {imageUrls.length > 1 && <div className="mt-3 grid grid-cols-3 gap-3">{imageUrls.slice(1).map((url, index) => <a key={url} href={url} target="_blank" rel="noopener noreferrer" className="relative aspect-video overflow-hidden rounded-lg border border-line"><Image unoptimized src={url} fill sizes="250px" alt={`${gig.title} gallery image ${index + 2}`} className="object-cover" /></a>)}</div>}
-      {videoUrl && <section className="mt-8"><h2 className="mb-3 font-display text-xl font-bold">Demo video</h2><video controls preload="none" className="w-full rounded-xl" src={videoUrl}>Your browser does not support video playback.</video></section>}
-      {demoLinks.length > 0 && <section className="mt-8"><h2 className="mb-3 font-display text-xl font-bold">Explore the demo</h2><div className="flex flex-wrap gap-3">{demoLinks.map((url, index) => <a key={url} href={url} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-11 items-center rounded-full border border-line px-4 text-[16px] font-semibold text-link hover:border-ember-cta">{index === 0 ? "View live demo" : `View live demo ${index + 1}`} ↗</a>)}</div></section>}
-      <section className="mt-10"><h2 className="font-display text-xl font-bold">What you&apos;ll get</h2><p className="mt-3 whitespace-pre-wrap text-[15px] leading-relaxed text-slate">{gig.description}</p></section>
-      <section className="mt-8"><h2 className="font-display text-xl font-bold">Before you buy</h2><p className="mt-3 text-[15px] leading-relaxed text-slate">The seller&apos;s description is the source of truth for what the product includes, supported formats and any requirements. Confirm those details before checkout.</p>{included.length > 0 && <ul className="mt-4 space-y-3">{included.map((line) => <li key={line} className="flex items-start gap-3 text-[15px] text-bone"><span aria-hidden="true" className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-ember" />{line}</li>)}</ul>}<p className="mt-4 text-[14px] leading-6 text-slate">Optional customization is not included unless the listing says so. Paid product add-ons are not available yet.</p></section>
-      <section className="mt-10 rounded-2xl bg-[#EFE7DB] p-6"><h2 className="font-display text-lg font-bold text-[#172B45]">Payment and delivery</h2><p className="mt-2 text-[14px] leading-relaxed text-[#526577]">Paystack processes eligible payments. The Middleman holds the payment until the buyer confirms delivery. Payment confirmation and product delivery are separate steps; use your order page to check the status available for your purchase.</p></section>
-      <section className="mt-10 border-t border-line pt-8"><h2 className="font-display text-xl font-bold">Reviews {rating.count > 0 && `(${rating.count})`}</h2>{reviews.length === 0 && <p className="mt-4 text-sm text-slate">No reviews yet for this product.</p>}<div className="mt-5 space-y-5">{reviews.map((review, i) => <div key={i} className="border-b border-line pb-5 last:border-0"><div className="mb-2 flex items-center justify-between"><StarRatingDisplay average={review.rating} count={1} size={12} /><span className="text-xs text-slate">{review.reviewer_name || "Buyer"}</span></div>{review.comment && <p className="text-sm leading-relaxed text-slate">{review.comment}</p>}</div>)}</div></section>
-    </div></div>
-  </div>
+    );
+  })();
+
+  return (
+    <main className="min-h-screen bg-ink text-bone">
+      <SiteHeader />
+      <div className="mx-auto max-w-7xl px-4 py-5 sm:px-6 sm:py-8">
+        <div className="flex items-center justify-between gap-3">
+          <nav aria-label="Breadcrumb" className="min-w-0 text-sm text-muted">
+            <ol className="flex flex-wrap items-center gap-1.5">
+              <li><Link href="/marketplace" className="font-semibold hover:text-link">Marketplace</Link></li>
+              <li aria-hidden="true">/</li>
+              <li><span>{categoryLabel}</span></li>
+              <li aria-hidden="true">/</li>
+              <li className="truncate text-bone">{gig.title}</li>
+            </ol>
+          </nav>
+          {!isOwnGig ? (
+            <div className="relative shrink-0">
+              <button
+                type="button"
+                aria-label="More actions"
+                aria-expanded={moreOpen}
+                onClick={() => setMoreOpen((open) => !open)}
+                className="grid h-11 w-11 place-items-center rounded-full text-bone hover:bg-elevated"
+              >
+                <DotsThreeIcon size={22} weight="bold" aria-hidden="true" />
+              </button>
+              {moreOpen ? (
+                <div role="menu" className="absolute right-0 top-12 z-20 min-w-40 rounded-xl border border-line bg-paper p-1.5 shadow-lg">
+                  <button
+                    type="button"
+                    role="menuitem"
+                    onClick={() => {
+                      setMoreOpen(false);
+                      setReportOpen(true);
+                    }}
+                    className="flex min-h-11 w-full items-center rounded-lg px-3 text-left text-[15px] font-semibold text-link"
+                  >
+                    Report
+                  </button>
+                </div>
+              ) : null}
+            </div>
+          ) : null}
+        </div>
+
+        <div className="mt-6 grid min-w-0 grid-cols-1 gap-8 lg:grid-cols-12 lg:gap-10">
+          <div className="min-w-0 lg:col-span-7">
+            <div className="overflow-hidden rounded-xl border border-line bg-paper">
+              <div className="relative aspect-[16/10] bg-elevated">
+                {currentSlide.type === "image" && currentSlide.url ? (
+                  <Image
+                    unoptimized
+                    src={currentSlide.url}
+                    fill
+                    sizes="(max-width: 1024px) 100vw, 720px"
+                    alt={`${gig.title} preview`}
+                    className="object-cover"
+                  />
+                ) : currentSlide.type === "pdf" ? (
+                  <div className="flex h-full flex-col items-center justify-center gap-3 p-6 text-center">
+                    <FileTypeIcon kind="pdf" size={28} className="h-16 w-16" />
+                    <p className="text-sm font-semibold text-bone">{packageListing?.originalFilename}</p>
+                    <p className="text-xs text-muted">Product file attached to this listing</p>
+                  </div>
+                ) : (
+                  <ProductCover title={gig.title} category={gig.category} label={showAiPill ? "AI-assisted" : undefined} />
+                )}
+                {slides.length > 1 ? (
+                  <>
+                    <button
+                      type="button"
+                      aria-label="Previous image"
+                      onClick={() => setActiveSlide((index) => (index - 1 + slides.length) % slides.length)}
+                      className="absolute left-3 top-1/2 grid h-11 w-11 -translate-y-1/2 place-items-center rounded-full border border-line bg-paper/95 text-bone shadow"
+                    >
+                      <CaretLeftIcon size={20} weight="bold" aria-hidden="true" />
+                    </button>
+                    <button
+                      type="button"
+                      aria-label="Next image"
+                      onClick={() => setActiveSlide((index) => (index + 1) % slides.length)}
+                      className="absolute right-3 top-1/2 grid h-11 w-11 -translate-y-1/2 place-items-center rounded-full border border-line bg-paper/95 text-bone shadow"
+                    >
+                      <CaretRightIcon size={20} weight="bold" aria-hidden="true" />
+                    </button>
+                  </>
+                ) : null}
+              </div>
+            </div>
+            {slides.length > 1 ? (
+              <div className="mt-3 flex gap-2 overflow-x-auto pb-1">
+                {slides.map((slide, index) => (
+                  <button
+                    key={`${slide.type}-${index}`}
+                    type="button"
+                    aria-label={`Show gallery item ${index + 1}`}
+                    aria-current={safeSlide === index}
+                    onClick={() => setActiveSlide(index)}
+                    className={`relative h-16 w-24 shrink-0 overflow-hidden rounded-lg border-2 ${
+                      safeSlide === index ? "border-ember-cta" : "border-line"
+                    }`}
+                  >
+                    {slide.type === "image" && slide.url ? (
+                      <Image unoptimized src={slide.url} fill sizes="96px" alt="" className="object-cover" />
+                    ) : (
+                      <span className="grid h-full w-full place-items-center bg-elevated">
+                        <FileTypeIcon kind="pdf" size={18} className="h-10 w-10 border-0 bg-transparent" />
+                      </span>
+                    )}
+                  </button>
+                ))}
+              </div>
+            ) : null}
+
+            <div className="mt-8 -mx-4 flex gap-1 overflow-x-auto border-b border-line px-4 sm:mx-0 sm:px-0" role="tablist" aria-label="Product details">
+              {DETAIL_TABS.map((tab) => (
+                <button
+                  key={tab.id}
+                  type="button"
+                  role="tab"
+                  id={`gig-tab-${tab.id}`}
+                  aria-selected={detailTab === tab.id}
+                  aria-controls={`gig-panel-${tab.id}`}
+                  onClick={() => setDetailTab(tab.id)}
+                  className={`min-h-11 shrink-0 border-b-2 px-3 pb-3 text-sm font-semibold transition-colors ${
+                    detailTab === tab.id ? "border-ember-cta text-link" : "border-transparent text-muted"
+                  }`}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </div>
+            <div
+              className="mt-5 rounded-xl border border-line bg-paper p-5"
+              role="tabpanel"
+              id={`gig-panel-${detailTab}`}
+              aria-labelledby={`gig-tab-${detailTab}`}
+            >
+              {tabPanel}
+            </div>
+
+            <section className="mt-10 border-t border-line pt-8">
+              <h2 className="font-display text-xl font-bold">Reviews {rating.count > 0 ? `(${rating.count})` : ""}</h2>
+              {reviews.length === 0 ? (
+                <p className="mt-4 text-sm text-muted">No reviews yet for this product.</p>
+              ) : (
+                <div className="mt-5 space-y-5">
+                  {reviews.map((review, i) => (
+                    <div key={i} className="border-b border-line pb-5 last:border-0">
+                      <div className="mb-2 flex items-center justify-between">
+                        <StarRatingDisplay average={review.rating} count={1} size={12} />
+                        <span className="text-xs text-muted">{review.reviewer_name || "Buyer"}</span>
+                      </div>
+                      {review.comment ? <p className="text-sm leading-relaxed text-muted">{review.comment}</p> : null}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </section>
+          </div>
+
+          <div className="min-w-0 lg:col-span-5">
+            <div className="lg:sticky lg:top-24">{buyPanel}</div>
+          </div>
+        </div>
+      </div>
   {reportOpen && (
     <div
       className="fixed inset-0 z-[70] flex items-end justify-center bg-[#182d41]/40 p-3 backdrop-blur-[2px] sm:items-center sm:p-6"
@@ -392,6 +730,7 @@ export default function GigPageClient({ gigId, purchasesEnabled }: { gigId: stri
       </div>
     </>
   )}
-  </main>;
+    </main>
+  );
 }
 
