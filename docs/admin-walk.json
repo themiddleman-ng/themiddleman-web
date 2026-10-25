@@ -9,8 +9,8 @@
     },
     {
       "route": "/admin/products",
-      "status": 404,
-      "title": "Page Not Found | The Middleman",
+      "status": 200,
+      "title": "Create an account | The Middleman",
       "likelyGuest": false
     },
     {
