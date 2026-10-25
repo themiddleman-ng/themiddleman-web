@@ -7,6 +7,7 @@ import GigCard, { type CardGig, type CardRating } from "./GigCard";
 import { DESIGN_PREVIEW_GIGS } from "@/lib/design-preview/catalog";
 import { MARKETPLACE_CATEGORIES } from "@/lib/marketplace/categories";
 import { attachPublicSellerCards } from "@/lib/marketplace/attach-public-sellers.mjs";
+import { CategoryIcon } from "./ProductCover";
 
 type GigRow = CardGig & { created_at: string };
 
@@ -21,13 +22,6 @@ function ListingSkeleton() {
       </div>
     </div>
   );
-}
-
-function CategoryIcon({ category }: { category: string }) {
-  if (category === "design") return <svg viewBox="0 0 24 24" className="h-14 w-14 sm:h-16 sm:w-16" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true"><path d="M12 3.5 20.5 12 12 20.5 3.5 12 12 3.5Z" /></svg>;
-  if (category === "marketing") return <svg viewBox="0 0 24 24" className="h-14 w-14 sm:h-16 sm:w-16" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true"><path d="M4 16V8l10-3v14L4 16Z" /><path d="M14 9.5h4.5L20 7v10l-1.5-2.5H14" /></svg>;
-  if (category === "writing") return <svg viewBox="0 0 24 24" className="h-14 w-14 sm:h-16 sm:w-16" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true"><path d="M6 20h12M8 4h5.5a3.5 3.5 0 0 1 0 7H8v9" strokeLinecap="round" /></svg>;
-  return <svg viewBox="0 0 24 24" className="h-14 w-14 sm:h-16 sm:w-16" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true"><path d="M8 8.5h3.8L8.6 16H6.4L9.2 8.5H8V7h6v1.5h-2.2L8.8 16H7" strokeLinecap="round" /><path d="M14.2 16V8.5L18.4 16V8.5" strokeLinecap="round" /></svg>;
 }
 
 export default function HomeFeed() {
@@ -107,7 +101,7 @@ export default function HomeFeed() {
                   className="category-tile flex min-h-11 flex-col items-start justify-between gap-4 rounded-2xl px-4 py-4"
                   style={{ ["--tile-accent" as string]: `var(--accent-${item.accent})` }}
                 >
-                  <CategoryIcon category={item.key} />
+                  <CategoryIcon category={item.key} className="h-14 w-14 sm:h-16 sm:w-16" />
                   <span className="text-[15px] font-semibold">{item.label}</span>
                 </Link>
               ))}
