@@ -1,8 +1,11 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { BellIcon } from "@phosphor-icons/react/dist/csr/Bell";
 import SiteHeader from "@/components/SiteHeader";
+import { signinHref } from "@/lib/auth/signin-redirect.mjs";
 
 type Notification = {
   id: string;
@@ -21,6 +24,7 @@ export default function NotificationsPage() {
   const [items, setItems] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [signedOut, setSignedOut] = useState(false);
   const [error, setError] = useState("");
 
   async function load() {
@@ -28,8 +32,16 @@ export default function NotificationsPage() {
     setError("");
     try {
       const response = await fetch("/api/notifications", { cache: "no-store" });
+      if (response.status === 401) {
+        setSignedOut(true);
+        setItems([]);
+        setUnreadCount(0);
+        setError("");
+        return;
+      }
       const result = await response.json();
       if (!response.ok) throw new Error(result.error || "Could not load notifications.");
+      setSignedOut(false);
       setItems(result.notifications || []);
       setUnreadCount(result.unreadCount || 0);
     } catch (cause) {
@@ -73,37 +85,51 @@ export default function NotificationsPage() {
   return (
     <main className="min-h-screen bg-ink text-bone">
       <SiteHeader />
-      <section className="mx-auto max-w-3xl px-5 py-8 sm:px-7">
-        <header className="flex flex-wrap items-end justify-between gap-4 border-b border-line pb-5">
-          <div>
-            <p className="text-xs font-semibold tracking-[.14em] text-ember">YOUR ACCOUNT</p>
-            <h1 className="mt-2 font-display text-3xl font-bold">Notifications</h1>
-            <p className="mt-2 text-sm text-slate">{unreadCount} unread</p>
+      {signedOut && !loading ? (
+        <section className="mm-signed-out-empty">
+          <div className="flex flex-col items-center text-center">
+            <BellIcon size={40} className="text-slate" aria-hidden="true" />
+            <p className="mt-4 text-sm text-slate">Sign in to see your notifications</p>
+            <Link
+              href={signinHref("/notifications")}
+              className="mt-5 inline-flex min-h-11 items-center justify-center rounded-full bg-ember-cta px-5 text-sm font-semibold text-on-ember hover:bg-ember-hover"
+            >
+              Sign in
+            </Link>
           </div>
-          {unreadCount > 0 ? <button onClick={markAllRead} className="rounded-full border border-line px-4 py-2 text-xs text-slate hover:text-bone">Mark all read</button> : null}
-        </header>
+        </section>
+      ) : (
+        <section className="mx-auto max-w-3xl px-5 py-8 sm:px-7">
+          <header className="flex flex-wrap items-end justify-between gap-4 border-b border-line pb-5">
+            <div>
+              <p className="text-xs font-semibold tracking-[.14em] text-ember">YOUR ACCOUNT</p>
+              <h1 className="mt-2 font-display text-3xl font-bold">Notifications</h1>
+              {!loading && !signedOut ? <p className="mt-2 text-sm text-slate">{unreadCount} unread</p> : null}
+            </div>
+            {!loading && !signedOut && unreadCount > 0 ? <button onClick={markAllRead} className="rounded-full border border-line px-4 py-2 text-xs text-slate hover:text-bone">Mark all read</button> : null}
+          </header>
 
-        {loading ? <p className="mt-7 text-sm text-slate">Loading notifications…</p> : null}
-        {error ? <p role="alert" className="mt-7 text-sm text-red-300">{error}</p> : null}
-        {!loading && !items.length ? <p className="mt-7 text-sm text-slate">You’re all caught up. Important product and order updates will appear here.</p> : null}
+          {loading ? <p className="mt-7 text-sm text-slate">Loading notifications…</p> : null}
+          {error ? <p role="alert" className="mt-7 text-sm text-red-300">{error}</p> : null}
+          {!loading && !signedOut && !error && !items.length ? <p className="mt-7 text-sm text-slate">You’re all caught up. Important product and order updates will appear here.</p> : null}
 
-        <div className="mt-5 divide-y divide-white/10 sm:mt-6">
-          {items.map((item) => (
-            <button key={item.id} onClick={() => openItem(item)} className={"block w-full py-4 text-left sm:py-5 " + (!item.read_at ? "border-l-2 border-ember pl-3 sm:pl-4" : "pl-[14px] sm:pl-[18px]")}>
-              <span className="flex flex-wrap items-center gap-2">
-                <span className="font-semibold">{item.title}</span>
-                {!item.read_at ? <span className="rounded-full bg-ember/10 px-2 py-0.5 text-[10px] text-ember">Unread</span> : null}
-                {item.action_required ? <span className="rounded-full bg-white/5 px-2 py-0.5 text-[10px] text-slate">Action needed</span> : null}
-              </span>
-              <span className="mt-1 block text-sm leading-6 text-slate">{item.body}</span>
-              <span className="mt-2 block text-[11px] text-slate/70">
-                {item.source === "admin" ? "The Middleman Support" : "The Middleman"} · {new Date(item.created_at).toLocaleString()}
-              </span>
-            </button>
-          ))}
-        </div>
-      </section>
+          <div className="mt-5 divide-y divide-white/10 sm:mt-6">
+            {items.map((item) => (
+              <button key={item.id} onClick={() => openItem(item)} className={"block w-full py-4 text-left sm:py-5 " + (!item.read_at ? "border-l-2 border-ember pl-3 sm:pl-4" : "pl-[14px] sm:pl-[18px]")}>
+                <span className="flex flex-wrap items-center gap-2">
+                  <span className="font-semibold">{item.title}</span>
+                  {!item.read_at ? <span className="rounded-full bg-ember/10 px-2 py-0.5 text-[10px] text-ember">Unread</span> : null}
+                  {item.action_required ? <span className="rounded-full bg-white/5 px-2 py-0.5 text-[10px] text-slate">Action needed</span> : null}
+                </span>
+                <span className="mt-1 block text-sm leading-6 text-slate">{item.body}</span>
+                <span className="mt-2 block text-[11px] text-slate/70">
+                  {item.source === "admin" ? "The Middleman Support" : "The Middleman"} · {new Date(item.created_at).toLocaleString()}
+                </span>
+              </button>
+            ))}
+          </div>
+        </section>
+      )}
     </main>
   );
 }
-

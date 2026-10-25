@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { Suspense } from 'react';
 import SiteHeader from '@/components/SiteHeader';
 import { requireAdminPage } from '@/lib/server/admin-page';
 import ReviewQueue from './review-queue';
@@ -22,12 +23,12 @@ export default async function AdminReviewPage() {
       <h1 className="mt-3 font-display text-3xl font-bold md:text-5xl">Delivery review</h1>
       <p className="mt-3 max-w-2xl text-slate">Inspect each seller file before it becomes available to the buyer. Every decision is recorded.</p>
       {queue.error ? <p role="alert" className="mt-8 text-red-300">Review queue unavailable: {queue.error.message}</p>
-        : <ReviewQueue deliveries={(queue.data ?? []).map(row => ({
+        : <Suspense fallback={<p className="mt-8 text-slate">Loading delivery reviews…</p>}><ReviewQueue deliveries={(queue.data ?? []).map(row => ({
           id: row.id, order_id: row.order_id, created_at: row.created_at,
           orders: (() => { const o = Array.isArray(row.orders) ? row.orders[0] : row.orders;
             if (!o) return null; const g = Array.isArray(o.gigs) ? o.gigs[0] : o.gigs;
             return { amount: Number(o.amount), gigs: g ?? null }; })(),
-        }))} />}
+        }))} /></Suspense>}
       <section className="mt-12 border-t border-line pt-8">
         <h2 className="font-display text-xl font-semibold">Recent decisions</h2>
         {recent.error ? <p className="mt-4 text-red-300">Audit history unavailable.</p> :

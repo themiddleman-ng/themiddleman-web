@@ -20,12 +20,15 @@ export default function NotFound() {
           Let&apos;s get you back to something real.
         </p>
 
-        <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-center">
-          <Link href="/" className="rounded-full bg-ember px-6 py-3 text-sm font-bold text-ink transition-colors hover:bg-ember/90">
+        <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:justify-center">
+          <Link href="/" className="rounded-full bg-ember px-6 py-3 text-sm font-bold text-[#111111] transition-colors hover:bg-ember-hover">
             Back to homepage
           </Link>
           <Link href="/marketplace" className="rounded-full border border-line px-6 py-3 text-sm font-semibold text-bone transition-colors hover:border-ember/40">
             Browse the marketplace
+          </Link>
+          <Link href="/signup?mode=signin" className="rounded-full border border-line px-6 py-3 text-sm font-semibold text-bone transition-colors hover:border-ember/40">
+            Sign in
           </Link>
         </div>
 

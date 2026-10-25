@@ -4,9 +4,23 @@ import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
-import { supabase } from "@/lib/supabaseClient";
+import { CaretLeftIcon } from "@phosphor-icons/react/dist/csr/CaretLeft";
+import { CaretRightIcon } from "@phosphor-icons/react/dist/csr/CaretRight";
+import { DotsThreeIcon } from "@phosphor-icons/react/dist/csr/DotsThree";
+import { HeartIcon } from "@phosphor-icons/react/dist/csr/Heart";
+import { SealCheckIcon } from "@phosphor-icons/react/dist/csr/SealCheck";
+import { ShareNetworkIcon } from "@phosphor-icons/react/dist/csr/ShareNetwork";
+import { signinHref } from "@/lib/auth/signin-redirect.mjs";
+import DraftRestoredNotice from "@/components/forms/DraftRestoredNotice";
+import { usePersistedForm } from "@/lib/forms/usePersistedForm";
+import { isSupabaseConfigured, supabase } from "@/lib/supabaseClient";
 import { StarRatingDisplay } from "@/components/StarRating";
 import SiteHeader from "@/components/SiteHeader";
+import ProductCover from "@/components/marketplace/ProductCover";
+import EscrowTrustLine from "@/components/EscrowTrustLine";
+import FileTypeIcon, { fileKindFromName } from "@/components/gigs/FileTypeIcon";
+import { DESIGN_PREVIEW_GIGS } from "@/lib/design-preview/catalog";
+import type { GigPackageListing } from "@/lib/gig-package-listing";
 
 type SellerProfile = { user_id: string; display_name: string; bio: string | null; verification_status: string };
 type GigRow = {
@@ -43,7 +57,24 @@ function initialsFrom(name: string): string {
   return (parts[0][0] + parts[1][0]).toUpperCase();
 }
 
-export default function GigPageClient({ gigId, purchasesEnabled }: { gigId: string; purchasesEnabled: boolean }) {
+const DETAIL_TABS = [
+  { id: "overview", label: "Overview" },
+  { id: "included", label: "What's included" },
+  { id: "requirements", label: "Requirements" },
+  { id: "creator", label: "Creator" },
+] as const;
+
+type DetailTabId = (typeof DETAIL_TABS)[number]["id"];
+
+export default function GigPageClient({
+  gigId,
+  purchasesEnabled,
+  packageListing = null,
+}: {
+  gigId: string;
+  purchasesEnabled: boolean;
+  packageListing?: GigPackageListing | null;
+}) {
   const router = useRouter();
   const [userId, setUserId] = useState<string | null>(null);
   const [userEmail, setUserEmail] = useState<string | null>(null);
@@ -54,11 +85,43 @@ export default function GigPageClient({ gigId, purchasesEnabled }: { gigId: stri
   const [loadError, setLoadError] = useState("");
   const [actionError, setActionError] = useState("");
   const [paying, setPaying] = useState(false);
-  const [reportReason, setReportReason] = useState("Spam or misleading content");
-  const [reportDetails, setReportDetails] = useState("");
+  const [reportOpen, setReportOpen] = useState(false);
+  const [reportDraft, setReportDraft] = useState({
+    reportReason: "Spam or misleading content",
+    reportDetails: "",
+  });
+  const {
+    restored: reportDraftRestored,
+    discardDraft: discardReportDraft,
+    clearDraft: clearReportDraft,
+  } = usePersistedForm({
+    formId: "gig-report",
+    userId,
+    recordId: gigId,
+    values: reportDraft,
+    setValues: setReportDraft,
+    enabled: Boolean(userId && reportOpen),
+    storage: "session",
+  });
+  const { reportReason, reportDetails } = reportDraft;
+  const setReportReason = (value: string) => setReportDraft((current) => ({ ...current, reportReason: value }));
+  const setReportDetails = (value: string) => setReportDraft((current) => ({ ...current, reportDetails: value }));
   const [reporting, setReporting] = useState(false);
   const [reportSuccess, setReportSuccess] = useState(false);
+  const [moreOpen, setMoreOpen] = useState(false);
+  const [activeSlide, setActiveSlide] = useState(0);
+  const [detailTab, setDetailTab] = useState<DetailTabId>("overview");
+  const [wishlisted, setWishlisted] = useState(false);
+  const [wishlistBusy, setWishlistBusy] = useState(false);
+  const [wishlistNotice, setWishlistNotice] = useState("");
+  const [shareNotice, setShareNotice] = useState("");
+  const [messageBusy, setMessageBusy] = useState(false);
+  const [messageError, setMessageError] = useState("");
   const orderRequestKey = useRef<string | null>(null);
+  const moreMenuRef = useRef<HTMLDivElement | null>(null);
+  const returnPath = `/gigs/${gigId}`;
+  const purchasesPausedTitle =
+    "Checkout is paused while payment and delivery verification continues.";
 
   useEffect(() => {
     void fetch("/api/gigs/" + gigId + "/view", {
@@ -74,6 +137,33 @@ export default function GigPageClient({ gigId, purchasesEnabled }: { gigId: stri
       setLoading(true); setLoadError("");
       const { data: { user } } = await supabase.auth.getUser();
       if (!cancelled && user) { setUserId(user.id); setUserEmail(user.email ?? null); }
+      if (!isSupabaseConfigured) {
+        const preview = DESIGN_PREVIEW_GIGS.find((item) => item.id === gigId);
+        if (preview) {
+          setGig({
+            id: preview.id,
+            title: preview.title,
+            description: preview.description,
+            category: preview.category,
+            price_ngn: preview.price_ngn,
+            is_ai_assisted: preview.is_ai_assisted,
+            gallery_image_paths: preview.gallery_image_paths ?? [],
+            seller_id: "preview-seller",
+            delivery_days: 3,
+            experience_tier: null,
+            demo_video_path: null,
+            demo_links: ["https://example.com"],
+            seller_profiles: {
+              user_id: "preview-seller",
+              display_name: preview.seller_profiles?.display_name ?? "Unknown seller",
+              bio: null,
+              verification_status: preview.seller_profiles?.verification_status ?? "approved",
+            },
+          });
+          setLoading(false);
+          return;
+        }
+      }
       const { data: gigData, error: gigError } = await supabase.from("gigs").select(
         "id, title, description, category, price_ngn, is_ai_assisted, seller_id, delivery_days, experience_tier, gallery_image_paths, demo_video_path, demo_links, seller_profiles ( user_id, display_name, bio, verification_status )"
       ).eq("id", gigId).single();
@@ -94,11 +184,48 @@ export default function GigPageClient({ gigId, purchasesEnabled }: { gigId: stri
     return () => { cancelled = true; };
   }, [gigId]);
 
+  useEffect(() => {
+    let cancelled = false;
+    async function loadWishlist() {
+      if (!userId) {
+        setWishlisted(false);
+        return;
+      }
+      try {
+        const response = await fetch(`/api/gigs/${gigId}/wishlist`, { cache: "no-store" });
+        const result = await response.json();
+        if (!cancelled && response.ok) setWishlisted(Boolean(result.saved));
+      } catch {
+        /* Wishlist is optional when the table is not migrated yet. */
+      }
+    }
+    void loadWishlist();
+    return () => { cancelled = true; };
+  }, [gigId, userId]);
+
+  useEffect(() => {
+    if (!moreOpen) return;
+    function closeOnPointer(event: MouseEvent) {
+      if (!moreMenuRef.current?.contains(event.target as Node)) setMoreOpen(false);
+    }
+    window.addEventListener("mousedown", closeOnPointer);
+    return () => window.removeEventListener("mousedown", closeOnPointer);
+  }, [moreOpen]);
+
+  useEffect(() => {
+    if (!shareNotice && !wishlistNotice) return;
+    const timer = window.setTimeout(() => {
+      setShareNotice("");
+      setWishlistNotice("");
+    }, 3200);
+    return () => window.clearTimeout(timer);
+  }, [shareNotice, wishlistNotice]);
+
   const [checkout, setCheckout] = useState<Checkout | null>(null);
 
   async function handleBuyAndPay() {
     setActionError("");
-    if (!userId) { router.push("/signup?mode=signin"); return; }
+    if (!userId) { router.push(signinHref(returnPath)); return; }
     if (!gig) return;
     const sellerUserId = gig.seller_profiles?.user_id;
     if (!sellerUserId) { setActionError("We could not verify the seller account for this product."); return; }
@@ -170,15 +297,96 @@ export default function GigPageClient({ gigId, purchasesEnabled }: { gigId: stri
     router.push("/gigs/mine");
   }
 
+  async function toggleWishlist() {
+    setWishlistNotice("");
+    if (!userId) {
+      router.push(signinHref(returnPath));
+      return;
+    }
+    setWishlistBusy(true);
+    try {
+      const response = await fetch(`/api/gigs/${gigId}/wishlist`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: "{}",
+      });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || "Could not update your saved list.");
+      setWishlisted(Boolean(result.saved));
+      setWishlistNotice(result.saved ? "Saved to your list." : "Removed from your saved list.");
+    } catch (cause) {
+      setWishlistNotice(cause instanceof Error ? cause.message : "Could not update your saved list.");
+    } finally {
+      setWishlistBusy(false);
+    }
+  }
+
+  async function handleShare() {
+    setShareNotice("");
+    const url = window.location.href;
+    const title = gig?.title ?? "Product on The Middleman";
+    try {
+      if (typeof navigator.share === "function") {
+        await navigator.share({ title, url });
+        return;
+      }
+    } catch (cause) {
+      if (cause instanceof Error && cause.name === "AbortError") return;
+    }
+    try {
+      await navigator.clipboard.writeText(url);
+      setShareNotice("Link copied to clipboard.");
+    } catch {
+      setShareNotice("Copy this link from your browser address bar.");
+    }
+  }
+
+  async function openProductMessages() {
+    setMessageError("");
+    if (!userId) {
+      router.push(signinHref("/messages"));
+      return;
+    }
+    setMessageBusy(true);
+    try {
+      const response = await fetch("/api/conversations", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ gigId }),
+      });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || "Messaging is not available for this product yet.");
+      if (result.id) router.push(`/messages?conversation=${result.id}`);
+      else router.push("/messages");
+    } catch (cause) {
+      setMessageError(cause instanceof Error ? cause.message : "Could not open messages.");
+    } finally {
+      setMessageBusy(false);
+    }
+  }
+
   async function handleReportGig() {
     setActionError(""); setReportSuccess(false);
-    if (!userId) { router.push("/signup?mode=signin"); return; }
+    if (!userId) { router.push(signinHref(returnPath)); return; }
     if (!gig || userId === gig.seller_profiles?.user_id) { setActionError("You cannot report your own product."); return; }
     setReporting(true);
     const { error } = await supabase.from("gig_reports").insert({ gig_id: gig.id, reported_by: userId, reason: reportReason, details: reportDetails.trim() || null });
     if (error) { setActionError(error.message); setReporting(false); return; }
-    setReportSuccess(true); setReportDetails(""); setReporting(false);
+    setReportSuccess(true);
+    setReportDraft({ reportReason: "Spam or misleading content", reportDetails: "" });
+    clearReportDraft();
+    setReporting(false);
+    setReportOpen(false);
   }
+
+  useEffect(() => {
+    if (!reportOpen) return;
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setReportOpen(false);
+    };
+    window.addEventListener("keydown", closeOnEscape);
+    return () => window.removeEventListener("keydown", closeOnEscape);
+  }, [reportOpen]);
 
   if (loading) return (
     <main className="min-h-screen bg-ink text-bone" aria-busy="true" aria-label="Loading product">
@@ -203,57 +411,520 @@ export default function GigPageClient({ gigId, purchasesEnabled }: { gigId: stri
       </div>
     </main>
   );
-  if (loadError || !gig) return <main className="grid min-h-screen place-items-center bg-ink px-6 text-bone"><div className="text-center"><p className="mb-4 text-sm text-slate">{loadError}</p><Link href="/marketplace" className="text-sm text-ember hover:underline">Back to marketplace</Link></div></main>;
+  if (loadError || !gig) return <main className="grid min-h-screen place-items-center bg-ink px-6 text-bone"><div className="text-center"><p className="mb-4 text-sm text-slate">{loadError}</p><Link href="/marketplace" className="text-sm text-eyebrow hover:underline">Back to marketplace</Link></div></main>;
 
   const verified = gig.seller_profiles?.verification_status === "approved";
-  const imageUrls = (gig.gallery_image_paths ?? []).map(path => supabase.storage.from('gig-media').getPublicUrl(path).data.publicUrl);
-  const videoUrl = gig.demo_video_path ? supabase.storage.from('gig-media').getPublicUrl(gig.demo_video_path).data.publicUrl : null;
-  const demoLinks = (gig.demo_links ?? []).filter(link => { try { return new URL(link).protocol === 'https:'; } catch { return false; } });
+  const imageUrls = (gig.gallery_image_paths ?? []).map((path) =>
+    supabase.storage.from("gig-media").getPublicUrl(path).data.publicUrl,
+  );
+  const videoUrl = gig.demo_video_path
+    ? supabase.storage.from("gig-media").getPublicUrl(gig.demo_video_path).data.publicUrl
+    : null;
+  const demoLinks = (gig.demo_links ?? []).filter((link) => {
+    try {
+      return new URL(link).protocol === "https:";
+    } catch {
+      return false;
+    }
+  });
   const isOwnGig = userId === gig.seller_profiles?.user_id;
-  const included = [
-    gig.delivery_days ? `Seller's estimated delivery: ${gig.delivery_days} day${gig.delivery_days > 1 ? "s" : ""}` : null,
-    gig.is_ai_assisted ? "Seller disclosed that AI tools are used." : null,
+  const requirementLines = [
+    gig.delivery_days
+      ? `Allow up to ${gig.delivery_days} day${gig.delivery_days > 1 ? "s" : ""} for the seller to deliver after purchase.`
+      : null,
+    gig.is_ai_assisted ? "This listing discloses that AI tools are used in the product." : null,
   ].filter(Boolean) as string[];
 
-  const purchasePanel = <div className="rounded-2xl border border-line bg-paper p-4 shadow-[0_18px_50px_rgba(31,21,12,.08)] sm:p-6">
-    <div className="flex items-baseline justify-between"><span className="text-sm text-slate">Price</span><span className="font-mono text-2xl font-semibold text-bone">₦{gig.price_ngn.toLocaleString()}</span></div>
-    {isOwnGig ? <div className="mt-5 space-y-3"><p className="text-center text-xs text-slate">This is your product.{" "}<Link href="/gigs/mine" className="text-ember hover:underline">Manage it</Link></p><button onClick={handleDeleteGig} className="w-full rounded-full border border-red-900/20 bg-red-950/10 px-5 py-3 text-sm font-semibold text-red-500 transition-colors hover:border-red-900/40 hover:bg-red-950/20">Delete product</button></div> : purchasesEnabled ? <div className="mt-5 space-y-3"><button onClick={handleBuyAndPay} disabled={paying} className="auth-button w-full">{paying ? "Opening Paystack…" : "Buy this product"}</button><p className="text-center text-xs text-slate">Checkout is enabled only in an isolated Paystack test environment.</p></div> : <div className="mt-5 rounded-xl bg-[#EFE7DB] p-4 text-center"><p className="text-sm font-semibold text-[#172B45]">Purchases are paused</p><p className="mt-2 text-xs leading-5 text-[#526577]">Payment and delivery are being verified before live checkout is enabled.</p></div>}
-    {checkout && <section className="mt-5 border-t border-line pt-5" aria-label="Checkout summary">
-      <h2 className="font-semibold">Review your total</h2>
-      <dl className="mt-3 space-y-2 text-sm">{(checkout.fees ? [['Product',checkout.fees.price_kobo],['Service fee (3%)',checkout.fees.buyer_fee_kobo],['Platform fee ($1)',checkout.fees.flat_fee_kobo],['VAT on fees',checkout.fees.buyer_vat_kobo],['Total',checkout.fees.buyer_total_kobo]] : [['Total',Number(checkout.order.amount)*100]]).map(([label,value])=><div key={String(label)} className="flex justify-between gap-3"><dt>{label}</dt><dd>₦{(Number(value)/100).toLocaleString('en-NG',{minimumFractionDigits:2})}</dd></div>)}</dl>
-      {checkout.display && <p className="mt-3 text-sm text-slate">Estimated USD total: {new Intl.NumberFormat('en-US',{style:'currency',currency:'USD'}).format(checkout.display.buyer_total_minor/100)}</p>}
-      {checkout.fees && <p className="mt-3 text-xs text-slate">You pay in NGN. The USD-to-NGN rate used for the $1 platform fee is locked to this order. Your bank sets its own conversion rate.</p>}
-      <button onClick={payReviewedCheckout} disabled={paying} className="auth-button mt-4 w-full">{paying?'Opening payment…':'Continue to Paystack'}</button>
-      <button className="mt-3 text-sm text-slate underline" disabled={paying} onClick={()=>{setCheckout(null);orderRequestKey.current=null;}}>Close checkout</button>
-    </section>}
-    {actionError && <p className="auth-error mt-4">{actionError}</p>}
-  </div>;
+  const showAiPill = gig.is_ai_assisted && gig.category !== "ai_assisted";
+  const categoryLabel = CATEGORY_LABELS[gig.category] ?? gig.category;
+  const summaryLine = gig.description.replace(/\s+/g, " ").trim().slice(0, 180);
 
-  const reportBox = !isOwnGig && <div className="rounded-2xl border border-line bg-paper p-5">
-    <p className="text-xs font-bold tracking-[.16em] text-ember">REPORT PRODUCT</p><p className="mt-2 text-sm text-slate">Send this product to admin for review if it looks unsafe, misleading, or abusive.</p>
-    <label className="mt-4 block text-sm font-medium text-bone">Reason<select value={reportReason} onChange={(e) => setReportReason(e.target.value)} className="auth-input mt-2"><option>Spam or misleading content</option><option>Inappropriate or abusive content</option><option>Wrong category or pricing</option><option>Suspicious seller activity</option><option>Other</option></select></label>
-    <label className="mt-4 block text-sm font-medium text-bone">Details<textarea value={reportDetails} onChange={(e) => setReportDetails(e.target.value)} className="auth-input mt-2 min-h-24" placeholder="Add any extra context for the admin team." /></label>
-    <button onClick={handleReportGig} disabled={reporting} className="mt-4 w-full rounded-full border border-line bg-amber-50 px-5 py-3 text-sm font-semibold text-bone transition-colors hover:border-ember/40 hover:bg-amber-100 disabled:opacity-50">{reporting ? "Sending report…" : "Report product"}</button>
-    {reportSuccess && <p className="mt-3 text-xs text-ember">Thanks. The admin team will review this product.</p>}
-  </div>;
+  const names = new Set<string>();
+  const packageFiles: { name: string; kind: ReturnType<typeof fileKindFromName> }[] = [];
+  if (packageListing?.originalFilename) {
+    names.add(packageListing.originalFilename);
+    packageFiles.push({
+      name: packageListing.originalFilename,
+      kind: fileKindFromName(packageListing.originalFilename, packageListing.contentType),
+    });
+  }
+  for (const path of packageListing?.innerPaths ?? []) {
+    const leaf = path.split("/").pop();
+    if (!leaf || names.has(leaf)) continue;
+    names.add(leaf);
+    packageFiles.push({ name: leaf, kind: fileKindFromName(leaf) });
+  }
 
-  return <main className="min-h-screen bg-ink text-bone"><SiteHeader /><div className="mx-auto max-w-7xl px-4 py-5 sm:px-6 sm:py-10">
-    <Link href="/marketplace" className="text-xs font-semibold text-slate transition-colors hover:text-ember">← Back to marketplace</Link>
-    <div className="mt-5 grid min-w-0 grid-cols-1 gap-7 lg:grid-cols-12 lg:gap-10"><div className="min-w-0 lg:col-span-8">
-      <div className="overflow-hidden rounded-2xl border border-line bg-paper shadow-[0_18px_50px_rgba(31,21,12,.08)]"><div className="relative aspect-[16/9]">{imageUrls[0] ? <Image unoptimized src={imageUrls[0]} fill sizes="(max-width: 1024px) 100vw, 800px" alt={`${gig.title} preview`} className="object-cover" /> : <div className="grid h-full w-full place-items-center bg-[#EEF1F2] p-8 text-center"><p className="max-w-sm text-base font-medium text-[#526577]">The seller has not uploaded a product preview yet.</p></div>}</div></div>
-      {imageUrls.length > 1 && <div className="mt-3 grid grid-cols-3 gap-3">{imageUrls.slice(1).map((url, index) => <a key={url} href={url} target="_blank" rel="noopener noreferrer" className="relative aspect-video overflow-hidden rounded-lg border border-line"><Image unoptimized src={url} fill sizes="250px" alt={`${gig.title} gallery image ${index + 2}`} className="object-cover" /></a>)}</div>}
-      {videoUrl && <section className="mt-8"><h2 className="mb-3 font-display text-xl font-bold">Demo video</h2><video controls preload="none" className="w-full rounded-xl" src={videoUrl}>Your browser does not support video playback.</video></section>}
-      {demoLinks.length > 0 && <section className="mt-8"><h2 className="mb-3 font-display text-xl font-bold">Explore the demo</h2><div className="flex flex-wrap gap-3">{demoLinks.map((url, index) => <a key={url} href={url} target="_blank" rel="noopener noreferrer" className="rounded-full border border-line px-4 py-2 text-sm text-ember hover:border-ember">Open demo {index + 1} ↗</a>)}</div></section>}
-      <div className="mt-8 flex flex-wrap items-center gap-3"><p className="font-mono text-[10px] font-semibold uppercase tracking-[.18em] text-slate">{CATEGORY_LABELS[gig.category] ?? gig.category}</p>{gig.is_ai_assisted && <span className="rounded-full bg-ember/15 px-3 py-1 text-xs font-semibold text-ember">AI-assisted</span>}</div>
-      <h1 className="mt-2 break-words font-display text-3xl font-bold tracking-tight sm:text-4xl">{gig.title}</h1>
-      <div className="mt-6 flex flex-wrap items-center gap-4 border-y border-line py-4"><div className="flex items-center gap-3"><div className="grid h-10 w-10 place-items-center rounded-full border border-line bg-[#FBF4EC] font-display text-sm font-bold text-bone">{initialsFrom(gig.seller_profiles?.display_name ?? "?")}</div><div><p className="text-sm font-medium">{gig.seller_profiles?.display_name ?? "Unknown seller"}</p>{verified ? <p className="text-xs font-semibold text-ember">Verified seller</p> : <p className="text-xs text-slate">Verification in progress</p>}</div></div><div className="sm:ml-auto"><StarRatingDisplay average={rating.average} count={rating.count} size={13} /></div></div>
-      <div className="mt-8 lg:hidden">{purchasePanel}</div>
-      <section className="mt-10"><h2 className="font-display text-xl font-bold">What you&apos;ll get</h2><p className="mt-3 whitespace-pre-wrap text-[15px] leading-relaxed text-slate">{gig.description}</p></section>
-      <section className="mt-8"><h2 className="font-display text-xl font-bold">Before you buy</h2><p className="mt-3 text-[15px] leading-relaxed text-slate">The seller&apos;s description is the source of truth for what the product includes, supported formats and any requirements. Confirm those details before checkout.</p>{included.length > 0 && <ul className="mt-4 space-y-3">{included.map((line) => <li key={line} className="flex items-start gap-3 text-[15px] text-bone"><span aria-hidden="true" className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-ember" />{line}</li>)}</ul>}<p className="mt-4 text-[14px] leading-6 text-slate">Optional customization is not included unless the listing says so. Paid product add-ons are not available yet.</p></section>
-      <section className="mt-10 rounded-2xl bg-[#EFE7DB] p-6"><h2 className="font-display text-lg font-bold text-[#172B45]">Payment and delivery</h2><p className="mt-2 text-[14px] leading-relaxed text-[#526577]">Paystack processes eligible payments. The Middleman does not currently hold funds in escrow or guarantee refunds. Payment confirmation and product delivery are separate steps; use your order page to check the status available for your purchase.</p></section>
-      <section className="mt-10 border-t border-line pt-8"><h2 className="font-display text-xl font-bold">Reviews {rating.count > 0 && `(${rating.count})`}</h2>{reviews.length === 0 && <p className="mt-4 text-sm text-slate">No reviews yet for this product.</p>}<div className="mt-5 space-y-5">{reviews.map((review, i) => <div key={i} className="border-b border-line pb-5 last:border-0"><div className="mb-2 flex items-center justify-between"><StarRatingDisplay average={review.rating} count={1} size={12} /><span className="text-xs text-slate">{review.reviewer_name || "Buyer"}</span></div>{review.comment && <p className="text-sm leading-relaxed text-slate">{review.comment}</p>}</div>)}</div></section>
-      <div className="mt-10 lg:hidden">{reportBox}</div>
-    </div><div className="hidden lg:col-span-4 lg:block"><div className="sticky top-24 space-y-5">{purchasePanel}{reportBox}</div></div></div>
-  </div></main>;
+  type Slide = { type: "image"; url: string } | { type: "pdf" };
+  const slides: Slide[] = imageUrls.map((url) => ({ type: "image", url }));
+  if (
+    packageListing &&
+    fileKindFromName(packageListing.originalFilename, packageListing.contentType) === "pdf" &&
+    !slides.some((item) => item.type === "pdf")
+  ) {
+    slides.push({ type: "pdf" });
+  }
+  if (slides.length === 0) slides.push({ type: "image", url: "" });
+
+  const safeSlide = Math.min(activeSlide, slides.length - 1);
+  const currentSlide = slides[safeSlide];
+
+  const purchaseAction = isOwnGig ? null : purchasesEnabled ? (
+    <button onClick={handleBuyAndPay} disabled={paying} className="auth-button w-full min-h-11 rounded-xl">
+      {paying ? "Opening Paystack…" : "Buy this product"}
+    </button>
+  ) : (
+    <button
+      type="button"
+      disabled
+      title={purchasesPausedTitle}
+      className="w-full min-h-11 rounded-xl bg-ember-cta/40 px-5 py-3 text-sm font-semibold text-on-ember opacity-80"
+    >
+      Purchases paused
+    </button>
+  );
+
+  const buyPanel = (
+    <div className="rounded-2xl border border-line bg-paper p-5 shadow-sm sm:p-6">
+      <h1 className="break-words font-display text-2xl font-bold tracking-tight sm:text-[1.65rem]">{gig.title}</h1>
+      <div className="mt-4 flex flex-wrap items-center gap-2">
+        <p className="font-mono text-2xl font-semibold text-ember-cta">₦{gig.price_ngn.toLocaleString()}</p>
+        {showAiPill ? (
+          <span className="rounded-full bg-ember-cta/10 px-3 py-1 text-xs font-semibold text-link">AI-assisted</span>
+        ) : null}
+      </div>
+      {summaryLine ? <p className="mt-3 text-[15px] leading-relaxed text-muted">{summaryLine}{gig.description.length > summaryLine.length ? "…" : ""}</p> : null}
+      <div className="my-5 border-t border-line" />
+      <div className="flex items-center gap-3">
+        <div className="grid h-11 w-11 place-items-center rounded-full border border-line bg-elevated font-display text-sm font-bold">
+          {initialsFrom(gig.seller_profiles?.display_name ?? "?")}
+        </div>
+        <div className="min-w-0 flex-1">
+          <p className="flex flex-wrap items-center gap-1.5 text-sm font-semibold">
+            {gig.seller_profiles?.display_name ?? "Unknown seller"}
+            {verified ? (
+              <SealCheckIcon size={18} weight="fill" className="text-sky-600" aria-label="Verified seller" />
+            ) : null}
+          </p>
+          <p className="text-xs text-muted">{categoryLabel}</p>
+        </div>
+        <StarRatingDisplay average={rating.average} count={rating.count} size={13} />
+      </div>
+      {isOwnGig ? (
+        <div className="mt-5 space-y-3">
+          <p className="text-center text-xs text-muted">
+            This is your product. <Link href="/gigs/mine" className="font-semibold text-link hover:underline">Manage it</Link>
+          </p>
+          <button
+            onClick={handleDeleteGig}
+            className="w-full min-h-11 rounded-xl border border-red-900/20 bg-red-950/10 px-5 py-3 text-sm font-semibold text-red-500"
+          >
+            Delete product
+          </button>
+        </div>
+      ) : (
+        <div className="mt-5 space-y-3">
+          {purchaseAction}
+          {!purchasesEnabled ? (
+            <p className="text-center text-xs leading-5 text-muted">
+              Payment and delivery are being verified before live checkout is enabled.
+            </p>
+          ) : (
+            <p className="text-center text-xs text-muted">Checkout is enabled only in an isolated Paystack test environment.</p>
+          )}
+          <EscrowTrustLine className="mt-3" />
+        </div>
+      )}
+      {checkout ? (
+        <section className="mt-5 border-t border-line pt-5" aria-label="Checkout summary">
+          <h2 className="font-semibold">Review your total</h2>
+          <dl className="mt-3 space-y-2 text-sm">
+            {(checkout.fees
+              ? [
+                  ["Product", checkout.fees.price_kobo],
+                  ["Service fee (3%)", checkout.fees.buyer_fee_kobo],
+                  ["Platform fee ($1)", checkout.fees.flat_fee_kobo],
+                  ["VAT on fees", checkout.fees.buyer_vat_kobo],
+                  ["Total", checkout.fees.buyer_total_kobo],
+                ]
+              : [["Total", Number(checkout.order.amount) * 100]]
+            ).map(([label, value]) => (
+              <div key={String(label)} className="flex justify-between gap-3">
+                <dt>{label}</dt>
+                <dd>₦{(Number(value) / 100).toLocaleString("en-NG", { minimumFractionDigits: 2 })}</dd>
+              </div>
+            ))}
+          </dl>
+          {checkout.display ? (
+            <p className="mt-3 text-sm text-muted">
+              Estimated USD total:{" "}
+              {new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(
+                checkout.display.buyer_total_minor / 100,
+              )}
+            </p>
+          ) : null}
+          {checkout.fees ? (
+            <p className="mt-3 text-xs text-muted">
+              You pay in NGN. The USD-to-NGN rate used for the $1 platform fee is locked to this order. Your bank sets its own conversion rate.
+            </p>
+          ) : null}
+          <button onClick={payReviewedCheckout} disabled={paying} className="auth-button mt-4 w-full min-h-11">
+            {paying ? "Opening payment…" : "Continue to Paystack"}
+          </button>
+          <button
+            className="mt-3 min-h-11 text-sm text-muted underline"
+            disabled={paying}
+            onClick={() => {
+              setCheckout(null);
+              orderRequestKey.current = null;
+            }}
+          >
+            Close checkout
+          </button>
+        </section>
+      ) : null}
+      {actionError ? <p className="auth-error mt-4">{actionError}</p> : null}
+      {reportSuccess ? <p className="mt-4 text-[14px] font-semibold text-link">Thanks. The admin team will review this product.</p> : null}
+    </div>
+  );
+
+  const tabPanel = (() => {
+    if (detailTab === "overview") {
+      return (
+        <div className="space-y-4 text-[15px] leading-relaxed text-muted">
+          <p className="whitespace-pre-wrap text-bone">{gig.description}</p>
+          {videoUrl ? (
+            <div>
+              <h3 className="font-display text-lg font-semibold text-bone">Demo video</h3>
+              <video controls preload="none" className="mt-3 w-full rounded-xl" src={videoUrl}>
+                Your browser does not support video playback.
+              </video>
+            </div>
+          ) : null}
+          {demoLinks.length > 0 ? (
+            <div className="flex flex-wrap gap-3">
+              {demoLinks.map((url, index) => (
+                <a
+                  key={url}
+                  href={url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex min-h-11 items-center rounded-full border border-line px-4 text-sm font-semibold text-link hover:border-ember-cta"
+                >
+                  {index === 0 ? "View live demo" : `View live demo ${index + 1}`}
+                </a>
+              ))}
+            </div>
+          ) : null}
+        </div>
+      );
+    }
+    if (detailTab === "included") {
+      return packageFiles.length > 0 ? (
+        <ul className="space-y-3">
+          {packageFiles.map((file) => (
+            <li key={file.name} className="flex items-center gap-3 text-sm text-bone">
+              <FileTypeIcon kind={file.kind} />
+              <span>{file.name}</span>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p className="text-sm text-muted">
+          File-level deliverables are described in the listing. Package filenames appear here when a reviewed product file is on record.
+        </p>
+      );
+    }
+    if (detailTab === "requirements") {
+      return requirementLines.length > 0 ? (
+        <ul className="list-disc space-y-2 pl-5 text-sm text-muted">
+          {requirementLines.map((line) => <li key={line}>{line}</li>)}
+        </ul>
+      ) : (
+        <p className="text-sm text-muted">
+          The seller&apos;s description is the source of truth for supported formats and any requirements. Confirm those details before checkout.
+        </p>
+      );
+    }
+    return (
+      <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_220px]">
+        <div>
+          <p className="text-sm font-semibold text-bone">{gig.seller_profiles?.display_name ?? "Unknown seller"}</p>
+          {verified ? <p className="mt-1 text-xs font-semibold text-link">Verified seller</p> : null}
+          {gig.seller_profiles?.bio ? (
+            <p className="mt-3 whitespace-pre-wrap text-sm leading-relaxed text-muted">{gig.seller_profiles.bio}</p>
+          ) : (
+            <p className="mt-3 text-sm text-muted">This creator has not added a bio yet.</p>
+          )}
+        </div>
+        <aside className="rounded-xl border border-line bg-elevated p-4">
+          <p className="text-sm font-semibold text-bone">Ask about customization after purchase</p>
+          <p className="mt-2 text-xs leading-5 text-muted">
+            Messaging opens once you have a paid order for this product.
+          </p>
+          <button
+            type="button"
+            disabled={messageBusy}
+            onClick={() => void openProductMessages()}
+            className="mt-4 inline-flex min-h-11 items-center text-sm font-semibold text-link hover:underline disabled:opacity-50"
+          >
+            {messageBusy ? "Opening messages…" : "Message about this product"}
+          </button>
+          {messageError ? <p className="mt-2 text-xs text-red-500">{messageError}</p> : null}
+        </aside>
+      </div>
+    );
+  })();
+
+  return (
+    <main className="min-h-screen bg-ink text-bone">
+      <SiteHeader />
+      <div className="mx-auto max-w-7xl px-4 py-5 sm:px-6 sm:py-8">
+        <div className="flex items-center justify-between gap-3">
+          <nav aria-label="Breadcrumb" className="min-w-0 text-sm text-muted">
+            <ol className="flex flex-wrap items-center gap-1.5">
+              <li><Link href="/marketplace" className="font-semibold hover:text-link">Marketplace</Link></li>
+              <li aria-hidden="true">/</li>
+              <li>
+                <Link href={`/marketplace?category=${encodeURIComponent(gig.category)}`} className="hover:text-link">
+                  {categoryLabel}
+                </Link>
+              </li>
+              <li aria-hidden="true">/</li>
+              <li className="truncate text-bone">{gig.title}</li>
+            </ol>
+          </nav>
+          {!isOwnGig ? (
+            <div className="flex shrink-0 items-center gap-1">
+              <button
+                type="button"
+                aria-label={wishlisted ? "Remove from saved list" : "Save product"}
+                aria-pressed={wishlisted}
+                disabled={wishlistBusy}
+                onClick={() => void toggleWishlist()}
+                className="grid h-11 w-11 place-items-center rounded-full text-bone hover:bg-elevated disabled:opacity-50"
+              >
+                <HeartIcon size={22} weight={wishlisted ? "fill" : "regular"} className={wishlisted ? "text-link" : ""} aria-hidden="true" />
+              </button>
+              <button
+                type="button"
+                aria-label="Share product"
+                onClick={() => void handleShare()}
+                className="grid h-11 w-11 place-items-center rounded-full text-bone hover:bg-elevated"
+              >
+                <ShareNetworkIcon size={22} weight="regular" aria-hidden="true" />
+              </button>
+              <div className="relative" ref={moreMenuRef}>
+                <button
+                  type="button"
+                  aria-label="More actions"
+                  aria-expanded={moreOpen}
+                  onClick={() => setMoreOpen((open) => !open)}
+                  className="grid h-11 w-11 place-items-center rounded-full text-bone hover:bg-elevated"
+                >
+                  <DotsThreeIcon size={22} weight="bold" aria-hidden="true" />
+                </button>
+                {moreOpen ? (
+                  <div role="menu" className="absolute right-0 top-12 z-20 min-w-40 rounded-xl border border-line bg-paper p-1.5 shadow-lg">
+                    <button
+                      type="button"
+                      role="menuitem"
+                      onClick={() => {
+                        setMoreOpen(false);
+                        setReportOpen(true);
+                      }}
+                      className="flex min-h-11 w-full items-center rounded-lg px-3 text-left text-[15px] font-semibold text-link"
+                    >
+                      Report
+                    </button>
+                  </div>
+                ) : null}
+              </div>
+            </div>
+          ) : null}
+        </div>
+        {shareNotice || wishlistNotice ? (
+          <p className="mt-2 text-right text-xs font-semibold text-link" role="status">
+            {shareNotice || wishlistNotice}
+          </p>
+        ) : null}
+
+        <div className="mt-6 grid min-w-0 grid-cols-1 gap-8 lg:grid-cols-12 lg:gap-10">
+          <div className="min-w-0 lg:col-span-7">
+            <div className="overflow-hidden rounded-xl border border-line bg-paper">
+              <div className="relative aspect-[16/10] bg-elevated">
+                {currentSlide.type === "image" && currentSlide.url ? (
+                  <Image
+                    unoptimized
+                    src={currentSlide.url}
+                    fill
+                    sizes="(max-width: 1024px) 100vw, 720px"
+                    alt={`${gig.title} preview`}
+                    className="object-cover"
+                  />
+                ) : currentSlide.type === "pdf" ? (
+                  <div className="flex h-full flex-col items-center justify-center gap-3 p-6 text-center">
+                    <FileTypeIcon kind="pdf" size={28} className="h-16 w-16" />
+                    <p className="text-sm font-semibold text-bone">{packageListing?.originalFilename}</p>
+                    <p className="text-xs text-muted">Product file attached to this listing</p>
+                  </div>
+                ) : (
+                  <ProductCover title={gig.title} category={gig.category} label={showAiPill ? "AI-assisted" : undefined} />
+                )}
+                {slides.length > 1 ? (
+                  <>
+                    <button
+                      type="button"
+                      aria-label="Previous image"
+                      onClick={() => setActiveSlide((index) => (index - 1 + slides.length) % slides.length)}
+                      className="absolute left-3 top-1/2 grid h-11 w-11 -translate-y-1/2 place-items-center rounded-full border border-line bg-paper/95 text-bone shadow"
+                    >
+                      <CaretLeftIcon size={20} weight="bold" aria-hidden="true" />
+                    </button>
+                    <button
+                      type="button"
+                      aria-label="Next image"
+                      onClick={() => setActiveSlide((index) => (index + 1) % slides.length)}
+                      className="absolute right-3 top-1/2 grid h-11 w-11 -translate-y-1/2 place-items-center rounded-full border border-line bg-paper/95 text-bone shadow"
+                    >
+                      <CaretRightIcon size={20} weight="bold" aria-hidden="true" />
+                    </button>
+                  </>
+                ) : null}
+              </div>
+            </div>
+            {slides.length > 1 ? (
+              <div className="mt-3 flex gap-2 overflow-x-auto pb-1">
+                {slides.map((slide, index) => (
+                  <button
+                    key={`${slide.type}-${index}`}
+                    type="button"
+                    aria-label={`Show gallery item ${index + 1}`}
+                    aria-current={safeSlide === index}
+                    onClick={() => setActiveSlide(index)}
+                    className={`relative h-16 w-24 shrink-0 overflow-hidden rounded-lg border-2 ${
+                      safeSlide === index ? "border-ember-cta" : "border-line"
+                    }`}
+                  >
+                    {slide.type === "image" && slide.url ? (
+                      <Image unoptimized src={slide.url} fill sizes="96px" alt="" className="object-cover" />
+                    ) : (
+                      <span className="grid h-full w-full place-items-center bg-elevated">
+                        <FileTypeIcon kind="pdf" size={18} className="h-10 w-10 border-0 bg-transparent" />
+                      </span>
+                    )}
+                  </button>
+                ))}
+              </div>
+            ) : null}
+
+            <div className="mt-8 -mx-4 flex gap-1 overflow-x-auto border-b border-line px-4 sm:mx-0 sm:px-0" role="tablist" aria-label="Product details">
+              {DETAIL_TABS.map((tab) => (
+                <button
+                  key={tab.id}
+                  type="button"
+                  role="tab"
+                  id={`gig-tab-${tab.id}`}
+                  aria-selected={detailTab === tab.id}
+                  aria-controls={`gig-panel-${tab.id}`}
+                  onClick={() => setDetailTab(tab.id)}
+                  className={`min-h-11 shrink-0 border-b-2 px-3 pb-3 text-sm font-semibold transition-colors ${
+                    detailTab === tab.id ? "border-ember-cta text-link" : "border-transparent text-muted"
+                  }`}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </div>
+            <div
+              className="mt-5 rounded-xl border border-line bg-paper p-5"
+              role="tabpanel"
+              id={`gig-panel-${detailTab}`}
+              aria-labelledby={`gig-tab-${detailTab}`}
+            >
+              {tabPanel}
+            </div>
+
+            <section className="mt-10 border-t border-line pt-8">
+              <h2 className="font-display text-xl font-bold">Reviews {rating.count > 0 ? `(${rating.count})` : ""}</h2>
+              {reviews.length === 0 ? (
+                <p className="mt-4 text-sm text-muted">No reviews yet for this product.</p>
+              ) : (
+                <div className="mt-5 space-y-5">
+                  {reviews.map((review, i) => (
+                    <div key={i} className="border-b border-line pb-5 last:border-0">
+                      <div className="mb-2 flex items-center justify-between">
+                        <StarRatingDisplay average={review.rating} count={1} size={12} />
+                        <span className="text-xs text-muted">{review.reviewer_name || "Buyer"}</span>
+                      </div>
+                      {review.comment ? <p className="text-sm leading-relaxed text-muted">{review.comment}</p> : null}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </section>
+          </div>
+
+          <div className="min-w-0 lg:col-span-5">
+            <div className="lg:sticky lg:top-24">{buyPanel}</div>
+          </div>
+        </div>
+      </div>
+  {reportOpen && (
+    <div
+      className="fixed inset-0 z-[70] flex items-end justify-center bg-[#182d41]/40 p-3 backdrop-blur-[2px] sm:items-center sm:p-6"
+      onMouseDown={(event) => { if (event.target === event.currentTarget) setReportOpen(false); }}
+    >
+      <section role="dialog" aria-modal="true" aria-labelledby="report-product-title" className="w-full max-w-md rounded-2xl border border-line bg-paper p-5 shadow-[0_24px_80px_rgba(18,34,49,.25)] sm:p-6">
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <h2 id="report-product-title" className="font-display text-xl font-semibold">Report this product</h2>
+            <p className="mt-2 text-sm leading-6 text-slate">Send this product to admin for review if it looks unsafe, misleading, or abusive.</p>
+          </div>
+          <button type="button" aria-label="Close report form" onClick={() => setReportOpen(false)} className="grid h-9 w-9 shrink-0 place-items-center rounded-full text-xl leading-none text-slate hover:bg-[#f4eee6] hover:text-bone">×</button>
+        </div>
+        <DraftRestoredNotice
+          visible={reportDraftRestored}
+          onDiscard={() => {
+            discardReportDraft();
+            setReportDraft({ reportReason: "Spam or misleading content", reportDetails: "" });
+          }}
+        />
+        <label className="mt-4 block text-sm font-medium text-bone">Reason<select value={reportReason} onChange={(e) => setReportReason(e.target.value)} className="auth-input mt-2"><option>Spam or misleading content</option><option>Inappropriate or abusive content</option><option>Wrong category or pricing</option><option>Suspicious seller activity</option><option>Other</option></select></label>
+        <label className="mt-4 block text-sm font-medium text-bone">Details<textarea value={reportDetails} onChange={(e) => setReportDetails(e.target.value)} className="auth-input mt-2 min-h-24" placeholder="Add any extra context for the admin team." /></label>
+        <button onClick={handleReportGig} disabled={reporting} className="mt-4 w-full rounded-full bg-[#F97316] px-5 py-3 text-sm font-semibold text-[#111111] transition-colors hover:bg-[#FB923C] disabled:opacity-50">{reporting ? "Sending report…" : "Submit report"}</button>
+      </section>
+    </div>
+  )}
+  {!isOwnGig && (
+    <>
+      <div className="h-24 lg:hidden" aria-hidden="true" />
+      <div className="fixed inset-x-0 z-30 border-t border-line bg-paper/96 p-3 backdrop-blur lg:hidden" style={{ bottom: "calc(4rem + env(safe-area-inset-bottom))" }}>
+        <div className="flex items-center gap-3">
+          <div className="min-w-0">
+            <p className="text-[13px] text-slate">Price</p>
+            <p className="font-mono text-lg font-semibold text-bone">₦{gig.price_ngn.toLocaleString()}</p>
+          </div>
+          {purchasesEnabled ? (
+            <button type="button" onClick={checkout ? payReviewedCheckout : handleBuyAndPay} disabled={paying} className="btn-primary ml-auto inline-flex min-h-11 flex-1 items-center justify-center rounded-xl px-4 text-sm font-semibold disabled:opacity-50">
+              {paying ? "Opening…" : checkout ? "Continue to Paystack" : "Buy this product"}
+            </button>
+          ) : (
+            <button
+              type="button"
+              disabled
+              title={purchasesPausedTitle}
+              className="ml-auto inline-flex min-h-11 flex-1 items-center justify-center rounded-xl bg-line px-4 text-sm font-semibold text-slate"
+            >
+              Purchases paused
+            </button>
+          )}
+        </div>
+        <EscrowTrustLine compact className="mt-2" />
+      </div>
+    </>
+  )}
+    </main>
+  );
 }
 

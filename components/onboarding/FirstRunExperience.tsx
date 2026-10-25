@@ -12,11 +12,11 @@ const PAGE_TOURS: Record<string, Step[]> = {
   '/browse': [{ title: 'Explore by category', text: 'Choose a category to discover relevant digital products. You can return to all products at any time.' }],
   '/orders': [{ title: 'Everything you ordered', text: 'Follow payment, delivery and review progress here. Open an order to see the actions available for its current status.' }],
   '/messages': [{ title: 'Your product conversations', text: 'Choose a conversation in the inbox. On mobile, use the back arrow to return to your other conversations.', target: '[aria-label="Conversation list"]' }, { title: 'Keep the conversation here', text: 'Write in the message box. Enter sends and Shift + Enter adds a new line. Share files through the order flow.' }],
-  '/profile': [{ title: 'Make yourself recognisable', text: 'Add or change your profile photo and review your account details here.' }, { title: 'One account, both roles', text: 'Use the selling setup to become a creator while continuing to buy products.' }],
+  '/profile': [{ title: 'Make yourself recognisable', text: 'Add a profile photo here. The same photo appears in the top-right account button on every page. Tap Edit to change your details, then Save to return to a compact summary.' }, { title: 'One account, both roles', text: 'Use the selling setup to become a creator while continuing to buy products. Authenticator and Admin links are in this page and the account menu.' }],
   '/payments': [{ title: 'Your money, clearly recorded', text: 'Review payments and seller payouts here. Statuses reflect the actual payment and order records.' }],
   '/notifications': [{ title: 'Catch up on updates', text: 'Read order and account updates here. Use the available controls to mark notifications as read.' }],
   '/settings': [{ title: 'Your preferences', text: 'Manage your account, cookie preferences and security. Replay the welcome tour here whenever you want.' }],
-  '/security': [{ title: 'Protect your account', text: 'Use the security controls to manage your sign-in protection. Keep recovery details in a safe place.' }],
+  '/security': [{ title: 'Authenticator app', text: 'Install Google Authenticator or Authy, tap Set up authenticator, scan the QR code, then enter the 6-digit code. Admin stays locked until that code is verified.' }],
   '/gigs/mine': [{ title: 'Your product workspace', text: 'Manage your listings, check their status and open the editor. Create a product when you are ready to publish something new.' }],
   '/gigs/new': [{ title: 'Give your product room to shine', text: 'Work through the listing fields, preview images and package requirements. Your existing validation will explain anything missing.' }],
   '/gigs/detail': [{ title: 'Review the product first', text: 'Read the description, price, included files and seller details. The purchase controls will guide you through the next step.' }],
@@ -162,7 +162,7 @@ export default function FirstRunExperience() {
     const target = steps?.[index]?.target ? document.querySelector<HTMLElement>(steps[index].target!) : null;
     if (!target) return;
     const outline = target.style.outline; const offset = target.style.outlineOffset;
-    target.style.outline = '3px solid #ed6509'; target.style.outlineOffset = '5px';
+    target.style.outline = '3px solid #F97316'; target.style.outlineOffset = '5px';
     return () => { target.style.outline = outline; target.style.outlineOffset = offset; };
   }, [stage, index, steps]);
 
@@ -171,13 +171,13 @@ export default function FirstRunExperience() {
   return <div className="fixed inset-0 z-[121] flex items-center justify-center bg-[#111b30]/50 p-4">
     <section ref={dialogRef} role="dialog" aria-modal="true" aria-labelledby="mm-tour-title" aria-describedby="mm-tour-description" className="relative w-full max-w-md rounded-2xl border border-[#e1e5ed] bg-white p-7 text-[#11172b] shadow-xl">
       <button type="button" onClick={dismiss} aria-label="Close tour" className="absolute right-3 top-3 grid h-11 w-11 place-items-center rounded-lg text-2xl text-[#606b80] hover:bg-[#f1f5fa]"><XIcon size={20} aria-hidden="true" /></button>
-      <p className="pr-10 text-xs font-semibold uppercase tracking-wider text-[#b84b00]">{stage === 'choice' ? 'Welcome to The Middleman' : `Page tour · ${index + 1} of ${steps.length}`}</p>
+      <p className="pr-10 text-xs font-semibold uppercase tracking-wider text-[#111111]">{stage === 'choice' ? 'Welcome to The Middleman' : `Page tour · ${index + 1} of ${steps.length}`}</p>
       <h2 aria-live="polite" id="mm-tour-title" className="mt-4 pr-4 text-2xl font-semibold tracking-tight">{stage === 'choice' ? 'Is this your first time here?' : step.title}</h2>
       <p aria-live="polite" id="mm-tour-description" className="mt-3 text-sm leading-6 text-[#606b80]">{stage === 'choice' ? 'Take a short introduction on each page as you explore. You can close a tour anytime and replay the welcome from Settings.' : step.text}</p>
       <div className="mt-7 flex flex-wrap items-center gap-3">
-        {stage === 'choice' ? <><button type="button" onClick={() => choose(true)} className="min-h-11 rounded-lg bg-[#e96309] px-5 text-sm font-semibold text-white">Yes, show me around</button><button type="button" onClick={() => choose(false)} className="min-h-11 rounded-lg border border-[#e1e5ed] px-4 text-sm font-medium">I know my way</button></> : <><button type="button" onClick={dismiss} className="min-h-11 px-2 text-sm text-[#606b80]">Skip this tour</button><button type="button" onClick={() => index + 1 >= steps.length ? dismiss() : setIndex(index + 1)} className="ml-auto min-h-11 rounded-lg bg-[#e96309] px-5 text-sm font-semibold text-white">{index + 1 >= steps.length ? 'Got it' : 'Next'}</button></>}
+        {stage === 'choice' ? <><button type="button" onClick={() => choose(true)} className="min-h-11 rounded-lg bg-[#F97316] px-5 text-sm font-semibold text-[#111111] hover:bg-[#FB923C]">Yes, show me around</button><button type="button" onClick={() => choose(false)} className="min-h-11 rounded-lg border border-[#e1e5ed] px-4 text-sm font-medium">I know my way</button></> : <><button type="button" onClick={dismiss} className="min-h-11 px-2 text-sm text-[#606b80]">Skip this tour</button><button type="button" onClick={() => index + 1 >= steps.length ? dismiss() : setIndex(index + 1)} className="ml-auto min-h-11 rounded-lg bg-[#F97316] px-5 text-sm font-semibold text-[#111111] hover:bg-[#FB923C]">{index + 1 >= steps.length ? 'Got it' : 'Next'}</button></>}
       </div>
-      {notice && <p role="status" className="mt-3 text-xs text-[#9c4014]">{notice}</p>}
+      {notice && <p role="status" className="mt-3 text-xs text-[#111111]">{notice}</p>}
     </section>
   </div>;
 }

@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 
 type ProductReview = {
   id: string;
@@ -84,7 +85,7 @@ function ReviewCard({ item, onReviewed }: { item: ProductReview; onReviewed: (em
   }
 
   return (
-    <article className="rounded-2xl border border-white/10 bg-paper p-5 text-bone">
+    <article id={`product-version-${item.id}`} className="rounded-2xl border border-white/10 bg-paper p-5 text-bone scroll-mt-24">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div className="min-w-0">
           <h2 className="font-display text-xl font-bold">{item.gig?.title || "Product listing"}</h2>
@@ -163,7 +164,7 @@ function ReviewCard({ item, onReviewed }: { item: ProductReview; onReviewed: (em
         {error ? <p role="alert" className="text-sm text-red-300 sm:col-span-2">{error}</p> : null}
         <div className="flex flex-wrap items-center justify-between gap-3 sm:col-span-2">
           <p className="text-xs text-slate">This decision creates a seller notification and an operational message.</p>
-          <button disabled={busy} className="rounded-full bg-ember px-5 py-2.5 text-xs font-semibold text-ink disabled:opacity-50">
+          <button disabled={busy} className="rounded-full bg-ember px-5 py-2.5 text-xs font-semibold text-[#111111] disabled:opacity-50">
             {busy ? "Saving…" : decision === "approve" ? "Approve product" : decision === "reject" ? "Reject product" : "Request changes"}
           </button>
         </div>
@@ -173,6 +174,8 @@ function ReviewCard({ item, onReviewed }: { item: ProductReview; onReviewed: (em
 }
 
 export default function AdminProductReviewQueue() {
+  const searchParams = useSearchParams();
+  const focusVersion = searchParams.get("version");
   const [items, setItems] = useState<ProductReview[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -194,6 +197,12 @@ export default function AdminProductReviewQueue() {
   }, []);
 
   useEffect(() => { void load(); }, [load]);
+
+  useEffect(() => {
+    if (!focusVersion || loading) return;
+    const target = document.getElementById(`product-version-${focusVersion}`);
+    if (target) target.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, [focusVersion, loading, items.length]);
 
   async function retryReviewEmail() {
     if (!emailNotice) return;

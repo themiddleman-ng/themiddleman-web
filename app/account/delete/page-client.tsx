@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabaseClient';
+import { signinHref } from '@/lib/auth/signin-redirect.mjs';
 
 export default function AccountDeletionClient() {
   const router = useRouter();
@@ -22,7 +23,7 @@ export default function AccountDeletionClient() {
     void supabase.auth.getUser().then(({ data, error: authError }) => {
       if (!active) return;
       if (authError || !data.user) {
-        router.replace('/signup?mode=signin');
+        router.replace(signinHref('/account/delete'));
         return;
       }
       setEmail(data.user.email ?? '');
@@ -91,7 +92,7 @@ export default function AccountDeletionClient() {
           <h1 className="mt-5 font-display text-3xl font-bold text-[#23384d]">Your account is deleted</h1>
           <p className="mt-3 text-sm leading-6 text-slate">Your profile, conversations and seller payout details have been removed, and your active listings were archived. Order and payment records may remain in de-identified form for transaction history and legal obligations.</p>
           <p className="mt-3 text-sm leading-6 text-slate">{emailSent ? 'We sent a confirmation email with a way to share feedback.' : 'The account is closed, but we could not send the confirmation email.'}</p>
-          <Link href="/marketplace" className="mt-6 inline-flex min-h-11 items-center justify-center rounded-xl bg-[#de641e] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#c95415]">Back to the marketplace</Link>
+          <Link href="/marketplace" className="mt-6 inline-flex min-h-11 items-center justify-center rounded-xl bg-[#F97316] px-5 py-3 text-sm font-semibold text-[#111111] transition hover:bg-[#FB923C]">Back to the marketplace</Link>
         </div>
       </section>
     );
@@ -99,12 +100,12 @@ export default function AccountDeletionClient() {
 
   return (
     <section className="mx-auto max-w-2xl px-4 py-6 sm:px-6 sm:py-12">
-      <Link href="/profile" className="inline-flex min-h-10 items-center gap-2 text-sm font-medium text-[#596a78] hover:text-[#c65316]">
+      <Link href="/profile" className="inline-flex min-h-10 items-center gap-2 text-sm font-medium text-[#596a78] hover:text-[#111111]">
         <span aria-hidden="true">←</span> Back to profile
       </Link>
 
       <div className="mt-4 rounded-2xl border border-[#ead9cd] bg-[#fffdf9] p-5 text-[#243344] shadow-[0_12px_40px_rgba(39,45,51,.08)] sm:mt-6 sm:p-8">
-        <p className="text-xs font-semibold tracking-[.12em] text-[#a94b18]">ACCOUNT AND PRIVACY</p>
+        <p className="text-xs font-semibold tracking-[.12em] text-[#111111]">ACCOUNT AND PRIVACY</p>
         <h1 className="mt-2 font-display text-3xl font-bold leading-tight tracking-[-.03em] sm:text-4xl">Delete your account</h1>
         <p className="mt-3 text-sm leading-6 text-[#5f6c78]">This permanently closes your Middleman account. You will no longer be able to sign in or manage products on it.</p>
 
@@ -121,15 +122,15 @@ export default function AccountDeletionClient() {
           </div>
           <div>
             <label htmlFor="delete-account-password" className="block text-sm font-medium text-[#33404d]">Confirm your password</label>
-            <input id="delete-account-password" type="password" autoComplete="current-password" value={password} onChange={(event) => setPassword(event.target.value)} required className="mt-1.5 w-full rounded-xl border border-[#ded6cb] bg-white px-3.5 py-3 text-[15px] text-[#1d2733] outline-none focus:border-[#de641e] focus:ring-4 focus:ring-[#de641e]/10" />
+            <input id="delete-account-password" type="password" autoComplete="current-password" value={password} onChange={(event) => setPassword(event.target.value)} required className="mt-1.5 w-full rounded-xl border border-[#ded6cb] bg-white px-3.5 py-3 text-[15px] text-[#1d2733] outline-none focus:border-[#F97316] focus:ring-4 focus:ring-[#F97316]/10" />
             <p className="mt-1.5 text-xs leading-5 text-[#75808a]">We ask you to sign in again before making this change.</p>
           </div>
           <div>
             <label htmlFor="delete-account-confirmation" className="block text-sm font-medium text-[#33404d]">Type <span className="font-bold">DELETE</span> to confirm</label>
-            <input id="delete-account-confirmation" value={confirmation} onChange={(event) => setConfirmation(event.target.value)} autoCapitalize="characters" autoComplete="off" spellCheck={false} required className="mt-1.5 w-full rounded-xl border border-[#ded6cb] bg-white px-3.5 py-3 text-[15px] text-[#1d2733] outline-none focus:border-[#de641e] focus:ring-4 focus:ring-[#de641e]/10" />
+            <input id="delete-account-confirmation" value={confirmation} onChange={(event) => setConfirmation(event.target.value)} autoCapitalize="characters" autoComplete="off" spellCheck={false} required className="mt-1.5 w-full rounded-xl border border-[#ded6cb] bg-white px-3.5 py-3 text-[15px] text-[#1d2733] outline-none focus:border-[#F97316] focus:ring-4 focus:ring-[#F97316]/10" />
           </div>
           <label className="flex items-start gap-3 rounded-xl border border-[#ead9cd] p-3.5 text-sm leading-5 text-[#5f6c78]">
-            <input type="checkbox" checked={understood} onChange={(event) => setUnderstood(event.target.checked)} className="mt-0.5 h-4 w-4 shrink-0 accent-[#c65316]" />
+            <input type="checkbox" checked={understood} onChange={(event) => setUnderstood(event.target.checked)} className="mt-0.5 h-4 w-4 shrink-0 accent-[#F97316]" />
             <span>I understand the account cannot be restored and some de-identified transaction records will be retained.</span>
           </label>
           {error && <p role="alert" className="rounded-xl bg-[#fff0ea] px-3.5 py-3 text-sm leading-5 text-[#933d27]">{error}</p>}

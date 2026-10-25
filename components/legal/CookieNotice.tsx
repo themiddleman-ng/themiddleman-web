@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 
 const STORAGE_KEY = "themiddleman-cookie-preferences-v2";
@@ -22,7 +23,16 @@ function readPreferences(): CookiePreferences {
   }
 }
 
+const TAB_PREFIXES = ["/marketplace", "/browse", "/gigs", "/orders", "/payments", "/messages", "/profile", "/settings"];
+
+function isProductPath(pathname: string) {
+  return /^\/gigs\/(?!new$|mine$)[^/]+/.test(pathname);
+}
+
 export default function CookieNotice() {
+  const pathname = usePathname();
+  const aboveTabs = TAB_PREFIXES.some((prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`));
+  const aboveBuyBar = isProductPath(pathname);
   const [visible, setVisible] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [optionalAnalytics, setOptionalAnalytics] = useState(false);
@@ -81,30 +91,35 @@ export default function CookieNotice() {
       {visible && (
         <aside
           aria-label="Cookie notice"
-          className="fixed bottom-[calc(4.75rem+env(safe-area-inset-bottom))] left-3 right-3 z-50 mx-auto max-w-sm rounded-2xl border border-[#e5dbcf] bg-[#fffdf9] p-4 text-[#243344] shadow-[0_12px_36px_rgba(28,37,47,.16)] sm:bottom-4 sm:left-4 sm:right-auto"
+          className={`fixed inset-x-0 z-50 border-t border-[#e5dbcf] bg-[#fffdf9] text-[#243344] shadow-[0_-6px_18px_rgba(28,37,47,.08)] ${
+            aboveBuyBar
+              ? "bottom-[calc(9.25rem+env(safe-area-inset-bottom))] md:bottom-0"
+              : aboveTabs
+                ? "bottom-[calc(4rem+env(safe-area-inset-bottom))] md:bottom-0"
+                : "bottom-0"
+          }`}
         >
-          <p className="text-sm font-semibold">Your privacy, your choice</p>
-          <p className="mt-1 text-xs leading-5 text-[#64717c]">
-            Essential cookies keep sign-in working. You can choose whether to allow optional analytics.
-          </p>
-          <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
-            <Link href="/legal/cookies" className="text-xs font-semibold text-[#a94b18] hover:underline">
-              Cookie policy
-            </Link>
-            <div className="flex items-center gap-2">
+          <div className="mx-auto flex max-w-7xl items-center gap-3 px-4 py-2 sm:px-6">
+            <p className="min-w-0 flex-1 truncate text-[13px] leading-5 text-[#243344]">
+              Essential cookies keep sign-in working.{" "}
+              <Link href="/legal/cookies" className="font-semibold text-[#111111] underline decoration-[#F97316] underline-offset-2 hover:underline">
+                Cookie policy
+              </Link>
+            </p>
+            <div className="flex shrink-0 items-center gap-2">
               <button
                 type="button"
                 onClick={() => { setOptionalAnalytics(readPreferences().optionalAnalytics); setSettingsOpen(true); }}
-                className="min-h-9 rounded-lg px-2.5 text-xs font-semibold text-[#465665] hover:bg-[#f5efe7]"
+                className="min-h-9 rounded-lg px-2.5 text-xs font-semibold text-[#172B45] hover:bg-[#f5efe7]"
               >
                 Choose
               </button>
               <button
                 type="button"
                 onClick={() => savePreferences(false)}
-                className="min-h-9 rounded-lg bg-[#de641e] px-3 text-xs font-semibold text-white hover:bg-[#c95415]"
+                className="min-h-9 rounded-lg bg-[#F97316] px-3 text-xs font-semibold text-[#111111] hover:bg-[#FB923C]"
               >
-                Only essential
+                OK
               </button>
             </div>
           </div>
@@ -124,7 +139,7 @@ export default function CookieNotice() {
           >
             <div className="flex items-start justify-between gap-4">
               <div>
-                <p className="text-xs font-semibold text-[#be561b]">Privacy</p>
+                <p className="text-xs font-semibold text-[#111111] underline decoration-[#F97316] underline-offset-2">Privacy</p>
                 <h2 id="cookie-settings-title" className="mt-1 font-display text-xl font-semibold">Cookie settings</h2>
                 <p className="mt-2 text-sm leading-6 text-[#64717c]">
                   Essential storage keeps your account signed in and secure. Change optional preferences below.
@@ -162,28 +177,28 @@ export default function CookieNotice() {
                   aria-checked={optionalAnalytics}
                   aria-label="Allow optional analytics"
                   onClick={() => setOptionalAnalytics((value) => !value)}
-                  className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#de641e]/20 ${optionalAnalytics ? "bg-[#de641e]" : "bg-[#c9c3ba]"}`}
+                  className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#F97316]/20 ${optionalAnalytics ? "bg-[#F97316]" : "bg-[#c9c3ba]"}`}
                 >
                   <span className={`h-5 w-5 rounded-full bg-white shadow-sm transition-transform ${optionalAnalytics ? "translate-x-[22px]" : "translate-x-0.5"}`} />
                 </button>
               </div>
             </div>
 
-            <Link href="/legal/cookies" onClick={() => setSettingsOpen(false)} className="mt-4 inline-block text-xs font-semibold text-[#a94b18] hover:underline">
+            <Link href="/legal/cookies" onClick={() => setSettingsOpen(false)} className="mt-4 inline-flex min-h-11 items-center text-[14px] font-semibold text-[#111111] underline decoration-[#F97316] underline-offset-2 hover:underline">
               Read the cookie policy
             </Link>
             <div className="mt-5 grid grid-cols-2 gap-2">
               <button
                 type="button"
                 onClick={() => savePreferences(false)}
-                className="min-h-11 rounded-xl border border-[#ddd3c8] px-4 py-2.5 text-sm font-semibold text-[#465665] transition hover:bg-[#f7f1e9]"
+                className="min-h-11 rounded-xl border border-[#ddd3c8] px-4 py-2.5 text-sm font-semibold text-[#172B45] transition hover:bg-[#f7f1e9]"
               >
                 Only essential
               </button>
               <button
                 type="button"
                 onClick={() => savePreferences(optionalAnalytics)}
-                className="min-h-11 rounded-xl bg-[#de641e] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#c95415]"
+                className="min-h-11 rounded-xl bg-[#F97316] px-4 py-2.5 text-sm font-semibold text-[#111111] transition hover:bg-[#FB923C]"
               >
                 Save choice
               </button>
@@ -194,4 +209,3 @@ export default function CookieNotice() {
     </>
   );
 }
-

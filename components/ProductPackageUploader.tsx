@@ -45,21 +45,20 @@ export function ProductPackageField({ file, onChange, required = true }: { file:
       <p className="mb-4 text-xs leading-5 text-slate">
         Code, templates and collections: upload a ZIP. Single documents or images can be uploaded as PDF, PNG or JPG; TXT is supported. Remove .git, .env files, credentials and private keys first. Executables are not accepted.
       </p>
-      <input
-        ref={inputRef}
-        className="sr-only"
-        type="file"
-        accept=".zip,.pdf,.png,.jpg,.jpeg,.txt,application/zip,application/pdf,image/png,image/jpeg,text/plain"
-        onChange={(event) => choose(event.target.files?.[0] || null)}
-      />
-      <button
-        type="button"
-        onClick={() => inputRef.current?.click()}
+      <label
+        className={"relative block w-full overflow-hidden rounded-lg border border-dashed px-4 py-5 text-left transition-colors focus-within:outline focus-within:outline-2 focus-within:outline-ember " + (dragging ? "border-ember bg-ember/10" : "border-white/15 bg-ink/30 hover:border-white/30")}
         onDragOver={(event) => { event.preventDefault(); setDragging(true); }}
         onDragLeave={() => setDragging(false)}
         onDrop={(event) => { event.preventDefault(); setDragging(false); choose(event.dataTransfer.files?.[0] || null); }}
-        className={"w-full rounded-lg border border-dashed px-4 py-5 text-left transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-ember " + (dragging ? "border-ember bg-ember/10" : "border-white/15 bg-ink/30 hover:border-white/30")}
       >
+      <input
+        ref={inputRef}
+        className="absolute inset-0 z-10 h-full w-full cursor-pointer opacity-0"
+        type="file"
+        accept=".zip,.pdf,.png,.jpg,.jpeg,.txt,application/zip,application/pdf,image/png,image/jpeg,text/plain"
+        aria-label="Choose a product file"
+        onChange={(event) => choose(event.target.files?.[0] || null)}
+      />
         {file ? (
           <span className="flex min-w-0 items-center justify-between gap-4">
             <span className="min-w-0">
@@ -74,7 +73,7 @@ export function ProductPackageField({ file, onChange, required = true }: { file:
             <span className="mt-1 block text-xs text-slate">ZIP, PDF, PNG, JPG or TXT · up to 10 MB</span>
           </span>
         )}
-      </button>
+      </label>
       {file ? <button type="button" onClick={() => { onChange(null); if (inputRef.current) inputRef.current.value = ""; }} className="mt-2 text-xs text-slate underline underline-offset-2 hover:text-bone">Remove file</button> : null}
       {error ? <p role="alert" className="mt-3 text-sm text-red-300">{error}</p> : null}
     </section>
@@ -135,7 +134,7 @@ export default function ProductPackageManager({ gigId, compact = false, onComple
         <ProductPackageField file={file} onChange={setFile} required={false} />
       </div>
       <div className="mt-3 flex flex-wrap items-center gap-3">
-        <button type="button" disabled={!file || Boolean(stage && stage !== "complete")} onClick={submit} className="rounded-full bg-ember px-4 py-2 text-xs font-semibold text-ink disabled:opacity-50">
+        <button type="button" disabled={!file || Boolean(stage && stage !== "complete")} onClick={submit} className="rounded-full bg-ember px-4 py-2 text-xs font-semibold text-[#111111] disabled:opacity-50">
           {stage && stage !== "complete" ? <StageLabel stage={stage} /> : current ? "Submit a new version" : "Upload and submit"}
         </button>
         {stage === "complete" ? <span className="text-xs text-emerald-300">Submitted for review.</span> : null}

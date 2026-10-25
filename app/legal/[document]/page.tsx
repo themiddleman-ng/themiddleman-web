@@ -1,5 +1,6 @@
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
+import SiteHeader from '@/components/SiteHeader';
 
 type LegalDocument = {
   title: string;
@@ -145,17 +146,9 @@ export default async function LegalPage({ params }: { params: Promise<{ document
   return (
     <main className="min-h-screen bg-ink text-bone">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbs) }} />
-      <header className="border-b border-line">
-        <div className="mx-auto flex max-w-4xl items-center justify-between px-6 py-5">
-          <Link href="/" className="font-display font-bold text-lg tracking-tight flex items-center gap-2">
-            <span className="h-2 w-2 rounded-full bg-ember" />
-            The Middleman
-          </Link>
-          <Link href="/" className="text-sm text-slate hover:text-bone transition-colors">← Back to Home</Link>
-        </div>
-      </header>
+      <SiteHeader />
 
-      <div className="mx-auto max-w-4xl px-6 py-12">
+      <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6 sm:py-12">
         <nav aria-label="Breadcrumb" className="mb-8 text-sm text-slate">
           <ol className="flex flex-wrap items-center gap-2">
             <li><Link href="/" className="underline underline-offset-4 hover:text-bone">Home</Link></li>
@@ -165,15 +158,15 @@ export default async function LegalPage({ params }: { params: Promise<{ document
         </nav>
         <div className="mb-10">
           <p className="text-xs font-bold tracking-[.16em] text-ember uppercase">Legal Document</p>
-          <h1 className="mt-2 font-display text-4xl font-bold">{doc.title}</h1>
+          <h1 className="mt-2 font-display text-[1.85rem] font-bold sm:text-4xl">{doc.title}</h1>
           <p className="mt-3 text-sm text-slate">Last updated: {doc.updated}</p>
         </div>
 
         <div className="mm-legal-layout">
         <aside className="mm-legal-contents" aria-label="On this page"><h2 className="text-sm font-semibold">On this page</h2><nav>{doc.sections.map((section, index) => <a key={section.heading} href={`#section-${index + 1}`}>{section.heading}</a>)}</nav></aside>
-        <div className="relative rounded-2xl border border-line bg-paper p-6 sm:p-10">
-          <div className="absolute -left-2 top-1/2 w-4 h-4 rounded-full bg-ink border border-line -translate-y-1/2" />
-          <div className="absolute -right-2 top-1/2 w-4 h-4 rounded-full bg-ink border border-line -translate-y-1/2" />
+        <div className="relative rounded-2xl border border-line bg-paper p-5 sm:p-10">
+          <div className="absolute -left-2 top-1/2 hidden h-4 w-4 -translate-y-1/2 rounded-full border border-line bg-ink sm:block" />
+          <div className="absolute -right-2 top-1/2 hidden h-4 w-4 -translate-y-1/2 rounded-full border border-line bg-ink sm:block" />
 
           <div className="space-y-8">
             {doc.sections.map((section, index) => (
@@ -184,7 +177,7 @@ export default async function LegalPage({ params }: { params: Promise<{ document
             ))}
           </div>
 
-          <div className="mt-10 pt-6 border-t border-dashed border-line flex items-center justify-between">
+          <div className="mt-10 flex flex-wrap items-center justify-between gap-3 border-t border-dashed border-line pt-6">
             <p className="text-xs text-slate font-mono">THE MIDDLEMAN · LAGOS, NIGERIA</p>
             <div className="ink-stamp rounded-md px-3 py-1 text-[10px]">OFFICIAL</div>
           </div>
@@ -198,7 +191,7 @@ export default async function LegalPage({ params }: { params: Promise<{ document
               href={`/legal/${key}`}
               className={`rounded-full px-4 py-2 text-xs font-semibold transition-colors ${
                 key === document
-                  ? 'bg-ember text-ink'
+                  ? 'bg-ember text-[#111111]'
                   : 'border border-line text-slate hover:border-ember/40 hover:text-bone'
               }`}
             >
