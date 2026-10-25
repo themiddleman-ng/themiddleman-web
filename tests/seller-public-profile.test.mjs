@@ -25,7 +25,7 @@ test("public seller migration limits anon reads to approved sellers", async () =
   assert.match(migration, /security_invoker = false/i);
   assert.match(migration, /authenticated reads own seller profile/);
   assert.doesNotMatch(migration, /for select to anon/i);
-  assert.match(migration, /sp\.id,\s*sp\.display_name,\s*sp\.bio,\s*sp\.rating_avg/s);
+  assert.match(migration, /sp\.id,\s*sp\.user_id,\s*sp\.display_name,\s*sp\.bio,\s*sp\.rating_avg/s);
   assert.doesNotMatch(migration, /select[\s\S]*id_document_url[\s\S]*from public\.seller_profiles/i);
 });
 

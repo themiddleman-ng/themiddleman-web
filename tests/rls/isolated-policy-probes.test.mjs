@@ -4,10 +4,14 @@ import { readFileSync } from "node:fs";
 import { PGlite } from "@electric-sql/pglite";
 import { assertIsolatedSupabaseUrl, isolatedDbReason } from "../../scripts/db-isolated-guard.mjs";
 
-test("db guard refuses hosted Supabase URLs", () => {
-  assert.throws(() => assertIsolatedSupabaseUrl("https://abcdef.supabase.co"), /Refusing/);
+test("db guard refuses production and unknown hosts", () => {
+  assert.throws(
+    () => assertIsolatedSupabaseUrl("https://uwigyojtiudefnwjezhm.supabase.co"),
+    /production/i,
+  );
   assert.throws(() => assertIsolatedSupabaseUrl("https://example.com"), /non-isolated/);
   assert.equal(assertIsolatedSupabaseUrl("http://127.0.0.1:54321").hostname, "127.0.0.1");
+  assert.equal(assertIsolatedSupabaseUrl("https://isolated-preview.supabase.co").hostname, "isolated-preview.supabase.co");
 });
 
 test("isolated supabase note when docker missing", () => {
