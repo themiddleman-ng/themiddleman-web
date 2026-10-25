@@ -1,3 +1,5 @@
+"use client";
+
 import { categoryTheme } from "@/lib/marketplace/categories";
 import { CodeIcon } from "@phosphor-icons/react/dist/csr/Code";
 import { MegaphoneIcon } from "@phosphor-icons/react/dist/csr/Megaphone";
