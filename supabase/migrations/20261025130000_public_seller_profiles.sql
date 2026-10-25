@@ -4,6 +4,8 @@ begin;
 drop policy if exists "public can read seller profiles" on public.seller_profiles;
 drop policy if exists "anon reads approved seller profiles" on public.seller_profiles;
 drop policy if exists "authenticated reads approved or own seller profile" on public.seller_profiles;
+drop policy if exists "authenticated reads approved seller profiles" on public.seller_profiles;
+drop policy if exists "authenticated reads own seller profile" on public.seller_profiles;
 
 revoke all on table public.seller_profiles from public, anon, authenticated;
 
@@ -13,12 +15,19 @@ grant insert (user_id, display_name, bio, skills, portfolio_links, linkedin_url,
 grant update (display_name, bio, skills, portfolio_links, linkedin_url,
   years_experience, gig_categories, id_document_type, id_document_url)
   on public.seller_profiles to authenticated;
-grant select on public.seller_profiles to authenticated;
+grant select (
+  id, user_id, display_name, bio, skills, portfolio_links, verification_status,
+  rating_avg, total_orders_completed, created_at, updated_at, gig_categories,
+  linkedin_url, years_experience
+) on public.seller_profiles to authenticated;
 
-drop policy if exists "authenticated reads own seller profile" on public.seller_profiles;
 create policy "authenticated reads own seller profile" on public.seller_profiles
   for select to authenticated
   using (user_id = (select auth.uid()));
+
+create policy "authenticated reads approved seller profiles" on public.seller_profiles
+  for select to authenticated
+  using (verification_status = 'approved');
 
 drop view if exists public.public_seller_profiles;
 
@@ -26,6 +35,7 @@ create view public.public_seller_profiles
 with (security_invoker = false) as
   select
     sp.id,
+    sp.user_id,
     sp.display_name,
     sp.bio,
     sp.rating_avg,
@@ -46,6 +56,7 @@ create view public.public_seller_profile_cards
 with (security_invoker = false) as
   select
     sp.id,
+    sp.user_id,
     sp.display_name,
     'approved'::text as verification_status
   from public.seller_profiles sp
