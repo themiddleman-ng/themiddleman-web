@@ -4,8 +4,7 @@
  * Does not mutate production. Use --dry-run to validate environment without writes.
  */
 import { pathToFileURL } from "node:url";
-
-const PRODUCTION_SUPABASE_HOST = "uwigyojtiudefnwjezhm.supabase.co";
+import { assertIsolatedSupabaseUrl } from "./db-isolated-guard.mjs";
 
 function parseArgs(argv) {
   return { dryRun: argv.includes("--dry-run") };
@@ -15,14 +14,16 @@ export function assertIsolatedTestEnvironment(env = process.env) {
   const url = env.NEXT_PUBLIC_SUPABASE_URL || "";
   let host = "";
   try {
-    host = new URL(url).hostname;
-  } catch {
-    throw new Error("NEXT_PUBLIC_SUPABASE_URL is missing or invalid.");
+    host = assertIsolatedSupabaseUrl(url).hostname;
+  } catch (error) {
+    throw new Error(`Refusing to run: ${error instanceof Error ? error.message : "NEXT_PUBLIC_SUPABASE_URL is missing or invalid."}`);
   }
-  if (!host || host === PRODUCTION_SUPABASE_HOST) {
-    throw new Error(
-      `Refusing to run: Supabase host "${host || "(empty)"}" is production or unset. Use an isolated project.`,
-    );
+  if (env.SUPABASE_DB_URL) {
+    try {
+      assertIsolatedSupabaseUrl(env.SUPABASE_DB_URL);
+    } catch (error) {
+      throw new Error(`Refusing to run: ${error instanceof Error ? error.message : "SUPABASE_DB_URL is not the escrow preview."}`);
+    }
   }
   const secret = env.PAYSTACK_SECRET_KEY || "";
   if (!/^sk_test_/.test(secret)) {

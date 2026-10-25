@@ -1,10 +1,10 @@
 #!/usr/bin/env node
 /**
- * Promote a local test user to admin. Refuses hosted Supabase URLs.
+ * Promote a test user to admin on localhost or the escrow preview project only.
  * Usage: SUPABASE_DB_URL=postgresql://postgres:postgres@127.0.0.1:54322/postgres node scripts/seed-test-admin.mjs <user-uuid>
  */
 import { spawnSync } from "node:child_process";
-import { assertIsolatedSupabaseUrl, isolatedDbReason } from "./db-isolated-guard.mjs";
+import { assertIsolatedSupabaseEnv, assertIsolatedSupabaseUrl, isolatedDbReason } from "./db-isolated-guard.mjs";
 
 const userId = process.argv[2];
 if (!userId) {
@@ -14,6 +14,8 @@ if (!userId) {
 
 const url = process.env.SUPABASE_DB_URL || process.env.DATABASE_URL;
 try {
+  assertIsolatedSupabaseEnv(process.env);
+  if (process.env.DATABASE_URL) assertIsolatedSupabaseUrl(process.env.DATABASE_URL);
   assertIsolatedSupabaseUrl(url);
 } catch (error) {
   console.error(error.message);

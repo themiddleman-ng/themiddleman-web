@@ -14,7 +14,7 @@ Set `MARKETPLACE_PRE_PURCHASE_ENQUIRY_ENABLED=true` on a preview or local enviro
 
 ## Manual verification checklist (local / isolated only)
 
-Never run these steps against the production Supabase project (`uwigyojtiudefnwjezhm.supabase.co`).
+Never run these steps against the production Supabase project (`uwigyojtiudefnwjezhm`). The only hosted test project is the escrow preview `vhfskuabgsudbaiqotth`. See `docs/isolated-testing-without-docker.md`.
 
 1. `supabase start` (or mocked Supabase URL in `.env.local`).
 2. Apply migrations in order (see root agent report).

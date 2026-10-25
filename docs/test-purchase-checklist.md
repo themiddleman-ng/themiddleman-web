@@ -4,7 +4,7 @@
 
 ## Preconditions
 
-- Local Supabase (`supabase start`) or a dedicated non-production project (hostname must **not** be `uwigyojtiudefnwjezhm.supabase.co`).
+- Local Supabase (`supabase start`) or the escrow preview project `vhfskuabgsudbaiqotth` only. `scripts/test-purchase-flow.mjs` refuses production `uwigyojtiudefnwjezhm` and any other host.
 - Migrations applied in order (see deployment report).
 - Environment:
   - `NEXT_PUBLIC_SUPABASE_URL` → isolated project

@@ -9,9 +9,13 @@ test("db guard refuses production and unknown hosts", () => {
     () => assertIsolatedSupabaseUrl("https://uwigyojtiudefnwjezhm.supabase.co"),
     /production/i,
   );
-  assert.throws(() => assertIsolatedSupabaseUrl("https://example.com"), /non-isolated/);
+  assert.throws(() => assertIsolatedSupabaseUrl("https://example.com"), /Refusing Supabase host/);
+  assert.throws(() => assertIsolatedSupabaseUrl("https://isolated-preview.supabase.co"), /Refusing Supabase host/);
   assert.equal(assertIsolatedSupabaseUrl("http://127.0.0.1:54321").hostname, "127.0.0.1");
-  assert.equal(assertIsolatedSupabaseUrl("https://isolated-preview.supabase.co").hostname, "isolated-preview.supabase.co");
+  assert.equal(
+    assertIsolatedSupabaseUrl("https://vhfskuabgsudbaiqotth.supabase.co").hostname,
+    "vhfskuabgsudbaiqotth.supabase.co",
+  );
 });
 
 test("isolated supabase note when docker missing", () => {
