@@ -17,21 +17,31 @@ export async function GET() {
     .select('id').eq('user_id', user.id).maybeSingle();
   if (profileError) return privateJson({ error: 'Could not load conversations.' }, 500);
 
-  const participantFilter = sellerProfile?.id
+  // conversations.seller_id is the seller auth user id. Older rows may store
+  // seller_profiles.id. Orders always store seller_profiles.id, so the filters differ.
+  const conversationFilter = [`buyer_id.eq.${user.id}`, `seller_id.eq.${user.id}`];
+  if (sellerProfile?.id) conversationFilter.push(`seller_id.eq.${sellerProfile.id}`);
+  const orderFilter = sellerProfile?.id
     ? `buyer_id.eq.${user.id},seller_id.eq.${sellerProfile.id}`
     : `buyer_id.eq.${user.id}`;
   const [conversationsResult, ordersResult] = await Promise.all([
     db.from('conversations')
       .select('id,buyer_id,seller_id,gig_id,buyer_last_read_at,seller_last_read_at,gigs(title),messages(sender_id,created_at)')
-      .or(participantFilter),
+      .or(conversationFilter.join(',')),
     db.from('orders')
-      .select('buyer_id,seller_id,gig_id')
-      .or(participantFilter)
+      .select('buyer_id,seller_id,gig_id,seller_profiles!orders_seller_id_fkey(user_id)')
+      .or(orderFilter)
       .in('status', paidOrderStatuses),
   ]);
   if (conversationsResult.error || ordersResult.error) return privateJson({ error: 'Could not load conversations.' }, 500);
 
-  const paidOrderKeys = new Set((ordersResult.data ?? []).map(order => `${order.buyer_id}:${order.seller_id}:${order.gig_id}`));
+  const paidOrderKeys = new Set<string>();
+  for (const order of ordersResult.data ?? []) {
+    const profile = Array.isArray(order.seller_profiles) ? order.seller_profiles[0] : order.seller_profiles;
+    const sellerUserId = profile && typeof profile === 'object' && 'user_id' in profile ? String(profile.user_id) : '';
+    paidOrderKeys.add(`${order.buyer_id}:${order.seller_id}:${order.gig_id}`);
+    if (sellerUserId) paidOrderKeys.add(`${order.buyer_id}:${sellerUserId}:${order.gig_id}`);
+  }
   const enquiryEnabled = prePurchaseEnquiryEnabled();
   const visibleConversations = (conversationsResult.data ?? []).filter(row =>
     enquiryEnabled || paidOrderKeys.has(`${row.buyer_id}:${row.seller_id}:${row.gig_id}`)
@@ -80,7 +90,10 @@ export async function POST(request: Request) {
   if (!uuidPattern.test(body.gigId ?? '')) return privateJson({ error: 'Invalid product.' }, 400);
   const { data: gig } = await db.from('gigs').select('id,seller_id,status,seller_profiles(user_id)')
     .eq('id', body.gigId).maybeSingle();
-  const seller = gig?.seller_profiles?.[0]?.user_id;
+  const sellerProfileRow = Array.isArray(gig?.seller_profiles) ? gig.seller_profiles[0] : gig?.seller_profiles;
+  const seller = sellerProfileRow && typeof sellerProfileRow === 'object' && 'user_id' in sellerProfileRow
+    ? sellerProfileRow.user_id
+    : undefined;
   if (!gig || gig.status !== 'active' || !seller || seller === user.id) {
     return privateJson({ error: 'This seller is not available.' }, 409);
   }
@@ -106,16 +119,18 @@ export async function POST(request: Request) {
         .eq('buyer_id', user.id)
         .gte('created_at', dayStart.toISOString()),
       db.from('orders')
-        .select('gig_id, seller_profiles!orders_seller_id_fkey(user_id)')
+        .select('gig_id, seller_id, seller_profiles!orders_seller_id_fkey(user_id)')
         .eq('buyer_id', user.id)
         .in('status', paidOrderStatuses),
     ]);
     if (limitError || paidListError) return privateJson({ error: 'Could not verify enquiry limits.' }, 500);
-    const paidKeys = new Set((paidOrderRows ?? []).map((order) => {
+    const paidKeys = new Set<string>();
+    for (const order of paidOrderRows ?? []) {
       const profile = Array.isArray(order.seller_profiles) ? order.seller_profiles[0] : order.seller_profiles;
       const sellerUserId = profile && typeof profile === 'object' && 'user_id' in profile ? String(profile.user_id) : '';
-      return `${user.id}:${sellerUserId}:${order.gig_id}`;
-    }));
+      if (sellerUserId) paidKeys.add(`${user.id}:${sellerUserId}:${order.gig_id}`);
+      if (order.seller_id) paidKeys.add(`${user.id}:${order.seller_id}:${order.gig_id}`);
+    }
     const enquiryThreadsToday = (todayConversations ?? []).filter((row) =>
       !paidKeys.has(`${row.buyer_id}:${row.seller_id}:${row.gig_id}`),
     ).length;
@@ -124,15 +139,29 @@ export async function POST(request: Request) {
     }
   }
 
-  const { data: existing } = await db.from('conversations').select('id')
-    .eq('buyer_id', user.id).eq('seller_id', gig.seller_id).eq('gig_id', gig.id).maybeSingle();
-  if (existing) return privateJson({ id: existing.id });
+  // One thread per buyer per product. Buying after an enquiry must reuse that
+  // row: order creation does not insert a conversation. Match (buyer_id, gig_id),
+  // which is what conversations_enquiry_one_per_buyer_gig enforces.
+  const { data: existingRows, error: existingError } = await db.from('conversations').select('id')
+    .eq('buyer_id', user.id).eq('gig_id', gig.id).limit(1);
+  if (existingError) return privateJson({ error: 'Could not open your existing conversation.' }, 500);
+  if (existingRows?.[0]) return privateJson({ id: existingRows[0].id });
+  // seller_id is the seller auth user id (messages FK and the paid-order trigger).
+  // gig.seller_id is seller_profiles.id and must not be stored here.
   const { data: created, error } = await db.from('conversations')
-    .insert({ buyer_id: user.id, seller_id: gig.seller_id, gig_id: gig.id }).select('id').single();
+    .insert({ buyer_id: user.id, seller_id: seller, gig_id: gig.id }).select('id').single();
   if (error?.code === '23505') {
-    const { data: raced } = await db.from('conversations').select('id')
-      .eq('buyer_id', user.id).eq('seller_id', gig.seller_id).eq('gig_id', gig.id).maybeSingle();
-    if (raced) return privateJson({ id: raced.id });
+    const { data: racedRows } = await db.from('conversations').select('id')
+      .eq('buyer_id', user.id).eq('gig_id', gig.id).limit(1);
+    if (racedRows?.[0]) {
+      return privateJson({
+        id: racedRows[0].id,
+        message: 'You already have a conversation about this product.',
+      });
+    }
+    return privateJson({
+      error: 'You already have a conversation about this product. Open Messages to continue it.',
+    }, 409);
   }
   return error || !created ? privateJson({ error: 'Could not start conversation.' }, 500)
     : privateJson({ id: created.id }, 201);

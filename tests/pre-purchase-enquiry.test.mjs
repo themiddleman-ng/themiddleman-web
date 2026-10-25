@@ -17,6 +17,22 @@ test("conversations route gates on paid orders unless enquiry flag is enabled", 
   assert.match(route, /cannot message yourself/i);
 });
 
+test("buying reuses the enquiry thread and a unique violation is not a 500", async () => {
+  const route = await readFile(new URL("../app/api/conversations/route.ts", import.meta.url), "utf8");
+  const orders = await readFile(new URL("../app/api/orders/route.ts", import.meta.url), "utf8");
+  assert.match(route, /\.eq\('buyer_id', user\.id\)\.eq\('gig_id', gig\.id\)\.limit\(1\)/);
+  assert.match(route, /seller_id: seller/);
+  assert.doesNotMatch(route, /seller_id:\s*gig\.seller_id/);
+  assert.match(route, /order creation does not insert a conversation/);
+  assert.doesNotMatch(orders, /from\(['"]conversations['"]\)/);
+  const uniqueBlock = route.slice(route.indexOf("error?.code === '23505'"));
+  assert.match(uniqueBlock, /You already have a conversation about this product/);
+  assert.match(uniqueBlock, /racedRows/);
+  const beforeGenericFailure = uniqueBlock.split("return error")[0];
+  assert.match(beforeGenericFailure, /409/);
+  assert.doesNotMatch(beforeGenericFailure, /, 500/);
+});
+
 test("enquiry migration limits daily threads to non-order conversations", async () => {
   const migration = await readFile(
     new URL("../supabase/migrations/20261025140000_pre_purchase_enquiry_limits.sql", import.meta.url),
