@@ -20,7 +20,7 @@ const STATUS_LABELS = {
 function StatusBadge({ status }) {
   const tone =
     status === "approved" ? "text-ember" :
-    status === "disputed" ? "text-[#ff8b6b]" :
+    status === "disputed" ? "text-muted" :
     "text-slate";
   return <span className={`text-xs font-medium ${tone}`}>{STATUS_LABELS[status] || status}</span>;
 }
@@ -265,7 +265,7 @@ export default function OrdersPage() {
 
                 <p className="mt-2 text-xs text-slate">#{order.id.slice(0, 8)} · {new Date(order.created_at).toLocaleDateString('en-NG', { day:'numeric', month:'short', year:'numeric' })}</p>
                 {!['disputed', 'refunded', 'pending_payment'].includes(order.status) && <ol className="mm-order-progress" aria-label="Order progress">{['Payment confirmed', 'In progress', 'Delivery', 'Completed'].map((label, index) => { const progress = order.status === 'approved' ? 3 : order.status === 'delivered' ? 2 : 1; return <li key={label} data-reached={index <= progress} aria-current={index === progress ? 'step' : undefined}>{label}</li>; })}</ol>}
-                {!deliveryEnabled && ["in_escrow", "delivered"].includes(order.status) && <p className="mt-3 rounded-lg bg-[#EFE7DB] p-3 text-sm text-[#526577]">Delivery actions are paused while the order fulfilment flow is verified.</p>}
+                {!deliveryEnabled && ["in_escrow", "delivered"].includes(order.status) && <p className="mt-3 rounded-lg bg-paper p-3 text-sm text-muted">Delivery actions are paused while the order fulfilment flow is verified.</p>}
                 {deliveryEnabled && order.deliveries?.[0]?.review_notes && !isBuyer && <p className="mt-3 text-sm text-slate">Admin feedback: {order.deliveries[0].review_notes}</p>}
                 {order.deliveries?.[0]?.dispute_window_closes_at && isBuyer && <p className="mt-3 text-xs text-slate">Review ends {new Date(order.deliveries[0].dispute_window_closes_at).toLocaleString()}. Review the delivery before the stated deadline.</p>}
                 {order.deliveries?.[0]?.seller_due_at && !isBuyer && <p className="mt-3 text-xs text-slate">Submission due {new Date(order.deliveries[0].seller_due_at).toLocaleString()}</p>}

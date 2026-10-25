@@ -882,7 +882,7 @@ export default function GigPageClient({
       </div>
   {reportOpen && (
     <div
-      className="fixed inset-0 z-[70] flex items-end justify-center bg-[#182d41]/40 p-3 backdrop-blur-[2px] sm:items-center sm:p-6"
+      className="fixed inset-0 z-[70] flex items-end justify-center bg-paper/40 p-3 backdrop-blur-[2px] sm:items-center sm:p-6"
       onMouseDown={(event) => { if (event.target === event.currentTarget) setReportOpen(false); }}
     >
       <section role="dialog" aria-modal="true" aria-labelledby="report-product-title" className="w-full max-w-md rounded-2xl border border-line bg-paper p-5 shadow-[0_24px_80px_rgba(18,34,49,.25)] sm:p-6">
@@ -891,7 +891,7 @@ export default function GigPageClient({
             <h2 id="report-product-title" className="font-display text-xl font-semibold">Report this product</h2>
             <p className="mt-2 text-sm leading-6 text-slate">Send this product to admin for review if it looks unsafe, misleading, or abusive.</p>
           </div>
-          <button type="button" aria-label="Close report form" onClick={() => setReportOpen(false)} className="grid h-9 w-9 shrink-0 place-items-center rounded-full text-xl leading-none text-slate hover:bg-[#f4eee6] hover:text-bone">×</button>
+          <button type="button" aria-label="Close report form" onClick={() => setReportOpen(false)} className="grid h-9 w-9 shrink-0 place-items-center rounded-full text-xl leading-none text-slate hover:bg-elevated hover:text-bone">×</button>
         </div>
         <DraftRestoredNotice
           visible={reportDraftRestored}
@@ -902,7 +902,7 @@ export default function GigPageClient({
         />
         <label className="mt-4 block text-sm font-medium text-bone">Reason<select value={reportReason} onChange={(e) => setReportReason(e.target.value)} className="auth-input mt-2"><option>Spam or misleading content</option><option>Inappropriate or abusive content</option><option>Wrong category or pricing</option><option>Suspicious seller activity</option><option>Other</option></select></label>
         <label className="mt-4 block text-sm font-medium text-bone">Details<textarea value={reportDetails} onChange={(e) => setReportDetails(e.target.value)} className="auth-input mt-2 min-h-24" placeholder="Add any extra context for the admin team." /></label>
-        <button onClick={handleReportGig} disabled={reporting} className="mt-4 w-full rounded-full bg-[#C2410C] px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-[#9A3412] disabled:opacity-50">{reporting ? "Sending report…" : "Submit report"}</button>
+        <button onClick={handleReportGig} disabled={reporting} className="mt-4 w-full rounded-full bg-ember-cta px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-ember-cta disabled:opacity-50">{reporting ? "Sending report…" : "Submit report"}</button>
       </section>
     </div>
   )}

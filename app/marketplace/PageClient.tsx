@@ -226,7 +226,7 @@ export default function MarketplacePage({ designPreview = false }: { designPrevi
               <span className="h-px w-5 bg-ember-cta" aria-hidden="true" />
               Marketplace
             </p>
-            <h1 className="font-display text-[26px] font-semibold leading-tight tracking-[-.035em] text-[#172B45] sm:text-[30px]">
+            <h1 className="font-display text-[26px] font-semibold leading-tight tracking-[-.035em] text-muted sm:text-[30px]">
               Find your next useful starting point.
             </h1>
             <p className="mt-1.5 max-w-2xl text-[14px] leading-6 text-muted">
@@ -252,11 +252,11 @@ export default function MarketplacePage({ designPreview = false }: { designPrevi
             onChange={(event) => setQuery(event.target.value)}
             placeholder="Search products, creators, templates..."
             aria-label="Search products, creators, and templates"
-            className="h-12 min-h-11 w-full rounded-2xl border border-[#eadfd3] bg-white pl-11 pr-4 text-[16px] text-bone shadow-[0_8px_24px_rgba(39,30,20,.06)] placeholder:text-muted transition focus:border-[#D87B36] focus:outline-none focus:ring-4 focus:ring-[#E89A5C]/15"
+            className="h-12 min-h-11 w-full rounded-2xl border border-line bg-white pl-11 pr-4 text-[16px] text-bone shadow-[0_8px_24px_rgba(39,30,20,.06)] placeholder:text-muted transition focus:border-line focus:outline-none focus:ring-4 focus:ring-line/15"
           />
         </div>
 
-        <nav aria-label="Product categories" className="no-scrollbar mt-3 flex gap-1 overflow-x-auto border-b border-[#dce6e5] pb-1">
+        <nav aria-label="Product categories" className="no-scrollbar mt-3 flex gap-1 overflow-x-auto border-b border-line pb-1">
           {CATEGORIES.map((category) => {
             const active = activeCategory === category.value;
             return (
@@ -305,7 +305,7 @@ export default function MarketplacePage({ designPreview = false }: { designPrevi
                 <button
                   type="button"
                   onClick={() => setRetryCount((count) => count + 1)}
-                  className="mt-3 rounded-md bg-[#C2410C] px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-[#9A3412] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#C2410C]"
+                  className="mt-3 rounded-md bg-ember-cta px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-ember-cta focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#C2410C]"
                 >
                   Try again
                 </button>

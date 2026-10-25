@@ -136,12 +136,12 @@ export default function SiteHeader({ isSeller: sellerHint = false, compact = fal
     setMenuOpen(false);
   }
   const unreadBadge = unreadCount > 0 ? (
-    <span className="inline-flex min-w-5 items-center justify-center rounded-full bg-[#e56b27] px-1.5 py-0.5 text-[11px] font-semibold leading-none text-white">
+    <span className="inline-flex min-w-5 items-center justify-center rounded-full bg-ember-cta px-1.5 py-0.5 text-[11px] font-semibold leading-none text-white">
       {unreadCount > 99 ? '99+' : unreadCount}
     </span>
   ) : null;
   const notificationBadge = notificationCount > 0 ? (
-    <span className="inline-flex min-w-5 items-center justify-center rounded-full bg-[#e56b27] px-1.5 py-0.5 text-[11px] font-semibold leading-none text-white">
+    <span className="inline-flex min-w-5 items-center justify-center rounded-full bg-ember-cta px-1.5 py-0.5 text-[11px] font-semibold leading-none text-white">
       {notificationCount > 99 ? '99+' : notificationCount}
     </span>
   ) : null;
@@ -158,7 +158,9 @@ export default function SiteHeader({ isSeller: sellerHint = false, compact = fal
           <Link href="/marketplace" className={desktopLinkClass('/marketplace')}>Marketplace</Link>
           {user && <>
             <Link href="/orders" data-onboarding-target="orders" className={desktopLinkClass('/orders')}>Orders</Link>
-            <Link href="/messages" data-onboarding-target="messages" className={desktopLinkClass('/messages')}><span className="inline-flex items-center gap-2">Messages{unreadBadge}</span></Link>
+            <Link href="/messages" data-onboarding-target="messages" className={desktopLinkClass('/messages')}>
+              <span className="inline-flex min-h-11 min-w-[2.75rem] items-center justify-center gap-2 px-1">Messages{unreadBadge}</span>
+            </Link>
           </>}
         </nav>
 
@@ -213,24 +215,30 @@ export default function SiteHeader({ isSeller: sellerHint = false, compact = fal
                 <circle cx="12" cy="8" r="3.5" /><path d="M4.5 20c.8-3.4 3.3-5.2 7.5-5.2s6.7 1.8 7.5 5.2" />
               </svg>
             )}
-            {!authResolved && <span className="absolute inset-0 rounded-full ring-2 ring-[#e8e0d6]" aria-hidden="true" />}
-            {(unreadCount + notificationCount) > 0 && <span className="absolute -right-0.5 -top-0.5 h-2.5 w-2.5 rounded-full border-2 border-[#fbf8f2] bg-[#e56b27]" aria-label="You have unread updates" />}
+            {!authResolved && <span className="absolute inset-0 rounded-full ring-2 ring-line" aria-hidden="true" />}
+            {(unreadCount + notificationCount) > 0 && <span className="absolute -right-0.5 -top-0.5 h-2.5 w-2.5 rounded-full border-2 border-paper bg-ember-cta" aria-label="You have unread updates" />}
           </button>
 
           {menuOpen && (
-            <div id="account-menu" role="menu" className="absolute right-0 top-[calc(100%+0.65rem)] z-50 max-h-[min(78svh,36rem)] w-[min(20rem,calc(100vw-1.5rem))] overflow-y-auto rounded-2xl border border-[#e7dfd5] bg-[#fffdf9] p-2.5 text-[#243344] shadow-[0_18px_55px_rgba(32,39,45,.18)]">
+            <div id="account-menu" role="menu" className="absolute right-0 top-[calc(100%+0.65rem)] z-50 max-h-[min(78svh,36rem)] w-[min(20rem,calc(100vw-1.5rem))] overflow-y-auto rounded-2xl border border-line bg-paper p-2.5 text-bone shadow-lg shadow-black/40">
               {user ? (
                 <>
-                  <div className="mb-1 flex items-center gap-3 border-b border-[#eee7de] px-3 pb-3 pt-2">
+                  <div className="mb-1 flex items-center gap-3 border-b border-line px-3 pb-3 pt-2">
                     <OwnerAvatar url={ownerAvatar.url} name={userLabel(user)} email={user.email} size={40} />
                     <div className="min-w-0">
                       <p className="truncate text-sm font-semibold">{userLabel(user)}</p>
-                      {user.email && <p className="mt-0.5 truncate text-xs text-[#6d7883]">{user.email}</p>}
+                      {user.email && <p className="mt-0.5 truncate text-xs text-muted">{user.email}</p>}
                     </div>
                   </div>
                   <nav aria-label="Account navigation" className="space-y-0.5">
                     <Link role="menuitem" href="/profile" data-onboarding-target="profile" className={mobileLink}>Profile</Link>
                     <Link role="menuitem" href="/orders" data-onboarding-target="orders" className={`${mobileLink} md:hidden`}>My orders</Link>
+                    <Link role="menuitem" href="/messages" className={`${mobileLink} md:hidden`}>
+                      <span className="inline-flex min-h-11 w-full items-center justify-between gap-3">
+                        <span>Messages</span>
+                        {unreadBadge}
+                      </span>
+                    </Link>
                     {sellerAccount && <Link role="menuitem" href="/gigs/mine" className={mobileLink}>My products</Link>}
                     <Link role="menuitem" href="/notifications" className={mobileLink}><span>Notifications</span>{notificationBadge}</Link>
                     <Link role="menuitem" href="/payments" className={mobileLink}>Payments</Link>
@@ -238,22 +246,22 @@ export default function SiteHeader({ isSeller: sellerHint = false, compact = fal
                     <Link role="menuitem" href="/security" className={mobileLink}>Authenticator &amp; security</Link>
                     {isAdmin && <Link role="menuitem" href="/admin" className={mobileLink}>Admin workspace</Link>}
                   </nav>
-                  <div className="my-2 border-t border-[#eee7de] pt-2">
-                    <button type="button" role="menuitem" onClick={handleSignOut} className={`${mobileLink} w-full text-left text-[#8e3b28] hover:bg-[#fff0ea]`}>Sign out</button>
+                  <div className="my-2 border-t border-line pt-2">
+                    <button type="button" role="menuitem" onClick={handleSignOut} className={`${mobileLink} w-full text-left text-link hover:bg-ember-cta/10`}>Sign out</button>
                   </div>
                 </>
               ) : (
                 <>
                   <div className="px-3 pb-3 pt-2">
                     <p className="font-display text-lg font-semibold">Welcome to The Middleman</p>
-                    <p className="mt-1 text-xs leading-5 text-[#697581]">Browse products now, then sign in when you’re ready to buy or sell.</p>
+                    <p className="mt-1 text-xs leading-5 text-muted">Browse products now, then sign in when you’re ready to buy or sell.</p>
                   </div>
                   <nav aria-label="Guest account menu" className="space-y-0.5">
                     <Link role="menuitem" href="/marketplace" className={mobileLink}>Browse products</Link>
                     <Link role="menuitem" href="/about" className={mobileLink}>About The Middleman</Link>
                     <button type="button" role="menuitem" onClick={openCookieSettings} className={`${mobileLink} w-full text-left`}>Cookie settings</button>
                   </nav>
-                  <div className="mt-2 grid gap-2 border-t border-[#eee7de] px-1 pt-3">
+                  <div className="mt-2 grid gap-2 border-t border-line px-1 pt-3">
                     <Link role="menuitem" href="/signup?mode=signin" className="flex min-h-11 items-center justify-center rounded-xl border border-line bg-paper px-3 text-sm font-semibold text-bone transition hover:bg-elevated">Log in</Link>
                     <Link role="menuitem" href="/signup?mode=signup" className="btn-primary flex min-h-11 items-center justify-center rounded-xl px-3 text-sm font-semibold">Create an account</Link>
                   </div>

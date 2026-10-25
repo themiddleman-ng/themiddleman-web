@@ -32,7 +32,7 @@ export default function OwnerAvatar({
 
   return (
     <span
-      className={`relative inline-grid shrink-0 place-items-center overflow-hidden rounded-full bg-[#e9e1d6] font-bold leading-none text-[#23384d] ${className}`}
+      className={`relative inline-grid shrink-0 place-items-center overflow-hidden rounded-full bg-paper font-bold leading-none text-muted ${className}`}
       style={{ width: size, height: size, fontSize: Math.max(10, Math.round(size * 0.32)) }}
     >
       {showPhoto ? (

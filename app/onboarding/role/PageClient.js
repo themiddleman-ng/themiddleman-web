@@ -92,7 +92,7 @@ export default function RoleSelectionPage() {
           <span className="rounded-full border border-ember/20 bg-white/70 px-3 py-1 text-xs font-medium text-slate shadow-sm">Step 1 of 2</span>
         </div>
 
-        <div className="overflow-hidden rounded-2xl border border-line bg-[#fffdf9] shadow-[0_20px_70px_rgba(31,21,12,.12)]">
+        <div className="overflow-hidden rounded-2xl border border-line bg-paper shadow-[0_20px_70px_rgba(31,21,12,.12)]">
           <div className="border-b border-line bg-[radial-gradient(circle_at_top_right,_rgba(242,100,25,.18),_transparent_42%),linear-gradient(180deg,rgba(255,255,255,.88),rgba(247,243,236,.92))] px-5 py-6 sm:px-10 sm:py-10">
             <p className="text-xs font-semibold tracking-[.2em] text-ember">MAKE IT YOURS</p>
             <h1 className="mt-2 font-display text-[1.65rem] font-bold tracking-tight sm:mt-3 sm:text-5xl">

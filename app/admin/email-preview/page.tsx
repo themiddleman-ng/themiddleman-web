@@ -21,7 +21,7 @@ function EmailPreview({ title, html }: { title: string; html: string }) {
         title={title}
         sandbox=""
         srcDoc={previewHtml}
-        className="h-[620px] w-full bg-[#f3f5f8]"
+        className="h-[620px] w-full bg-paper"
       />
     </section>
   );

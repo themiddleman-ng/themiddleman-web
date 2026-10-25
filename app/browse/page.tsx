@@ -30,7 +30,7 @@ export default function BrowsePage() {
         <p className="font-mono text-[10px] font-semibold uppercase tracking-[.2em] text-ember">Browse</p>
         <h1 className="mt-2 font-display text-[1.75rem] font-bold tracking-tight sm:text-3xl">Find something worth building on.</h1>
 
-        <form onSubmit={submit} className="sticky top-16 z-20 mt-5 rounded-2xl border border-line bg-[#fffdf9]/95 p-3 shadow-[0_8px_24px_rgba(28,37,47,.06)] backdrop-blur sm:static sm:mt-6 sm:rounded-none sm:border-0 sm:bg-transparent sm:p-0 sm:shadow-none">
+        <form onSubmit={submit} className="sticky top-16 z-20 mt-5 rounded-2xl border border-line bg-paper/95 p-3 shadow-[0_8px_24px_rgba(28,37,47,.06)] backdrop-blur sm:static sm:mt-6 sm:rounded-none sm:border-0 sm:bg-transparent sm:p-0 sm:shadow-none">
           <label htmlFor="browse-search" className="mb-2 block text-sm font-medium">Search the marketplace</label>
           <input
             id="browse-search"
@@ -40,7 +40,7 @@ export default function BrowsePage() {
             placeholder="Search products, code, templates, sellers"
             className="w-full rounded-xl border border-line bg-paper px-4 py-3.5 text-sm text-bone placeholder-slate outline-none transition-colors focus:border-ember sm:rounded-full sm:px-5"
           />
-          <button type="submit" className="mt-3 min-h-12 w-full rounded-xl bg-[#C2410C] px-6 text-sm font-semibold text-white sm:w-auto sm:min-h-11 sm:rounded-lg">Search products</button>
+          <button type="submit" className="mt-3 min-h-12 w-full rounded-xl bg-ember-cta px-6 text-sm font-semibold text-white sm:w-auto sm:min-h-11 sm:rounded-lg">Search products</button>
         </form>
 
         <p className="mb-3 mt-7 font-mono text-[10px] font-semibold uppercase tracking-[.18em] text-slate sm:mt-8">Categories</p>
@@ -49,7 +49,7 @@ export default function BrowsePage() {
             <Link
               key={c.value}
               href={`/marketplace?category=${c.value}`}
-              className="overflow-hidden rounded-xl border border-line bg-paper transition-colors hover:border-[#C2410C]/40"
+              className="overflow-hidden rounded-xl border border-line bg-paper transition-colors hover:border-line/40"
             >
               <div className="h-28">
                 <ProductCover title={c.label} category={c.value} compact />
@@ -62,7 +62,7 @@ export default function BrowsePage() {
           ))}
         </div>
 
-        <Link href="/marketplace" className="mt-6 inline-flex text-sm font-semibold text-[#9A3412] hover:underline">
+        <Link href="/marketplace" className="mt-6 inline-flex text-sm font-semibold text-muted hover:underline">
           See everything on the marketplace →
         </Link>
       </div>

@@ -338,14 +338,14 @@ function MessagesPageInner() {
         </div>
 
         {!noticeDismissed && (
-          <div className="mx-3 mb-3 flex items-start gap-3 rounded-2xl border border-[#ecd9c8] bg-[#fffaf4] px-4 py-3 text-[#5e5a54] sm:mx-6 md:mx-0">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#b5632b" strokeWidth="1.8" className="mt-0.5 shrink-0" aria-hidden="true">
+          <div className="mx-3 mb-3 flex items-start gap-3 rounded-2xl border border-line bg-elevated px-4 py-3 text-muted sm:mx-6 md:mx-0">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" className="text-ember-cta" strokeWidth="1.8" className="mt-0.5 shrink-0" aria-hidden="true">
               <path d="M12 9v4m0 4h.01M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z" />
             </svg>
             <p className="flex-1 text-[14px] leading-5 text-muted sm:text-xs sm:text-slate">
               Keep messages about the product. Links, phone numbers and email addresses are blocked to help protect order conversations.
             </p>
-            <button type="button" onClick={() => setNoticeDismissed(true)} aria-label="Dismiss safety note" className="-mr-1 grid h-11 w-11 shrink-0 place-items-center rounded-full text-sm text-muted transition hover:bg-[#f5e9dc] hover:text-bone">
+            <button type="button" onClick={() => setNoticeDismissed(true)} aria-label="Dismiss safety note" className="-mr-1 grid h-11 w-11 shrink-0 place-items-center rounded-full text-sm text-muted transition hover:bg-elevated hover:text-bone">
               ×
             </button>
           </div>
@@ -354,12 +354,12 @@ function MessagesPageInner() {
         {loading && (
           <div className="flex-1 overflow-hidden border-t border-line bg-ink p-4 sm:p-6" aria-label="Loading conversations">
             <div className="flex animate-pulse gap-4">
-              <div className="h-11 w-11 rounded-full bg-[#eee8df]" />
-              <div className="flex-1 space-y-2 pt-1"><div className="h-3 w-1/3 rounded bg-[#eee8df]" /><div className="h-3 w-2/3 rounded bg-[#f3eee7]" /></div>
+              <div className="h-11 w-11 rounded-full bg-elevated" />
+              <div className="flex-1 space-y-2 pt-1"><div className="h-3 w-1/3 rounded bg-elevated" /><div className="h-3 w-2/3 rounded bg-elevated" /></div>
             </div>
-            <div className="mt-6 h-px bg-[#f0ece5]" />
-            <div className="mt-6 h-14 w-3/5 animate-pulse rounded-2xl bg-[#f3eee7]" />
-            <div className="ml-auto mt-5 h-14 w-1/2 animate-pulse rounded-2xl bg-[#e9edf0]" />
+            <div className="mt-6 h-px bg-line" />
+            <div className="mt-6 h-14 w-3/5 animate-pulse rounded-2xl bg-elevated" />
+            <div className="ml-auto mt-5 h-14 w-1/2 animate-pulse rounded-2xl bg-elevated" />
           </div>
         )}
 
@@ -390,13 +390,13 @@ function MessagesPageInner() {
         )}
 
         {!loading && !loadError && conversations.length > 0 && activeConversation && (
-          <div className="flex min-h-[31rem] flex-1 overflow-hidden border-t border-line bg-ink">
-            <section className={`${mobileThreadOpen ? "hidden" : "flex"} w-full shrink-0 flex-col overflow-y-auto md:flex md:w-[320px] md:border-r md:border-line`} aria-label="Conversation list">
+          <div className="flex min-h-[31rem] min-w-0 flex-1 overflow-hidden border-t border-line bg-ink">
+            <section className={`${mobileThreadOpen ? "hidden" : "flex"} w-full shrink-0 flex-col overflow-y-auto md:flex md:w-[min(320px,38%)] md:max-w-sm md:border-r md:border-line`} aria-label="Conversation list">
               <div className="flex items-center justify-between border-b border-line px-4 py-3.5">
                 <h2 className="text-[16px] font-semibold text-bone">Inbox</h2>
                 <span className="text-[14px] text-slate">{conversations.length}</span>
               </div>
-              <input type="search" aria-label="Search conversations" placeholder="Search conversations" value={conversationQuery} onChange={(event) => setConversationQuery(event.target.value)} className="mx-3 mb-1 mt-3 min-h-11 w-[calc(100%-1.5rem)] rounded-lg border border-[#e1e5ed] px-3 text-[16px] text-bone placeholder:text-muted" />
+              <input type="search" aria-label="Search conversations" placeholder="Search conversations" value={conversationQuery} onChange={(event) => setConversationQuery(event.target.value)} className="mx-3 mb-1 mt-3 min-h-11 w-[calc(100%-1.5rem)] rounded-lg border border-line px-3 text-[16px] text-bone placeholder:text-muted" />
               {conversations.filter((conversation) => `${conversation.counterpartName} ${conversation.gigTitle || ''}`.toLowerCase().includes(conversationQuery.trim().toLowerCase())).map((conversation) => (
                 <ConversationRowItem
                   key={conversation.id}
@@ -412,9 +412,9 @@ function MessagesPageInner() {
               ))}
             </section>
 
-            <section className={`${mobileThreadOpen ? "flex" : "hidden"} min-w-0 flex-1 flex-col md:flex`} aria-label="Active conversation">
-              <div className="flex min-h-[4.5rem] items-center gap-3 border-b border-[#eee7de] px-3 py-3 sm:px-5">
-                <button type="button" onClick={() => setMobileThreadOpen(false)} aria-label="Back to conversations" className="grid h-11 w-11 shrink-0 place-items-center rounded-full text-muted transition hover:bg-[#f4eee6] md:hidden">
+            <section className={`${mobileThreadOpen ? "flex" : "hidden"} min-w-0 w-full flex-1 flex-col md:flex`} aria-label="Active conversation">
+              <div className="flex min-h-[4.5rem] items-center gap-3 border-b border-line px-3 py-3 sm:px-5">
+                <button type="button" onClick={() => setMobileThreadOpen(false)} aria-label="Back to conversations" className="grid h-11 w-11 shrink-0 place-items-center rounded-full text-muted transition hover:bg-elevated md:hidden">
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6" /></svg>
                 </button>
                 <Avatar initials={activeConversation.counterpartInitials} />
@@ -425,7 +425,7 @@ function MessagesPageInner() {
                 <span className="hidden rounded-full bg-elevated px-3 py-1.5 text-[14px] font-medium text-slate sm:inline-flex">Order conversation</span>
               </div>
 
-              <div ref={scrollRef} className="min-h-0 flex-1 overflow-y-auto bg-[linear-gradient(180deg,#fffdf9,#fbfaf7)] px-3 py-5 sm:px-5 sm:py-6">
+              <div ref={scrollRef} className="min-h-0 flex-1 overflow-y-auto bg-ink px-3 py-5 sm:px-5 sm:py-6">
                 <div className="flex min-h-full flex-col justify-end gap-4">
                   {messages.length === 0 && (
                     <p className="my-auto text-center text-[16px] text-slate">Your conversation starts here.</p>
@@ -441,7 +441,7 @@ function MessagesPageInner() {
                   {otherTyping && (
                     <div className="flex items-end gap-2.5" aria-label="The other person is typing">
                       <Avatar initials={activeConversation.counterpartInitials} />
-                      <div className="flex items-center gap-1 rounded-2xl rounded-bl-md bg-[#f1efeb] px-3.5 py-3">
+                      <div className="flex items-center gap-1 rounded-2xl rounded-bl-md bg-elevated px-3.5 py-3">
                         <span className="typing-dot" /><span className="typing-dot" /><span className="typing-dot" />
                       </div>
                     </div>
@@ -449,7 +449,7 @@ function MessagesPageInner() {
                 </div>
               </div>
 
-              <div className="border-t border-[#eee7de] bg-[#fffdf9] px-3 py-3 sm:px-5 sm:py-4">
+              <div className="w-full min-w-0 border-t border-line bg-paper px-3 py-3 sm:px-5 sm:py-4">
                 <DraftRestoredNotice
                   visible={composerDraftRestored}
                   onDiscard={() => {
@@ -457,8 +457,8 @@ function MessagesPageInner() {
                     setComposerDraft({ body: "" });
                   }}
                 />
-                {warning && <p role="alert" className="mb-2 rounded-xl bg-[#fff2e8] px-3 py-2 text-xs leading-5 text-[#9a4b1e]">{warning}</p>}
-                <div className="flex items-end gap-2 rounded-2xl border border-[#e7e1d8] bg-[#faf8f4] p-2 focus-within:border-[#d8895e] focus-within:ring-4 focus-within:ring-[#de641e]/10">
+                {warning && <p role="alert" className="mb-2 rounded-xl bg-ember-cta/10 px-3 py-2 text-xs leading-5 text-link">{warning}</p>}
+                <div className="flex w-full min-w-0 items-end gap-2 rounded-2xl border border-line bg-paper p-2 focus-within:border-link focus-within:ring-4 focus-within:ring-ember-cta/10">
                   <textarea
                     rows={1}
                     maxLength={2000}
@@ -467,13 +467,13 @@ function MessagesPageInner() {
                     onKeyDown={handleKeyDown}
                     placeholder="Write a message…"
                     aria-label="Write a message"
-                    className="max-h-28 min-h-11 flex-1 resize-y border-0 bg-transparent px-2 py-2 text-[16px] leading-5 text-bone outline-none placeholder:text-muted"
+                    className="max-h-28 min-h-11 min-w-0 w-full flex-1 basis-0 resize-y border-0 bg-transparent px-2 py-2 text-[16px] leading-5 text-bone outline-none placeholder:text-muted"
                   />
                   <button
                     type="button"
                     onClick={handleSend}
                     disabled={!draft.trim()}
-                    className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-[#de641e] text-white transition hover:bg-[#c95415] disabled:cursor-not-allowed disabled:bg-[#e8dfd7] disabled:text-[#9b968f]"
+                    className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-ember-cta text-white transition hover:bg-ember-hover disabled:cursor-not-allowed disabled:bg-elevated disabled:text-muted"
                     aria-label="Send message"
                   >
                     <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="m21 3-7.2 18-3.9-7.9L2 9.2 21 3Z" /><path d="M21 3 9.9 13.1" /></svg>
@@ -482,11 +482,11 @@ function MessagesPageInner() {
                 <p className="mt-2 px-1 text-[14px] text-muted md:text-xs md:text-slate">Enter to send · Shift + Enter for a new line</p>
               </div>
             </section>
-            <aside className="hidden w-60 shrink-0 border-l border-[#e1e5ed] p-6 xl:block" aria-label="Conversation details">
+            <aside className="hidden w-60 shrink-0 border-l border-line p-6 xl:block" aria-label="Conversation details">
               <h2 className="text-sm font-semibold">Conversation details</h2>
               <p className="mt-6 text-[14px] text-slate">Product</p>
               <p className="mt-2 text-sm font-semibold">{activeConversation.gigTitle || 'Product conversation'}</p>
-              {activeConversation.gig_id && <Link href={`/gigs/${activeConversation.gig_id}`} className="mt-5 block rounded-lg border border-[#e1e5ed] px-4 py-3 text-center text-sm font-medium">View product</Link>}
+              {activeConversation.gig_id && <Link href={`/gigs/${activeConversation.gig_id}`} className="mt-5 block rounded-lg border border-line px-4 py-3 text-center text-sm font-medium">View product</Link>}
               <Link href="/orders" className="mt-3 flex min-h-11 items-center justify-center rounded-lg bg-ember-cta text-center text-sm font-semibold text-on-ember hover:bg-ember-hover">View your orders</Link>
               <p className="mt-6 text-[14px] leading-5 text-slate">Keep payments and delivery on The Middleman. Share files through the order flow.</p>
             </aside>

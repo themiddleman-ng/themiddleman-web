@@ -54,18 +54,18 @@ function AuthCallout({ alert, onAction }) {
   return (
     <div
       id="auth-alert"
-      className={`flex items-start gap-2 rounded-md border-l-[3px] border-l-[#b42318] bg-[#fff6f4] px-3 ${compact ? 'py-2' : 'py-2.5'}`}
+      className={`flex items-start gap-2 rounded-md border-l-[3px] border-l-ember-cta bg-paper px-3 ${compact ? 'py-2' : 'py-2.5'}`}
       role="alert"
       aria-live="assertive"
     >
-      <Icon size={16} weight="fill" className="mt-0.5 shrink-0 text-[#b42318]" aria-hidden="true" />
+      <Icon size={16} weight="fill" className="mt-0.5 shrink-0 text-muted" aria-hidden="true" />
       <div className="min-w-0">
-        <p className="text-[13px] font-semibold leading-5 text-[#7a271a]">{alert.title}</p>
-        {alert.message ? <p className="mt-0.5 text-[12px] leading-5 text-[#5c4036]">{alert.message}</p> : null}
+        <p className="text-[13px] font-semibold leading-5 text-muted">{alert.title}</p>
+        {alert.message ? <p className="mt-0.5 text-[12px] leading-5 text-muted">{alert.message}</p> : null}
         {alert.actionHref ? (
-          <Link href={alert.actionHref} className="mt-1.5 inline-flex text-[12px] font-semibold text-[#9a3412] underline decoration-[#e7b49a] underline-offset-2">{alert.actionLabel}</Link>
+          <Link href={alert.actionHref} className="mt-1.5 inline-flex text-[12px] font-semibold text-muted underline decoration-link underline-offset-2">{alert.actionLabel}</Link>
         ) : alert.actionLabel && onAction ? (
-          <button type="button" onClick={onAction} className="mt-1.5 text-[12px] font-semibold text-[#9a3412] underline decoration-[#e7b49a] underline-offset-2">{alert.actionLabel}</button>
+          <button type="button" onClick={onAction} className="mt-1.5 text-[12px] font-semibold text-muted underline decoration-link underline-offset-2">{alert.actionLabel}</button>
         ) : null}
       </div>
     </div>
@@ -85,7 +85,7 @@ function PasswordField({ id, value, onChange, autoComplete, placeholder, shown, 
         onChange={onChange}
         aria-invalid={invalid || undefined}
         aria-describedby={invalid ? describedBy : undefined}
-        className={`w-full rounded-xl border bg-white py-3 pl-3.5 pr-12 text-[15px] text-[#1d2733] outline-none transition placeholder:text-[#89919a] focus:ring-4 ${invalid ? 'border-[#b42318] focus:border-[#b42318] focus:ring-[#b42318]/15' : 'border-[#ded6cb] focus:border-[#C2410C] focus:ring-[#C2410C]/10'}`}
+        className={`w-full rounded-xl border bg-white py-3 pl-3.5 pr-12 text-[15px] text-bone outline-none transition placeholder:text-muted focus:ring-4 ${invalid ? 'border-line focus:border-line focus:ring-line/15' : 'border-line focus:border-line focus:ring-line/10'}`}
       />
       <button
         type="button"
@@ -93,7 +93,7 @@ function PasswordField({ id, value, onChange, autoComplete, placeholder, shown, 
         aria-label={shown ? 'Hide password' : 'Show password'}
         onMouseDown={(event) => event.preventDefault()}
         onClick={onToggle}
-        className="absolute inset-y-0 right-0 grid w-11 place-items-center rounded-r-xl text-[#5d6874] hover:text-[#C2410C] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#C2410C]"
+        className="absolute inset-y-0 right-0 grid w-11 place-items-center rounded-r-xl text-muted hover:text-ember-cta focus:outline-none focus-visible:ring-2 focus-visible:ring-line"
       >
         {shown ? <EyeSlashIcon size={18} aria-hidden="true" /> : <EyeIcon size={18} aria-hidden="true" />}
       </button>
@@ -383,10 +383,10 @@ function AuthPageInner() {
     window.setTimeout(() => router.push(next), 700);
   }
 
-  const inputClass = 'mt-1.5 w-full rounded-xl border bg-white px-3.5 py-3 text-[15px] text-[#1d2733] outline-none transition placeholder:text-[#89919a] focus:ring-4';
-  const validInput = 'border-[#ded6cb] focus:border-[#C2410C] focus:ring-[#C2410C]/10';
-  const invalidInput = 'border-[#b42318] focus:border-[#b42318] focus:ring-[#b42318]/15';
-  const labelClass = 'block text-sm font-medium text-[#33404d]';
+  const inputClass = 'mt-1.5 w-full rounded-xl border bg-white px-3.5 py-3 text-[15px] text-bone outline-none transition placeholder:text-muted focus:ring-4';
+  const validInput = 'border-line focus:border-line focus:ring-line/10';
+  const invalidInput = 'border-line focus:border-line focus:ring-line/15';
+  const labelClass = 'block text-sm font-medium text-muted';
 
   return (
     <main data-mode={flipped ? 'signin' : 'signup'} data-switching={switching || undefined} className="mm-auth relative min-h-[100svh] bg-paper text-bone">
@@ -416,7 +416,7 @@ function AuthPageInner() {
             {!flipped ? (
               <>
                 <h1 className="font-display text-[2rem] font-bold leading-tight tracking-[-.035em] sm:text-4xl">Create your account</h1>
-                <p className="mt-2 text-[15px] leading-6 text-[#596674]">Buy digital products or set up a creator profile when you’re ready.</p>
+                <p className="mt-2 text-[15px] leading-6 text-muted">Buy digital products or set up a creator profile when you’re ready.</p>
                 <DraftRestoredNotice
                   visible={signupDraftRestored}
                   onDiscard={() => {
@@ -459,37 +459,37 @@ function AuthPageInner() {
                   </label>
                   <PasswordChecklist value={password} />
 
-                  <div className="flex items-start gap-3 rounded-xl bg-[#f7f3ed] p-3.5">
-                    <input id="consent-terms" type="checkbox" checked={agreedToTerms} onChange={(e) => setAgreedToTerms(e.target.checked)} className="mt-1 h-4 w-4 shrink-0 accent-[#C2410C]" />
-                    <label htmlFor="consent-terms" className="text-[16px] leading-6 text-[#4B5563]">
+                  <div className="flex items-start gap-3 rounded-xl bg-paper p-3.5">
+                    <input id="consent-terms" type="checkbox" checked={agreedToTerms} onChange={(e) => setAgreedToTerms(e.target.checked)} className="mt-1 h-4 w-4 shrink-0 accent-ember-cta" />
+                    <label htmlFor="consent-terms" className="text-[16px] leading-6 text-muted">
                       I agree to the <Link href="/legal/terms" className="inline-flex min-h-11 items-center font-semibold text-eyebrow underline">Terms of Service</Link>, <Link href="/legal/privacy" className="inline-flex min-h-11 items-center font-semibold text-eyebrow underline">Privacy Policy</Link>, and <Link href="/legal/refunds" className="inline-flex min-h-11 items-center font-semibold text-eyebrow underline">Refund Policy</Link>.
                     </label>
                   </div>
                   <AuthCallout alert={signupAlert} onAction={signupAlert?.actionLabel ? () => { switchMode(true); setSignupAlert(null); } : undefined} />
                   {signupNotice ? (
-                    <div className="rounded-xl bg-[#f0f6ef] p-4 text-sm leading-6 text-[#35523b]" role="status">
+                    <div className="rounded-xl bg-paper p-4 text-sm leading-6 text-muted" role="status">
                       <p>{signupNotice}</p>
                       <button type="button" onClick={() => switchMode(true)} className="mt-2 font-semibold underline">Go to sign in</button>
                     </div>
                   ) : (
-                    <button className="w-full rounded-xl bg-[#C2410C] px-5 py-3.5 text-sm font-bold text-white transition hover:bg-[#9A3412] focus:outline-none focus:ring-4 focus:ring-[#C2410C]/20 disabled:cursor-not-allowed disabled:opacity-50" type="submit" disabled={signupLoading || !signupReady}>
+                    <button className="w-full rounded-xl bg-ember-cta px-5 py-3.5 text-sm font-bold text-white transition hover:bg-ember-cta focus:outline-none focus:ring-4 focus:ring-line/20 disabled:cursor-not-allowed disabled:opacity-50" type="submit" disabled={signupLoading || !signupReady}>
                       {signupLoading ? 'Creating account…' : 'Create account'}
                     </button>
                   )}
                 </form>
 
-                <p className="mt-5 text-center text-[16px] text-[#4B5563]">Already have an account? <button type="button" onClick={() => switchMode(true)} className="inline-flex min-h-11 items-center font-semibold text-eyebrow hover:underline">Log in</button></p>
+                <p className="mt-5 text-center text-[16px] text-muted">Already have an account? <button type="button" onClick={() => switchMode(true)} className="inline-flex min-h-11 items-center font-semibold text-eyebrow hover:underline">Log in</button></p>
               </>
             ) : (
               <>
                 <h1 className="font-display text-[2rem] font-bold leading-tight tracking-[-.035em] sm:text-4xl">Welcome back.</h1>
-                <p className="mt-2 text-[15px] leading-6 text-[#596674]">Sign in to your Middleman account.</p>
+                <p className="mt-2 text-[15px] leading-6 text-muted">Sign in to your Middleman account.</p>
                 {returnPath ? (
-                  <p role="status" className="mt-4 rounded-xl border border-[#e8dfd3] bg-[#f7f3ed] px-3.5 py-3 text-sm leading-5 text-[#4f5c68]">
+                  <p role="status" className="mt-4 rounded-xl border border-line bg-paper px-3.5 py-3 text-sm leading-5 text-muted">
                     Sign in to continue
                   </p>
                 ) : null}
-                {loginNotice && <p role="status" className="mt-5 rounded-xl bg-[#f0f6ef] px-3.5 py-3 text-sm leading-5 text-[#35523b]">{loginNotice}</p>}
+                {loginNotice && <p role="status" className="mt-5 rounded-xl bg-paper px-3.5 py-3 text-sm leading-5 text-muted">{loginNotice}</p>}
                 <form noValidate onSubmit={handleLogin} className="mt-7 space-y-5" id="auth-panel-signin" role="tabpanel" aria-labelledby="auth-tab-signin">
                   <label className={labelClass} htmlFor="login-email">Email address
                     <input ref={loginEmailRef} id="login-email" type="email" autoComplete="email" inputMode="email" placeholder="Enter your email" value={loginEmail} onChange={(e) => { setLoginEmail(e.target.value); if (loginAlert && loginAlert.field !== 'password') setLoginAlert(null); }} aria-invalid={loginAlert?.field === 'email' || loginAlert?.field === 'credentials' || undefined} aria-describedby={loginAlert ? 'auth-alert' : undefined} className={`${inputClass} ${loginAlert?.field === 'email' || loginAlert?.field === 'credentials' ? invalidInput : validInput}`} />
@@ -513,19 +513,19 @@ function AuthPageInner() {
                     />
                   </div>
                   {loginSuccess ? (
-                    <div className="flex items-center gap-2 rounded-md bg-[#eef7f0] px-3 py-2.5 text-[13px] font-semibold text-[#215c38]" role="status" aria-live="polite">
+                    <div className="flex items-center gap-2 rounded-md bg-paper px-3 py-2.5 text-[13px] font-semibold text-muted" role="status" aria-live="polite">
                       <CheckCircleIcon size={16} weight="fill" aria-hidden="true" />
                       Signed in successfully
                     </div>
                   ) : (
                     <AuthCallout alert={loginAlert} />
                   )}
-                  <button className="w-full rounded-xl bg-[#C2410C] px-5 py-3.5 text-sm font-bold text-white transition hover:bg-[#9A3412] focus:outline-none focus:ring-4 focus:ring-[#C2410C]/20 disabled:cursor-not-allowed disabled:opacity-50" type="submit" disabled={loginLoading || loginSuccess}>
+                  <button className="w-full rounded-xl bg-ember-cta px-5 py-3.5 text-sm font-bold text-white transition hover:bg-ember-cta focus:outline-none focus:ring-4 focus:ring-line/20 disabled:cursor-not-allowed disabled:opacity-50" type="submit" disabled={loginLoading || loginSuccess}>
                     {loginSuccess ? 'Continuing…' : loginLoading ? 'Logging in…' : 'Log in'}
                   </button>
                 </form>
-                <p className="mt-6 text-center text-[16px] text-[#4B5563]">New to The Middleman? <button type="button" onClick={() => switchMode(false)} className="inline-flex min-h-11 items-center font-semibold text-eyebrow hover:underline">Create an account</button></p>
-                <p className="mt-8 border-t border-[#eee6dc] pt-5 text-center text-[14px] leading-6 text-[#4B5563]">By continuing, you agree to the <Link href="/legal/terms" className="inline-flex min-h-11 items-center font-semibold underline">Terms of Service</Link> and <Link href="/legal/privacy" className="inline-flex min-h-11 items-center font-semibold underline">Privacy Policy</Link>.</p>
+                <p className="mt-6 text-center text-[16px] text-muted">New to The Middleman? <button type="button" onClick={() => switchMode(false)} className="inline-flex min-h-11 items-center font-semibold text-eyebrow hover:underline">Create an account</button></p>
+                <p className="mt-8 border-t border-line pt-5 text-center text-[14px] leading-6 text-muted">By continuing, you agree to the <Link href="/legal/terms" className="inline-flex min-h-11 items-center font-semibold underline">Terms of Service</Link> and <Link href="/legal/privacy" className="inline-flex min-h-11 items-center font-semibold underline">Privacy Policy</Link>.</p>
               </>
             )}
           </div>

@@ -20,12 +20,10 @@
   --logo-navy: #0B1E3F;
   --auth-hero-bg: #C2410C;
   --auth-hero-ink: #FFFFFF;
-  --accent-violet: #A78BFA;
-  --accent-teal: #2DD4BF;
-  --accent-pink: #F472B6;
-  --accent-lime: #A3E635;
-  --accent-sky: #38BDF8;
-  --accent-amber: #FBBF24;
+  --accent-ember: var(--ember);
+  --accent-ember-soft: color-mix(in srgb, var(--ember) 70%, var(--bone));
+  --accent-ember-deep: var(--ember-cta);
+  --accent-link: var(--link);
   --font-syne: "Segoe UI", "Avenir Next", "Helvetica Neue", Arial, sans-serif;
   --font-dm-sans: "Inter", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
   --font-dm-mono: "Consolas", "SFMono-Regular", "Roboto Mono", "Liberation Mono", Menlo, monospace;
@@ -58,12 +56,10 @@ html.dark {
   --color-logo-blue: var(--logo-blue);
   --color-logo-orange: var(--logo-orange);
   --color-logo-navy: var(--logo-navy);
-  --color-accent-violet: var(--accent-violet);
-  --color-accent-teal: var(--accent-teal);
-  --color-accent-pink: var(--accent-pink);
-  --color-accent-lime: var(--accent-lime);
-  --color-accent-sky: var(--accent-sky);
-  --color-accent-amber: var(--accent-amber);
+  --color-accent-ember: var(--accent-ember);
+  --color-accent-ember-soft: var(--accent-ember-soft);
+  --color-accent-ember-deep: var(--accent-ember-deep);
+  --color-accent-link: var(--accent-link);
   --font-display: var(--font-syne);
   --font-body: var(--font-dm-sans);
   --font-mono: var(--font-dm-mono);
@@ -154,12 +150,12 @@ html {
   border-radius: 999px;
   opacity: .14;
 }
-.homepage-confetti span:nth-child(1) { left: 8%; top: 18%; width: 18px; height: 18px; background: var(--accent-violet); transform: rotate(18deg); border-radius: 4px; }
-.homepage-confetti span:nth-child(2) { left: 22%; top: 72%; width: 12px; height: 12px; background: var(--accent-teal); }
-.homepage-confetti span:nth-child(3) { right: 18%; top: 28%; width: 16px; height: 10px; background: var(--accent-lime); border-radius: 3px; }
-.homepage-confetti span:nth-child(4) { right: 8%; bottom: 18%; width: 14px; height: 14px; background: var(--accent-pink); }
-.homepage-confetti span:nth-child(5) { left: 48%; top: 12%; width: 10px; height: 10px; background: var(--accent-sky); }
-.homepage-confetti span:nth-child(6) { left: 62%; bottom: 16%; width: 20px; height: 8px; background: var(--accent-amber); }
+.homepage-confetti span:nth-child(1) { left: 8%; top: 18%; width: 18px; height: 18px; background: var(--accent-ember); transform: rotate(18deg); border-radius: 4px; }
+.homepage-confetti span:nth-child(2) { left: 22%; top: 72%; width: 12px; height: 12px; background: var(--accent-ember-soft); }
+.homepage-confetti span:nth-child(3) { right: 18%; top: 28%; width: 16px; height: 10px; background: var(--accent-link); border-radius: 3px; }
+.homepage-confetti span:nth-child(4) { right: 8%; bottom: 18%; width: 14px; height: 14px; background: var(--accent-ember-deep); }
+.homepage-confetti span:nth-child(5) { left: 48%; top: 12%; width: 10px; height: 10px; background: var(--ember-hover); }
+.homepage-confetti span:nth-child(6) { left: 62%; bottom: 16%; width: 20px; height: 8px; background: var(--accent-ember-soft); }
 
 .category-tile {
   background: color-mix(in srgb, var(--tile-accent) 13%, var(--paper));
@@ -218,11 +214,11 @@ html {
   .hero-listing-card { width: 260px; }
 }
 .developer-strip {
-  background: color-mix(in srgb, var(--accent-violet) 10%, var(--ink));
+  background: color-mix(in srgb, var(--accent-ember) 10%, var(--ink));
 }
 .cta-band {
-  background: linear-gradient(135deg, #E8590C, #FB923C);
-  color: var(--logo-navy);
+  background: linear-gradient(135deg, var(--ember-cta), var(--link));
+  color: var(--on-ember);
 }
 @keyframes hero-light-shift {
   from { background-position: 0% 0%, 0% 0%, 0% 50%; }
