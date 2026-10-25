@@ -940,7 +940,7 @@ export default function GigPageClient({
         />
         <label className="mt-4 block text-sm font-medium text-bone">Reason<select value={reportReason} onChange={(e) => setReportReason(e.target.value)} className="auth-input mt-2"><option>Spam or misleading content</option><option>Inappropriate or abusive content</option><option>Wrong category or pricing</option><option>Suspicious seller activity</option><option>Other</option></select></label>
         <label className="mt-4 block text-sm font-medium text-bone">Details<textarea value={reportDetails} onChange={(e) => setReportDetails(e.target.value)} className="auth-input mt-2 min-h-24" placeholder="Add any extra context for the admin team." /></label>
-        <button onClick={handleReportGig} disabled={reporting} className="mt-4 w-full rounded-full bg-ember-cta px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-ember-cta disabled:opacity-50">{reporting ? "Sending report…" : "Submit report"}</button>
+        <button onClick={handleReportGig} disabled={reporting} className="mt-4 w-full rounded-full bg-ember-cta px-5 py-3 text-sm font-semibold text-ink transition-colors hover:bg-ember-hover disabled:opacity-50">{reporting ? "Sending report…" : "Submit report"}</button>
       </section>
     </div>
   )}

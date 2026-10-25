@@ -318,7 +318,7 @@ export default function ProfilePage() {
 
             <div className="flex w-full flex-col gap-2 sm:w-auto sm:min-w-48">
               <PhotoPicker id="profile-avatar-file" label="Choose a profile photo" disabled={avatarLoading} onFile={(file) => { void handleAvatarSelected(file); }}>
-                <span className="inline-flex min-h-11 w-full items-center justify-center rounded-xl bg-ember-cta px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-ember-hover">
+                <span className="inline-flex min-h-11 w-full items-center justify-center rounded-xl bg-ember-cta px-4 py-2.5 text-sm font-semibold text-ink transition hover:bg-ember-hover">
                   {avatarLoading ? 'Uploading photo…' : ownerAvatar.url ? 'Change photo' : 'Add profile photo'}
                 </span>
               </PhotoPicker>
@@ -447,7 +447,7 @@ export default function ProfilePage() {
                 {sellerProfile && <VerificationBadge status={sellerProfile.verification_status} />}
               </div>
             ) : (
-              <Link href="/onboarding/role" className="mt-5 inline-flex min-h-11 items-center justify-center rounded-xl bg-ember-cta px-4 text-sm font-semibold text-white transition hover:bg-ember-hover">
+              <Link href="/onboarding/role" className="mt-5 inline-flex min-h-11 items-center justify-center rounded-xl bg-ember-cta px-4 text-sm font-semibold text-ink transition hover:bg-ember-hover">
                 Set up selling
               </Link>
             )}

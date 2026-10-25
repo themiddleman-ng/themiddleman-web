@@ -92,7 +92,7 @@ export default function AccountDeletionClient() {
           <h1 className="mt-5 font-display text-3xl font-bold text-muted">Your account is deleted</h1>
           <p className="mt-3 text-sm leading-6 text-slate">Your profile, conversations and seller payout details have been removed, and your active listings were archived. Order and payment records may remain in de-identified form for transaction history and legal obligations.</p>
           <p className="mt-3 text-sm leading-6 text-slate">{emailSent ? 'We sent a confirmation email with a way to share feedback.' : 'The account is closed, but we could not send the confirmation email.'}</p>
-          <Link href="/marketplace" className="mt-6 inline-flex min-h-11 items-center justify-center rounded-xl bg-ember-cta px-5 py-3 text-sm font-semibold text-white transition hover:bg-ember-hover">Back to the marketplace</Link>
+          <Link href="/marketplace" className="mt-6 inline-flex min-h-11 items-center justify-center rounded-xl bg-ember-cta px-5 py-3 text-sm font-semibold text-ink transition hover:bg-ember-hover">Back to the marketplace</Link>
         </div>
       </section>
     );
@@ -130,7 +130,7 @@ export default function AccountDeletionClient() {
             <input id="delete-account-confirmation" value={confirmation} onChange={(event) => setConfirmation(event.target.value)} autoCapitalize="characters" autoComplete="off" spellCheck={false} required className="mt-1.5 w-full rounded-xl border border-line bg-white px-3.5 py-3 text-[15px] text-bone outline-none focus:border-line focus:ring-4 focus:ring-ember-cta/10" />
           </div>
           <label className="flex items-start gap-3 rounded-xl border border-line p-3.5 text-sm leading-5 text-muted">
-            <input type="checkbox" checked={understood} onChange={(event) => setUnderstood(event.target.checked)} className="mt-0.5 h-4 w-4 shrink-0 accent-[#c65316]" />
+            <input type="checkbox" checked={understood} onChange={(event) => setUnderstood(event.target.checked)} className="mt-0.5 h-4 w-4 shrink-0 accent-[#F97316]" />
             <span>I understand the account cannot be restored and some de-identified transaction records will be retained.</span>
           </label>
           {error && <p role="alert" className="rounded-xl bg-paper px-3.5 py-3 text-sm leading-5 text-muted">{error}</p>}

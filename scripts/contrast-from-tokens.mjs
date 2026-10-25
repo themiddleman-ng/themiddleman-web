@@ -27,8 +27,13 @@ const dark = {
   pairs: [
     ["bone on ink", "#F5F2EC", "#111111"],
     ["muted on ink", "#A1A1AA", "#111111"],
-    ["ember-cta on ink", "#E8590C", "#111111"],
-    ["link on paper", "#F97316", "#1A1A1A"],
+    ["ink on ember fill", "#111111", "#F97316"],
+    ["ink on ember hover", "#111111", "#FB923C"],
+    ["ember on ink", "#F97316", "#111111"],
+    ["link on ink", "#FB923C", "#111111"],
+    ["ember on paper", "#F97316", "#1A1A1A"],
+    ["link on paper", "#FB923C", "#1A1A1A"],
+    ["white on ember fill (do not use)", "#FFFFFF", "#F97316"],
   ],
 };
 
@@ -37,7 +42,8 @@ const light = {
   pairs: [
     ["text on white paper", "#11172B", "#FFFFFF"],
     ["muted on white", "#536078", "#FFFFFF"],
-    ["ember on white", "#C2410C", "#FFFFFF"],
+    ["ink on ember fill", "#111111", "#F97316"],
+    ["orange text on white (do not use)", "#F97316", "#FFFFFF"],
   ],
 };
 

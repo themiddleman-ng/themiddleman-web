@@ -40,7 +40,7 @@ export default function BrowsePage() {
             placeholder="Search products, code, templates, sellers"
             className="w-full rounded-xl border border-line bg-paper px-4 py-3.5 text-sm text-bone placeholder-slate outline-none transition-colors focus:border-ember sm:rounded-full sm:px-5"
           />
-          <button type="submit" className="mt-3 min-h-12 w-full rounded-xl bg-ember-cta px-6 text-sm font-semibold text-white sm:w-auto sm:min-h-11 sm:rounded-lg">Search products</button>
+          <button type="submit" className="mt-3 min-h-12 w-full rounded-xl bg-ember-cta px-6 text-sm font-semibold text-ink sm:w-auto sm:min-h-11 sm:rounded-lg">Search products</button>
         </form>
 
         <p className="mb-3 mt-7 font-mono text-[10px] font-semibold uppercase tracking-[.18em] text-slate sm:mt-8">Categories</p>

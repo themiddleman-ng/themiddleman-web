@@ -13,7 +13,7 @@ function QueueTypePill({ kind }: { kind: AdminQueueKind }) {
       ? "bg-sky-50 text-sky-800 border-sky-200"
       : kind === "delivery"
         ? "bg-zinc-100 text-zinc-700 border-zinc-200"
-        : "bg-orange-50 text-orange-800 border-orange-200";
+        : "bg-[#F97316] text-[#111111] border-[#FB923C]";
   const label = kind === "seller" ? "Seller" : kind === "delivery" ? "Delivery review" : "Product";
   return (
     <span className={`inline-flex rounded-full border px-2.5 py-0.5 text-xs font-semibold ${tone}`}>

@@ -136,12 +136,12 @@ export default function SiteHeader({ isSeller: sellerHint = false, compact = fal
     setMenuOpen(false);
   }
   const unreadBadge = unreadCount > 0 ? (
-    <span className="inline-flex min-w-5 items-center justify-center rounded-full bg-ember-cta px-1.5 py-0.5 text-[11px] font-semibold leading-none text-white">
+    <span className="inline-flex min-w-5 items-center justify-center rounded-full bg-ember-cta px-1.5 py-0.5 text-[11px] font-semibold leading-none text-ink">
       {unreadCount > 99 ? '99+' : unreadCount}
     </span>
   ) : null;
   const notificationBadge = notificationCount > 0 ? (
-    <span className="inline-flex min-w-5 items-center justify-center rounded-full bg-ember-cta px-1.5 py-0.5 text-[11px] font-semibold leading-none text-white">
+    <span className="inline-flex min-w-5 items-center justify-center rounded-full bg-ember-cta px-1.5 py-0.5 text-[11px] font-semibold leading-none text-ink">
       {notificationCount > 99 ? '99+' : notificationCount}
     </span>
   ) : null;

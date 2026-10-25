@@ -472,7 +472,7 @@ function AuthPageInner() {
                       <button type="button" onClick={() => switchMode(true)} className="mt-2 font-semibold underline">Go to sign in</button>
                     </div>
                   ) : (
-                    <button className="w-full rounded-xl bg-ember-cta px-5 py-3.5 text-sm font-bold text-white transition hover:bg-ember-cta focus:outline-none focus:ring-4 focus:ring-line/20 disabled:cursor-not-allowed disabled:opacity-50" type="submit" disabled={signupLoading || !signupReady}>
+                    <button className="w-full rounded-xl bg-ember-cta px-5 py-3.5 text-sm font-bold text-ink transition hover:bg-ember-hover focus:outline-none focus:ring-4 focus:ring-line/20 disabled:cursor-not-allowed disabled:opacity-50" type="submit" disabled={signupLoading || !signupReady}>
                       {signupLoading ? 'Creating account…' : 'Create account'}
                     </button>
                   )}
@@ -520,7 +520,7 @@ function AuthPageInner() {
                   ) : (
                     <AuthCallout alert={loginAlert} />
                   )}
-                  <button className="w-full rounded-xl bg-ember-cta px-5 py-3.5 text-sm font-bold text-white transition hover:bg-ember-cta focus:outline-none focus:ring-4 focus:ring-line/20 disabled:cursor-not-allowed disabled:opacity-50" type="submit" disabled={loginLoading || loginSuccess}>
+                  <button className="w-full rounded-xl bg-ember-cta px-5 py-3.5 text-sm font-bold text-ink transition hover:bg-ember-hover focus:outline-none focus:ring-4 focus:ring-line/20 disabled:cursor-not-allowed disabled:opacity-50" type="submit" disabled={loginLoading || loginSuccess}>
                     {loginSuccess ? 'Continuing…' : loginLoading ? 'Logging in…' : 'Log in'}
                   </button>
                 </form>

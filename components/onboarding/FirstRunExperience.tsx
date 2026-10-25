@@ -162,7 +162,7 @@ export default function FirstRunExperience() {
     const target = steps?.[index]?.target ? document.querySelector<HTMLElement>(steps[index].target!) : null;
     if (!target) return;
     const outline = target.style.outline; const offset = target.style.outlineOffset;
-    target.style.outline = '3px solid #ed6509'; target.style.outlineOffset = '5px';
+    target.style.outline = '3px solid #F97316'; target.style.outlineOffset = '5px';
     return () => { target.style.outline = outline; target.style.outlineOffset = offset; };
   }, [stage, index, steps]);
 

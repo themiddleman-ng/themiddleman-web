@@ -307,7 +307,7 @@ export default function MarketplacePage({ designPreview = false }: { designPrevi
                 <button
                   type="button"
                   onClick={() => setRetryCount((count) => count + 1)}
-                  className="mt-3 rounded-md bg-ember-cta px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-ember-cta focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#C2410C]"
+                  className="mt-3 rounded-md bg-ember-cta px-4 py-2 text-sm font-semibold text-ink transition-colors hover:bg-ember-hover focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#F97316]"
                 >
                   Try again
                 </button>

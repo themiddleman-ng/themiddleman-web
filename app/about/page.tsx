@@ -44,7 +44,7 @@ export default function AboutPage() {
         </div>
 
         <div className="mt-8 grid gap-3 sm:mt-10 sm:flex sm:flex-wrap">
-          <Link href="/marketplace" className="inline-flex min-h-12 items-center justify-center rounded-xl bg-ember-cta px-6 py-3 text-sm font-bold text-white transition-colors hover:bg-ember-cta sm:rounded-full">Browse the marketplace</Link>
+          <Link href="/marketplace" className="inline-flex min-h-12 items-center justify-center rounded-xl bg-ember-cta px-6 py-3 text-sm font-bold text-ink transition-colors hover:bg-ember-hover sm:rounded-full">Browse the marketplace</Link>
           <Link href="/signup" className="inline-flex min-h-12 items-center justify-center rounded-xl border border-line px-6 py-3 text-sm font-semibold text-bone transition-colors hover:border-ember/40 sm:rounded-full">Create an account</Link>
         </div>
       </div>

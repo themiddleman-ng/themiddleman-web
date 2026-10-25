@@ -136,7 +136,7 @@ export default function MobileTabBar() {
             <Link
               href="/gigs/new"
               aria-label="List a product"
-              className="absolute left-1/2 top-0 z-10 flex h-[3.25rem] w-[3.25rem] -translate-x-1/2 -translate-y-[42%] items-center justify-center rounded-full border-[3px] border-paper bg-ember text-on-ember shadow-[0_10px_24px_rgba(242,100,25,.32)] transition-transform active:scale-95"
+              className="absolute left-1/2 top-0 z-10 flex h-[3.25rem] w-[3.25rem] -translate-x-1/2 -translate-y-[42%] items-center justify-center rounded-full border-[3px] border-paper bg-ember text-on-ember shadow-[0_10px_24px_rgba(249,115,22,.32)] transition-transform active:scale-95"
             >
               <PlusIcon size={24} weight="bold" aria-hidden="true" />
             </Link>

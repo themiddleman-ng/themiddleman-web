@@ -494,7 +494,7 @@ function MessagesPageInner() {
                     type="button"
                     onClick={handleSend}
                     disabled={!draft.trim()}
-                    className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-ember-cta text-white transition hover:bg-ember-hover disabled:cursor-not-allowed disabled:bg-elevated disabled:text-muted"
+                    className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-ember-cta text-ink transition hover:bg-ember-hover disabled:cursor-not-allowed disabled:bg-elevated disabled:text-muted"
                     aria-label="Send message"
                   >
                     <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="m21 3-7.2 18-3.9-7.9L2 9.2 21 3Z" /><path d="M21 3 9.9 13.1" /></svg>

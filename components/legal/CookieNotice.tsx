@@ -117,7 +117,7 @@ export default function CookieNotice() {
               <button
                 type="button"
                 onClick={() => savePreferences(false)}
-                className="min-h-9 rounded-lg bg-ember px-3 text-xs font-semibold text-on-ember hover:opacity-90"
+                className="min-h-9 rounded-lg bg-ember px-3 text-xs font-semibold text-on-ember hover:bg-ember-hover"
               >
                 OK
               </button>
@@ -198,7 +198,7 @@ export default function CookieNotice() {
               <button
                 type="button"
                 onClick={() => savePreferences(optionalAnalytics)}
-                className="min-h-11 rounded-xl bg-ember px-4 py-2.5 text-sm font-semibold text-on-ember transition hover:opacity-90"
+                className="min-h-11 rounded-xl bg-ember px-4 py-2.5 text-sm font-semibold text-on-ember transition hover:bg-ember-hover"
               >
                 Save choice
               </button>

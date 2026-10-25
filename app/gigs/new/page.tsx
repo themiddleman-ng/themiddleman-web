@@ -252,7 +252,7 @@ export default function NewGigPage() {
 			<header className="border-b border-line bg-paper/50 backdrop-blur sticky top-0 z-20">
 				<div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-3 sm:px-6 sm:py-4">
 					<Link href="/" className="font-display font-bold text-lg tracking-tight flex items-center gap-2">
-						<span className="h-2.5 w-2.5 rounded-full bg-ember shadow-[0_0_0_4px_rgba(242,100,25,.15)]" />
+						<span className="h-2.5 w-2.5 rounded-full bg-ember shadow-[0_0_0_4px_rgba(249,115,22,.15)]" />
 						<span className="truncate">The Middleman</span>
 					</Link>
 					<Link href="/gigs/mine" className="inline-flex shrink-0 items-center gap-1.5 text-xs text-slate transition-colors hover:text-bone sm:gap-2 sm:text-sm">
@@ -413,7 +413,7 @@ export default function NewGigPage() {
 
 							{isAiAssisted && (
 								<div className="mt-4 pt-4 border-t border-white/5">
-									<span className="inline-flex items-center gap-1.5 text-[9px] font-bold tracking-wider text-amber-400 bg-amber-950/20 border border-amber-900/30 px-2 py-0.5 rounded">
+									<span className="inline-flex items-center gap-1.5 text-[9px] font-bold tracking-wider text-[#111111] bg-[#F97316] border border-[#FB923C] px-2 py-0.5 rounded">
 										<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
 										AI-ASSISTED DELIVERY
 									</span>
