@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import { InfoIcon } from "@phosphor-icons/react/dist/csr/Info";
 import SiteHeader from "@/components/SiteHeader";
 import { signinHref } from "@/lib/auth/signin-redirect.mjs";
+import DraftRestoredNotice from "@/components/forms/DraftRestoredNotice";
+import { usePersistedForm } from "@/lib/forms/usePersistedForm";
 
 type Message = { id: string; sender_kind: "seller" | "admin" | "system"; body: string; created_at: string };
 type Thread = { id: string; subject: string; status: "open" | "closed"; updated_at: string; messages: Message[] };
@@ -14,7 +16,21 @@ export default function SellerSupportPage() {
   const [threads, setThreads] = useState<Thread[]>([]);
   const [activeId, setActiveId] = useState("");
   const [mobileThreadOpen, setMobileThreadOpen] = useState(false);
-  const [reply, setReply] = useState("");
+  const [replyDraft, setReplyDraft] = useState({ body: "" });
+  const {
+    restored: replyDraftRestored,
+    discardDraft: discardReplyDraft,
+    clearDraft: clearReplyDraft,
+  } = usePersistedForm({
+    formId: "seller-support-reply",
+    recordId: activeId || "none",
+    values: replyDraft,
+    setValues: setReplyDraft,
+    enabled: Boolean(activeId),
+    storage: "session",
+  });
+  const reply = replyDraft.body;
+  const setReply = (body: string) => setReplyDraft({ body });
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
@@ -77,6 +93,7 @@ export default function SellerSupportPage() {
       const result = await response.json();
       if (!response.ok) throw new Error(result.error || "Could not send your reply.");
       setReply("");
+      clearReplyDraft();
       await load();
     } catch (sendError) {
       setError(sendError instanceof Error ? sendError.message : "Could not send your reply.");
@@ -147,6 +164,13 @@ export default function SellerSupportPage() {
                 </div>
                 {activeThread.status === "open" ? (
                   <form onSubmit={sendReply} className="border-t border-line p-4 sm:p-5">
+                    <DraftRestoredNotice
+                      visible={replyDraftRestored}
+                      onDiscard={() => {
+                        discardReplyDraft();
+                        setReplyDraft({ body: "" });
+                      }}
+                    />
                     <label className="block text-sm">
                       Reply
                       <textarea value={reply} onChange={(event) => setReply(event.target.value)} maxLength={5000} className="auth-input mt-2 min-h-24" placeholder="Write a reply to The Middleman team." />

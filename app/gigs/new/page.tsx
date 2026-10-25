@@ -6,6 +6,8 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabaseClient';
 import { signinHref } from '@/lib/auth/signin-redirect.mjs';
+import DraftRestoredNotice from '@/components/forms/DraftRestoredNotice';
+import { usePersistedForm } from '@/lib/forms/usePersistedForm';
 import { ProductPackageField } from '@/components/ProductPackageUploader';
 import { uploadProductPackage } from '@/lib/client/product-packages';
 
@@ -25,19 +27,57 @@ const EXPERIENCE_TIERS = [
 
 export default function NewGigPage() {
 	const router = useRouter();
-	const [title, setTitle] = useState('');
-	const [description, setDescription] = useState('');
-	const [category, setCategory] = useState('');
-	const [priceNgn, setPriceNgn] = useState('');
-	const [deliveryDays, setDeliveryDays] = useState('7');
-	const [experienceTier, setExperienceTier] = useState('beginner');
-	const [isAiAssisted, setIsAiAssisted] = useState(false);
+	const [listingUserId, setListingUserId] = useState<string | null>(null);
+	const [listingDraft, setListingDraft] = useState({
+		title: '',
+		description: '',
+		category: '',
+		priceNgn: '',
+		deliveryDays: '7',
+		experienceTier: 'beginner',
+		isAiAssisted: false,
+		linksInput: '',
+		repoUrl: '',
+		previewCommit: '',
+		exclusive: false,
+	});
+	const {
+		restored: listingDraftRestored,
+		discardDraft: discardListingDraft,
+		clearDraft: clearListingDraft,
+	} = usePersistedForm({
+		formId: 'gig-create',
+		userId: listingUserId,
+		values: listingDraft,
+		setValues: setListingDraft,
+		secretKeys: [],
+	});
+	const {
+		title,
+		description,
+		category,
+		priceNgn,
+		deliveryDays,
+		experienceTier,
+		isAiAssisted,
+		linksInput,
+		repoUrl,
+		previewCommit,
+		exclusive,
+	} = listingDraft;
+	const setTitle = (value: string) => setListingDraft((current) => ({ ...current, title: value }));
+	const setDescription = (value: string) => setListingDraft((current) => ({ ...current, description: value }));
+	const setCategory = (value: string) => setListingDraft((current) => ({ ...current, category: value }));
+	const setPriceNgn = (value: string) => setListingDraft((current) => ({ ...current, priceNgn: value }));
+	const setDeliveryDays = (value: string) => setListingDraft((current) => ({ ...current, deliveryDays: value }));
+	const setExperienceTier = (value: string) => setListingDraft((current) => ({ ...current, experienceTier: value }));
+	const setIsAiAssisted = (value: boolean) => setListingDraft((current) => ({ ...current, isAiAssisted: value }));
+	const setLinksInput = (value: string) => setListingDraft((current) => ({ ...current, linksInput: value }));
+	const setRepoUrl = (value: string) => setListingDraft((current) => ({ ...current, repoUrl: value }));
+	const setPreviewCommit = (value: string) => setListingDraft((current) => ({ ...current, previewCommit: value }));
+	const setExclusive = (value: boolean) => setListingDraft((current) => ({ ...current, exclusive: value }));
 	const [images, setImages] = useState<File[]>([]);
 	const [video, setVideo] = useState<File | null>(null);
-	const [linksInput, setLinksInput] = useState('');
-	const [repoUrl,setRepoUrl] = useState('');
-	const [previewCommit,setPreviewCommit] = useState('');
-	const [exclusive,setExclusive] = useState(false);
 	const [previewImage, setPreviewImage] = useState<string | null>(null);
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState('');
@@ -52,7 +92,10 @@ export default function NewGigPage() {
 		supabase.auth.getUser().then(({ data: { user } }) => {
 			if (!active) return;
 			if (!user) router.replace(signinHref('/gigs/new'));
-			else setAuthChecked(true);
+			else {
+				setListingUserId(user.id);
+				setAuthChecked(true);
+			}
 		});
 		return () => { active = false; };
 	}, [router]);
@@ -190,6 +233,7 @@ export default function NewGigPage() {
 				return;
 			}
 		}
+		clearListingDraft();
 		router.push('/gigs/mine');
 	}
 
@@ -227,6 +271,25 @@ export default function NewGigPage() {
 
 				<div className="grid min-w-0 gap-8 lg:grid-cols-[1.3fr_.7fr] lg:gap-12">
 					<form onSubmit={handleSubmit} className="min-w-0 space-y-6 sm:space-y-8">
+						<DraftRestoredNotice
+							visible={listingDraftRestored}
+							onDiscard={() => {
+								discardListingDraft();
+								setListingDraft({
+									title: '',
+									description: '',
+									category: '',
+									priceNgn: '',
+									deliveryDays: '7',
+									experienceTier: 'beginner',
+									isAiAssisted: false,
+									linksInput: '',
+									repoUrl: '',
+									previewCommit: '',
+									exclusive: false,
+								});
+							}}
+						/>
 						<div className="field-shell">
 							<label className="field-label">Product title</label>
 							<span className="field-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg></span>

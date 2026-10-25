@@ -48,7 +48,7 @@ test("signed-out notifications are a single centred empty state", () => {
   assert.match(notifications, /bg-ember-cta/);
   assert.match(notifications, /text-on-ember/);
   assert.match(notifications, /mm-signed-out-empty/);
-  assert.match(notifications, /href="\/signup\?mode=signin&next=\/notifications"/);
+  assert.match(notifications, /signinHref\("\/notifications"\)/);
   assert.match(notifications, /response\.status === 401/);
   assert.match(notifications, /setSignedOut\(true\)/);
   assert.match(notifications, /!signedOut && !error && !items\.length/);

@@ -1,7 +1,12 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { readFile } from "node:fs/promises";
-import { safeNextPath, signinHref } from "../lib/auth/signin-redirect.mjs";
+import {
+  authModeHref,
+  readReturnPath,
+  safeNextPath,
+  signinHref,
+} from "../lib/auth/signin-redirect.mjs";
 
 test("safeNextPath only allows same-origin relative paths", () => {
   assert.equal(safeNextPath("/orders"), "/orders");
@@ -18,6 +23,18 @@ test("signinHref adds a return link for the original page", () => {
   assert.equal(signinHref(""), "/signup?mode=signin");
 });
 
+test("readReturnPath accepts next and returnTo with the same sanitizer", () => {
+  const params = new URLSearchParams("returnTo=%2Fmessages");
+  assert.equal(readReturnPath(params), "/messages");
+  assert.equal(readReturnPath({ get: (key) => (key === "next" ? "/orders" : "") }), "/orders");
+  assert.equal(readReturnPath({ get: () => "https://evil.example" }), "");
+});
+
+test("authModeHref builds signup and signin links", () => {
+  assert.equal(authModeHref("signup", "/marketplace"), "/signup?mode=signup&next=%2Fmarketplace");
+  assert.equal(authModeHref("signin"), "/signup?mode=signin");
+});
+
 test("signed-out account pages redirect instead of rendering the full screen", async () => {
   const orders = await readFile(new URL("../app/orders/PageClient.js", import.meta.url), "utf8");
   const messages = await readFile(new URL("../app/messages/PageClient.tsx", import.meta.url), "utf8");
@@ -29,7 +46,7 @@ test("signed-out account pages redirect instead of rendering the full screen", a
   assert.match(messages, /signinHref\("\/messages"\)/);
   assert.match(newGig, /signinHref\('\/gigs\/new'\)/);
   assert.match(role, /signinHref\('\/onboarding\/role'\)/);
-  assert.match(signup, /safeNextPath\(searchParams.get\('next'\)\)/);
+  assert.match(signup, /readReturnPath\(searchParams\)/);
   assert.doesNotMatch(orders, /Sign in to view your orders\./);
   assert.doesNotMatch(messages, /Sign in to view your messages\./);
 });

@@ -6,6 +6,8 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { supabase } from "@/lib/supabaseClient";
 import SiteHeader from "@/components/SiteHeader";
 import { signinHref } from "@/lib/auth/signin-redirect.mjs";
+import DraftRestoredNotice from "@/components/forms/DraftRestoredNotice";
+import { usePersistedForm } from "@/lib/forms/usePersistedForm";
 
 // Design note: message threads use a calm correspondence layout with a
 // sender, timestamp and message text separated by a thin rule.
@@ -132,7 +134,22 @@ function MessagesPageInner() {
   const [activeId, setActiveId] = useState<string | null>(null);
   const [mobileThreadOpen, setMobileThreadOpen] = useState(false);
   const [messages, setMessages] = useState<MessageRow[]>([]);
-  const [draft, setDraft] = useState("");
+  const [composerDraft, setComposerDraft] = useState({ body: "" });
+  const {
+    restored: composerDraftRestored,
+    discardDraft: discardComposerDraft,
+    clearDraft: clearComposerDraft,
+  } = usePersistedForm({
+    formId: "messages-compose",
+    userId,
+    recordId: activeId || "none",
+    values: composerDraft,
+    setValues: setComposerDraft,
+    enabled: Boolean(userId && activeId),
+    storage: "session",
+  });
+  const draft = composerDraft.body;
+  const setDraft = (body: string) => setComposerDraft({ body });
   const [warning, setWarning] = useState<string | null>(null);
   const [noticeDismissed, setNoticeDismissed] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -290,6 +307,7 @@ function MessagesPageInner() {
     }
 
     setDraft("");
+    clearComposerDraft();
     setWarning(null);
     const refreshed = await fetch(`/api/conversations/${activeId}/messages`, { cache: 'no-store' });
     if (refreshed.ok) setMessages((await refreshed.json()).messages);
@@ -432,6 +450,13 @@ function MessagesPageInner() {
               </div>
 
               <div className="border-t border-[#eee7de] bg-[#fffdf9] px-3 py-3 sm:px-5 sm:py-4">
+                <DraftRestoredNotice
+                  visible={composerDraftRestored}
+                  onDiscard={() => {
+                    discardComposerDraft();
+                    setComposerDraft({ body: "" });
+                  }}
+                />
                 {warning && <p role="alert" className="mb-2 rounded-xl bg-[#fff2e8] px-3 py-2 text-xs leading-5 text-[#9a4b1e]">{warning}</p>}
                 <div className="flex items-end gap-2 rounded-2xl border border-[#e7e1d8] bg-[#faf8f4] p-2 focus-within:border-[#d8895e] focus-within:ring-4 focus-within:ring-[#de641e]/10">
                   <textarea

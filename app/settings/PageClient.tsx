@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import SiteHeader from '@/components/SiteHeader';
 import { useAdminAccount } from '@/lib/account/use-admin-account';
 import { supabase } from '@/lib/supabaseClient';
+import { signinHref } from '@/lib/auth/signin-redirect.mjs';
 
 export default function SettingsPageClient() {
   const router = useRouter();
@@ -18,7 +19,7 @@ export default function SettingsPageClient() {
     let active = true;
     supabase.auth.getUser().then(({ data: { user } }) => {
       if (!active) return;
-      if (!user) router.replace('/signup?mode=signin');
+      if (!user) router.replace(signinHref('/settings'));
       else {
         setUserId(user.id);
         setLoading(false);

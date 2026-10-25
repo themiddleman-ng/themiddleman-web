@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabaseClient';
 import SiteHeader from '@/components/SiteHeader';
@@ -12,6 +12,9 @@ import { avatarStoragePath } from '@/lib/profile/avatar-file.mjs';
 import { AVATAR_BUCKET } from '@/lib/profile/owner-avatar.mjs';
 import { prepareAvatarFile } from '@/lib/profile/prepare-avatar';
 import { publishOwnerAvatar, resolveOwnerAvatar, saveOwnerAvatarPath, useOwnerAvatar } from '@/lib/profile/use-owner-avatar';
+import DraftRestoredNotice from '@/components/forms/DraftRestoredNotice';
+import { usePersistedForm } from '@/lib/forms/usePersistedForm';
+import { signinHref } from '@/lib/auth/signin-redirect.mjs';
 
 type UserRow = {
   full_name: string | null;
@@ -98,6 +101,28 @@ export default function ProfilePage() {
   const [profileNotice, setProfileNotice] = useState('');
   const [profileError, setProfileError] = useState('');
   const [editingProfile, setEditingProfile] = useState(false);
+  const profileDraftValues = useMemo(
+    () => ({ fullName, location, displayName, phone, bio }),
+    [fullName, location, displayName, phone, bio],
+  );
+  const {
+    restored: profileDraftRestored,
+    discardDraft: discardProfileDraft,
+    clearDraft: clearProfileDraft,
+  } = usePersistedForm({
+    formId: 'profile-settings',
+    userId: authUser?.id,
+    values: profileDraftValues,
+    setValues: (next) => {
+      const draft = typeof next === 'function' ? next(profileDraftValues) : next;
+      if (typeof draft.fullName === 'string') setFullName(draft.fullName);
+      if (typeof draft.location === 'string') setLocation(draft.location);
+      if (typeof draft.displayName === 'string') setDisplayName(draft.displayName);
+      if (typeof draft.phone === 'string') setPhone(draft.phone);
+      if (typeof draft.bio === 'string') setBio(draft.bio);
+    },
+    enabled: Boolean(authUser?.id && editingProfile),
+  });
 
   useEffect(() => {
     let active = true;
@@ -105,7 +130,7 @@ export default function ProfilePage() {
     async function load() {
       const { data: { user: authUser } } = await supabase.auth.getUser();
       if (!authUser) {
-        router.replace('/signup?mode=signin');
+        router.replace(signinHref('/profile'));
         return;
       }
 
@@ -237,6 +262,7 @@ export default function ProfilePage() {
       const { error: metadataError } = await supabase.auth.updateUser({ data: { full_name: fullName.trim(), display_name: displayName.trim(), phone: phone.trim(), bio: bio.trim() } });
       if (metadataError) { setProfileError('Your name and state were saved, but the other details could not be saved. Please retry.'); return; }
       setSavedExtras({ displayName: displayName.trim(), phone: phone.trim(), bio: bio.trim() });
+      clearProfileDraft();
       setProfileNotice('Your profile has been saved.');
       setEditingProfile(false);
     } catch { setProfileError('We could not save your profile. Your changes are still here; please try again.'); }
@@ -345,6 +371,15 @@ export default function ProfilePage() {
             </div>
           ) : (
             <form onSubmit={saveProfile} className="mt-6 grid gap-5 sm:grid-cols-2">
+              <div className="sm:col-span-2">
+                <DraftRestoredNotice
+                  visible={profileDraftRestored}
+                  onDiscard={() => {
+                    discardProfileDraft();
+                    resetProfileForm();
+                  }}
+                />
+              </div>
               <label className="text-sm font-medium">Full name<input autoComplete="name" required maxLength={120} value={fullName} onChange={(event) => setFullName(event.target.value)} className="mt-2 block min-h-12 w-full border px-3" /></label>
               <label className="text-sm font-medium">Display name<input autoComplete="nickname" maxLength={80} value={displayName} onChange={(event) => setDisplayName(event.target.value)} className="mt-2 block min-h-12 w-full border px-3" /></label>
               <label className="text-sm font-medium">Email address<input type="email" value={user?.email || ''} readOnly className="mt-2 block min-h-12 w-full border px-3" /><span className="mt-1 block text-xs text-[#606b80]">Your sign-in email. This cannot be changed here.</span></label>

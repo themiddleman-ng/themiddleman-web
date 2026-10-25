@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabaseClient';
+import { signinHref } from '@/lib/auth/signin-redirect.mjs';
 
 export default function AccountDeletionClient() {
   const router = useRouter();
@@ -22,7 +23,7 @@ export default function AccountDeletionClient() {
     void supabase.auth.getUser().then(({ data, error: authError }) => {
       if (!active) return;
       if (authError || !data.user) {
-        router.replace('/signup?mode=signin');
+        router.replace(signinHref('/account/delete'));
         return;
       }
       setEmail(data.user.email ?? '');
