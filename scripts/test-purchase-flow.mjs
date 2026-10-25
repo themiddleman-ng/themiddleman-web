@@ -3,7 +3,7 @@
  * Guarded test-purchase orchestrator for isolated Supabase + Paystack TEST keys only.
  * Does not mutate production. Use --dry-run to validate environment without writes.
  */
-import assert from "node:assert/strict";
+import { pathToFileURL } from "node:url";
 
 const PRODUCTION_SUPABASE_HOST = "uwigyojtiudefnwjezhm.supabase.co";
 
@@ -51,8 +51,6 @@ async function main() {
       "Follow docs/test-purchase-checklist.md for manual steps; extend this script when fixtures exist.",
   );
 }
-
-import { pathToFileURL } from "node:url";
 
 const isMain = process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href;
 if (isMain) {

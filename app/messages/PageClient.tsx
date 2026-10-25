@@ -339,7 +339,7 @@ function MessagesPageInner() {
 
         {!noticeDismissed && (
           <div className="mx-3 mb-3 flex items-start gap-3 rounded-2xl border border-line bg-elevated px-4 py-3 text-muted sm:mx-6 md:mx-0">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" className="text-ember-cta" strokeWidth="1.8" className="mt-0.5 shrink-0" aria-hidden="true">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="mt-0.5 shrink-0 text-ember-cta" aria-hidden="true">
               <path d="M12 9v4m0 4h.01M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z" />
             </svg>
             <p className="flex-1 text-[14px] leading-5 text-muted sm:text-xs sm:text-slate">
