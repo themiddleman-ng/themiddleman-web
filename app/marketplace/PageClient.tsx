@@ -8,6 +8,7 @@ import SiteHeader from "@/components/SiteHeader";
 import GigCard, { type CardGig, type CardRating } from "@/components/marketplace/GigCard";
 import { DESIGN_PREVIEW_GIGS } from "@/lib/design-preview/catalog";
 import { countActiveMarketplaceFilters, clearedMarketplaceFilters } from "@/lib/marketplace/active-filters.mjs";
+import { attachPublicSellerCards } from "@/lib/marketplace/attach-public-sellers.mjs";
 
 type GigCategory = "development" | "design" | "marketing" | "writing" | "ai_assisted";
 
@@ -153,7 +154,7 @@ export default function MarketplacePage({ designPreview = false }: { designPrevi
           supabase
             .from("gigs")
             .select(
-              "id, title, description, category, price_ngn, is_ai_assisted, gallery_image_paths, created_at, seller_profiles ( display_name, verification_status )"
+              "id, title, description, category, price_ngn, is_ai_assisted, gallery_image_paths, created_at, seller_id"
             )
             .eq("status", "active")
             .order("created_at", { ascending: false }),
@@ -163,7 +164,8 @@ export default function MarketplacePage({ designPreview = false }: { designPrevi
         if (cancelled) return;
 
         if (gigsResult.error) throw gigsResult.error;
-        setGigs((gigsResult.data as unknown as GigRow[]) ?? []);
+        const rows = await attachPublicSellerCards(supabase, (gigsResult.data as GigRow[]) ?? []);
+        setGigs(rows as GigRow[]);
 
         const ratingsMap: Record<string, GigRating> = {};
         if (ratingsResult.error) {

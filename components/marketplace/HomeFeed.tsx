@@ -6,6 +6,7 @@ import { isSupabaseConfigured, supabase } from "@/lib/supabaseClient";
 import GigCard, { type CardGig, type CardRating } from "./GigCard";
 import { DESIGN_PREVIEW_GIGS } from "@/lib/design-preview/catalog";
 import { MARKETPLACE_CATEGORIES } from "@/lib/marketplace/categories";
+import { attachPublicSellerCards } from "@/lib/marketplace/attach-public-sellers.mjs";
 
 type GigRow = CardGig & { created_at: string };
 
@@ -48,7 +49,7 @@ export default function HomeFeed() {
       const [gigsResult, ratingsResult] = await Promise.all([
         supabase
           .from("gigs")
-          .select("id, title, description, category, price_ngn, is_ai_assisted, gallery_image_paths, created_at, seller_profiles ( display_name, verification_status )")
+          .select("id, title, description, category, price_ngn, is_ai_assisted, gallery_image_paths, created_at, seller_id")
           .eq("status", "active")
           .order("created_at", { ascending: false })
           .limit(40),
@@ -62,7 +63,8 @@ export default function HomeFeed() {
         return;
       }
 
-      setGigs((gigsResult.data as unknown as GigRow[]) ?? []);
+      const rows = await attachPublicSellerCards(supabase, (gigsResult.data as GigRow[]) ?? []);
+      setGigs(rows as GigRow[]);
       const ratingMap: Record<string, CardRating> = {};
       ((ratingsResult.data as Array<{ gig_id: string } & CardRating>) ?? []).forEach((row) => {
         ratingMap[row.gig_id] = row;

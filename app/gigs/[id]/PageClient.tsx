@@ -79,6 +79,7 @@ export default function GigPageClient({
 }) {
   const router = useRouter();
   const [userId, setUserId] = useState<string | null>(null);
+  const [ownSellerProfileId, setOwnSellerProfileId] = useState<string | null>(null);
   const [userEmail, setUserEmail] = useState<string | null>(null);
   const [gig, setGig] = useState<GigRow | null>(null);
   const [rating, setRating] = useState({ average: 0, count: 0 });
@@ -126,6 +127,25 @@ export default function GigPageClient({
     "Checkout is not open yet. When it is, your payment stays in escrow until you accept delivery or a dispute is resolved.";
 
   useEffect(() => {
+    let cancelled = false;
+    if (!userId) {
+      setOwnSellerProfileId(null);
+      return;
+    }
+    void supabase
+      .from("seller_profiles")
+      .select("id")
+      .eq("user_id", userId)
+      .maybeSingle()
+      .then(({ data }) => {
+        if (!cancelled) setOwnSellerProfileId(data?.id ?? null);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [userId]);
+
+  useEffect(() => {
     void fetch("/api/gigs/" + gigId + "/view", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -167,13 +187,26 @@ export default function GigPageClient({
         }
       }
       const { data: gigData, error: gigError } = await supabase.from("gigs").select(
-        "id, title, description, category, price_ngn, is_ai_assisted, seller_id, delivery_days, experience_tier, gallery_image_paths, demo_video_path, demo_links, seller_profiles ( user_id, display_name, bio, verification_status )"
+        "id, title, description, category, price_ngn, is_ai_assisted, seller_id, delivery_days, experience_tier, gallery_image_paths, demo_video_path, demo_links"
       ).eq("id", gigId).single();
       if (cancelled) return;
       if (gigError || !gigData) {
         setLoadError("This product couldn't be found — it may have been removed."); setLoading(false); return;
       }
-      setGig(gigData as unknown as GigRow);
+      const { data: publicSeller } = await supabase
+        .from("public_seller_profiles")
+        .select("id, display_name, bio")
+        .eq("id", gigData.seller_id)
+        .maybeSingle();
+      const sellerProfile = publicSeller
+        ? {
+            user_id: "",
+            display_name: publicSeller.display_name,
+            bio: publicSeller.bio,
+            verification_status: "approved",
+          }
+        : null;
+      setGig({ ...(gigData as GigRow), seller_profiles: sellerProfile });
       const [{ data: ratingsData }, { data: reviewsData }] = await Promise.all([
         supabase.rpc("get_gig_ratings"), supabase.rpc("get_gig_reviews", { p_gig_id: gigId }),
       ]);
@@ -229,9 +262,8 @@ export default function GigPageClient({
     setActionError("");
     if (!userId) { router.push(signinHref(returnPath)); return; }
     if (!gig) return;
-    const sellerUserId = gig.seller_profiles?.user_id;
-    if (!sellerUserId) { setActionError("We could not verify the seller account for this product."); return; }
-    if (userId === sellerUserId) { setActionError("You cannot buy your own product."); return; }
+    if (!gig.seller_profiles) { setActionError("We could not verify the seller account for this product."); return; }
+    if (ownSellerProfileId === gig.seller_id) { setActionError("You cannot buy your own product."); return; }
     const publicKey = process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY;
     if (!publicKey) { setActionError("Payments aren't configured yet — add NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY to .env.local."); return; }
     setPaying(true);
@@ -292,7 +324,7 @@ export default function GigPageClient({
 
   async function handleDeleteGig() {
     setActionError("");
-    if (!userId || !gig || userId !== gig.seller_profiles?.user_id) return;
+    if (!userId || !gig || ownSellerProfileId !== gig.seller_id) return;
     if (!window.confirm("Delete this product? It will no longer appear in the marketplace.")) return;
     const { error } = await supabase.from("gigs").update({ status: "deleted" }).eq("id", gig.id);
     if (error) { setActionError(error.message); return; }
@@ -370,7 +402,7 @@ export default function GigPageClient({
   async function handleReportGig() {
     setActionError(""); setReportSuccess(false);
     if (!userId) { router.push(signinHref(returnPath)); return; }
-    if (!gig || userId === gig.seller_profiles?.user_id) { setActionError("You cannot report your own product."); return; }
+    if (!gig || ownSellerProfileId === gig.seller_id) { setActionError("You cannot report your own product."); return; }
     setReporting(true);
     const { error } = await supabase.from("gig_reports").insert({ gig_id: gig.id, reported_by: userId, reason: reportReason, details: reportDetails.trim() || null });
     if (error) { setActionError(error.message); setReporting(false); return; }
@@ -429,7 +461,7 @@ export default function GigPageClient({
       return false;
     }
   });
-  const isOwnGig = userId === gig.seller_profiles?.user_id;
+  const isOwnGig = ownSellerProfileId === gig.seller_id;
   const requirementLines = [
     gig.delivery_days
       ? `Allow up to ${gig.delivery_days} day${gig.delivery_days > 1 ? "s" : ""} for the seller to deliver after purchase.`

@@ -1,16 +1,13 @@
--- pgTAP / manual RLS checks for public_seller_profiles (run on local Supabase only).
--- Untested in CI until `supabase start` is available in the agent environment.
+-- Manual RLS checks for public_seller_profiles (local Supabase only).
+-- Run via scripts/run-rls-tests.mjs after seeding.
 
-begin;
+-- Expect: anon cannot read id_document_url from seller_profiles (0 rows).
+-- select id_document_url from public.seller_profiles limit 1;
 
--- Expect: anon cannot read pending seller rows from seller_profiles.
--- select id from public.seller_profiles where verification_status = 'pending'; -- should return 0 rows as anon
-
--- Expect: anon can read approved seller via the directory view.
+-- Expect: anon can read approved directory rows from the view only.
 -- select id, display_name from public.public_seller_profiles limit 1;
 
--- Expect: view columns exclude sensitive fields (no user_id, id_document_url, linkedin_url).
--- select column_name from information_schema.columns
---   where table_schema = 'public' and table_name = 'public_seller_profiles';
-
-rollback;
+-- Expect: pending sellers are absent from the view.
+-- select count(*) from public.public_seller_profiles sp
+--   join public.seller_profiles raw on raw.id = sp.id
+--   where raw.verification_status = 'pending';
