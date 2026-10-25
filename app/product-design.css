@@ -118,8 +118,6 @@
 .mm-logo-on-orange-text { color:var(--auth-hero-ink); }
 .mm-auth-logo { color:var(--auth-hero-ink); }
 .mm-auth .mm-auth-form { display:flex; align-items:center; justify-content:center; box-sizing:border-box; min-width:0; padding:48px clamp(48px,6vw,96px)!important; background:#fff; transition:transform .8s cubic-bezier(.65,0,.2,1); }
-.mm-auth[data-mode=signup] .mm-auth-hero,
-.mm-auth[data-mode=signup] .mm-auth-form { transform:none; }
 .mm-auth .mm-auth-form h1 { font-size:36px; }
 .mm-auth .mm-auth-form form { margin-top:28px; }
 .mm-auth .mm-auth-form input { min-height:48px; }
@@ -218,6 +216,55 @@
 .mm-design main > :not(header) button[class*="bg-[#ed6509]"],.mm-design main > :not(header) a[class*="bg-[#ed6509]"] { background:#c85005; color:#fff; }
 .mm-design .mm-auth .mm-auth-form button[type=submit] { background:#C2410C; color:#fff; }
 .mm-auth .mm-auth-form-face { width:100%; max-width:28rem; margin-left:auto; margin-right:auto; }
+.mm-auth-tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px;
+  margin-bottom: 20px;
+  padding: 4px;
+  border-radius: 12px;
+  background: #f3ede4;
+  position: relative;
+}
+.mm-auth-tabs [role="tab"] {
+  position: relative;
+  z-index: 1;
+  min-height: 44px;
+  border: 0;
+  border-radius: 9px;
+  background: transparent;
+  font-size: 14px;
+  font-weight: 600;
+  color: #5d6874;
+  transition: color .25s ease;
+}
+.mm-auth-tabs [role="tab"][aria-selected="true"] { color: #1d2733; }
+.mm-auth-tab-indicator {
+  position: absolute;
+  top: 4px;
+  bottom: 4px;
+  left: 4px;
+  width: calc(50% - 4px);
+  border-radius: 9px;
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(48, 38, 27, .08);
+  transition: transform .35s cubic-bezier(.65, 0, .2, 1);
+  pointer-events: none;
+}
+.mm-auth[data-mode="signin"] .mm-auth-tab-indicator { transform: translateX(100%); }
+@media (min-width: 768px) {
+  .mm-auth-panel {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) !important;
+    position: relative;
+  }
+  .mm-auth[data-mode="signup"] .mm-auth-hero {
+    transform: translateX(100%);
+  }
+  .mm-auth[data-mode="signup"] .mm-auth-form {
+    transform: translateX(-100%);
+  }
+}
 @media(max-width:767px) {
  .mm-catalogue-toolbar { flex-wrap:nowrap; gap:8px; }
  .mm-catalogue-status { min-width:0; }

@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { BellIcon } from "@phosphor-icons/react/dist/csr/Bell";
 import SiteHeader from "@/components/SiteHeader";
+import { signinHref } from "@/lib/auth/signin-redirect.mjs";
 
 type Notification = {
   id: string;
@@ -90,7 +91,7 @@ export default function NotificationsPage() {
             <BellIcon size={40} className="text-slate" aria-hidden="true" />
             <p className="mt-4 text-sm text-slate">Sign in to see your notifications</p>
             <Link
-              href="/signup?mode=signin&next=/notifications"
+              href={signinHref("/notifications")}
               className="mt-5 inline-flex min-h-11 items-center justify-center rounded-full bg-ember-cta px-5 text-sm font-semibold text-on-ember hover:bg-ember-hover"
             >
               Sign in

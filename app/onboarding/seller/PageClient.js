@@ -4,6 +4,9 @@ import Link from 'next/link';
 import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabaseClient';
+import { signinHref } from '@/lib/auth/signin-redirect.mjs';
+import DraftRestoredNotice from '@/components/forms/DraftRestoredNotice';
+import { usePersistedForm } from '@/lib/forms/usePersistedForm';
 
 const SERVICE_CATEGORIES = ['Development', 'Design', 'Marketing', 'Writing', 'AI-assisted services'];
 const ID_DOCUMENT_TYPES = ['National ID (NIN)', 'International passport', "Driver's licence", "Voter's card", 'CAC business certificate'];
@@ -25,17 +28,60 @@ function getUploadErrorMessage(uploadError) {
 
 export default function SellerOnboardingPage() {
   const router = useRouter();
-  const [displayName, setDisplayName] = useState('');
-  const [bio, setBio] = useState('');
-  const [skills, setSkills] = useState('');
-  const [portfolio, setPortfolio] = useState('');
-  const [linkedin, setLinkedin] = useState('');
-  const [experience, setExperience] = useState('');
-  const [selectedTypes, setSelectedTypes] = useState([]);
-  const [idDocumentType, setIdDocumentType] = useState('');
+  const [userId, setUserId] = useState('');
+  const [sellerDraft, setSellerDraft] = useState({
+    displayName: '',
+    bio: '',
+    skills: '',
+    portfolio: '',
+    linkedin: '',
+    experience: '',
+    selectedTypes: [],
+    idDocumentType: '',
+    accepted: false,
+    bankCode: '',
+    accountNumber: '',
+    payoutConfirmed: false,
+  });
+  const {
+    restored: sellerDraftRestored,
+    discardDraft: discardSellerDraft,
+    clearDraft: clearSellerDraft,
+  } = usePersistedForm({
+    formId: 'seller-onboarding',
+    userId,
+    values: sellerDraft,
+    setValues: setSellerDraft,
+    secretKeys: ['accountNumber', 'bankCode'],
+  });
+  const {
+    displayName,
+    bio,
+    skills,
+    portfolio,
+    linkedin,
+    experience,
+    selectedTypes,
+    idDocumentType,
+    accepted,
+    bankCode,
+    accountNumber,
+    payoutConfirmed,
+  } = sellerDraft;
+  const setDisplayName = (value) => setSellerDraft((current) => ({ ...current, displayName: value }));
+  const setBio = (value) => setSellerDraft((current) => ({ ...current, bio: value }));
+  const setSkills = (value) => setSellerDraft((current) => ({ ...current, skills: value }));
+  const setPortfolio = (value) => setSellerDraft((current) => ({ ...current, portfolio: value }));
+  const setLinkedin = (value) => setSellerDraft((current) => ({ ...current, linkedin: value }));
+  const setExperience = (value) => setSellerDraft((current) => ({ ...current, experience: value }));
+  const setSelectedTypes = (value) => setSellerDraft((current) => ({ ...current, selectedTypes: value }));
+  const setIdDocumentType = (value) => setSellerDraft((current) => ({ ...current, idDocumentType: value }));
+  const setAccepted = (value) => setSellerDraft((current) => ({ ...current, accepted: value }));
+  const setBankCode = (value) => setSellerDraft((current) => ({ ...current, bankCode: value }));
+  const setAccountNumber = (value) => setSellerDraft((current) => ({ ...current, accountNumber: value }));
+  const setPayoutConfirmed = (value) => setSellerDraft((current) => ({ ...current, payoutConfirmed: value }));
   const [idFile, setIdFile] = useState(null);
   const [uploadedDocumentPath, setUploadedDocumentPath] = useState('');
-  const [accepted, setAccepted] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [pageReady, setPageReady] = useState(false);
@@ -43,10 +89,7 @@ export default function SellerOnboardingPage() {
   const [banksLoading, setBanksLoading] = useState(false);
   const [payoutSetupEnabled, setPayoutSetupEnabled] = useState(false);
   const [banksError, setBanksError] = useState('');
-  const [bankCode, setBankCode] = useState('');
-  const [accountNumber, setAccountNumber] = useState('');
   const [verifiedAccountName, setVerifiedAccountName] = useState('');
-  const [payoutConfirmed, setPayoutConfirmed] = useState(false);
   const [verifyingPayout, setVerifyingPayout] = useState(false);
   const [agreementHighlighted, setAgreementHighlighted] = useState(false);
   const agreementRef = useRef(null);
@@ -56,9 +99,10 @@ export default function SellerOnboardingPage() {
     async function guardSellerAccess() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
-        router.replace('/signup');
+        router.replace(signinHref('/onboarding/seller'));
         return;
       }
+      setUserId(user.id);
 
       const { data: userRow, error: userError } = await supabase
         .from('users')
@@ -107,9 +151,12 @@ export default function SellerOnboardingPage() {
   }, [pageReady]);
 
   const toggleType = (type) =>
-    setSelectedTypes((current) =>
-      current.includes(type) ? current.filter((item) => item !== type) : [...current, type]
-    );
+    setSellerDraft((current) => ({
+      ...current,
+      selectedTypes: current.selectedTypes.includes(type)
+        ? current.selectedTypes.filter((item) => item !== type)
+        : [...current.selectedTypes, type],
+    }));
 
   function flashAgreement() {
     agreementRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -213,6 +260,7 @@ export default function SellerOnboardingPage() {
       }
     }
 
+    clearSellerDraft();
     router.push('/onboarding/pending');
   }
 
@@ -248,6 +296,29 @@ export default function SellerOnboardingPage() {
               Required step before publishing products
             </div>
           </header>
+
+          <div className="px-4 pt-4 sm:px-10">
+            <DraftRestoredNotice
+              visible={sellerDraftRestored}
+              onDiscard={() => {
+                discardSellerDraft();
+                setSellerDraft({
+                  displayName: '',
+                  bio: '',
+                  skills: '',
+                  portfolio: '',
+                  linkedin: '',
+                  experience: '',
+                  selectedTypes: [],
+                  idDocumentType: '',
+                  accepted: false,
+                  bankCode: '',
+                  accountNumber: '',
+                  payoutConfirmed: false,
+                });
+              }}
+            />
+          </div>
 
           <div className="grid min-w-0 gap-6 p-4 sm:gap-8 sm:p-10 lg:grid-cols-[1.3fr_.7fr]">
             <div className="space-y-6">

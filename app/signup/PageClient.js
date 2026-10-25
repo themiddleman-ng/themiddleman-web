@@ -15,7 +15,9 @@ import { applyLoginFailure, classifyLoginError, classifySignupError, validateLog
 import { markSignedIn } from '@/components/feedback/SignedInToast';
 import Link from 'next/link';
 import Logo from '@/components/Logo';
-import { safeNextPath } from '@/lib/auth/signin-redirect.mjs';
+import { readReturnPath, safeNextPath } from '@/lib/auth/signin-redirect.mjs';
+import { usePersistedForm } from '@/lib/forms/usePersistedForm';
+import DraftRestoredNotice from '@/components/forms/DraftRestoredNotice';
 
 const NIGERIAN_STATES = [
   'Abia', 'Adamawa', 'Akwa Ibom', 'Anambra', 'Bauchi', 'Bayelsa', 'Benue', 'Borno',
@@ -136,12 +138,84 @@ function getInitialMode(searchParams) {
   return false;
 }
 
+function buildAuthUrl(signin, searchParams) {
+  const params = new URLSearchParams();
+  params.set('mode', signin ? 'signin' : 'signup');
+  const next = readReturnPath(searchParams);
+  if (next) params.set('next', next);
+  if (searchParams.get('reset') === 'success') params.set('reset', 'success');
+  return `/signup?${params.toString()}`;
+}
+
+function AuthModeTabs({ signin, onSelect, tabRefs }) {
+  return (
+    <div className="mm-auth-tabs" role="tablist" aria-label="Account access">
+      <span className="mm-auth-tab-indicator" aria-hidden="true" />
+      <button
+        type="button"
+        role="tab"
+        id="auth-tab-signup"
+        ref={(node) => { tabRefs.current[0] = node; }}
+        aria-selected={!signin}
+        aria-controls="auth-panel-signup"
+        tabIndex={signin ? -1 : 0}
+        onClick={() => onSelect(false)}
+        onKeyDown={(event) => {
+          if (event.key === 'ArrowRight' || event.key === 'ArrowLeft') {
+            event.preventDefault();
+            onSelect(true);
+            tabRefs.current[1]?.focus();
+          }
+        }}
+      >
+        Create account
+      </button>
+      <button
+        type="button"
+        role="tab"
+        id="auth-tab-signin"
+        ref={(node) => { tabRefs.current[1] = node; }}
+        aria-selected={signin}
+        aria-controls="auth-panel-signin"
+        tabIndex={signin ? 0 : -1}
+        onClick={() => onSelect(true)}
+        onKeyDown={(event) => {
+          if (event.key === 'ArrowRight' || event.key === 'ArrowLeft') {
+            event.preventDefault();
+            onSelect(false);
+            tabRefs.current[0]?.focus();
+          }
+        }}
+      >
+        Sign in
+      </button>
+    </div>
+  );
+}
+
 function AuthPageInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [flipped, setFlipped] = useState(() => getInitialMode(searchParams));
   const [switching, setSwitching] = useState(false);
   const switchTimer = useRef(0);
+  const tabRefs = useRef([]);
+  const returnPath = readReturnPath(searchParams);
+
+  useEffect(() => {
+    const mode = searchParams.get('mode');
+    if (mode === 'signin') setFlipped(true);
+    else if (mode === 'signup') setFlipped(false);
+  }, [searchParams]);
+
+  useEffect(() => {
+    let active = true;
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (!active || !user) return;
+      router.replace(returnPath || '/marketplace');
+    });
+    return () => { active = false; };
+  }, [router, returnPath]);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -153,25 +227,53 @@ function AuthPageInner() {
   useEffect(() => () => window.clearTimeout(switchTimer.current), []);
 
   function switchMode(signin) {
-    if (signin === flipped || switching) return;
+    if (signin === flipped && searchParams.get('mode') === (signin ? 'signin' : 'signup')) return;
     const reduceMotion = typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     const desktop = typeof window !== 'undefined' && window.matchMedia('(min-width: 768px)').matches;
-    if (reduceMotion || desktop) {
+    const applyMode = () => {
       setFlipped(signin);
+      router.replace(buildAuthUrl(signin, searchParams), { scroll: false });
+    };
+    if (reduceMotion || desktop) {
+      applyMode();
+      return;
+    }
+    if (signin === flipped) {
+      applyMode();
       return;
     }
     setSwitching(true);
     window.clearTimeout(switchTimer.current);
-    window.setTimeout(() => setFlipped(signin), 300);
+    window.setTimeout(applyMode, 300);
     switchTimer.current = window.setTimeout(() => setSwitching(false), 720);
   }
 
-  const [fullName, setFullName] = useState('');
-  const [email, setEmail] = useState('');
-  const [phone, setPhone] = useState('');
-  const [state, setState] = useState('');
+  const [signupDraft, setSignupDraft] = useState({
+    fullName: '',
+    email: '',
+    phone: '',
+    state: '',
+    agreedToTerms: false,
+  });
+  const {
+    restored: signupDraftRestored,
+    discardDraft: discardSignupDraft,
+    clearDraft: clearSignupDraft,
+  } = usePersistedForm({
+    formId: 'signup',
+    userId: null,
+    values: signupDraft,
+    setValues: setSignupDraft,
+    secretKeys: ['password'],
+  });
+  const { fullName, email, phone, state, agreedToTerms } = signupDraft;
+  const setFullName = (value) => setSignupDraft((current) => ({ ...current, fullName: value }));
+  const setEmail = (value) => setSignupDraft((current) => ({ ...current, email: value }));
+  const setPhone = (value) => setSignupDraft((current) => ({ ...current, phone: value }));
+  const setState = (value) => setSignupDraft((current) => ({ ...current, state: value }));
+  const setAgreedToTerms = (value) => setSignupDraft((current) => ({ ...current, agreedToTerms: value }));
+
   const [password, setPassword] = useState('');
-  const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [signupLoading, setSignupLoading] = useState(false);
   const [signupAlert, setSignupAlert] = useState(null);
   const [signupNotice, setSignupNotice] = useState('');
@@ -193,10 +295,6 @@ function AuthPageInner() {
     }
   }, [searchParams]);
 
-  useEffect(() => {
-    try { window.localStorage.removeItem('mm_signup_draft'); }
-    catch { /* Storage can be unavailable in private browsing. */ }
-  }, []);
   const signupReady =
     fullName.trim().length > 0 &&
     /^\S+@\S+\.\S+$/.test(email) &&
@@ -238,6 +336,7 @@ function AuthPageInner() {
       return;
     }
 
+    clearSignupDraft();
     markSignedIn();
     router.push('/onboarding/role');
   }
@@ -279,7 +378,7 @@ function AuthPageInner() {
     setLoginLoading(false);
     setLoginSuccess(true);
     markSignedIn();
-    const requested = safeNextPath(searchParams.get('next'));
+    const requested = readReturnPath(searchParams);
     const next = assurance.data?.nextLevel === 'aal2' && assurance.data?.currentLevel !== 'aal2' ? '/security' : requested || '/marketplace';
     window.setTimeout(() => router.push(next), 700);
   }
@@ -310,13 +409,23 @@ function AuthPageInner() {
         </aside>
 
         <section className="mm-auth-form min-w-0 w-full flex-col px-5 py-6 sm:px-9 sm:py-9 md:px-12 md:py-10">
+          <div className="mx-auto w-full max-w-lg">
+            <AuthModeTabs signin={flipped} onSelect={switchMode} tabRefs={tabRefs} />
+          </div>
           <div key={flipped ? 'signin' : 'signup'} className="mm-auth-form-face mx-auto w-full max-w-lg">
             {!flipped ? (
               <>
                 <h1 className="font-display text-[2rem] font-bold leading-tight tracking-[-.035em] sm:text-4xl">Create your account</h1>
                 <p className="mt-2 text-[15px] leading-6 text-[#596674]">Buy digital products or set up a creator profile when you’re ready.</p>
+                <DraftRestoredNotice
+                  visible={signupDraftRestored}
+                  onDiscard={() => {
+                    discardSignupDraft();
+                    setSignupDraft({ fullName: '', email: '', phone: '', state: '', agreedToTerms: false });
+                  }}
+                />
 
-                <form onSubmit={handleSignup} className="mt-6 space-y-4">
+                <form onSubmit={handleSignup} className="mt-6 space-y-4" id="auth-panel-signup" role="tabpanel" aria-labelledby="auth-tab-signup">
                   <label className={labelClass} htmlFor="signup-name">Full name
                     <input id="signup-name" type="text" autoComplete="name" placeholder="Ada Obi" value={fullName} onChange={(e) => setFullName(e.target.value)} required className={`${inputClass} ${validInput}`} />
                   </label>
@@ -375,8 +484,13 @@ function AuthPageInner() {
               <>
                 <h1 className="font-display text-[2rem] font-bold leading-tight tracking-[-.035em] sm:text-4xl">Welcome back.</h1>
                 <p className="mt-2 text-[15px] leading-6 text-[#596674]">Sign in to your Middleman account.</p>
+                {returnPath ? (
+                  <p role="status" className="mt-4 rounded-xl border border-[#e8dfd3] bg-[#f7f3ed] px-3.5 py-3 text-sm leading-5 text-[#4f5c68]">
+                    Sign in to continue
+                  </p>
+                ) : null}
                 {loginNotice && <p role="status" className="mt-5 rounded-xl bg-[#f0f6ef] px-3.5 py-3 text-sm leading-5 text-[#35523b]">{loginNotice}</p>}
-                <form noValidate onSubmit={handleLogin} className="mt-7 space-y-5">
+                <form noValidate onSubmit={handleLogin} className="mt-7 space-y-5" id="auth-panel-signin" role="tabpanel" aria-labelledby="auth-tab-signin">
                   <label className={labelClass} htmlFor="login-email">Email address
                     <input ref={loginEmailRef} id="login-email" type="email" autoComplete="email" inputMode="email" placeholder="Enter your email" value={loginEmail} onChange={(e) => { setLoginEmail(e.target.value); if (loginAlert && loginAlert.field !== 'password') setLoginAlert(null); }} aria-invalid={loginAlert?.field === 'email' || loginAlert?.field === 'credentials' || undefined} aria-describedby={loginAlert ? 'auth-alert' : undefined} className={`${inputClass} ${loginAlert?.field === 'email' || loginAlert?.field === 'credentials' ? invalidInput : validInput}`} />
                   </label>

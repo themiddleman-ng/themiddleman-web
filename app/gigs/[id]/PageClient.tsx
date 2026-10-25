@@ -11,6 +11,8 @@ import { HeartIcon } from "@phosphor-icons/react/dist/csr/Heart";
 import { SealCheckIcon } from "@phosphor-icons/react/dist/csr/SealCheck";
 import { ShareNetworkIcon } from "@phosphor-icons/react/dist/csr/ShareNetwork";
 import { signinHref } from "@/lib/auth/signin-redirect.mjs";
+import DraftRestoredNotice from "@/components/forms/DraftRestoredNotice";
+import { usePersistedForm } from "@/lib/forms/usePersistedForm";
 import { isSupabaseConfigured, supabase } from "@/lib/supabaseClient";
 import { StarRatingDisplay } from "@/components/StarRating";
 import SiteHeader from "@/components/SiteHeader";
@@ -83,11 +85,29 @@ export default function GigPageClient({
   const [loadError, setLoadError] = useState("");
   const [actionError, setActionError] = useState("");
   const [paying, setPaying] = useState(false);
-  const [reportReason, setReportReason] = useState("Spam or misleading content");
-  const [reportDetails, setReportDetails] = useState("");
+  const [reportOpen, setReportOpen] = useState(false);
+  const [reportDraft, setReportDraft] = useState({
+    reportReason: "Spam or misleading content",
+    reportDetails: "",
+  });
+  const {
+    restored: reportDraftRestored,
+    discardDraft: discardReportDraft,
+    clearDraft: clearReportDraft,
+  } = usePersistedForm({
+    formId: "gig-report",
+    userId,
+    recordId: gigId,
+    values: reportDraft,
+    setValues: setReportDraft,
+    enabled: Boolean(userId && reportOpen),
+    storage: "session",
+  });
+  const { reportReason, reportDetails } = reportDraft;
+  const setReportReason = (value: string) => setReportDraft((current) => ({ ...current, reportReason: value }));
+  const setReportDetails = (value: string) => setReportDraft((current) => ({ ...current, reportDetails: value }));
   const [reporting, setReporting] = useState(false);
   const [reportSuccess, setReportSuccess] = useState(false);
-  const [reportOpen, setReportOpen] = useState(false);
   const [moreOpen, setMoreOpen] = useState(false);
   const [activeSlide, setActiveSlide] = useState(0);
   const [detailTab, setDetailTab] = useState<DetailTabId>("overview");
@@ -352,7 +372,11 @@ export default function GigPageClient({
     setReporting(true);
     const { error } = await supabase.from("gig_reports").insert({ gig_id: gig.id, reported_by: userId, reason: reportReason, details: reportDetails.trim() || null });
     if (error) { setActionError(error.message); setReporting(false); return; }
-    setReportSuccess(true); setReportDetails(""); setReporting(false); setReportOpen(false);
+    setReportSuccess(true);
+    setReportDraft({ reportReason: "Spam or misleading content", reportDetails: "" });
+    clearReportDraft();
+    setReporting(false);
+    setReportOpen(false);
   }
 
   useEffect(() => {
@@ -859,6 +883,13 @@ export default function GigPageClient({
           </div>
           <button type="button" aria-label="Close report form" onClick={() => setReportOpen(false)} className="grid h-9 w-9 shrink-0 place-items-center rounded-full text-xl leading-none text-slate hover:bg-[#f4eee6] hover:text-bone">×</button>
         </div>
+        <DraftRestoredNotice
+          visible={reportDraftRestored}
+          onDiscard={() => {
+            discardReportDraft();
+            setReportDraft({ reportReason: "Spam or misleading content", reportDetails: "" });
+          }}
+        />
         <label className="mt-4 block text-sm font-medium text-bone">Reason<select value={reportReason} onChange={(e) => setReportReason(e.target.value)} className="auth-input mt-2"><option>Spam or misleading content</option><option>Inappropriate or abusive content</option><option>Wrong category or pricing</option><option>Suspicious seller activity</option><option>Other</option></select></label>
         <label className="mt-4 block text-sm font-medium text-bone">Details<textarea value={reportDetails} onChange={(e) => setReportDetails(e.target.value)} className="auth-input mt-2 min-h-24" placeholder="Add any extra context for the admin team." /></label>
         <button onClick={handleReportGig} disabled={reporting} className="mt-4 w-full rounded-full bg-[#C2410C] px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-[#9A3412] disabled:opacity-50">{reporting ? "Sending report…" : "Submit report"}</button>
