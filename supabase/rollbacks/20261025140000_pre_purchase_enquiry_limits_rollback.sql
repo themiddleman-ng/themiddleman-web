@@ -1,5 +1,10 @@
 begin;
 
+-- Drops private.conversation_has_paid_order. That function treated only
+-- in_escrow, delivered, approved, and disputed as paid (a paying buyer is
+-- not enquiry-capped). pending_payment and refunded were intentionally
+-- excluded. Restoring this file removes that bypass entirely.
+
 drop index if exists public.conversations_enquiry_one_per_buyer_gig;
 
 drop trigger if exists enforce_conversation_enquiry_limits on public.conversations;

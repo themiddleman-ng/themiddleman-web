@@ -18,6 +18,26 @@ as $$
     where o.buyer_id = p_buyer_id
       and sp.user_id = p_seller_user_id
       and o.gig_id is not distinct from p_gig_id
+      -- Paid bypass. Compare production `select status, count(*) from public.orders group by 1`
+      -- (supabase/preflight/2026-10-25_preflight.sql) to this list before applying.
+      --
+      -- public.order_status is only these six values (schema + phase A). Writers:
+      --   pending_payment — order insert / escrow checkout RPC. Paystack has not settled.
+      --                     Do not bypass: the buyer has not paid.
+      --   in_escrow       — phase C verify and escrow v2 after a successful charge.
+      --                     Also the status while a seller-timeout refund is only queued.
+      --                     Bypass: money has been taken and not confirmed returned.
+      --   delivered       — admin release (phase D and escrow v2). Bypass: buyer has paid.
+      --   approved        — buyer accept, auto-accept, dispute closed with no refund,
+      --                     or a succeeded payout. Bypass: purchase completed.
+      --   disputed        — open dispute. A partial refund leaves the order here until
+      --                     payout sets approved or a full refund sets refunded.
+      --                     Bypass: the buyer has paid and the case is still open.
+      --   refunded        — finish_escrow_operation when the refund equals buyer_total.
+      --                     Do not bypass: the purchase was fully reversed. The app
+      --                     still reuses an existing (buyer_id, gig_id) thread; this
+      --                     status only stops a refunded order from waiving the daily cap.
+      -- No other order status is produced by webhooks, cron, or the escrow v2 functions.
       and o.status in ('in_escrow', 'delivered', 'approved', 'disputed')
   );
 $$;

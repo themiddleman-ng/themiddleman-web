@@ -40,6 +40,21 @@ test("enquiry migration limits daily threads to non-order conversations", async 
   );
   assert.match(migration, /conversation_has_paid_order/);
   assert.match(migration, /not private\.conversation_has_paid_order/);
+  assert.match(migration, /o\.status in \('in_escrow', 'delivered', 'approved', 'disputed'\)/);
+  assert.match(migration, /pending_payment — order insert/);
+  assert.match(migration, /refunded\s+— finish_escrow_operation/);
+  const rollback = await readFile(
+    new URL("../supabase/rollbacks/20261025140000_pre_purchase_enquiry_limits_rollback.sql", import.meta.url),
+    "utf8",
+  );
+  assert.match(rollback, /in_escrow, delivered, approved, and disputed/);
+  assert.match(rollback, /pending_payment and refunded/);
+  const preflight = await readFile(
+    new URL("../supabase/preflight/2026-10-25_preflight.sql", import.meta.url),
+    "utf8",
+  );
+  assert.match(preflight, /select status, count\(\*\)/);
+  assert.match(preflight, /bypass: in_escrow, delivered, approved, disputed/);
   assert.match(migration, /messages_body_max_length.*not valid/i);
   assert.match(migration, /conversations_enquiry_one_per_buyer_gig/);
 });

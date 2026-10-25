@@ -1,6 +1,18 @@
 -- READ-ONLY pre-flight for production. Samuel runs this manually; do not apply migrations from this file.
 begin read only;
 
+-- Order statuses actually stored. Compare each status to the paid bypass in
+-- private.conversation_has_paid_order (20261025140000_pre_purchase_enquiry_limits.sql):
+--   bypass: in_escrow, delivered, approved, disputed
+--   do not bypass: pending_payment (not settled), refunded (full refund confirmed)
+-- Any status outside those six is drift. Do not apply 20261025140000 until
+-- this result has been read. A row in the bypass list means that buyer must
+-- not be blocked from the existing product thread.
+select status, count(*)
+from public.orders
+group by 1
+order by 1;
+
 -- Long messages that would fail once messages_body_max_length is validated
 select count(*) as long_message_count
 from public.messages
