@@ -24,9 +24,9 @@ export default function AboutPage() {
           <p>The Middleman was founded by Samuel Oguntona and built at Obafemi Awolowo University, Ile-Ife. It began as a campus project and is growing into a marketplace for digital products from creators across Nigeria.</p>
         </div>
 
-        <div className="relative mt-8 rounded-2xl border border-line bg-paper p-5 sm:mt-12 sm:p-8">
-          <div className="absolute -left-2 top-1/2 hidden h-4 w-4 -translate-y-1/2 rounded-full border border-line bg-ink sm:block" />
-          <div className="absolute -right-2 top-1/2 hidden h-4 w-4 -translate-y-1/2 rounded-full border border-line bg-ink sm:block" />
+        <div className="relative mt-8 overflow-hidden rounded-2xl border border-line bg-paper p-5 sm:mt-12 sm:p-8">
+          <div className="pointer-events-none absolute left-0 top-1/2 hidden h-4 w-4 -translate-x-1/2 -translate-y-1/2 rounded-full border border-line bg-ink sm:block" />
+          <div className="pointer-events-none absolute right-0 top-1/2 hidden h-4 w-4 -translate-y-1/2 translate-x-1/2 rounded-full border border-line bg-ink sm:block" />
           <p className="text-xs font-bold uppercase tracking-[.16em] text-ember">What we hold to</p>
           <ul className="mt-5 space-y-4">
             {[
