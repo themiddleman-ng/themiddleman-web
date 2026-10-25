@@ -80,15 +80,31 @@ export async function POST(request: Request) {
     return privateJson({ error: 'You cannot message yourself about this product.' }, 409);
   }
 
-  const dayStart = new Date();
-  dayStart.setUTCHours(0, 0, 0, 0);
-  const { count: threadsToday, error: limitError } = await db.from('conversations')
-    .select('id', { count: 'exact', head: true })
-    .eq('buyer_id', user.id)
-    .gte('created_at', dayStart.toISOString());
-  if (limitError) return privateJson({ error: 'Could not verify enquiry limits.' }, 500);
-  if ((threadsToday ?? 0) >= ENQUIRY_DAILY_THREAD_LIMIT) {
-    return privateJson({ error: `You can start up to ${ENQUIRY_DAILY_THREAD_LIMIT} new product conversations per day.` }, 429);
+  if (!paidOrder) {
+    const dayStart = new Date();
+    dayStart.setUTCHours(0, 0, 0, 0);
+    const [{ data: todayConversations, error: limitError }, { data: paidOrderRows, error: paidListError }] = await Promise.all([
+      db.from('conversations')
+        .select('id,buyer_id,seller_id,gig_id,created_at')
+        .eq('buyer_id', user.id)
+        .gte('created_at', dayStart.toISOString()),
+      db.from('orders')
+        .select('gig_id, seller_profiles!orders_seller_id_fkey(user_id)')
+        .eq('buyer_id', user.id)
+        .in('status', paidOrderStatuses),
+    ]);
+    if (limitError || paidListError) return privateJson({ error: 'Could not verify enquiry limits.' }, 500);
+    const paidKeys = new Set((paidOrderRows ?? []).map((order) => {
+      const profile = Array.isArray(order.seller_profiles) ? order.seller_profiles[0] : order.seller_profiles;
+      const sellerUserId = profile && typeof profile === 'object' && 'user_id' in profile ? String(profile.user_id) : '';
+      return `${user.id}:${sellerUserId}:${order.gig_id}`;
+    }));
+    const enquiryThreadsToday = (todayConversations ?? []).filter((row) =>
+      !paidKeys.has(`${row.buyer_id}:${row.seller_id}:${row.gig_id}`),
+    ).length;
+    if (enquiryThreadsToday >= ENQUIRY_DAILY_THREAD_LIMIT) {
+      return privateJson({ error: `You can start up to ${ENQUIRY_DAILY_THREAD_LIMIT} new product conversations per day.` }, 429);
+    }
   }
 
   const { data: existing } = await db.from('conversations').select('id')
