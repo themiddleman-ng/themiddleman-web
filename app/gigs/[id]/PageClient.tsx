@@ -501,10 +501,14 @@ export default function GigPageClient({
         </div>
         <div className="min-w-0 flex-1">
           <p className="flex flex-wrap items-center gap-1.5 text-sm font-semibold">
-            {gig.seller_profiles?.display_name ?? "Unknown seller"}
             {verified ? (
-              <SealCheckIcon size={18} weight="fill" className="text-sky-600" aria-label="Verified seller" />
-            ) : null}
+              <Link href={`/sellers/${gig.seller_id}`} className="inline-flex min-h-11 items-center gap-1.5 hover:text-link">
+                {gig.seller_profiles?.display_name ?? "Unknown seller"}
+                <SealCheckIcon size={18} weight="fill" className="text-link" aria-label="Verified seller" />
+              </Link>
+            ) : (
+              <span>{gig.seller_profiles?.display_name ?? "Unknown seller"}</span>
+            )}
           </p>
           <p className="text-xs text-muted">{categoryLabel}</p>
         </div>
@@ -649,7 +653,13 @@ export default function GigPageClient({
     return (
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_220px]">
         <div>
-          <p className="text-sm font-semibold text-bone">{gig.seller_profiles?.display_name ?? "Unknown seller"}</p>
+          {verified ? (
+            <Link href={`/sellers/${gig.seller_id}`} className="inline-flex min-h-11 items-center text-sm font-semibold text-bone hover:text-link">
+              {gig.seller_profiles?.display_name ?? "Unknown seller"}
+            </Link>
+          ) : (
+            <p className="text-sm font-semibold text-bone">{gig.seller_profiles?.display_name ?? "Unknown seller"}</p>
+          )}
           {verified ? <p className="mt-1 text-xs font-semibold text-link">Verified seller</p> : null}
           {gig.seller_profiles?.bio ? (
             <p className="mt-3 whitespace-pre-wrap text-sm leading-relaxed text-muted">{gig.seller_profiles.bio}</p>
