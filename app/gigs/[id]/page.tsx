@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { createClient } from "@supabase/supabase-js";
 import PageClient from "./PageClient";
 import { gatewayTestEnabled } from "@/lib/server/escrow-config.mjs";
+import { prePurchaseEnquiryEnabled } from "@/lib/server/messaging-config.mjs";
 import { loadGigPackageListing } from "@/lib/server/gig-package-listing";
 
 export const dynamic = "force-dynamic";
@@ -92,6 +93,7 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
     <PageClient
       gigId={id}
       purchasesEnabled={gatewayTestEnabled()}
+      prePurchaseEnquiryEnabled={prePurchaseEnquiryEnabled()}
       packageListing={packageListing}
     />
   );

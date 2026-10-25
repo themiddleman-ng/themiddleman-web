@@ -69,10 +69,12 @@ type DetailTabId = (typeof DETAIL_TABS)[number]["id"];
 export default function GigPageClient({
   gigId,
   purchasesEnabled,
+  prePurchaseEnquiryEnabled = false,
   packageListing = null,
 }: {
   gigId: string;
   purchasesEnabled: boolean;
+  prePurchaseEnquiryEnabled?: boolean;
   packageListing?: GigPackageListing | null;
 }) {
   const router = useRouter();
@@ -121,7 +123,7 @@ export default function GigPageClient({
   const moreMenuRef = useRef<HTMLDivElement | null>(null);
   const returnPath = `/gigs/${gigId}`;
   const purchasesPausedTitle =
-    "Checkout is paused while payment and delivery verification continues.";
+    "Checkout is not open yet. When it is, your payment stays in escrow until you accept delivery or a dispute is resolved.";
 
   useEffect(() => {
     void fetch("/api/gigs/" + gigId + "/view", {
@@ -531,7 +533,7 @@ export default function GigPageClient({
           {purchaseAction}
           {!purchasesEnabled ? (
             <p className="text-center text-xs leading-5 text-muted">
-              Payment and delivery are being verified before live checkout is enabled.
+              You can browse and save products. Purchases stay paused until checkout is enabled on an isolated test environment; funds are only released per our escrow terms after delivery review.
             </p>
           ) : (
             <p className="text-center text-xs text-muted">Checkout is enabled only in an isolated Paystack test environment.</p>
@@ -668,9 +670,13 @@ export default function GigPageClient({
           )}
         </div>
         <aside className="rounded-xl border border-line bg-elevated p-4">
-          <p className="text-sm font-semibold text-bone">Ask about customization after purchase</p>
+          <p className="text-sm font-semibold text-bone">
+            {prePurchaseEnquiryEnabled ? "Ask a pre-purchase question" : "Ask about customization after purchase"}
+          </p>
           <p className="mt-2 text-xs leading-5 text-muted">
-            Messaging opens once you have a paid order for this product.
+            {prePurchaseEnquiryEnabled
+              ? "Send a short question about this product before checkout. Links and contact details stay blocked in messages."
+              : "Messaging opens once you have a paid order for this product."}
           </p>
           <button
             type="button"

@@ -1,4 +1,5 @@
 import { authenticatedUser, privateJson, serviceClient, uuidPattern } from '@/lib/server/marketplace';
+import { prePurchaseEnquiryEnabled } from '@/lib/server/messaging-config.mjs';
 import { sameOriginMutation } from '@/lib/server/same-origin.mjs';
 
 export const runtime = 'nodejs';
@@ -30,12 +31,13 @@ export async function GET() {
   if (conversationsResult.error || ordersResult.error) return privateJson({ error: 'Could not load conversations.' }, 500);
 
   const paidOrderKeys = new Set((ordersResult.data ?? []).map(order => `${order.buyer_id}:${order.seller_id}:${order.gig_id}`));
-  const paidConversations = (conversationsResult.data ?? []).filter(row =>
-    paidOrderKeys.has(`${row.buyer_id}:${row.seller_id}:${row.gig_id}`)
+  const enquiryEnabled = prePurchaseEnquiryEnabled();
+  const visibleConversations = (conversationsResult.data ?? []).filter(row =>
+    enquiryEnabled || paidOrderKeys.has(`${row.buyer_id}:${row.seller_id}:${row.gig_id}`)
   );
 
   let unreadCount = 0;
-  const conversations = paidConversations.map(row => {
+  const conversations = visibleConversations.map(row => {
     const lastReadAt = row.buyer_id === user.id ? row.buyer_last_read_at : row.seller_last_read_at;
     if ((row.messages ?? []).some(message => message.sender_id !== user.id &&
       (!lastReadAt || Date.parse(message.created_at) > Date.parse(lastReadAt)))) unreadCount++;
@@ -69,7 +71,9 @@ export async function POST(request: Request) {
     .eq('buyer_id', user.id).eq('seller_id', gig.seller_id).eq('gig_id', gig.id)
     .in('status', paidOrderStatuses).limit(1).maybeSingle();
   if (orderError) return privateJson({ error: 'Could not verify the order.' }, 500);
-  if (!paidOrder) return privateJson({ error: 'Messaging is available only after a paid order for this product.' }, 403);
+  if (!paidOrder && !prePurchaseEnquiryEnabled()) {
+    return privateJson({ error: 'Messaging is available only after a paid order for this product.' }, 403);
+  }
 
   const { data: existing } = await db.from('conversations').select('id')
     .eq('buyer_id', user.id).eq('seller_id', gig.seller_id).eq('gig_id', gig.id).maybeSingle();
