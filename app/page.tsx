@@ -28,8 +28,8 @@ const steps = [
     ),
   },
   {
-    title: "Pay with Paystack (₦)",
-    body: "Eligible checkout runs through Paystack in Nigerian Naira. Purchases are paused while payment is verified.",
+    title: "Purchases paused",
+    body: "Prices are shown in Naira. Checkout is not open, so the site does not take a payment.",
     icon: (
       <svg viewBox="0 0 24 24" className="h-7 w-7" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
         <rect x="3" y="6" width="18" height="12" rx="2" />
@@ -38,8 +38,8 @@ const steps = [
     ),
   },
   {
-    title: "Get your files",
-    body: "Your payment is held until you confirm. Collect the files from your order page after the seller delivers — this is not an instant download.",
+    title: "Files come later",
+    body: "File delivery follows a paid order. There is nothing to download while purchases are paused.",
     icon: (
       <svg viewBox="0 0 24 24" className="h-7 w-7" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
         <path d="M7 3.5h7l4 4V20a1.5 1.5 0 0 1-1.5 1.5H7A1.5 1.5 0 0 1 5.5 20V5A1.5 1.5 0 0 1 7 3.5Z" />
@@ -51,8 +51,8 @@ const steps = [
 
 const developerFeatures = [
   {
-    title: "Paystack checkout in Naira",
-    body: "Eligible purchases check out in Nigerian Naira through Paystack.",
+    title: "Prices in Naira",
+    body: "Listings show a price in Nigerian Naira. Checkout is not open on this launch.",
     icon: (
       <svg viewBox="0 0 24 24" className="h-6 w-6" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
         <rect x="2" y="5" width="20" height="14" rx="2" />
@@ -72,7 +72,7 @@ const developerFeatures = [
   },
   {
     title: "In-app product messaging",
-    body: "Keep product conversations on The Middleman after an order starts.",
+    body: "Product messages are tied to a paid order. New purchases are paused, so a new buyer cannot open a thread yet.",
     icon: (
       <svg viewBox="0 0 24 24" className="h-6 w-6" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
         <path d="M21 12a8 8 0 0 1-8 8H5l1.6-3.2A8 8 0 1 1 21 12Z" strokeLinejoin="round" />
@@ -96,7 +96,7 @@ export default function Home() {
               Find <span className="text-ember">digital</span> products that work.
             </h1>
             <p className="mt-4 max-w-xl text-[16px] leading-7 text-slate sm:text-[18px]">
-              Browse listings from Nigerian creators and pay through Paystack.
+              Browse listings from Nigerian creators. Purchases are paused, so nothing on this site charges you.
             </p>
             <form action="/marketplace" className="mt-5 md:hidden" role="search">
               <label className="sr-only" htmlFor="hero-search">Search products</label>
@@ -122,7 +122,7 @@ export default function Home() {
       <section id="how-it-works" className="bg-ink">
         <div className="mx-auto max-w-7xl px-5 py-14 sm:px-8 sm:py-16">
           <p className="text-[13px] font-bold uppercase tracking-[.14em] text-eyebrow">How it works</p>
-          <h2 className="mt-3 max-w-md font-display text-[1.85rem] font-semibold leading-[1.08] tracking-[-.05em] text-bone sm:text-[2.4rem]">Find, pay, then collect your files.</h2>
+          <h2 className="mt-3 max-w-md font-display text-[1.85rem] font-semibold leading-[1.08] tracking-[-.05em] text-bone sm:text-[2.4rem]">Find a listing, then check back when purchases open.</h2>
           <div className="mt-8 grid gap-4 sm:grid-cols-3">
             {steps.map((step, index) => (
               <article key={step.title} className="rounded-2xl border border-line bg-paper p-5">
@@ -158,7 +158,7 @@ export default function Home() {
         <div className="mx-auto flex max-w-7xl flex-col gap-5 px-5 py-14 sm:px-8 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <p className="text-[13px] font-bold uppercase tracking-[.14em] text-eyebrow">Sell on The Middleman</p>
-            <h2 className="mt-3 max-w-xl font-display text-[1.85rem] font-semibold tracking-[-.04em] text-bone">List a digital product and get paid in Naira.</h2>
+            <h2 className="mt-3 max-w-xl font-display text-[1.85rem] font-semibold tracking-[-.04em] text-bone">List a digital product buyers can preview.</h2>
             <p className="mt-3 max-w-xl text-[16px] leading-7 text-slate">Create an account, finish seller verification, then publish a listing buyers can preview.</p>
           </div>
           <Link href="/signup" className="btn-primary inline-flex min-h-12 w-fit items-center justify-center rounded-md px-5 text-[16px] font-bold">Start selling</Link>
@@ -169,7 +169,7 @@ export default function Home() {
 
       <section className="cta-band">
         <div className="mx-auto flex max-w-7xl flex-col gap-5 px-5 py-12 sm:px-8 sm:flex-row sm:items-center sm:justify-between">
-          <h2 className="max-w-xl font-display text-[clamp(1.8rem,3vw,2.6rem)] font-semibold leading-tight">Find a product. Pay in Naira.</h2>
+          <h2 className="max-w-xl font-display text-[clamp(1.8rem,3vw,2.6rem)] font-semibold leading-tight">Find a product. Purchases are paused.</h2>
           <Link href="/marketplace" className="inline-flex min-h-12 w-fit items-center rounded-md bg-logo-navy px-5 text-[16px] font-bold text-white">Browse products</Link>
         </div>
       </section>
@@ -201,7 +201,7 @@ export default function Home() {
             <p className="text-[14px] font-bold text-bone">Contact</p>
             <div className="mt-3 grid gap-2 text-[16px] text-slate">
               <a href="mailto:hello@themiddleman.com.ng" className="inline-flex min-h-11 items-center break-all hover:text-eyebrow">hello@themiddleman.com.ng</a>
-              <p className="text-[14px] font-semibold text-bone">Payments by Paystack</p>
+              <p className="text-[14px] font-semibold text-bone">Purchases are paused</p>
             </div>
           </div>
         </div>

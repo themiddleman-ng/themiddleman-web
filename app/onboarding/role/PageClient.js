@@ -60,7 +60,7 @@ export default function RoleSelectionPage() {
       setActive: setWantsToBuy,
       number: '01',
       title: 'BUY DIGITAL PRODUCTS',
-      text: 'Discover software, code, templates and other digital products to use or build with.',
+      text: 'Browse software, code, templates and other digital products. Purchases are paused, so choosing this does not start a payment.',
       tag: 'Buyer',
     },
     {
@@ -68,7 +68,7 @@ export default function RoleSelectionPage() {
       setActive: setWantsToSell,
       number: '02',
       title: 'SELL DIGITAL PRODUCTS',
-      text: 'List your software, code or digital products and make them available to buyers.',
+      text: 'List your software, code or digital products for buyers to preview. Payouts are not open on this launch.',
       tag: 'Seller',
     },
   ];
@@ -99,8 +99,7 @@ export default function RoleSelectionPage() {
               How would you like to use<br className="hidden sm:block" /> The Middleman?
             </h1>
             <p className="mt-4 max-w-xl text-sm leading-relaxed text-slate sm:text-base">
-              Choose one path or both. Your account adapts to what you want to buy or sell, and you can change these
-              preferences later.
+              Choose one path or both. Purchases and payouts are paused. You can change these preferences later.
             </p>
           </div>
 
@@ -136,7 +135,7 @@ export default function RoleSelectionPage() {
             </div>
 
             <button type="button" aria-pressed={wantsToBuy && wantsToSell} onClick={() => { setWantsToBuy(true); setWantsToSell(true); }} className={`mt-4 w-full rounded-xl border px-5 py-4 text-left text-sm font-semibold ${wantsToBuy && wantsToSell ? 'border-ember bg-ember/10' : 'border-line bg-white'}`}>
-              Buy and sell <span className="ml-2 font-normal text-slate">Both, with one account</span>
+              Buy and sell <span className="ml-2 font-normal text-slate">Both, with one account. Purchases stay paused.</span>
             </button>
 
             {error && <p className="auth-error mt-5">{error}</p>}

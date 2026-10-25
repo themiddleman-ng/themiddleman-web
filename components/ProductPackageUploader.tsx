@@ -38,7 +38,7 @@ export function ProductPackageField({ file, onChange, required = true }: { file:
       <div className="mb-3 flex items-start justify-between gap-3">
         <div>
           <h2 className="font-display text-lg font-semibold text-bone">Product file {required ? <span className="text-ember">*</span> : null}</h2>
-          <p className="mt-1 text-sm text-slate">Upload the actual files buyers receive after purchase. This file stays private until review approves it.</p>
+          <p className="mt-1 text-sm text-slate">Upload the files a buyer would receive after a purchase. Purchases are paused on this launch. This file stays private until review approves it.</p>
         </div>
         <span className="shrink-0 rounded-full bg-white/5 px-2.5 py-1 text-xs text-slate">10 MB max</span>
       </div>

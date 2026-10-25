@@ -225,7 +225,7 @@ export default function OrdersPage() {
 
       <section className="mx-auto max-w-4xl px-4 py-5 sm:px-6 sm:py-10">
         <p className="text-xs font-semibold tracking-[.2em] text-ember">MY ORDERS</p>
-        <h1 className="mt-2 font-display text-2xl font-bold sm:text-3xl">My orders</h1><p className="mt-2 text-sm text-slate">Track and manage your purchases and sales of digital products.</p><Link href="/disputes" className="mt-3 inline-block min-h-10 text-sm font-medium text-ember hover:underline">Respond to a dispute</Link>
+        <h1 className="mt-2 font-display text-2xl font-bold sm:text-3xl">My orders</h1><p className="mt-2 text-sm text-slate">Track orders that already exist. New purchases are paused, so this page does not start a payment.</p><Link href="/disputes" className="mt-3 inline-block min-h-10 text-sm font-medium text-ember hover:underline">Respond to a dispute</Link>
 
         <div className="mm-order-controls mt-5 flex flex-col gap-3 rounded-xl border border-line bg-white p-4 sm:flex-row sm:flex-wrap sm:items-end">
           <label className="min-w-0 flex-1 text-xs font-semibold">Search orders<input type="search" value={orderQuery} onChange={(event) => setOrderQuery(event.target.value)} placeholder="Product or order ID" className="mt-2 block min-h-11 w-full border px-3 text-sm font-normal" /></label>

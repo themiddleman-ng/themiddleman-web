@@ -2,7 +2,7 @@
 
 import { LockIcon } from "@phosphor-icons/react/dist/csr/Lock";
 
-export const ESCROW_TRUST_COPY = "Payment held in escrow until you confirm delivery";
+export const ESCROW_TRUST_COPY = "Purchases are paused. No payment is taken or held.";
 
 type EscrowTrustLineProps = {
   compact?: boolean;

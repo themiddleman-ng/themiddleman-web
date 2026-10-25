@@ -3,7 +3,7 @@ import SiteHeader from "@/components/SiteHeader";
 
 export const metadata = {
   title: "About",
-  description: "Discover ready-made digital products from Nigerian creators and pay in Naira through Paystack.",
+  description: "A marketplace for ready-made digital products from Nigerian creators. Purchases are paused.",
   alternates: { canonical: "/about" },
   openGraph: { title: "About The Middleman", description: "A marketplace for ready-made digital products from independent creators.", url: "https://themiddleman.com.ng/about" },
   twitter: { card: "summary_large_image", title: "About The Middleman", description: "Discover ready-made digital products from Nigerian creators." },
@@ -19,7 +19,7 @@ export default function AboutPage() {
         <h1 className="mt-2 font-display text-[1.85rem] font-bold tracking-tight sm:text-5xl">A marketplace for useful digital products.</h1>
 
         <div className="mt-10 space-y-6 text-[15px] leading-relaxed text-slate">
-          <p>The Middleman is a marketplace for ready-made digital products from independent creators, built with Nigeria first in mind. Buyers can review listing details and previews before purchasing, and pay in Naira through Paystack.</p>
+          <p>The Middleman is a marketplace for ready-made digital products from independent creators, built with Nigeria first in mind. Buyers can review listing details and previews. Purchases are paused, so browsing does not start a payment.</p>
           <p>We started with a simple goal: make it easier to discover useful digital products and understand what is included before buying. Clear listing details help buyers compare products and creators.</p>
           <p>The Middleman was founded by Samuel Oguntona and built at Obafemi Awolowo University, Ile-Ife. It began as a campus project and is growing into a marketplace for digital products from creators across Nigeria.</p>
         </div>
@@ -32,7 +32,7 @@ export default function AboutPage() {
             {[
               ["Ready-made products", "Browse digital products made by independent creators."],
               ["Clear listing details", "Review product descriptions, previews and seller information before buying."],
-              ["Pay in Naira", "Checkout is in Naira through Paystack."],
+              ["Prices in Naira", "Listings show a price in Naira. Checkout is not open on this launch."],
               ["Seller verification labels", "A verified mark appears only for sellers whose verification is approved."],
             ].map(([title, body]) => (
               <li key={title} className="flex items-start gap-3">

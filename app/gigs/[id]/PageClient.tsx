@@ -124,7 +124,7 @@ export default function GigPageClient({
   const moreMenuRef = useRef<HTMLDivElement | null>(null);
   const returnPath = `/gigs/${gigId}`;
   const purchasesPausedTitle =
-    "Checkout is not open yet. When it is, your payment stays in escrow until you accept delivery or a dispute is resolved.";
+    "Checkout is not open. Browsing this product does not take a payment.";
 
   useEffect(() => {
     let cancelled = false;
@@ -464,7 +464,7 @@ export default function GigPageClient({
   const isOwnGig = ownSellerProfileId === gig.seller_id;
   const requirementLines = [
     gig.delivery_days
-      ? `Allow up to ${gig.delivery_days} day${gig.delivery_days > 1 ? "s" : ""} for the seller to deliver after purchase.`
+      ? `The listing allows up to ${gig.delivery_days} day${gig.delivery_days > 1 ? "s" : ""} for delivery after a purchase. Purchases are paused, so that clock does not start.`
       : null,
     gig.is_ai_assisted ? "This listing discloses that AI tools are used in the product." : null,
   ].filter(Boolean) as string[];
@@ -565,7 +565,7 @@ export default function GigPageClient({
           {purchaseAction}
           {!purchasesEnabled ? (
             <p className="text-center text-xs leading-5 text-muted">
-              You can browse and save products. Purchases stay paused until checkout is enabled on an isolated test environment; funds are only released per our escrow terms after delivery review.
+              You can browse and save products. Checkout is not open, and this page does not take a payment.
             </p>
           ) : (
             <p className="text-center text-xs text-muted">Checkout is enabled only in an isolated Paystack test environment.</p>
@@ -680,7 +680,7 @@ export default function GigPageClient({
         </ul>
       ) : (
         <p className="text-sm text-muted">
-          The seller&apos;s description is the source of truth for supported formats and any requirements. Confirm those details before checkout.
+          The seller&apos;s description is the source of truth for supported formats and any requirements. Purchases are paused, so reading this listing does not start a payment.
         </p>
       );
     }
@@ -703,12 +703,12 @@ export default function GigPageClient({
         </div>
         <aside className="rounded-xl border border-line bg-elevated p-4">
           <p className="text-sm font-semibold text-bone">
-            {prePurchaseEnquiryEnabled ? "Ask a pre-purchase question" : "Ask about customization after purchase"}
+            {prePurchaseEnquiryEnabled ? "Ask a pre-purchase question" : "Questions follow a paid order"}
           </p>
           <p className="mt-2 text-xs leading-5 text-muted">
             {prePurchaseEnquiryEnabled
-              ? "Send a short question about this product before checkout. Links and contact details stay blocked in messages."
-              : "Messaging opens once you have a paid order for this product."}
+              ? "Send a short question about this product. Purchases are paused, so this does not start a payment. Links and contact details stay blocked in messages."
+              : "Purchases are paused, so a new buyer cannot open a product thread yet. Messaging is tied to a paid order."}
           </p>
           <button
             type="button"

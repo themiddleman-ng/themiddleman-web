@@ -6,23 +6,23 @@ import Link from "next/link";
 const QUESTIONS = [
   {
     question: "How do payments work?",
-    answer: "Eligible purchases use Paystack checkout in Nigerian Naira. Buyers pay the listed price plus any processing fees shown at checkout. Purchases are paused while payment and delivery are verified.",
+    answer: "Purchases are paused on this launch. Listings show a price in Naira, and checkout does not take a payment. The terms describe how payment is meant to work once it is enabled.",
   },
   {
     question: "How does payment protection work?",
-    answer: "All payments on The Middleman are held in escrow. When a buyer places an order, the full amount is deducted and held by The Middleman. Your money is never released to the seller until you approve the delivery. If something goes wrong, your funds are protected.",
+    answer: "No payment is held right now, because checkout is not open. The terms and refund policy describe the escrow rules that would apply once payments are enabled. Those pages are the written policy. This launch does not collect or hold money.",
   },
   {
     question: "Can I get a refund?",
-    answer: "The refund policy allows a request if a seller fails to deliver, the delivery is materially different from the listing, the files are unsafe, or the seller is unresponsive during an active order. Read the refund policy before paying.",
+    answer: "A refund applies to a payment that was taken. Checkout is paused, so there is no new payment to refund. The refund policy is the written rule for when payments are enabled.",
   },
   {
     question: "Who owns the licence after I buy?",
-    answer: "Upon full payment and delivery approval, ownership of the delivered digital product transfers from seller to buyer, unless the listing says otherwise. Sellers remain responsible for third-party licences included in a delivery.",
+    answer: "The terms say ownership transfers after full payment and delivery approval, unless the listing says otherwise. Purchases are paused, so that transfer does not happen on this launch.",
   },
   {
     question: "How do downloads and delivery work?",
-    answer: "Sellers must deliver what the listing describes, in the stated formats, within the stated timeframe, and without malware or lock mechanisms. Payment confirmation and product delivery are separate steps. Use your order page to check the status available for your purchase.",
+    answer: "File delivery follows a paid order. Purchases are paused, so there is no download to collect. Sellers still describe formats and contents on the listing.",
   },
   {
     question: "What can I buy here?",
@@ -39,7 +39,7 @@ export default function HomeFAQ() {
         <div>
           <p className="text-[13px] font-bold uppercase tracking-[.14em] text-eyebrow">Frequently asked</p>
           <h2 className="mt-4 max-w-sm font-display text-[1.85rem] font-semibold leading-[1.08] tracking-[-.055em] text-bone sm:text-[clamp(2.4rem,4vw,3.4rem)] sm:leading-[1.02]">Good questions.</h2>
-          <p className="mt-4 max-w-sm text-[16px] leading-7 text-slate">Answers from the current legal pages and the live payment flow.</p>
+          <p className="mt-4 max-w-sm text-[16px] leading-7 text-slate">Answers for this browse-only launch. The legal pages are unchanged and describe the rules for when payments are enabled.</p>
           <Link href="/legal/terms" className="mt-5 inline-flex min-h-11 items-center text-[16px] font-semibold text-eyebrow underline underline-offset-4">Read the terms</Link>
         </div>
 

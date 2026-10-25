@@ -282,7 +282,7 @@ function OrdersPreview({ detail = false }: { detail?: boolean }) {
           <aside className="mm-demo-panel">
             <h2>Payment summary</h2>
             <p>Product <b>₦8,500</b></p>
-            <p>Paid in Naira through Paystack</p>
+            <p>Sample price in Naira. This preview does not charge anyone.</p>
             <hr />
             <Link className="mm-demo-primary" href="?screen=messages">Message creator</Link>
           </aside>
@@ -292,7 +292,7 @@ function OrdersPreview({ detail = false }: { detail?: boolean }) {
   }
   return (
     <>
-      <div className="mm-demo-hero"><div><h1>My orders</h1><p>Track and manage your purchases and sales of digital products.</p></div></div>
+      <div className="mm-demo-hero"><div><h1>My orders</h1><p>Sample screen. Purchases are paused, and this preview does not create an order.</p></div></div>
       <div className="mm-demo-tabs" role="tablist" aria-label="Order type">
         {["Purchases", "Sales"].map((item) => (
           <button type="button" role="tab" aria-selected={tab === item} className={tab === item ? "active" : ""} onClick={() => { setTab(item); setExpandedId((item === "Sales" ? saleOrders : purchaseOrders)[0][0]); }} key={item}>{item}</button>
@@ -661,7 +661,7 @@ function ProductPreview() {
           {step === "review" && (
             <div className="mm-demo-review">
               <p>Product <b>₦8,500</b></p>
-              <p>Pay in Naira through Paystack once live checkout is on. This preview does not charge anyone.</p>
+              <p>Checkout is not part of this preview. No payment is sent.</p>
               <button className="mm-demo-primary" type="button" onClick={() => setStep("done")}>Confirm sample checkout</button>
               <button className="mm-demo-text-button" type="button" onClick={() => setStep("buy")}>Back</button>
             </div>

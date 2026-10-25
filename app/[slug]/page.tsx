@@ -4,10 +4,10 @@ import { notFound } from "next/navigation";
 import SiteHeader from "@/components/SiteHeader";
 
 const pages: Record<string, { eyebrow: string; title: string; body: string; action: string }> = {
-  about: { eyebrow: "OUR STORY", title: "A trusted home for digital products.", body: "The Middleman helps Nigerians buy and sell verified digital products, code, templates, and creative work — with escrow-backed Naira payments held safely on every order.", action: "Browse the marketplace" },
+  about: { eyebrow: "OUR STORY", title: "A trusted home for digital products.", body: "The Middleman helps Nigerians browse ready-made digital products, code, templates, and creative work. Purchases are paused, so browsing does not start a payment.", action: "Browse the marketplace" },
   careers: { eyebrow: "CAREERS", title: "Build trust into every transaction.", body: "We are building thoughtful tools for the next generation of Nigeria's digital workforce. There are no open roles today, but we would love to hear from exceptional people.", action: "Email our team" },
-  disputes: { eyebrow: "RESOLUTION", title: "Fair outcomes, clearly handled.", body: "If delivery and expectations do not match, both parties can submit the agreed brief and work history for a structured review. Funds remain protected while we assess the case.", action: "Contact support" },
-  "seller-guidelines": { eyebrow: "SELLER GUIDE", title: "Set clear expectations. Deliver excellent work.", body: "Keep your offer specific, communicate milestones early, and only mark an order delivered when the agreed work is ready to review. Great sellers earn trust over time.", action: "Start seller verification" },
+  disputes: { eyebrow: "RESOLUTION", title: "Fair outcomes, clearly handled.", body: "Purchases are paused, so there is no payment to hold. When payments are enabled, a disagreement about delivery will follow the published dispute policy.", action: "Contact support" },
+  "seller-guidelines": { eyebrow: "SELLER GUIDE", title: "Set clear expectations. Deliver excellent work.", body: "Describe exactly what a buyer would receive. Purchases and payouts are paused on this launch, so a listing is a preview until checkout opens.", action: "Start seller verification" },
 };
 
 export default async function InformationPage({ params }: { params: Promise<{ slug: string }> }) {

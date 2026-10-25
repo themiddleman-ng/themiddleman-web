@@ -405,7 +405,7 @@ function AuthPageInner() {
               Find useful digital products. Customize them with the creator.
             </p>
           </div>
-          <p className="mm-auth-hero-note relative text-[16px]">Pay in Naira through Paystack.</p>
+          <p className="mm-auth-hero-note relative text-[16px]">Purchases are paused. Signing up does not charge you.</p>
         </aside>
 
         <section className="mm-auth-form min-w-0 w-full flex-col px-5 py-6 sm:px-9 sm:py-9 md:px-12 md:py-10">
@@ -416,7 +416,7 @@ function AuthPageInner() {
             {!flipped ? (
               <>
                 <h1 className="font-display text-[2rem] font-bold leading-tight tracking-[-.035em] sm:text-4xl">Create your account</h1>
-                <p className="mt-2 text-[15px] leading-6 text-muted">Buy digital products or set up a creator profile when you’re ready.</p>
+                <p className="mt-2 text-[15px] leading-6 text-muted">Browse digital products or set up a creator profile when you’re ready. Purchases are paused.</p>
                 <DraftRestoredNotice
                   visible={signupDraftRestored}
                   onDiscard={() => {

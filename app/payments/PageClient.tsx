@@ -6,7 +6,7 @@ import SiteHeader from "@/components/SiteHeader";
 import { downloadCsv } from "@/lib/client/download-csv";
 
 const steps: [string, string, string][] = [
-  ["1", "Pay in Naira", "Checkout uses Paystack. The total is shown in Naira before you confirm a payment."],
+  ["1", "Purchases paused", "Checkout is not open. Listed prices are in Naira, and this page does not charge a card or bank account."],
   ["2", "Track your order", "View the product and order status from My Orders when an order is recorded."],
   ["3", "Review payment activity", "Check payment references, amounts, fees and settlement status here. Some order actions may be paused while the flow is verified."],
 ];
@@ -69,7 +69,7 @@ export default function PaymentsPage() {
         <p className="text-xs font-bold tracking-[.2em] text-ember">PAYMENTS</p>
         <h1 className="mt-2 font-display text-[1.65rem] font-bold leading-tight tracking-tight sm:text-4xl">Payment activity</h1>
         <p className="mt-3 max-w-2xl text-sm leading-6 text-slate sm:text-base">
-          Payments are made in Naira through Paystack. Review payment status and order records here. A buyer accepting delivery does not by itself send a seller payout.
+          Checkout is paused. This page does not start a payment. If a past test payment exists, you can review its status here. A buyer accepting delivery does not by itself send a seller payout.
         </p>
 
         {!loading && !loadError && <div className="mt-6 grid gap-4 sm:grid-cols-3">{[['Payments made', payments.filter((row) => row.role !== 'seller').reduce((sum, row) => sum + row.amount, 0)], ['Sales awaiting payout · gross', payments.filter((row) => row.role === 'seller' && row.payout_status === 'pending').reduce((sum, row) => sum + row.amount, 0)], ['Settled sales · gross', payments.filter((row) => row.role === 'seller' && row.payout_status === 'paid').reduce((sum, row) => sum + row.amount, 0)]].map(([label, amount]) => <section key={String(label)} className="rounded-xl border border-line bg-white p-5"><p className="text-xs text-slate">{label}</p><strong className="mt-3 block text-2xl">₦{Number(amount).toLocaleString('en-NG')}</strong></section>)}</div>}

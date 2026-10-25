@@ -4,7 +4,7 @@ import PageClient from "./PageClient";
 export const dynamic = "force-dynamic";
 
 const description =
-  "Browse digital products from independent Nigerian creators. Compare listing details and prices, then pay in Naira through Paystack.";
+  "Browse digital products from independent Nigerian creators. Compare listing details and prices. Purchases are paused, so browsing does not start a payment.";
 
 export const metadata: Metadata = {
   title: "Marketplace",

@@ -288,8 +288,11 @@ export default function SellerOnboardingPage() {
             <p className="text-xs font-semibold tracking-[.2em] text-ember">SELLER VERIFICATION</p>
             <h1 className="mt-3 font-display text-3xl font-bold text-bone sm:text-5xl">Show buyers what you deliver.</h1>
             <p className="mt-4 max-w-2xl text-sm leading-relaxed text-slate sm:text-base">
-              Complete your creator profile, verify your payout account and securely submit one identity document. A member of our team
-              reviews every application by hand before you can publish products.
+              Complete your creator profile and securely submit one identity document.
+              {payoutSetupEnabled
+                ? " Verify your payout account before you submit."
+                : " Payout account checks are off, so this form does not save a bank account."}{" "}
+              A member of our team reviews every application by hand before you can publish products.
             </p>
             <div className="mt-6 inline-flex items-center gap-2 rounded-full border border-ember/30 bg-ember/10 px-4 py-2 text-xs font-medium text-ember">
               <span className="h-2 w-2 rounded-full bg-ember" />
@@ -470,7 +473,7 @@ export default function SellerOnboardingPage() {
               <section className="border-t border-line pt-6">
                 <p className="text-xs font-bold tracking-[.16em] text-ember">04 · PAYOUT ACCOUNT</p>
                 <p className="mt-3 max-w-2xl text-sm leading-relaxed text-slate">
-                  Add the Nigerian bank account where approved seller payouts should go. Paystack checks the account name before we save it.
+                  Payout accounts are collected only when seller payouts are enabled. This launch does not save a bank account or run a name check unless that switch is on.
                 </p>
                 {payoutSetupEnabled ? (
                   <>

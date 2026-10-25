@@ -29,7 +29,7 @@ export default function Image() {
             Find digital products made by Nigerian creators.
           </div>
           <div style={{ color: "#526577", display: "flex", fontSize: 30, marginTop: 36 }}>
-            Ready-made products. Pay in naira through Paystack.
+            Ready-made products. Purchases are paused.
           </div>
         </div>
       </div>

@@ -36,7 +36,7 @@ export const metadata: Metadata = {
     template: "%s | The Middleman",
   },
   description:
-    "Browse ready-made digital products from independent Nigerian creators. Review listing details and pay in Naira through Paystack.",
+    "Browse ready-made digital products from independent Nigerian creators. Purchases are paused, so browsing does not start a payment.",
   applicationName: "The Middleman",
   keywords: [
     "Nigeria digital marketplace",
@@ -50,13 +50,13 @@ export const metadata: Metadata = {
     siteName: "The Middleman",
     title: "The Middleman | Nigerian Digital Products Marketplace",
     description:
-      "Find ready-made digital products from Nigerian creators. Review listing details and pay in Naira through Paystack.",
+      "Find ready-made digital products from Nigerian creators. Purchases are paused, so browsing does not start a payment.",
   },
   twitter: {
     card: "summary_large_image",
     title: "The Middleman | Nigerian Digital Products Marketplace",
     description:
-      "Find ready-made digital products from Nigerian creators. Browse, compare listing details and pay in naira through Paystack.",
+      "Find ready-made digital products from Nigerian creators. Purchases are paused, so browsing does not start a payment.",
   },
   robots: {
     index: true,
