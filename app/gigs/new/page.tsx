@@ -5,6 +5,9 @@ import Image from 'next/image';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabaseClient';
+import { signinHref } from '@/lib/auth/signin-redirect.mjs';
+import DraftRestoredNotice from '@/components/forms/DraftRestoredNotice';
+import { usePersistedForm } from '@/lib/forms/usePersistedForm';
 import { ProductPackageField } from '@/components/ProductPackageUploader';
 import { uploadProductPackage } from '@/lib/client/product-packages';
 
@@ -24,19 +27,57 @@ const EXPERIENCE_TIERS = [
 
 export default function NewGigPage() {
 	const router = useRouter();
-	const [title, setTitle] = useState('');
-	const [description, setDescription] = useState('');
-	const [category, setCategory] = useState('');
-	const [priceNgn, setPriceNgn] = useState('');
-	const [deliveryDays, setDeliveryDays] = useState('7');
-	const [experienceTier, setExperienceTier] = useState('beginner');
-	const [isAiAssisted, setIsAiAssisted] = useState(false);
+	const [listingUserId, setListingUserId] = useState<string | null>(null);
+	const [listingDraft, setListingDraft] = useState({
+		title: '',
+		description: '',
+		category: '',
+		priceNgn: '',
+		deliveryDays: '7',
+		experienceTier: 'beginner',
+		isAiAssisted: false,
+		linksInput: '',
+		repoUrl: '',
+		previewCommit: '',
+		exclusive: false,
+	});
+	const {
+		restored: listingDraftRestored,
+		discardDraft: discardListingDraft,
+		clearDraft: clearListingDraft,
+	} = usePersistedForm({
+		formId: 'gig-create',
+		userId: listingUserId,
+		values: listingDraft,
+		setValues: setListingDraft,
+		secretKeys: [],
+	});
+	const {
+		title,
+		description,
+		category,
+		priceNgn,
+		deliveryDays,
+		experienceTier,
+		isAiAssisted,
+		linksInput,
+		repoUrl,
+		previewCommit,
+		exclusive,
+	} = listingDraft;
+	const setTitle = (value: string) => setListingDraft((current) => ({ ...current, title: value }));
+	const setDescription = (value: string) => setListingDraft((current) => ({ ...current, description: value }));
+	const setCategory = (value: string) => setListingDraft((current) => ({ ...current, category: value }));
+	const setPriceNgn = (value: string) => setListingDraft((current) => ({ ...current, priceNgn: value }));
+	const setDeliveryDays = (value: string) => setListingDraft((current) => ({ ...current, deliveryDays: value }));
+	const setExperienceTier = (value: string) => setListingDraft((current) => ({ ...current, experienceTier: value }));
+	const setIsAiAssisted = (value: boolean) => setListingDraft((current) => ({ ...current, isAiAssisted: value }));
+	const setLinksInput = (value: string) => setListingDraft((current) => ({ ...current, linksInput: value }));
+	const setRepoUrl = (value: string) => setListingDraft((current) => ({ ...current, repoUrl: value }));
+	const setPreviewCommit = (value: string) => setListingDraft((current) => ({ ...current, previewCommit: value }));
+	const setExclusive = (value: boolean) => setListingDraft((current) => ({ ...current, exclusive: value }));
 	const [images, setImages] = useState<File[]>([]);
 	const [video, setVideo] = useState<File | null>(null);
-	const [linksInput, setLinksInput] = useState('');
-	const [repoUrl,setRepoUrl] = useState('');
-	const [previewCommit,setPreviewCommit] = useState('');
-	const [exclusive,setExclusive] = useState(false);
 	const [previewImage, setPreviewImage] = useState<string | null>(null);
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState('');
@@ -45,6 +86,19 @@ export default function NewGigPage() {
 	const [packageFeatureLoaded, setPackageFeatureLoaded] = useState(false);
 	const [createdGigId, setCreatedGigId] = useState<string | null>(null);
 	const [packageStage, setPackageStage] = useState('');
+	const [authChecked, setAuthChecked] = useState(false);
+	useEffect(() => {
+		let active = true;
+		supabase.auth.getUser().then(({ data: { user } }) => {
+			if (!active) return;
+			if (!user) router.replace(signinHref('/gigs/new'));
+			else {
+				setListingUserId(user.id);
+				setAuthChecked(true);
+			}
+		});
+		return () => { active = false; };
+	}, [router]);
 	useEffect(() => {
 		if (!images[0]) { setPreviewImage(null); return; }
 		const url = URL.createObjectURL(images[0]);
@@ -179,17 +233,26 @@ export default function NewGigPage() {
 				return;
 			}
 		}
+		clearListingDraft();
 		router.push('/gigs/mine');
 	}
 
 	const categoryLabel = CATEGORIES.find((c) => c.value === category)?.label || 'Category';
+
+	if (!authChecked) {
+		return (
+			<main className="min-h-screen bg-ink text-bone">
+				<p className="px-4 py-10 text-[16px] text-slate">Checking your account…</p>
+			</main>
+		);
+	}
 
 	return (
 		<main className="min-h-screen bg-ink text-bone">
 			<header className="border-b border-line bg-paper/50 backdrop-blur sticky top-0 z-20">
 				<div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-3 sm:px-6 sm:py-4">
 					<Link href="/" className="font-display font-bold text-lg tracking-tight flex items-center gap-2">
-						<span className="h-2.5 w-2.5 rounded-full bg-ember shadow-[0_0_0_4px_rgba(242,100,25,.15)]" />
+						<span className="h-2.5 w-2.5 rounded-full bg-ember shadow-[0_0_0_4px_rgba(249,115,22,.15)]" />
 						<span className="truncate">The Middleman</span>
 					</Link>
 					<Link href="/gigs/mine" className="inline-flex shrink-0 items-center gap-1.5 text-xs text-slate transition-colors hover:text-bone sm:gap-2 sm:text-sm">
@@ -202,12 +265,31 @@ export default function NewGigPage() {
 			<div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-8 lg:py-10">
 				<div className="mb-6 sm:mb-10">
 					<p className="text-xs font-bold tracking-[.2em] text-ember uppercase">New digital product</p>
-					<h1 className="mt-2 font-display text-3xl font-bold sm:text-4xl">List a ready-made product</h1>
+					<h1 className="mt-2 font-display text-[1.65rem] font-bold sm:text-4xl">List a ready-made product</h1>
 					<p className="mt-3 text-sm text-slate max-w-xl">Describe the ready-made product, what it includes, supported formats and any requirements. Every submission is reviewed before it appears in the marketplace.</p>
 				</div>
 
 				<div className="grid min-w-0 gap-8 lg:grid-cols-[1.3fr_.7fr] lg:gap-12">
 					<form onSubmit={handleSubmit} className="min-w-0 space-y-6 sm:space-y-8">
+						<DraftRestoredNotice
+							visible={listingDraftRestored}
+							onDiscard={() => {
+								discardListingDraft();
+								setListingDraft({
+									title: '',
+									description: '',
+									category: '',
+									priceNgn: '',
+									deliveryDays: '7',
+									experienceTier: 'beginner',
+									isAiAssisted: false,
+									linksInput: '',
+									repoUrl: '',
+									previewCommit: '',
+									exclusive: false,
+								});
+							}}
+						/>
 						<div className="field-shell">
 							<label className="field-label">Product title</label>
 							<span className="field-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg></span>
@@ -331,7 +413,7 @@ export default function NewGigPage() {
 
 							{isAiAssisted && (
 								<div className="mt-4 pt-4 border-t border-white/5">
-									<span className="inline-flex items-center gap-1.5 text-[9px] font-bold tracking-wider text-amber-400 bg-amber-950/20 border border-amber-900/30 px-2 py-0.5 rounded">
+									<span className="inline-flex items-center gap-1.5 text-[9px] font-bold tracking-wider text-[#111111] bg-[#F97316] border border-[#FB923C] px-2 py-0.5 rounded">
 										<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
 										AI-ASSISTED DELIVERY
 									</span>

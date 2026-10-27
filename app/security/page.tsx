@@ -11,11 +11,13 @@ export default function SecurityPage() {
       <section className="mx-auto max-w-2xl px-4 py-6 sm:px-6 sm:py-10">
         <p className="text-xs tracking-widest text-ember">ACCOUNT SECURITY</p>
         <h1 className="mt-2 font-display text-3xl font-bold sm:mt-3 sm:text-4xl">
-          Protect your account
+          Authenticator and password
         </h1>
         <p className="mt-3 text-sm leading-6 text-slate sm:mt-4 sm:text-base">
-          Use an authenticator app for two-step verification. Admin access
-          requires a verified code.
+          This is the authenticator page. Install Google Authenticator or Authy
+          on your phone, tap Set up authenticator, scan the QR code, then type
+          the 6-digit code. Admin tools stay locked until that code is verified,
+          and only platform operator accounts can open Admin.
         </p>
         <SecuritySettings />
       </section>

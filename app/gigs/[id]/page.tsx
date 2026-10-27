@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { createClient } from "@supabase/supabase-js";
 import PageClient from "./PageClient";
 import { gatewayTestEnabled } from "@/lib/server/escrow-config.mjs";
+import { prePurchaseEnquiryEnabled } from "@/lib/server/messaging-config.mjs";
+import { loadGigPackageListing } from "@/lib/server/gig-package-listing";
 
 export const dynamic = "force-dynamic";
 
@@ -86,5 +88,13 @@ export async function generateMetadata({
 
 export default async function Page({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  return <PageClient gigId={id} purchasesEnabled={gatewayTestEnabled()} />;
+  const packageListing = await loadGigPackageListing(id);
+  return (
+    <PageClient
+      gigId={id}
+      purchasesEnabled={gatewayTestEnabled()}
+      prePurchaseEnquiryEnabled={prePurchaseEnquiryEnabled()}
+      packageListing={packageListing}
+    />
+  );
 }

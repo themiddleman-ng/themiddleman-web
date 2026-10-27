@@ -1,253 +1,363 @@
-import Link from 'next/link';
-import SiteHeader from '@/components/SiteHeader';
-import { requireAdminPage } from '@/lib/server/admin-page';
-import NotificationRetryButton from './notification-retry-button';
+import Link from "next/link";
+import AdminActivityList from "@/components/admin/AdminActivityList";
+import AdminOverviewToolbar from "@/components/admin/AdminOverviewToolbar";
+import AdminPriorityQueue from "@/components/admin/AdminPriorityQueue";
+import type { AdminQueueRow } from "@/components/admin/admin-queue";
+import AdminStatCard, { type AdminStatIcon } from "@/components/admin/AdminStatCard";
+import AdminWorkspaceShell from "@/components/admin/AdminWorkspaceShell";
+import { requireAdminPage } from "@/lib/server/admin-page";
+import { productPackagesEnabled } from "@/lib/server/product-package-config.mjs";
+import NotificationRetryButton from "./notification-retry-button";
 
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 
 const FLOW = [
-  ['pending_payment', 'Awaiting payment'],
-  ['in_escrow', 'In escrow'],
-  ['delivered', 'Delivered'],
-  ['approved', 'Completed'],
-  ['disputed', 'Disputed'],
-  ['refunded', 'Refunded'],
+  ["pending_payment", "Awaiting payment"],
+  ["in_escrow", "In escrow"],
+  ["delivered", "Delivered"],
+  ["approved", "Completed"],
+  ["disputed", "Disputed"],
+  ["refunded", "Refunded"],
 ] as const;
 
 function StatusPill({ status }: { status: string }) {
-  const tone = status === 'sent'
-    ? 'border-emerald-500/30 text-emerald-300'
-    : status === 'failed'
-      ? 'border-red-500/30 text-red-300'
-      : 'border-amber-500/30 text-amber-200';
-
+  const tone =
+    status === "sent"
+      ? "border-emerald-500/30 text-emerald-700"
+      : status === "failed"
+        ? "border-red-500/30 text-red-700"
+        : "border-[#F97316]/40 text-[#FB923C]";
   return <span className={`rounded-full border px-2.5 py-1 text-xs font-semibold ${tone}`}>{status}</span>;
+}
+
+function relationOne<T>(value: T | T[] | null | undefined): T | null {
+  if (Array.isArray(value)) return value[0] ?? null;
+  return value ?? null;
 }
 
 export default async function AdminPage() {
   const administrator = await requireAdminPage();
   const db = administrator.db;
+  const packagesOn = productPackagesEnabled();
 
   const [
-    deliveries,
-    disputes,
-    reports,
+    deliveryCount,
+    deliveryRows,
+    productVersionCount,
+    productQueue,
+    sellerPendingCount,
+    sellerQueue,
+    notifications,
     audit,
     orders,
     payments,
-    notifications,
+    disputes,
+    reports,
     adminSetting,
-    users,
-    gigs,
   ] = await Promise.all([
-    db.from('deliveries').select('id', { count: 'exact', head: true }).eq('status', 'pending_review'),
-    db.from('disputes').select('id,order_id,reason,created_at', { count: 'exact' }).eq('status', 'open').order('created_at', { ascending: false }).limit(6),
-    db.from('gig_reports').select('id,gig_id,reason,created_at', { count: 'exact' }).eq('status', 'open').order('created_at', { ascending: false }).limit(6),
-    db.from('admin_audit_log').select('id,action,created_at').order('created_at', { ascending: false }).limit(10),
-    db.from('orders').select('id,status,amount,created_at').order('created_at', { ascending: false }).limit(200),
-    db.from('payments').select('id,order_id,amount,escrow_status,payout_status,created_at').order('created_at', { ascending: false }).limit(8),
-    db.from('email_notifications').select('id,order_id,recipient_role,recipient_email,status,attempts,last_error,updated_at').order('updated_at', { ascending: false }).limit(24),
-    db.from('platform_settings').select('value').eq('key', 'admin_notification_email').maybeSingle(),
-    db.from('profiles').select('id', { count: 'exact', head: true }),
-    db.from('gigs').select('id', { count: 'exact', head: true }),
+    db.from("deliveries").select("id", { count: "exact", head: true }).eq("status", "pending_review"),
+    db
+      .from("deliveries")
+      .select("id,order_id,created_at,orders(amount,gigs(title,category,gallery_image_paths))")
+      .eq("status", "pending_review")
+      .order("created_at", { ascending: true })
+      .limit(12),
+    packagesOn
+      ? db
+          .from("product_versions")
+          .select("id", { count: "exact", head: true })
+          .eq("review_status", "awaiting_review")
+      : db.from("gigs").select("id", { count: "exact", head: true }).eq("status", "pending_review"),
+    packagesOn
+      ? db
+          .from("product_versions")
+          .select("id,gig_id,uploaded_at,gigs(title,category,gallery_image_paths)")
+          .eq("review_status", "awaiting_review")
+          .order("uploaded_at", { ascending: true })
+          .limit(12)
+      : db
+          .from("gigs")
+          .select("id,title,category,gallery_image_paths,updated_at")
+          .eq("status", "pending_review")
+          .order("updated_at", { ascending: true })
+          .limit(12),
+    db
+      .from("seller_profiles")
+      .select("id", { count: "exact", head: true })
+      .eq("verification_status", "pending"),
+    db
+      .from("seller_profiles")
+      .select("id,display_name,created_at")
+      .eq("verification_status", "pending")
+      .order("created_at", { ascending: true })
+      .limit(12),
+    db
+      .from("email_notifications")
+      .select("id,order_id,recipient_role,recipient_email,status,attempts,last_error,updated_at")
+      .order("updated_at", { ascending: false })
+      .limit(24),
+    db.from("admin_audit_log").select("id,action,created_at").order("created_at", { ascending: false }).limit(12),
+    db.from("orders").select("id,status,amount,created_at").order("created_at", { ascending: false }).limit(200),
+    db
+      .from("payments")
+      .select("id,order_id,amount,escrow_status,payout_status,created_at")
+      .order("created_at", { ascending: false })
+      .limit(8),
+    db
+      .from("disputes")
+      .select("id,order_id,reason,created_at", { count: "exact" })
+      .eq("status", "open")
+      .order("created_at", { ascending: false })
+      .limit(6),
+    db
+      .from("gig_reports")
+      .select("id,gig_id,reason,created_at", { count: "exact" })
+      .eq("status", "open")
+      .order("created_at", { ascending: false })
+      .limit(6),
+    db.from("platform_settings").select("value").eq("key", "admin_notification_email").maybeSingle(),
   ]);
+
+  const comms = notifications.data ?? [];
+  const notificationFailures = comms.filter((row) => row.status === "failed").length;
+  const productsAwaiting = productVersionCount.count ?? 0;
+  const sellersAwaiting = sellerPendingCount.count ?? 0;
+  const deliveriesAwaiting = deliveryCount.count ?? 0;
+
+  const queue: AdminQueueRow[] = [];
+
+  for (const row of productQueue.data ?? []) {
+    if (packagesOn && "gig_id" in row) {
+      const version = row as {
+        id: string;
+        gig_id: string;
+        uploaded_at: string;
+        gigs: { title: string; category: string } | { title: string; category: string }[] | null;
+      };
+      const gig = relationOne(version.gigs);
+      const title = gig?.title ?? "Product listing";
+      queue.push({
+        id: `product-${version.id}`,
+        kind: "product",
+        title,
+        detail: `#${version.gig_id.slice(0, 8)}`,
+        since: version.uploaded_at,
+        href: `/admin/products?version=${version.id}`,
+        thumb: { title, category: gig?.category ?? "development" },
+      });
+    } else {
+      const gigRow = row as { id: string; title: string; category: string; updated_at: string };
+      queue.push({
+        id: `product-${gigRow.id}`,
+        kind: "product",
+        title: gigRow.title,
+        detail: `#${gigRow.id.slice(0, 8)}`,
+        since: gigRow.updated_at,
+        href: `/admin/products?gig=${gigRow.id}`,
+        thumb: { title: gigRow.title, category: gigRow.category ?? "development" },
+      });
+    }
+  }
+
+  for (const seller of sellerQueue.data ?? []) {
+    queue.push({
+      id: `seller-${seller.id}`,
+      kind: "seller",
+      title: seller.display_name ?? "Seller application",
+      detail: "Verification pending",
+      since: seller.created_at,
+      href: `/admin/sellers?focus=${seller.id}&status=pending`,
+    });
+  }
+
+  for (const delivery of deliveryRows.data ?? []) {
+    const order = relationOne(
+      delivery.orders as
+        | { gigs: { title: string; category: string; gallery_image_paths?: string[] } | { title: string; category: string }[] | null }
+        | { gigs: { title: string; category: string; gallery_image_paths?: string[] } | { title: string; category: string }[] | null }[]
+        | null,
+    );
+    const gig = relationOne(order?.gigs ?? null);
+    queue.push({
+      id: `delivery-${delivery.id}`,
+      kind: "delivery",
+      title: gig?.title ?? "Delivery submission",
+      detail: `Order ${delivery.order_id.slice(0, 8)}`,
+      since: delivery.created_at,
+      href: `/admin/review?delivery=${delivery.id}`,
+      thumb: gig
+        ? { title: gig.title, category: gig.category ?? "development" }
+        : undefined,
+    });
+  }
+
+  queue.sort((a, b) => Date.parse(a.since) - Date.parse(b.since));
 
   const orderRows = orders.data ?? [];
   const counts: Record<string, number> = {};
-  for (const [key] of FLOW) counts[key] = orderRows.filter(row => row.status === key).length;
+  for (const [key] of FLOW) counts[key] = orderRows.filter((row) => row.status === key).length;
 
-  const comms = notifications.data ?? [];
-  const needsAttention = comms.filter(row => row.status === 'failed' || row.status === 'pending');
+  const overviewDate = new Date().toLocaleDateString("en-GB", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+    timeZone: "Africa/Lagos",
+  });
 
-  return <main className="min-h-screen bg-ink text-bone">
-    <SiteHeader />
+  const statCards: { label: string; value: number; href: string; icon: AdminStatIcon }[] = [];
+  if (productsAwaiting > 0 || packagesOn) {
+    statCards.push({
+      label: "Products awaiting review",
+      value: productsAwaiting,
+      href: "/admin/products",
+      icon: "package",
+    });
+  }
+  statCards.push(
+    {
+      label: "Seller applications",
+      value: sellersAwaiting,
+      href: "/admin/sellers",
+      icon: "users",
+    },
+    {
+      label: "Delivery reviews",
+      value: deliveriesAwaiting,
+      href: "/admin/review",
+      icon: "delivery",
+    },
+  );
+  if (notificationFailures > 0 || comms.length > 0) {
+    statCards.push({
+      label: "Notification failures",
+      value: notificationFailures,
+      href: "/admin/communications",
+      icon: "notifications",
+    });
+  }
 
-    <div className="mx-auto max-w-7xl px-5 py-10 md:py-14">
-      <div className="flex flex-wrap items-end justify-between gap-5">
-        <div>
-          <p className="text-xs font-bold uppercase tracking-[.2em] text-ember">Admin workspace</p>
-          <h1 className="mt-3 font-display text-4xl font-bold md:text-5xl">Operations control</h1>
-          <p className="mt-3 max-w-3xl text-slate">
-            Payments, fulfilment, trust &amp; safety, email delivery and audit activity in one role-gated workspace.
-          </p>
-        </div>
-        <div className="flex flex-wrap gap-3">
-          <Link href="/admin/review" className="rounded-full bg-ember px-5 py-2.5 text-sm font-bold text-ink">
-            Open delivery review
-          </Link>
-          <Link href="/admin/products" className="rounded-full border border-line px-5 py-2.5 text-sm font-semibold">Review product packages</Link>
-          <Link href="/admin/sellers" className="rounded-full border border-line px-5 py-2.5 text-sm font-semibold">Seller directory</Link>
-          <Link href="/admin/email-preview" className="rounded-full border border-line px-5 py-2.5 text-sm font-semibold">Email previews</Link>
-          <Link href="/admin/communications" className="rounded-full border border-line px-5 py-2.5 text-sm font-semibold">Seller messages</Link>
-          <Link href="/admin/escrow" className="rounded-full border border-line px-5 py-2.5 text-sm font-semibold">Trust &amp; payouts</Link>
-          <Link href="/security" className="rounded-full border border-line px-5 py-2.5 text-sm font-semibold">Account security</Link>
-          <Link href="/marketplace" className="rounded-full border border-line px-5 py-2.5 text-sm font-semibold">
-            View marketplace
-          </Link>
-        </div>
-      </div>
+  return (
+    <AdminWorkspaceShell>
+      <div className="rounded-2xl border border-line bg-paper p-5 shadow-sm md:p-7">
+        <AdminOverviewToolbar overviewDate={overviewDate} />
 
-      <section className="mt-9 grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
-        <div className="rounded-2xl border border-line bg-paper p-5">
-          <p className="text-xs uppercase tracking-wider text-slate">Users</p>
-          <strong className="mt-3 block font-display text-4xl">{users.count ?? 0}</strong>
-          <p className="mt-2 text-xs text-slate">Registered accounts</p>
-        </div>
-        <div className="rounded-2xl border border-line bg-paper p-5">
-          <p className="text-xs uppercase tracking-wider text-slate">Products</p>
-          <strong className="mt-3 block font-display text-4xl">{gigs.count ?? 0}</strong>
-          <p className="mt-2 text-xs text-slate">Marketplace listings</p>
-        </div>
-        <div className="rounded-2xl border border-line bg-paper p-5">
-          <p className="text-xs uppercase tracking-wider text-slate">In escrow</p>
-          <strong className="mt-3 block font-display text-4xl">{counts.in_escrow ?? 0}</strong>
-          <p className="mt-2 text-xs text-slate">Paid, protected orders</p>
-        </div>
-        <Link href="/admin/review" className="rounded-2xl border border-line bg-paper p-5 hover:border-ember">
-          <p className="text-xs uppercase tracking-wider text-slate">Delivery review</p>
-          <strong className="mt-3 block font-display text-4xl">{deliveries.count ?? 0}</strong>
-          <p className="mt-2 text-xs text-ember">Review seller submissions →</p>
-        </Link>
-        <div className="rounded-2xl border border-line bg-paper p-5">
-          <p className="text-xs uppercase tracking-wider text-slate">Email attention</p>
-          <strong className="mt-3 block font-display text-4xl">{needsAttention.length}</strong>
-          <p className="mt-2 text-xs text-slate">Failed or pending notices</p>
-        </div>
-      </section>
+        {statCards.length > 0 ? (
+          <section className="mt-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-4" aria-label="Operations metrics">
+            {statCards.map((card) => (
+              <AdminStatCard key={card.label} {...card} />
+            ))}
+          </section>
+        ) : null}
 
-      <section className="mm-performance-chart" aria-labelledby="admin-distribution-title"><h2 id="admin-distribution-title">Order status overview</h2><p>Distribution of the latest {orderRows.length} recorded orders. Live order states, rather than estimated revenue.</p>{FLOW.map(([status, label]) => <label key={status}><span>{label}</span><meter min={0} max={Math.max(1, orderRows.length)} value={counts[status] || 0} aria-label={`${label}: ${counts[status] || 0}`} /><strong>{counts[status] || 0}</strong></label>)}</section>
-      <section className="mt-10 rounded-2xl border border-line bg-paper p-5 md:p-6">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div>
-            <p className="text-xs font-bold uppercase tracking-[.16em] text-ember">Order pipeline</p>
-            <h2 className="mt-2 font-display text-2xl font-semibold">Product movement</h2>
+        <AdminPriorityQueue rows={queue} />
+
+        <section className="mt-10" aria-labelledby="recent-activity-title">
+          <h2 id="recent-activity-title" className="font-display text-lg font-semibold">Recent activity</h2>
+          <AdminActivityList rows={audit.data ?? []} />
+        </section>
+
+        <details className="mt-10 rounded-xl border border-line bg-elevated p-4 open:bg-paper">
+          <summary className="cursor-pointer text-sm font-semibold text-bone">Detailed operations &amp; email health</summary>
+          <div className="mt-6 grid gap-8 xl:grid-cols-[1.25fr_.75fr]">
+            <section>
+              <p className="text-xs font-bold uppercase tracking-[.16em] text-link">Communications</p>
+              <h3 className="mt-2 font-display text-xl font-semibold">Transactional email health</h3>
+              <p className="mt-2 text-xs text-muted">
+                Operations inbox: {adminSetting.data?.value ?? "Not configured"}
+              </p>
+              <div className="mt-4 space-y-3">
+                {comms.length
+                  ? comms.map((row) => (
+                      <article key={row.id} className="rounded-xl border border-line bg-paper p-4">
+                        <div className="flex flex-wrap items-start justify-between gap-3">
+                          <div>
+                            <p className="text-sm font-semibold capitalize">{row.recipient_role} notification</p>
+                            <p className="mt-1 text-xs text-muted">
+                              {row.recipient_email} · order {row.order_id.slice(0, 8)}
+                            </p>
+                          </div>
+                          <StatusPill status={row.status} />
+                        </div>
+                        <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
+                          <p className="text-xs text-muted">
+                            Attempts: {row.attempts}
+                            {row.last_error ? ` · ${row.last_error}` : ""}
+                          </p>
+                          {(row.status === "failed" || row.status === "pending") && (
+                            <NotificationRetryButton orderId={row.order_id} />
+                          )}
+                        </div>
+                      </article>
+                    ))
+                  : <p className="text-sm text-muted">No transactional email records yet.</p>}
+              </div>
+            </section>
+
+            <section>
+              <p className="text-xs font-bold uppercase tracking-[.16em] text-link">Payments</p>
+              <h3 className="mt-2 font-display text-xl font-semibold">Recent escrow activity</h3>
+              <div className="mt-4 space-y-3">
+                {(payments.data ?? []).map((row) => (
+                  <div key={row.id} className="rounded-xl border border-line bg-paper p-4">
+                    <div className="flex justify-between gap-3">
+                      <span className="font-mono text-sm">₦{Number(row.amount).toLocaleString("en-NG")}</span>
+                      <span className="text-xs text-link">{row.escrow_status}</span>
+                    </div>
+                    <p className="mt-2 text-xs text-muted">
+                      Order {row.order_id.slice(0, 8)} · payout {row.payout_status}
+                    </p>
+                  </div>
+                ))}
+                {!payments.data?.length && <p className="text-sm text-muted">No payment records yet.</p>}
+              </div>
+            </section>
           </div>
-          <span className="text-xs text-slate">Server-authoritative states</span>
-        </div>
 
-        <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-6">
-          {FLOW.map(([key, label], index) => <div key={key} className="rounded-xl border border-line p-4">
-            <span className="text-[11px] font-bold text-slate">{String(index + 1).padStart(2, '0')}</span>
-            <p className="mt-2 text-sm font-semibold">{label}</p>
-            <strong className="mt-3 block font-mono text-xl text-ember">{counts[key] ?? 0}</strong>
-          </div>)}
-        </div>
-
-        <p className="mt-5 text-xs leading-6 text-slate">
-          Payment confirmed → escrow → seller delivery → admin review → buyer approval or dispute → completion/refund → payout processing.
-        </p>
-      </section>
-
-      <div className="mt-10 grid gap-8 xl:grid-cols-[1.25fr_.75fr]">
-        <section className="rounded-2xl border border-line bg-paper p-5 md:p-6">
-          <div className="flex flex-wrap items-start justify-between gap-4">
-            <div>
-              <p className="text-xs font-bold uppercase tracking-[.16em] text-ember">Communications</p>
-              <h2 className="mt-2 font-display text-2xl font-semibold">Transactional email health</h2>
-              <p className="mt-2 text-xs text-slate">Buyer, seller and operations delivery records are tracked independently.</p>
-            </div>
-            <div className="text-right text-xs text-slate">
-              <p>Operations inbox</p>
-              <p className="mt-1 font-semibold text-bone">{adminSetting.data?.value ?? 'Not configured'}</p>
-            </div>
+          <div className="mt-8 grid gap-6 lg:grid-cols-2">
+            <section>
+              <h3 className="font-display text-lg font-semibold">Open disputes</h3>
+              <div className="mt-3 space-y-3">
+                {disputes.data?.length
+                  ? disputes.data.map((row) => (
+                      <article key={row.id} className="rounded-xl border border-line bg-paper p-4">
+                        <p className="text-sm font-semibold">Order {row.order_id.slice(0, 8)}</p>
+                        <p className="mt-2 text-sm text-muted">{row.reason}</p>
+                      </article>
+                    ))
+                  : <p className="text-sm text-muted">No open disputes.</p>}
+              </div>
+            </section>
+            <section>
+              <h3 className="font-display text-lg font-semibold">Product reports</h3>
+              <div className="mt-3 space-y-3">
+                {reports.data?.length
+                  ? reports.data.map((row) => (
+                      <article key={row.id} className="rounded-xl border border-line bg-paper p-4">
+                        <Link className="text-sm font-semibold text-link underline" href={`/gigs/${row.gig_id}`}>
+                          Open reported product
+                        </Link>
+                        <p className="mt-2 text-sm text-muted">{row.reason}</p>
+                      </article>
+                    ))
+                  : <p className="text-sm text-muted">No pending reports.</p>}
+              </div>
+            </section>
           </div>
 
-          <div className="mt-6 space-y-3">
-            {comms.length ? comms.map(row => <article key={row.id} className="rounded-xl border border-line p-4">
-              <div className="flex flex-wrap items-start justify-between gap-3">
-                <div>
-                  <p className="text-sm font-semibold capitalize">{row.recipient_role} notification</p>
-                  <p className="mt-1 text-xs text-slate">{row.recipient_email} · order {row.order_id.slice(0, 8)}</p>
+          <section className="mt-8">
+            <h3 className="font-display text-lg font-semibold">Order status snapshot</h3>
+            <p className="mt-2 text-xs text-muted">Latest {orderRows.length} recorded orders.</p>
+            <div className="mt-4 grid gap-2 sm:grid-cols-3 lg:grid-cols-6">
+              {FLOW.map(([key, label]) => (
+                <div key={key} className="rounded-lg border border-line bg-paper p-3">
+                  <p className="text-xs text-muted">{label}</p>
+                  <p className="mt-1 font-mono text-lg text-ember-cta">{counts[key] ?? 0}</p>
                 </div>
-                <StatusPill status={row.status} />
-              </div>
-              <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
-                <p className="text-xs text-slate">
-                  Attempts: {row.attempts}
-                  {row.last_error ? ` · ${row.last_error}` : ''}
-                </p>
-                {(row.status === 'failed' || row.status === 'pending') && <NotificationRetryButton orderId={row.order_id} />}
-              </div>
-            </article>) : <p className="text-sm text-slate">No transactional email records yet.</p>}
-          </div>
-        </section>
-
-        <section className="rounded-2xl border border-line bg-paper p-5 md:p-6">
-          <p className="text-xs font-bold uppercase tracking-[.16em] text-ember">Payments</p>
-          <h2 className="mt-2 font-display text-2xl font-semibold">Recent escrow activity</h2>
-          <div className="mt-6 space-y-3">
-            {(payments.data ?? []).map(row => <div key={row.id} className="rounded-xl border border-line p-4">
-              <div className="flex justify-between gap-3">
-                <span className="font-mono text-sm">₦{Number(row.amount).toLocaleString('en-NG')}</span>
-                <span className="text-xs text-ember">{row.escrow_status}</span>
-              </div>
-              <p className="mt-2 text-xs text-slate">Order {row.order_id.slice(0, 8)} · payout {row.payout_status}</p>
-              <time className="mt-1 block text-xs text-slate">
-                {new Date(row.created_at).toLocaleString('en-NG', { timeZone: 'Africa/Lagos' })}
-              </time>
-            </div>)}
-            {!payments.data?.length && <p className="text-sm text-slate">No payment records yet.</p>}
-          </div>
-        </section>
+              ))}
+            </div>
+          </section>
+        </details>
       </div>
-
-      <div className="mt-10 grid gap-8 lg:grid-cols-2">
-        <section className="rounded-2xl border border-line bg-paper p-5 md:p-6">
-          <h2 className="font-display text-xl font-semibold">Open disputes</h2>
-          <div className="mt-4 space-y-3">
-            {disputes.data?.length ? disputes.data.map(row => <article key={row.id} className="rounded-xl border border-line p-4">
-              <p className="text-sm font-semibold">Order {row.order_id.slice(0, 8)}</p>
-              <p className="mt-2 text-sm text-slate">{row.reason}</p>
-              <time className="mt-2 block text-xs text-slate">{new Date(row.created_at).toLocaleString('en-NG', { timeZone: 'Africa/Lagos' })}</time>
-            </article>) : <p className="text-sm text-slate">No open disputes.</p>}
-          </div>
-        </section>
-
-        <section className="rounded-2xl border border-line bg-paper p-5 md:p-6">
-          <h2 className="font-display text-xl font-semibold">Product reports</h2>
-          <div className="mt-4 space-y-3">
-            {reports.data?.length ? reports.data.map(row => <article key={row.id} className="rounded-xl border border-line p-4">
-              <Link className="text-sm font-semibold text-ember underline" href={`/gigs/${row.gig_id}`}>Open reported product</Link>
-              <p className="mt-2 text-sm text-slate">{row.reason}</p>
-              <time className="mt-2 block text-xs text-slate">{new Date(row.created_at).toLocaleString('en-NG', { timeZone: 'Africa/Lagos' })}</time>
-            </article>) : <p className="text-sm text-slate">No pending reports.</p>}
-          </div>
-        </section>
-      </div>
-
-      <section className="mt-10 rounded-2xl border border-line bg-paper p-5 md:p-6">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div>
-            <p className="text-xs font-bold uppercase tracking-[.16em] text-ember">Security &amp; audit</p>
-            <h2 className="mt-2 font-display text-2xl font-semibold">Operational posture</h2>
-          </div>
-          <span className="text-xs text-slate">Sensitive values are never rendered</span>
-        </div>
-
-        <div className="mt-6 grid gap-3 sm:grid-cols-3">
-          <div className="rounded-xl border border-line p-4">
-            <p className="text-xs text-slate">Paystack server key</p>
-            <p className="mt-2 text-sm font-semibold">{process.env.PAYSTACK_SECRET_KEY ? 'Configured' : 'Missing'}</p>
-          </div>
-          <div className="rounded-xl border border-line p-4">
-            <p className="text-xs text-slate">Resend server key</p>
-            <p className="mt-2 text-sm font-semibold">{process.env.RESEND_API_KEY ? 'Configured' : 'Missing'}</p>
-          </div>
-          <div className="rounded-xl border border-line p-4">
-            <p className="text-xs text-slate">Service-role database</p>
-            <p className="mt-2 text-sm font-semibold">{process.env.SUPABASE_SERVICE_ROLE_KEY ? 'Configured' : 'Missing'}</p>
-          </div>
-        </div>
-
-        <h3 className="mt-8 font-display text-lg font-semibold">Recent admin activity</h3>
-        <ul className="mt-4 space-y-2">
-          {audit.data?.map(row => <li key={row.id} className="flex flex-wrap justify-between gap-3 rounded-xl border border-line p-3 text-sm">
-            <span>{row.action.replaceAll('_', ' ')}</span>
-            <time className="text-slate">{new Date(row.created_at).toLocaleString('en-NG', { timeZone: 'Africa/Lagos' })}</time>
-          </li>)}
-        </ul>
-        {!audit.data?.length && <p className="mt-3 text-sm text-slate">No decisions recorded yet.</p>}
-      </section>
-    </div>
-  </main>;
+    </AdminWorkspaceShell>
+  );
 }

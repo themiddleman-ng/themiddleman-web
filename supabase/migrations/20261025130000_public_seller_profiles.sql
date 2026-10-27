@@ -1,0 +1,73 @@
+begin;
+
+-- Remove every public/anon path to seller_profiles (including column grants from phase E).
+drop policy if exists "public can read seller profiles" on public.seller_profiles;
+drop policy if exists "anon reads approved seller profiles" on public.seller_profiles;
+drop policy if exists "authenticated reads approved or own seller profile" on public.seller_profiles;
+drop policy if exists "authenticated reads approved seller profiles" on public.seller_profiles;
+drop policy if exists "authenticated reads own seller profile" on public.seller_profiles;
+
+revoke all on table public.seller_profiles from public, anon, authenticated;
+
+grant insert (user_id, display_name, bio, skills, portfolio_links, linkedin_url,
+  years_experience, gig_categories, id_document_type, id_document_url)
+  on public.seller_profiles to authenticated;
+grant update (display_name, bio, skills, portfolio_links, linkedin_url,
+  years_experience, gig_categories, id_document_type, id_document_url)
+  on public.seller_profiles to authenticated;
+-- Own row only. Column privileges are not row filters: without a policy for
+-- other sellers, authenticated cannot select these columns on anyone else's row.
+-- linkedin_url stays on this grant so the owner can read their own value.
+-- It is not on either public view. id_document_*, bank, and contact columns
+-- are not granted here and are not on the views.
+grant select (
+  id, user_id, display_name, bio, skills, portfolio_links, verification_status,
+  rating_avg, total_orders_completed, created_at, updated_at, gig_categories,
+  linkedin_url, years_experience
+) on public.seller_profiles to authenticated;
+
+create policy "authenticated reads own seller profile" on public.seller_profiles
+  for select to authenticated
+  using (user_id = (select auth.uid()));
+
+-- No "authenticated reads approved seller profiles" policy. Other sellers'
+-- public fields come only from the views below (security_invoker = false,
+-- approved rows only).
+
+drop view if exists public.public_seller_profiles;
+
+create view public.public_seller_profiles
+with (security_invoker = false) as
+  select
+    sp.id,
+    sp.user_id,
+    sp.display_name,
+    sp.bio,
+    sp.rating_avg,
+    sp.total_orders_completed,
+    sp.created_at
+  from public.seller_profiles sp
+  where sp.verification_status = 'approved';
+
+comment on view public.public_seller_profiles is
+  'Approved sellers only. Columns: id, user_id, display_name, bio, rating_avg, total_orders_completed, created_at. Excludes id_document_*, linkedin_url, bank, email, and phone.';
+
+revoke all on public.public_seller_profiles from public;
+grant select on public.public_seller_profiles to anon, authenticated;
+
+-- Marketplace cards need a verified label without exposing sensitive seller_profiles columns.
+drop view if exists public.public_seller_profile_cards;
+create view public.public_seller_profile_cards
+with (security_invoker = false) as
+  select
+    sp.id,
+    sp.user_id,
+    sp.display_name,
+    'approved'::text as verification_status
+  from public.seller_profiles sp
+  where sp.verification_status = 'approved';
+
+revoke all on public.public_seller_profile_cards from public;
+grant select on public.public_seller_profile_cards to anon, authenticated;
+
+commit;

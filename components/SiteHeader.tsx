@@ -1,11 +1,13 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type FormEvent } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import Image from 'next/image';
 import { supabase } from '@/lib/supabaseClient';
 import Logo from '@/components/Logo';
+import OwnerAvatar from '@/components/profile/OwnerAvatar';
+import { useAdminAccount } from '@/lib/account/use-admin-account';
+import { publishOwnerAvatar, useOwnerAvatar } from '@/lib/profile/use-owner-avatar';
 
 type HeaderUser = {
   id: string;
@@ -18,23 +20,18 @@ function userLabel(user: HeaderUser) {
   return typeof name === 'string' && name.trim() ? name.trim() : user.email ?? 'Your account';
 }
 
-function initials(user: HeaderUser | null) {
-  if (!user) return '';
-  const parts = userLabel(user).split(/[\s@._-]+/).filter(Boolean);
-  if (parts.length > 1) return (parts[0][0] + parts[1][0]).toUpperCase();
-  return parts[0]?.slice(0, 2).toUpperCase() ?? 'MM';
-}
-
 export default function SiteHeader({ isSeller: sellerHint = false, compact = false, hideOnMobile = false }: { isSeller?: boolean; compact?: boolean; hideOnMobile?: boolean }) {
   const router = useRouter();
   const pathname = usePathname();
   const [user, setUser] = useState<HeaderUser | null>(null);
-  const [avatarUrl, setAvatarUrl] = useState('');
   const [authResolved, setAuthResolved] = useState(false);
+  const ownerAvatar = useOwnerAvatar(user);
+  const isAdmin = useAdminAccount(user?.id);
   const [unreadCount, setUnreadCount] = useState(0);
   const [notificationCount, setNotificationCount] = useState(0);
   const [menuOpen, setMenuOpen] = useState(false);
   const [sellerAccount, setSellerAccount] = useState(sellerHint);
+  const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
     let cancelled = false;
@@ -72,9 +69,14 @@ export default function SiteHeader({ isSeller: sellerHint = false, compact = fal
     window.addEventListener('messages:read-updated', refresh);
     window.addEventListener('notifications:updated', refresh);
     window.addEventListener('focus', refresh);
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      const nextUser = (session?.user as HeaderUser | null) ?? null;
-      setUser(nextUser);
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'USER_UPDATED') {
+        void supabase.auth.getUser().then(({ data }) => {
+          if (!cancelled) setUser((data.user as HeaderUser | null) ?? null);
+        });
+      } else {
+        setUser((session?.user as HeaderUser | null) ?? null);
+      }
       setAuthResolved(true);
       if (!session?.user) {
         setSellerAccount(false);
@@ -97,21 +99,9 @@ export default function SiteHeader({ isSeller: sellerHint = false, compact = fal
 
   useEffect(() => setMenuOpen(false), [pathname]);
 
-  useEffect(() => {
-    let active = true;
-    const path = user?.user_metadata?.profile_avatar_path;
-    if (typeof path !== 'string' || !path) {
-      setAvatarUrl('');
-      return () => { active = false; };
-    }
-    void supabase.storage.from('profile-avatars').createSignedUrl(path, 3600).then(({ data }) => {
-      if (active) setAvatarUrl(data?.signedUrl ?? '');
-    });
-    return () => { active = false; };
-  }, [user?.id, user?.user_metadata?.profile_avatar_path]);
-
   async function handleSignOut() {
     await supabase.auth.signOut();
+    publishOwnerAvatar(null);
     setUser(null);
     setMenuOpen(false);
     router.push('/marketplace');
@@ -122,38 +112,86 @@ export default function SiteHeader({ isSeller: sellerHint = false, compact = fal
     setMenuOpen(false);
   }
 
-  const desktopLink = 'rounded-full px-3 py-2 text-sm transition-colors hover:bg-[#f4eee6] hover:text-[#182d41]';
-  const mobileLink = 'flex min-h-11 items-center justify-between rounded-xl px-3 py-2.5 text-sm text-[#273544] transition-colors hover:bg-[#f5efe7]';
+  function desktopLinkClass(href: string) {
+    const active =
+      href === '/marketplace'
+        ? pathname.startsWith('/marketplace') || pathname.startsWith('/browse')
+        : href === '/messages'
+          ? pathname.startsWith('/messages')
+          : href === '/orders'
+            ? pathname.startsWith('/orders')
+            : href === '/#categories'
+              ? pathname === '/'
+              : false;
+    return `inline-flex h-11 min-h-11 items-center rounded-full px-3 text-sm transition-colors hover:bg-elevated ${
+      active ? 'font-semibold text-link' : 'text-bone hover:text-bone'
+    }`;
+  }
+  const mobileLink = 'flex min-h-11 items-center justify-between rounded-xl px-3 py-2.5 text-sm text-bone transition-colors hover:bg-elevated';
+
+  function submitHeaderSearch(event: FormEvent) {
+    event.preventDefault();
+    const next = searchQuery.trim();
+    router.push(next ? `/marketplace?q=${encodeURIComponent(next)}` : '/marketplace');
+    setMenuOpen(false);
+  }
   const unreadBadge = unreadCount > 0 ? (
-    <span className="inline-flex min-w-5 items-center justify-center rounded-full bg-[#e56b27] px-1.5 py-0.5 text-[11px] font-semibold leading-none text-white">
+    <span className="inline-flex min-w-5 items-center justify-center rounded-full bg-ember-cta px-1.5 py-0.5 text-[11px] font-semibold leading-none text-ink">
       {unreadCount > 99 ? '99+' : unreadCount}
     </span>
   ) : null;
   const notificationBadge = notificationCount > 0 ? (
-    <span className="inline-flex min-w-5 items-center justify-center rounded-full bg-[#e56b27] px-1.5 py-0.5 text-[11px] font-semibold leading-none text-white">
+    <span className="inline-flex min-w-5 items-center justify-center rounded-full bg-ember-cta px-1.5 py-0.5 text-[11px] font-semibold leading-none text-ink">
       {notificationCount > 99 ? '99+' : notificationCount}
     </span>
   ) : null;
 
   return (
-    <header className={`${hideOnMobile ? 'hidden md:block ' : ''}sticky top-0 z-30 border-b border-[#e9e2d9] backdrop-blur-xl ${compact ? 'bg-[#faf7f0]/95' : 'bg-[#fbf8f2]/95'}`}>
+    <header className={`${hideOnMobile ? 'hidden md:block ' : ''}sticky top-0 z-30 border-b border-line bg-ink/95 backdrop-blur-xl`}>
       <div className="relative mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-2.5 sm:px-6">
-        <div className="shrink-0">
-          <Logo href="/marketplace" className="text-lg" markClass="h-7 w-7" variant="horizontal" textClass="text-sm" />
+        <div className="z-10 shrink-0">
+          <Logo href="/" className="text-lg" markClass="h-7 w-7" variant="horizontal" textClass="text-sm" />
         </div>
 
-        <nav className="hidden items-center gap-1 md:flex" aria-label="Main navigation">
-          <Link href="/marketplace" className={desktopLink}>Marketplace</Link>
+        <nav className="absolute left-1/2 hidden -translate-x-1/2 items-center gap-1 md:flex" aria-label="Main navigation">
+          <Link href="/#categories" className={desktopLinkClass('/#categories')}>Categories</Link>
+          <Link href="/marketplace" className={desktopLinkClass('/marketplace')}>Marketplace</Link>
           {user && <>
-            <Link href="/orders" data-onboarding-target="orders" className={desktopLink}>My Orders</Link>
-            {sellerAccount && <Link href="/gigs/mine" className={desktopLink}>My Products</Link>}
-            <Link href="/messages" data-onboarding-target="messages" className={desktopLink}><span className="inline-flex items-center gap-2">Messages{unreadBadge}</span></Link>
-            <Link href="/notifications" className={desktopLink}><span className="inline-flex items-center gap-2">Alerts{notificationBadge}</span></Link>
-            <Link href="/payments" className={desktopLink}>Payments</Link>
+            <Link href="/orders" data-onboarding-target="orders" className={desktopLinkClass('/orders')}>Orders</Link>
+            <Link href="/messages" data-onboarding-target="messages" className={desktopLinkClass('/messages')}>
+              <span className="inline-flex min-h-11 min-w-[2.75rem] items-center justify-center gap-2 px-1">Messages{unreadBadge}</span>
+            </Link>
           </>}
         </nav>
 
-        <div className="relative flex shrink-0 items-center gap-2">
+        <div className="relative z-10 flex shrink-0 items-center gap-2">
+          <form onSubmit={submitHeaderSearch} className="hidden lg:block" role="search">
+            <label className="relative block">
+              <span className="sr-only">Search products</span>
+              <svg className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
+                <circle cx="10.8" cy="10.8" r="6.8" />
+                <path d="m16 16 4.5 4.5" strokeLinecap="round" />
+              </svg>
+              <input
+                type="search"
+                value={searchQuery}
+                onChange={(event) => setSearchQuery(event.target.value)}
+                placeholder="Search products"
+                className="h-11 w-44 rounded-full border border-line bg-paper pl-9 pr-3 text-sm text-bone placeholder:text-muted transition focus:w-56 focus:border-ember focus:outline-none focus:ring-4 focus:ring-ember/15 xl:w-56 xl:focus:w-64"
+              />
+            </label>
+          </form>
+          <Link href="/browse" aria-label="Search products" className="grid h-11 w-11 place-items-center rounded-full border border-line bg-paper text-bone lg:hidden">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
+              <circle cx="10.8" cy="10.8" r="6.8" />
+              <path d="m16 16 4.5 4.5" strokeLinecap="round" />
+            </svg>
+          </Link>
+          {!user && authResolved && (
+            <Link href="/signup?mode=signin" className="hidden h-11 items-center rounded-full bg-ember-cta px-4 text-sm font-semibold text-on-ember hover:bg-ember-hover sm:inline-flex">
+              Sign in
+            </Link>
+          )}
           <button
             type="button"
             onClick={() => setMenuOpen((open) => !open)}
@@ -162,57 +200,70 @@ export default function SiteHeader({ isSeller: sellerHint = false, compact = fal
             aria-haspopup="menu"
             aria-controls="account-menu"
             data-onboarding-target="menu"
-            className="relative grid h-10 w-10 place-items-center rounded-full border border-[#e5ddd3] bg-white text-[#23384d] shadow-sm transition hover:border-[#dc6b2e]/60 hover:bg-[#fffaf3] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#dc6b2e]/15"
+            className="relative grid h-11 w-11 place-items-center overflow-hidden rounded-full border border-line bg-paper text-bone shadow-sm transition hover:border-ember/60 hover:bg-elevated focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-ember/15"
           >
             {user ? (
-              avatarUrl ? (
-                <Image src={avatarUrl} alt="" width={40} height={40} unoptimized className="h-10 w-10 rounded-full object-cover" />
-              ) : (
-                <span className="text-xs font-bold">{initials(user)}</span>
-              )
+              <OwnerAvatar
+                url={ownerAvatar.url}
+                name={userLabel(user)}
+                email={user.email}
+                size={44}
+                className="h-11 w-11"
+              />
             ) : (
               <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" aria-hidden="true">
                 <circle cx="12" cy="8" r="3.5" /><path d="M4.5 20c.8-3.4 3.3-5.2 7.5-5.2s6.7 1.8 7.5 5.2" />
               </svg>
             )}
-            {!authResolved && <span className="absolute inset-0 rounded-full ring-2 ring-[#e8e0d6]" aria-hidden="true" />}
-            {(unreadCount + notificationCount) > 0 && <span className="absolute -right-0.5 -top-0.5 h-2.5 w-2.5 rounded-full border-2 border-[#fbf8f2] bg-[#e56b27]" aria-label="You have unread updates" />}
+            {!authResolved && <span className="absolute inset-0 rounded-full ring-2 ring-line" aria-hidden="true" />}
+            {(unreadCount + notificationCount) > 0 && <span className="absolute -right-0.5 -top-0.5 h-2.5 w-2.5 rounded-full border-2 border-paper bg-ember-cta" aria-label="You have unread updates" />}
           </button>
 
           {menuOpen && (
-            <div id="account-menu" role="menu" className="absolute right-0 top-[calc(100%+0.65rem)] z-50 max-h-[min(78svh,36rem)] w-[min(20rem,calc(100vw-1.5rem))] overflow-y-auto rounded-2xl border border-[#e7dfd5] bg-[#fffdf9] p-2.5 text-[#243344] shadow-[0_18px_55px_rgba(32,39,45,.18)]">
+            <div id="account-menu" role="menu" className="absolute right-0 top-[calc(100%+0.65rem)] z-50 max-h-[min(78svh,36rem)] w-[min(20rem,calc(100vw-1.5rem))] overflow-y-auto rounded-2xl border border-line bg-paper p-2.5 text-bone shadow-lg shadow-black/40">
               {user ? (
                 <>
-                  <div className="mb-1 border-b border-[#eee7de] px-3 pb-3 pt-2">
-                    <p className="truncate text-sm font-semibold">{userLabel(user)}</p>
-                    {user.email && <p className="mt-0.5 truncate text-xs text-[#6d7883]">{user.email}</p>}
+                  <div className="mb-1 flex items-center gap-3 border-b border-line px-3 pb-3 pt-2">
+                    <OwnerAvatar url={ownerAvatar.url} name={userLabel(user)} email={user.email} size={40} />
+                    <div className="min-w-0">
+                      <p className="truncate text-sm font-semibold">{userLabel(user)}</p>
+                      {user.email && <p className="mt-0.5 truncate text-xs text-muted">{user.email}</p>}
+                    </div>
                   </div>
                   <nav aria-label="Account navigation" className="space-y-0.5">
-                    <Link role="menuitem" href="/profile" data-onboarding-target="profile" className="hidden min-h-11 items-center justify-between rounded-xl px-3 py-2.5 text-sm text-[#273544] transition-colors hover:bg-[#f5efe7] md:flex">Profile</Link>
+                    <Link role="menuitem" href="/profile" data-onboarding-target="profile" className={mobileLink}>Profile</Link>
                     <Link role="menuitem" href="/orders" data-onboarding-target="orders" className={`${mobileLink} md:hidden`}>My orders</Link>
-                    {sellerAccount && <Link role="menuitem" href="/gigs/mine" className={`${mobileLink} md:hidden`}>My products</Link>}
-                    <Link role="menuitem" href="/notifications" className={`${mobileLink} md:hidden`}><span>Notifications</span>{notificationBadge}</Link>
-                    <Link role="menuitem" href="/payments" className={`${mobileLink} md:hidden`}>Payments</Link>
+                    <Link role="menuitem" href="/messages" className={`${mobileLink} md:hidden`}>
+                      <span className="inline-flex min-h-11 w-full items-center justify-between gap-3">
+                        <span>Messages</span>
+                        {unreadBadge}
+                      </span>
+                    </Link>
+                    {sellerAccount && <Link role="menuitem" href="/gigs/mine" className={mobileLink}>My products</Link>}
+                    <Link role="menuitem" href="/notifications" className={mobileLink}><span>Notifications</span>{notificationBadge}</Link>
+                    <Link role="menuitem" href="/payments" className={mobileLink}>Payments</Link>
                     <Link role="menuitem" href="/settings" className={mobileLink}>Settings</Link>
+                    <Link role="menuitem" href="/security" className={mobileLink}>Authenticator &amp; security</Link>
+                    {isAdmin && <Link role="menuitem" href="/admin" className={mobileLink}>Admin workspace</Link>}
                   </nav>
-                  <div className="my-2 border-t border-[#eee7de] pt-2">
-                    <button type="button" role="menuitem" onClick={handleSignOut} className={`${mobileLink} w-full text-left text-[#8e3b28] hover:bg-[#fff0ea]`}>Sign out</button>
+                  <div className="my-2 border-t border-line pt-2">
+                    <button type="button" role="menuitem" onClick={handleSignOut} className={`${mobileLink} w-full text-left text-link hover:bg-ember-cta/10`}>Sign out</button>
                   </div>
                 </>
               ) : (
                 <>
                   <div className="px-3 pb-3 pt-2">
                     <p className="font-display text-lg font-semibold">Welcome to The Middleman</p>
-                    <p className="mt-1 text-xs leading-5 text-[#697581]">Browse products now, then sign in when you’re ready to buy or sell.</p>
+                    <p className="mt-1 text-xs leading-5 text-muted">Browse products now, then sign in when you’re ready to buy or sell.</p>
                   </div>
                   <nav aria-label="Guest account menu" className="space-y-0.5">
                     <Link role="menuitem" href="/marketplace" className={mobileLink}>Browse products</Link>
                     <Link role="menuitem" href="/about" className={mobileLink}>About The Middleman</Link>
                     <button type="button" role="menuitem" onClick={openCookieSettings} className={`${mobileLink} w-full text-left`}>Cookie settings</button>
                   </nav>
-                  <div className="mt-2 grid gap-2 border-t border-[#eee7de] px-1 pt-3">
-                    <Link role="menuitem" href="/signup?mode=signin" className="flex min-h-11 items-center justify-center rounded-xl border border-[#ddd3c8] px-3 text-sm font-semibold text-[#25384b] transition hover:bg-[#f5efe7]">Log in</Link>
-                    <Link role="menuitem" href="/signup?mode=signup" className="flex min-h-11 items-center justify-center rounded-xl bg-[#de641e] px-3 text-sm font-semibold text-white transition hover:bg-[#c95415]">Create an account</Link>
+                  <div className="mt-2 grid gap-2 border-t border-line px-1 pt-3">
+                    <Link role="menuitem" href="/signup?mode=signin" className="flex min-h-11 items-center justify-center rounded-xl border border-line bg-paper px-3 text-sm font-semibold text-bone transition hover:bg-elevated">Log in</Link>
+                    <Link role="menuitem" href="/signup?mode=signup" className="btn-primary flex min-h-11 items-center justify-center rounded-xl px-3 text-sm font-semibold">Create an account</Link>
                   </div>
                 </>
               )}

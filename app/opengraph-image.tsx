@@ -21,7 +21,7 @@ export default function Image() {
       >
         <div style={{ display: "flex", flexDirection: "column", width: "100%" }}>
           <div style={{ alignItems: "center", color: "#0b3d91", display: "flex", fontSize: 34, fontWeight: 700 }}>
-            <div style={{ background: "#ff8a00", borderRadius: 999, display: "flex", height: 22, marginRight: 18, width: 22 }} />
+            <div style={{ background: "#F97316", borderRadius: 999, display: "flex", height: 22, marginRight: 18, width: 22 }} />
             THE MIDDLEMAN
           </div>
           <div style={{ background: "#dce2e5", display: "flex", height: 2, margin: "36px 0 50px", width: "100%" }} />
@@ -29,7 +29,7 @@ export default function Image() {
             Find digital products made by Nigerian creators.
           </div>
           <div style={{ color: "#526577", display: "flex", fontSize: 30, marginTop: 36 }}>
-            Ready-made products. Pay in naira through Paystack.
+            Ready-made products. Purchases are paused.
           </div>
         </div>
       </div>

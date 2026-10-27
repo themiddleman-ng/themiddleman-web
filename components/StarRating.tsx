@@ -4,17 +4,17 @@ import { useState } from "react";
 
 function Star({ filled, half, size }: { filled: boolean; half?: boolean; size: number }) {
   return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill={filled ? "#F26419" : "none"} stroke="#F26419" strokeWidth="1.5">
+    <svg width={size} height={size} viewBox="0 0 24 24" fill={filled ? "#F97316" : "none"} stroke="#F97316" strokeWidth="1.5">
       {half && (
         <defs>
           <linearGradient id="half-star">
-            <stop offset="50%" stopColor="#F26419" />
+            <stop offset="50%" stopColor="#F97316" />
             <stop offset="50%" stopColor="transparent" stopOpacity="0" />
           </linearGradient>
         </defs>
       )}
       <path
-        fill={half ? "url(#half-star)" : filled ? "#F26419" : "none"}
+        fill={half ? "url(#half-star)" : filled ? "#F97316" : "none"}
         d="m12 2 3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z"
       />
     </svg>
@@ -32,7 +32,7 @@ export function StarRatingDisplay({
   size?: number;
 }) {
   if (!count) {
-    return <span className="text-[11px] text-[#8C8C8C]">No reviews yet</span>;
+    return <span className="text-[14px] text-slate">No reviews yet</span>;
   }
   const rounded = Math.round(average * 2) / 2;
   return (
@@ -42,7 +42,7 @@ export function StarRatingDisplay({
           <Star key={n} size={size} filled={rounded >= n} half={rounded + 0.5 === n} />
         ))}
       </span>
-      <span className="text-[11px] text-[#8C8C8C]">
+      <span className="text-[14px] text-slate">
         {average.toFixed(1)} ({count})
       </span>
     </span>

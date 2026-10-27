@@ -5,6 +5,8 @@ import Link from "next/link";
 import { supabase } from "@/lib/supabaseClient";
 import { StarRatingDisplay } from "@/components/StarRating";
 import SiteHeader from "@/components/SiteHeader";
+import { signinHref } from "@/lib/auth/signin-redirect.mjs";
+import { useRouter } from "next/navigation";
 import ProductPackageManager from "@/components/ProductPackageUploader";
 
 const CATEGORY_LABELS = {
@@ -16,6 +18,7 @@ const CATEGORY_LABELS = {
 };
 
 export default function MyGigsPage() {
+  const router = useRouter();
   const [gigs, setGigs] = useState([]);
   const [productQuery, setProductQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
@@ -35,7 +38,7 @@ export default function MyGigsPage() {
     setLoadError("");
 
     const { data: { user } } = await supabase.auth.getUser();
-    if (!user) { setLoadError("Sign in to manage your products."); setLoading(false); return; }
+    if (!user) { router.replace(signinHref("/gigs/mine")); return; }
 
     const { data: sellerProfile, error: profileError } = await supabase
       .from("seller_profiles")
@@ -102,7 +105,7 @@ export default function MyGigsPage() {
             <Link href="/analytics" className="inline-flex min-h-10 items-center rounded-full border border-line px-4 py-2 text-sm text-slate hover:text-bone">Analytics</Link>
             <Link
               href="/gigs/new"
-              className="inline-flex min-h-10 flex-1 items-center justify-center rounded-full bg-ember px-4 py-2 text-center text-sm font-semibold text-ink transition-colors hover:bg-ember/90 sm:flex-none sm:px-5"
+              className="inline-flex min-h-10 flex-1 items-center justify-center rounded-full bg-ember px-4 py-2 text-center text-sm font-semibold text-ink transition-colors hover:bg-ember-hover sm:flex-none sm:px-5"
             >
               + List a new product
             </Link>

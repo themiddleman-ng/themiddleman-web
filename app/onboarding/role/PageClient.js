@@ -1,15 +1,27 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabaseClient';
+import { signinHref } from '@/lib/auth/signin-redirect.mjs';
 
 export default function RoleSelectionPage() {
   const router = useRouter();
+  const [ready, setReady] = useState(false);
   const [wantsToBuy, setWantsToBuy] = useState(true);
   const [wantsToSell, setWantsToSell] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+
+  useEffect(() => {
+    let active = true;
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (!active) return;
+      if (!user) router.replace(signinHref('/onboarding/role'));
+      else setReady(true);
+    });
+    return () => { active = false; };
+  }, [router]);
 
   const hasSelection = wantsToBuy || wantsToSell;
 
@@ -48,7 +60,7 @@ export default function RoleSelectionPage() {
       setActive: setWantsToBuy,
       number: '01',
       title: 'BUY DIGITAL PRODUCTS',
-      text: 'Discover software, code, templates and other digital products to use or build with.',
+      text: 'Browse software, code, templates and other digital products. Purchases are paused, so choosing this does not start a payment.',
       tag: 'Buyer',
     },
     {
@@ -56,31 +68,38 @@ export default function RoleSelectionPage() {
       setActive: setWantsToSell,
       number: '02',
       title: 'SELL DIGITAL PRODUCTS',
-      text: 'List your software, code or digital products and make them available to buyers.',
+      text: 'List your software, code or digital products for buyers to preview. Payouts are not open on this launch.',
       tag: 'Seller',
     },
   ];
+
+  if (!ready) {
+    return (
+      <main className="grid min-h-[100svh] place-items-center bg-ink px-4">
+        <p className="text-[16px] text-slate">Checking your account…</p>
+      </main>
+    );
+  }
 
   return (
     <main className="grid min-h-[100svh] place-items-center overflow-hidden bg-ink px-4 py-6 sm:px-6 sm:py-10">
       <section className="w-full max-w-4xl">
         <div className="mb-5 flex items-center justify-between gap-3 sm:mb-8">
           <div className="flex min-w-0 items-center gap-2 font-display text-sm font-bold tracking-tight text-bone sm:text-base">
-            <span className="h-2 w-2 shrink-0 rounded-full bg-ember shadow-[0_0_0_4px_rgba(242,100,25,.14)]" />
+            <span className="h-2 w-2 shrink-0 rounded-full bg-ember shadow-[0_0_0_4px_rgba(249,115,22,.14)]" />
             <span className="truncate">The Middleman</span>
           </div>
           <span className="rounded-full border border-ember/20 bg-white/70 px-3 py-1 text-xs font-medium text-slate shadow-sm">Step 1 of 2</span>
         </div>
 
-        <div className="overflow-hidden rounded-2xl border border-line bg-[#fffdf9] shadow-[0_20px_70px_rgba(31,21,12,.12)]">
-          <div className="border-b border-line bg-[radial-gradient(circle_at_top_right,_rgba(242,100,25,.18),_transparent_42%),linear-gradient(180deg,rgba(255,255,255,.88),rgba(247,243,236,.92))] px-5 py-6 sm:px-10 sm:py-10">
+        <div className="overflow-hidden rounded-2xl border border-line bg-paper shadow-[0_20px_70px_rgba(31,21,12,.12)]">
+          <div className="border-b border-line bg-[radial-gradient(circle_at_top_right,_rgba(249,115,22,.18),_transparent_42%),linear-gradient(180deg,rgba(255,255,255,.88),rgba(247,243,236,.92))] px-5 py-6 sm:px-10 sm:py-10">
             <p className="text-xs font-semibold tracking-[.2em] text-ember">MAKE IT YOURS</p>
-            <h1 className="mt-2 font-display text-3xl font-bold tracking-tight sm:mt-3 sm:text-5xl">
+            <h1 className="mt-2 font-display text-[1.65rem] font-bold tracking-tight sm:mt-3 sm:text-5xl">
               How would you like to use<br className="hidden sm:block" /> The Middleman?
             </h1>
             <p className="mt-4 max-w-xl text-sm leading-relaxed text-slate sm:text-base">
-              Choose one path or both. Your account adapts to what you want to buy or sell, and you can change these
-              preferences later.
+              Choose one path or both. Purchases and payouts are paused. You can change these preferences later.
             </p>
           </div>
 
@@ -94,14 +113,14 @@ export default function RoleSelectionPage() {
                   onClick={() => choice.setActive(!choice.active)}
                   className={`group relative rounded-2xl border p-4 text-left transition duration-200 sm:p-6 ${
                     choice.active
-                      ? 'border-ember bg-ember/10 shadow-[0_18px_40px_rgba(242,100,25,.15)] ring-1 ring-ember/30'
+                      ? 'border-ember bg-ember/10 shadow-[0_18px_40px_rgba(249,115,22,.15)] ring-1 ring-ember/30'
                       : 'border-line bg-[rgba(255,255,255,0.68)] hover:-translate-y-0.5 hover:border-ember/30 hover:shadow-[0_14px_30px_rgba(31,21,12,.08)]'
                   }`}
                 >
                   <span className="font-mono text-xs font-semibold tracking-[.2em] text-ember">{choice.number}</span>
                   <span
                     className={`absolute right-5 top-5 grid h-6 w-6 place-items-center rounded-full border text-xs font-bold ${
-                      choice.active ? 'border-ember bg-ember text-ink shadow-[0_0_0_3px_rgba(242,100,25,.12)]' : 'border-line bg-white/80 text-transparent'
+                      choice.active ? 'border-ember bg-ember text-ink shadow-[0_0_0_3px_rgba(249,115,22,.12)]' : 'border-line bg-white/80 text-transparent'
                     }`}
                   >
                     ✓
@@ -116,7 +135,7 @@ export default function RoleSelectionPage() {
             </div>
 
             <button type="button" aria-pressed={wantsToBuy && wantsToSell} onClick={() => { setWantsToBuy(true); setWantsToSell(true); }} className={`mt-4 w-full rounded-xl border px-5 py-4 text-left text-sm font-semibold ${wantsToBuy && wantsToSell ? 'border-ember bg-ember/10' : 'border-line bg-white'}`}>
-              Buy and sell <span className="ml-2 font-normal text-slate">Both, with one account</span>
+              Buy and sell <span className="ml-2 font-normal text-slate">Both, with one account. Purchases stay paused.</span>
             </button>
 
             {error && <p className="auth-error mt-5">{error}</p>}

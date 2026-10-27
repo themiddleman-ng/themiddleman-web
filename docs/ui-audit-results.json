@@ -1,0 +1,1714 @@
+{
+  "base": "http://127.0.0.1:3000",
+  "generatedAt": "2026-10-25T09:42:43.011Z",
+  "routes": {
+    "375:/": [
+      {
+        "type": "contrast-sample",
+        "detail": [
+          {
+            "fg": "rgb(245, 242, 236)",
+            "bg": "rgb(17, 17, 17)",
+            "tag": "MAIN"
+          },
+          {
+            "fg": "rgb(245, 242, 236)",
+            "bg": "oklab(0.177624 0.00000809133 0.00000356138 / 0.95)",
+            "tag": "HEADER"
+          },
+          {
+            "fg": "rgb(245, 242, 236)",
+            "bg": "rgba(0, 0, 0, 0)",
+            "tag": "NAV"
+          }
+        ]
+      }
+    ],
+    "375:/marketplace": [
+      {
+        "type": "tap",
+        "detail": [
+          {
+            "w": 85,
+            "h": 16,
+            "label": "Cookie policy"
+          },
+          {
+            "w": 65,
+            "h": 36,
+            "label": "Choose"
+          },
+          {
+            "w": 42,
+            "h": 36,
+            "label": "OK"
+          }
+        ]
+      },
+      {
+        "type": "contrast-sample",
+        "detail": [
+          {
+            "fg": "rgb(245, 242, 236)",
+            "bg": "rgba(0, 0, 0, 0)",
+            "tag": "MAIN"
+          },
+          {
+            "fg": "rgb(245, 242, 236)",
+            "bg": "oklab(0.177624 0.00000809133 0.00000356138 / 0.95)",
+            "tag": "HEADER"
+          },
+          {
+            "fg": "rgb(245, 242, 236)",
+            "bg": "rgba(0, 0, 0, 0)",
+            "tag": "NAV"
+          }
+        ]
+      }
+    ],
+    "375:/browse": [
+      {
+        "type": "tap",
+        "detail": [
+          {
+            "w": 253,
+            "h": 20,
+            "label": "See everything on the marketplace →"
+          },
+          {
+            "w": 85,
+            "h": 16,
+            "label": "Cookie policy"
+          },
+          {
+            "w": 65,
+            "h": 36,
+            "label": "Choose"
+          },
+          {
+            "w": 42,
+            "h": 36,
+            "label": "OK"
+          }
+        ]
+      },
+      {
+        "type": "contrast-sample",
+        "detail": [
+          {
+            "fg": "rgb(245, 242, 236)",
+            "bg": "rgb(17, 17, 17)",
+            "tag": "MAIN"
+          },
+          {
+            "fg": "rgb(245, 242, 236)",
+            "bg": "oklab(0.177624 0.00000809133 0.00000356138 / 0.95)",
+            "tag": "HEADER"
+          },
+          {
+            "fg": "rgb(245, 242, 236)",
+            "bg": "rgba(0, 0, 0, 0)",
+            "tag": "NAV"
+          }
+        ]
+      }
+    ],
+    "375:/about": [
+      {
+        "type": "tap",
+        "detail": [
+          {
+            "w": 85,
+            "h": 16,
+            "label": "Cookie policy"
+          },
+          {
+            "w": 65,
+            "h": 36,
+            "label": "Choose"
+          },
+          {
+            "w": 42,
+            "h": 36,
+            "label": "OK"
+          }
+        ]
+      },
+      {
+        "type": "contrast-sample",
+        "detail": [
+          {
+            "fg": "rgb(245, 242, 236)",
+            "bg": "rgb(17, 17, 17)",
+            "tag": "MAIN"
+          },
+          {
+            "fg": "rgb(245, 242, 236)",
+            "bg": "oklab(0.177624 0.00000809133 0.00000356138 / 0.95)",
+            "tag": "HEADER"
+          },
+          {
+            "fg": "rgb(245, 242, 236)",
+            "bg": "rgba(0, 0, 0, 0)",
+            "tag": "NAV"
+          }
+        ]
+      }
+    ],
+    "375:/signup?mode=signin": [
+      {
+        "type": "contrast-sample",
+        "detail": [
+          {
+            "fg": "rgb(245, 242, 236)",
+            "bg": "rgb(17, 17, 17)",
+            "tag": "MAIN"
+          }
+        ]
+      }
+    ],
+    "375:/gigs/new": [
+      {
+        "type": "tap",
+        "detail": [
+          {
+            "w": 85,
+            "h": 16,
+            "label": "Cookie policy"
+          },
+          {
+            "w": 65,
+            "h": 36,
+            "label": "Choose"
+          },
+          {
+            "w": 42,
+            "h": 36,
+            "label": "OK"
+          }
+        ]
+      },
+      {
+        "type": "contrast-sample",
+        "detail": [
+          {
+            "fg": "rgb(245, 242, 236)",
+            "bg": "rgb(17, 17, 17)",
+            "tag": "MAIN"
+          },
+          {
+            "fg": "rgb(245, 242, 236)",
+            "bg": "rgba(0, 0, 0, 0)",
+            "tag": "NAV"
+          }
+        ]
+      }
+    ],
+    "375:/messages": [
+      {
+        "type": "tap",
+        "detail": [
+          {
+            "w": 85,
+            "h": 16,
+            "label": "Cookie policy"
+          },
+          {
+            "w": 65,
+            "h": 36,
+            "label": "Choose"
+          },
+          {
+            "w": 42,
+            "h": 36,
+            "label": "OK"
+          }
+        ]
+      },
+      {
+        "type": "contrast-sample",
+        "detail": [
+          {
+            "fg": "rgb(245, 242, 236)",
+            "bg": "rgb(17, 17, 17)",
+            "tag": "MAIN"
+          },
+          {
+            "fg": "rgb(245, 242, 236)",
+            "bg": "oklab(0.177624 0.00000809133 0.00000356138 / 0.95)",
+            "tag": "HEADER"
+          },
+          {
+            "fg": "rgb(245, 242, 236)",
+            "bg": "rgba(0, 0, 0, 0)",
+            "tag": "NAV"
+          }
+        ]
+      }
+    ],
+    "375:/orders": [
+      {
+        "type": "tap",
+        "detail": [
+          {
+            "w": 85,
+            "h": 16,
+            "label": "Cookie policy"
+          },
+          {
+            "w": 65,
+            "h": 36,
+            "label": "Choose"
+          },
+          {
+            "w": 42,
+            "h": 36,
+            "label": "OK"
+          }
+        ]
+      },
+      {
+        "type": "contrast-sample",
+        "detail": [
+          {
+            "fg": "rgb(245, 242, 236)",
+            "bg": "rgb(17, 17, 17)",
+            "tag": "MAIN"
+          },
+          {
+            "fg": "rgb(245, 242, 236)",
+            "bg": "oklab(0.177624 0.00000809133 0.00000356138 / 0.95)",
+            "tag": "HEADER"
+          },
+          {
+            "fg": "rgb(245, 242, 236)",
+            "bg": "rgba(0, 0, 0, 0)",
+            "tag": "NAV"
+          }
+        ]
+      }
+    ],
+    "375:/profile": [
+      {
+        "type": "tap",
+        "detail": [
+          {
+            "w": 85,
+            "h": 16,
+            "label": "Cookie policy"
+          },
+          {
+            "w": 65,
+            "h": 36,
+            "label": "Choose"
+          },
+          {
+            "w": 42,
+            "h": 36,
+            "label": "OK"
+          }
+        ]
+      },
+      {
+        "type": "contrast-sample",
+        "detail": [
+          {
+            "fg": "rgb(245, 242, 236)",
+            "bg": "rgb(17, 17, 17)",
+            "tag": "MAIN"
+          },
+          {
+            "fg": "rgb(245, 242, 236)",
+            "bg": "oklab(0.177624 0.00000809133 0.00000356138 / 0.95)",
+            "tag": "HEADER"
+          },
+          {
+            "fg": "rgb(245, 242, 236)",
+            "bg": "rgba(0, 0, 0, 0)",
+            "tag": "NAV"
+          }
+        ]
+      }
+    ],
+    "375:/settings": [
+      {
+        "type": "tap",
+        "detail": [
+          {
+            "w": 85,
+            "h": 16,
+            "label": "Cookie policy"
+          },
+          {
+            "w": 65,
+            "h": 36,
+            "label": "Choose"
+          },
+          {
+            "w": 42,
+            "h": 36,
+            "label": "OK"
+          }
+        ]
+      },
+      {
+        "type": "contrast-sample",
+        "detail": [
+          {
+            "fg": "rgb(245, 242, 236)",
+            "bg": "rgb(17, 17, 17)",
+            "tag": "MAIN"
+          },
+          {
+            "fg": "rgb(245, 242, 236)",
+            "bg": "oklab(0.177624 0.00000809133 0.00000356138 / 0.95)",
+            "tag": "HEADER"
+          },
+          {
+            "fg": "rgb(245, 242, 236)",
+            "bg": "rgba(0, 0, 0, 0)",
+            "tag": "NAV"
+          }
+        ]
+      }
+    ],
+    "375:/admin": [
+      {
+        "type": "tap",
+        "detail": [
+          {
+            "w": 85,
+            "h": 16,
+            "label": "Cookie policy"
+          },
+          {
+            "w": 65,
+            "h": 36,
+            "label": "Choose"
+          },
+          {
+            "w": 42,
+            "h": 36,
+            "label": "OK"
+          }
+        ]
+      },
+      {
+        "type": "contrast-sample",
+        "detail": [
+          {
+            "fg": "rgb(245, 242, 236)",
+            "bg": "rgb(17, 17, 17)",
+            "tag": "MAIN"
+          }
+        ]
+      }
+    ],
+    "375:/design-review": [
+      {
+        "type": "contrast-sample",
+        "detail": [
+          {
+            "fg": "rgb(245, 242, 236)",
+            "bg": "rgb(17, 17, 17)",
+            "tag": "MAIN"
+          }
+        ]
+      }
+    ],
+    "375:/legal/terms": [
+      {
+        "type": "tap",
+        "detail": [
+          {
+            "w": 39,
+            "h": 17,
+            "label": "Home"
+          },
+          {
+            "w": 133,
+            "h": 38,
+            "label": "1. Acceptance of Terms"
+          },
+          {
+            "w": 140,
+            "h": 38,
+            "label": "2. Nature of the Platform"
+          },
+          {
+            "w": 160,
+            "h": 38,
+            "label": "3. Account Registration & Verification"
+          },
+          {
+            "w": 160,
+            "h": 38,
+            "label": "4. Escrow Payment Mechanism"
+          },
+          {
+            "w": 114,
+            "h": 38,
+            "label": "5. Buyer Obligations"
+          },
+          {
+            "w": 113,
+            "h": 38,
+            "label": "6. Seller Obligations"
+          },
+          {
+            "w": 121,
+            "h": 38,
+            "label": "7. Prohibited Conduct"
+          },
+          {
+            "w": 125,
+            "h": 38,
+            "label": "8. Fees & Commission"
+          },
+          {
+            "w": 128,
+            "h": 38,
+            "label": "9. Intellectual Property"
+          },
+          {
+            "w": 125,
+            "h": 38,
+            "label": "10. Dispute Resolution"
+          },
+          {
+            "w": 133,
+            "h": 38,
+            "label": "11. Limitation of Liability"
+          }
+        ]
+      },
+      {
+        "type": "contrast-sample",
+        "detail": [
+          {
+            "fg": "rgb(245, 242, 236)",
+            "bg": "rgb(17, 17, 17)",
+            "tag": "MAIN"
+          },
+          {
+            "fg": "rgb(245, 242, 236)",
+            "bg": "oklab(0.177624 0.00000809133 0.00000356138 / 0.95)",
+            "tag": "HEADER"
+          },
+          {
+            "fg": "rgb(245, 242, 236)",
+            "bg": "rgba(0, 0, 0, 0)",
+            "tag": "NAV"
+          }
+        ]
+      }
+    ],
+    "375:/sellers/00000000-0000-4000-8000-000000000001": [
+      {
+        "type": "contrast-sample",
+        "detail": []
+      }
+    ],
+    "768:/": [
+      {
+        "type": "contrast-sample",
+        "detail": [
+          {
+            "fg": "rgb(245, 242, 236)",
+            "bg": "rgb(17, 17, 17)",
+            "tag": "MAIN"
+          },
+          {
+            "fg": "rgb(245, 242, 236)",
+            "bg": "oklab(0.177624 0.00000809133 0.00000356138 / 0.95)",
+            "tag": "HEADER"
+          },
+          {
+            "fg": "rgb(245, 242, 236)",
+            "bg": "rgba(0, 0, 0, 0)",
+            "tag": "NAV"
+          }
+        ]
+      }
+    ],
+    "768:/marketplace": [
+      {
+        "type": "tap",
+        "detail": [
+          {
+            "w": 85,
+            "h": 16,
+            "label": "Cookie policy"
+          },
+          {
+            "w": 65,
+            "h": 36,
+            "label": "Choose"
+          },
+          {
+            "w": 42,
+            "h": 36,
+            "label": "OK"
+          }
+        ]
+      },
+      {
+        "type": "contrast-sample",
+        "detail": [
+          {
+            "fg": "rgb(245, 242, 236)",
+            "bg": "rgba(0, 0, 0, 0)",
+            "tag": "MAIN"
+          },
+          {
+            "fg": "rgb(245, 242, 236)",
+            "bg": "oklab(0.177624 0.00000809133 0.00000356138 / 0.95)",
+            "tag": "HEADER"
+          },
+          {
+            "fg": "rgb(245, 242, 236)",
+            "bg": "rgba(0, 0, 0, 0)",
+            "tag": "NAV"
+          }
+        ]
+      }
+    ],
+    "768:/browse": [
+      {
+        "type": "tap",
+        "detail": [
+          {
+            "w": 253,
+            "h": 20,
+            "label": "See everything on the marketplace →"
+          },
+          {
+            "w": 85,
+            "h": 16,
+            "label": "Cookie policy"
+          },
+          {
+            "w": 65,
+            "h": 36,
+            "label": "Choose"
+          },
+          {
+            "w": 42,
+            "h": 36,
+            "label": "OK"
+          }
+        ]
+      },
+      {
+        "type": "contrast-sample",
+        "detail": [
+          {
+            "fg": "rgb(245, 242, 236)",
+            "bg": "rgb(17, 17, 17)",
+            "tag": "MAIN"
+          },
+          {
+            "fg": "rgb(245, 242, 236)",
+            "bg": "oklab(0.177624 0.00000809133 0.00000356138 / 0.95)",
+            "tag": "HEADER"
+          },
+          {
+            "fg": "rgb(245, 242, 236)",
+            "bg": "rgba(0, 0, 0, 0)",
+            "tag": "NAV"
+          }
+        ]
+      }
+    ],
+    "768:/about": [
+      {
+        "type": "tap",
+        "detail": [
+          {
+            "w": 85,
+            "h": 16,
+            "label": "Cookie policy"
+          },
+          {
+            "w": 65,
+            "h": 36,
+            "label": "Choose"
+          },
+          {
+            "w": 42,
+            "h": 36,
+            "label": "OK"
+          }
+        ]
+      },
+      {
+        "type": "contrast-sample",
+        "detail": [
+          {
+            "fg": "rgb(245, 242, 236)",
+            "bg": "rgb(17, 17, 17)",
+            "tag": "MAIN"
+          },
+          {
+            "fg": "rgb(245, 242, 236)",
+            "bg": "oklab(0.177624 0.00000809133 0.00000356138 / 0.95)",
+            "tag": "HEADER"
+          },
+          {
+            "fg": "rgb(245, 242, 236)",
+            "bg": "rgba(0, 0, 0, 0)",
+            "tag": "NAV"
+          }
+        ]
+      }
+    ],
+    "768:/signup?mode=signin": [
+      {
+        "type": "tap",
+        "detail": [
+          {
+            "w": 85,
+            "h": 16,
+            "label": "Cookie policy"
+          },
+          {
+            "w": 65,
+            "h": 36,
+            "label": "Choose"
+          },
+          {
+            "w": 42,
+            "h": 36,
+            "label": "OK"
+          }
+        ]
+      },
+      {
+        "type": "contrast-sample",
+        "detail": [
+          {
+            "fg": "rgb(245, 242, 236)",
+            "bg": "rgb(17, 17, 17)",
+            "tag": "MAIN"
+          }
+        ]
+      }
+    ],
+    "768:/gigs/new": [
+      {
+        "type": "tap",
+        "detail": [
+          {
+            "w": 85,
+            "h": 16,
+            "label": "Cookie policy"
+          },
+          {
+            "w": 65,
+            "h": 36,
+            "label": "Choose"
+          },
+          {
+            "w": 42,
+            "h": 36,
+            "label": "OK"
+          }
+        ]
+      },
+      {
+        "type": "contrast-sample",
+        "detail": [
+          {
+            "fg": "rgb(245, 242, 236)",
+            "bg": "rgb(17, 17, 17)",
+            "tag": "MAIN"
+          },
+          {
+            "fg": "rgb(245, 242, 236)",
+            "bg": "rgba(0, 0, 0, 0)",
+            "tag": "NAV"
+          }
+        ]
+      }
+    ],
+    "768:/messages": [
+      {
+        "type": "tap",
+        "detail": [
+          {
+            "w": 85,
+            "h": 16,
+            "label": "Cookie policy"
+          },
+          {
+            "w": 65,
+            "h": 36,
+            "label": "Choose"
+          },
+          {
+            "w": 42,
+            "h": 36,
+            "label": "OK"
+          }
+        ]
+      },
+      {
+        "type": "contrast-sample",
+        "detail": [
+          {
+            "fg": "rgb(245, 242, 236)",
+            "bg": "rgb(17, 17, 17)",
+            "tag": "MAIN"
+          },
+          {
+            "fg": "rgb(245, 242, 236)",
+            "bg": "oklab(0.177624 0.00000809133 0.00000356138 / 0.95)",
+            "tag": "HEADER"
+          },
+          {
+            "fg": "rgb(245, 242, 236)",
+            "bg": "rgba(0, 0, 0, 0)",
+            "tag": "NAV"
+          }
+        ]
+      }
+    ],
+    "768:/orders": [
+      {
+        "type": "tap",
+        "detail": [
+          {
+            "w": 85,
+            "h": 16,
+            "label": "Cookie policy"
+          },
+          {
+            "w": 65,
+            "h": 36,
+            "label": "Choose"
+          },
+          {
+            "w": 42,
+            "h": 36,
+            "label": "OK"
+          }
+        ]
+      },
+      {
+        "type": "contrast-sample",
+        "detail": [
+          {
+            "fg": "rgb(245, 242, 236)",
+            "bg": "rgb(17, 17, 17)",
+            "tag": "MAIN"
+          },
+          {
+            "fg": "rgb(245, 242, 236)",
+            "bg": "oklab(0.177624 0.00000809133 0.00000356138 / 0.95)",
+            "tag": "HEADER"
+          },
+          {
+            "fg": "rgb(245, 242, 236)",
+            "bg": "rgba(0, 0, 0, 0)",
+            "tag": "NAV"
+          }
+        ]
+      }
+    ],
+    "768:/profile": [
+      {
+        "type": "tap",
+        "detail": [
+          {
+            "w": 85,
+            "h": 16,
+            "label": "Cookie policy"
+          },
+          {
+            "w": 65,
+            "h": 36,
+            "label": "Choose"
+          },
+          {
+            "w": 42,
+            "h": 36,
+            "label": "OK"
+          }
+        ]
+      },
+      {
+        "type": "contrast-sample",
+        "detail": [
+          {
+            "fg": "rgb(245, 242, 236)",
+            "bg": "rgb(17, 17, 17)",
+            "tag": "MAIN"
+          },
+          {
+            "fg": "rgb(245, 242, 236)",
+            "bg": "oklab(0.177624 0.00000809133 0.00000356138 / 0.95)",
+            "tag": "HEADER"
+          },
+          {
+            "fg": "rgb(245, 242, 236)",
+            "bg": "rgba(0, 0, 0, 0)",
+            "tag": "NAV"
+          }
+        ]
+      }
+    ],
+    "768:/settings": [
+      {
+        "type": "tap",
+        "detail": [
+          {
+            "w": 85,
+            "h": 16,
+            "label": "Cookie policy"
+          },
+          {
+            "w": 65,
+            "h": 36,
+            "label": "Choose"
+          },
+          {
+            "w": 42,
+            "h": 36,
+            "label": "OK"
+          }
+        ]
+      },
+      {
+        "type": "contrast-sample",
+        "detail": [
+          {
+            "fg": "rgb(245, 242, 236)",
+            "bg": "rgb(17, 17, 17)",
+            "tag": "MAIN"
+          },
+          {
+            "fg": "rgb(245, 242, 236)",
+            "bg": "oklab(0.177624 0.00000809133 0.00000356138 / 0.95)",
+            "tag": "HEADER"
+          },
+          {
+            "fg": "rgb(245, 242, 236)",
+            "bg": "rgba(0, 0, 0, 0)",
+            "tag": "NAV"
+          }
+        ]
+      }
+    ],
+    "768:/admin": [
+      {
+        "type": "tap",
+        "detail": [
+          {
+            "w": 85,
+            "h": 16,
+            "label": "Cookie policy"
+          },
+          {
+            "w": 65,
+            "h": 36,
+            "label": "Choose"
+          },
+          {
+            "w": 42,
+            "h": 36,
+            "label": "OK"
+          }
+        ]
+      },
+      {
+        "type": "contrast-sample",
+        "detail": [
+          {
+            "fg": "rgb(245, 242, 236)",
+            "bg": "rgb(17, 17, 17)",
+            "tag": "MAIN"
+          }
+        ]
+      }
+    ],
+    "768:/design-review": [
+      {
+        "type": "contrast-sample",
+        "detail": [
+          {
+            "fg": "rgb(245, 242, 236)",
+            "bg": "rgb(17, 17, 17)",
+            "tag": "MAIN"
+          }
+        ]
+      }
+    ],
+    "768:/legal/terms": [
+      {
+        "type": "tap",
+        "detail": [
+          {
+            "w": 39,
+            "h": 17,
+            "label": "Home"
+          },
+          {
+            "w": 230,
+            "h": 19,
+            "label": "1. Acceptance of Terms"
+          },
+          {
+            "w": 230,
+            "h": 19,
+            "label": "2. Nature of the Platform"
+          },
+          {
+            "w": 230,
+            "h": 19,
+            "label": "3. Account Registration & Verification"
+          },
+          {
+            "w": 230,
+            "h": 19,
+            "label": "4. Escrow Payment Mechanism"
+          },
+          {
+            "w": 230,
+            "h": 19,
+            "label": "5. Buyer Obligations"
+          },
+          {
+            "w": 230,
+            "h": 19,
+            "label": "6. Seller Obligations"
+          },
+          {
+            "w": 230,
+            "h": 19,
+            "label": "7. Prohibited Conduct"
+          },
+          {
+            "w": 230,
+            "h": 19,
+            "label": "8. Fees & Commission"
+          },
+          {
+            "w": 230,
+            "h": 19,
+            "label": "9. Intellectual Property"
+          },
+          {
+            "w": 230,
+            "h": 19,
+            "label": "10. Dispute Resolution"
+          },
+          {
+            "w": 230,
+            "h": 19,
+            "label": "11. Limitation of Liability"
+          }
+        ]
+      },
+      {
+        "type": "contrast-sample",
+        "detail": [
+          {
+            "fg": "rgb(245, 242, 236)",
+            "bg": "rgb(17, 17, 17)",
+            "tag": "MAIN"
+          },
+          {
+            "fg": "rgb(245, 242, 236)",
+            "bg": "oklab(0.177624 0.00000809133 0.00000356138 / 0.95)",
+            "tag": "HEADER"
+          },
+          {
+            "fg": "rgb(245, 242, 236)",
+            "bg": "rgba(0, 0, 0, 0)",
+            "tag": "NAV"
+          }
+        ]
+      }
+    ],
+    "768:/sellers/00000000-0000-4000-8000-000000000001": [
+      {
+        "type": "contrast-sample",
+        "detail": [
+          {
+            "fg": "rgb(245, 242, 236)",
+            "bg": "rgb(17, 17, 17)",
+            "tag": "MAIN"
+          }
+        ]
+      }
+    ],
+    "1440:/": [
+      {
+        "type": "contrast-sample",
+        "detail": [
+          {
+            "fg": "rgb(245, 242, 236)",
+            "bg": "rgb(17, 17, 17)",
+            "tag": "MAIN"
+          },
+          {
+            "fg": "rgb(245, 242, 236)",
+            "bg": "oklab(0.177624 0.00000809133 0.00000356138 / 0.95)",
+            "tag": "HEADER"
+          },
+          {
+            "fg": "rgb(245, 242, 236)",
+            "bg": "rgba(0, 0, 0, 0)",
+            "tag": "NAV"
+          }
+        ]
+      }
+    ],
+    "1440:/marketplace": [
+      {
+        "type": "contrast-sample",
+        "detail": [
+          {
+            "fg": "rgb(245, 242, 236)",
+            "bg": "rgba(0, 0, 0, 0)",
+            "tag": "MAIN"
+          },
+          {
+            "fg": "rgb(245, 242, 236)",
+            "bg": "oklab(0.177624 0.00000809133 0.00000356138 / 0.95)",
+            "tag": "HEADER"
+          },
+          {
+            "fg": "rgb(245, 242, 236)",
+            "bg": "rgba(0, 0, 0, 0)",
+            "tag": "NAV"
+          }
+        ]
+      }
+    ],
+    "1440:/browse": [
+      {
+        "type": "tap",
+        "detail": [
+          {
+            "w": 253,
+            "h": 20,
+            "label": "See everything on the marketplace →"
+          }
+        ]
+      },
+      {
+        "type": "contrast-sample",
+        "detail": [
+          {
+            "fg": "rgb(245, 242, 236)",
+            "bg": "rgb(17, 17, 17)",
+            "tag": "MAIN"
+          },
+          {
+            "fg": "rgb(245, 242, 236)",
+            "bg": "oklab(0.177624 0.00000809133 0.00000356138 / 0.95)",
+            "tag": "HEADER"
+          },
+          {
+            "fg": "rgb(245, 242, 236)",
+            "bg": "rgba(0, 0, 0, 0)",
+            "tag": "NAV"
+          }
+        ]
+      }
+    ],
+    "1440:/about": [
+      {
+        "type": "tap",
+        "detail": [
+          {
+            "w": 85,
+            "h": 16,
+            "label": "Cookie policy"
+          },
+          {
+            "w": 65,
+            "h": 36,
+            "label": "Choose"
+          },
+          {
+            "w": 42,
+            "h": 36,
+            "label": "OK"
+          }
+        ]
+      },
+      {
+        "type": "contrast-sample",
+        "detail": [
+          {
+            "fg": "rgb(245, 242, 236)",
+            "bg": "rgb(17, 17, 17)",
+            "tag": "MAIN"
+          },
+          {
+            "fg": "rgb(245, 242, 236)",
+            "bg": "oklab(0.177624 0.00000809133 0.00000356138 / 0.95)",
+            "tag": "HEADER"
+          },
+          {
+            "fg": "rgb(245, 242, 236)",
+            "bg": "rgba(0, 0, 0, 0)",
+            "tag": "NAV"
+          }
+        ]
+      }
+    ],
+    "1440:/signup?mode=signin": [
+      {
+        "type": "tap",
+        "detail": [
+          {
+            "w": 85,
+            "h": 16,
+            "label": "Cookie policy"
+          },
+          {
+            "w": 65,
+            "h": 36,
+            "label": "Choose"
+          },
+          {
+            "w": 42,
+            "h": 36,
+            "label": "OK"
+          }
+        ]
+      },
+      {
+        "type": "contrast-sample",
+        "detail": [
+          {
+            "fg": "rgb(245, 242, 236)",
+            "bg": "rgb(17, 17, 17)",
+            "tag": "MAIN"
+          }
+        ]
+      }
+    ],
+    "1440:/gigs/new": [
+      {
+        "type": "tap",
+        "detail": [
+          {
+            "w": 183,
+            "h": 44,
+            "label": "My products"
+          },
+          {
+            "w": 183,
+            "h": 44,
+            "label": "Create a product"
+          },
+          {
+            "w": 183,
+            "h": 44,
+            "label": "Analytics"
+          },
+          {
+            "w": 183,
+            "h": 44,
+            "label": "Seller support"
+          },
+          {
+            "w": 183,
+            "h": 44,
+            "label": "Explore marketplace"
+          },
+          {
+            "w": 183,
+            "h": 44,
+            "label": "Buy and sell"
+          }
+        ]
+      },
+      {
+        "type": "contrast-sample",
+        "detail": [
+          {
+            "fg": "rgb(245, 242, 236)",
+            "bg": "rgb(17, 17, 17)",
+            "tag": "MAIN"
+          },
+          {
+            "fg": "rgb(245, 242, 236)",
+            "bg": "rgba(0, 0, 0, 0)",
+            "tag": "NAV"
+          }
+        ]
+      }
+    ],
+    "1440:/messages": [
+      {
+        "type": "tap",
+        "detail": [
+          {
+            "w": 85,
+            "h": 16,
+            "label": "Cookie policy"
+          },
+          {
+            "w": 65,
+            "h": 36,
+            "label": "Choose"
+          },
+          {
+            "w": 42,
+            "h": 36,
+            "label": "OK"
+          }
+        ]
+      },
+      {
+        "type": "contrast-sample",
+        "detail": [
+          {
+            "fg": "rgb(245, 242, 236)",
+            "bg": "rgb(17, 17, 17)",
+            "tag": "MAIN"
+          },
+          {
+            "fg": "rgb(245, 242, 236)",
+            "bg": "oklab(0.177624 0.00000809133 0.00000356138 / 0.95)",
+            "tag": "HEADER"
+          },
+          {
+            "fg": "rgb(245, 242, 236)",
+            "bg": "rgba(0, 0, 0, 0)",
+            "tag": "NAV"
+          }
+        ]
+      }
+    ],
+    "1440:/orders": [
+      {
+        "type": "tap",
+        "detail": [
+          {
+            "w": 183,
+            "h": 44,
+            "label": "Your profile"
+          },
+          {
+            "w": 183,
+            "h": 44,
+            "label": "Orders"
+          },
+          {
+            "w": 183,
+            "h": 44,
+            "label": "Messages"
+          },
+          {
+            "w": 183,
+            "h": 44,
+            "label": "Payments"
+          },
+          {
+            "w": 183,
+            "h": 44,
+            "label": "Notifications"
+          },
+          {
+            "w": 183,
+            "h": 44,
+            "label": "Settings"
+          },
+          {
+            "w": 183,
+            "h": 44,
+            "label": "Security"
+          },
+          {
+            "w": 183,
+            "h": 44,
+            "label": "Explore marketplace"
+          },
+          {
+            "w": 183,
+            "h": 44,
+            "label": "Buy and sell"
+          },
+          {
+            "w": 85,
+            "h": 16,
+            "label": "Cookie policy"
+          },
+          {
+            "w": 65,
+            "h": 36,
+            "label": "Choose"
+          },
+          {
+            "w": 42,
+            "h": 36,
+            "label": "OK"
+          }
+        ]
+      },
+      {
+        "type": "contrast-sample",
+        "detail": [
+          {
+            "fg": "rgb(245, 242, 236)",
+            "bg": "rgb(17, 17, 17)",
+            "tag": "MAIN"
+          },
+          {
+            "fg": "rgb(245, 242, 236)",
+            "bg": "oklab(0.177624 0.00000809133 0.00000356138 / 0.95)",
+            "tag": "HEADER"
+          },
+          {
+            "fg": "rgb(245, 242, 236)",
+            "bg": "rgba(0, 0, 0, 0)",
+            "tag": "NAV"
+          }
+        ]
+      }
+    ],
+    "1440:/profile": [
+      {
+        "type": "tap",
+        "detail": [
+          {
+            "w": 183,
+            "h": 44,
+            "label": "Your profile"
+          },
+          {
+            "w": 183,
+            "h": 44,
+            "label": "Orders"
+          },
+          {
+            "w": 183,
+            "h": 44,
+            "label": "Messages"
+          },
+          {
+            "w": 183,
+            "h": 44,
+            "label": "Payments"
+          },
+          {
+            "w": 183,
+            "h": 44,
+            "label": "Notifications"
+          },
+          {
+            "w": 183,
+            "h": 44,
+            "label": "Settings"
+          },
+          {
+            "w": 183,
+            "h": 44,
+            "label": "Security"
+          },
+          {
+            "w": 183,
+            "h": 44,
+            "label": "Explore marketplace"
+          },
+          {
+            "w": 183,
+            "h": 44,
+            "label": "Buy and sell"
+          },
+          {
+            "w": 85,
+            "h": 16,
+            "label": "Cookie policy"
+          },
+          {
+            "w": 65,
+            "h": 36,
+            "label": "Choose"
+          },
+          {
+            "w": 42,
+            "h": 36,
+            "label": "OK"
+          }
+        ]
+      },
+      {
+        "type": "contrast-sample",
+        "detail": [
+          {
+            "fg": "rgb(245, 242, 236)",
+            "bg": "rgb(17, 17, 17)",
+            "tag": "MAIN"
+          },
+          {
+            "fg": "rgb(245, 242, 236)",
+            "bg": "oklab(0.177624 0.00000809133 0.00000356138 / 0.95)",
+            "tag": "HEADER"
+          },
+          {
+            "fg": "rgb(245, 242, 236)",
+            "bg": "rgba(0, 0, 0, 0)",
+            "tag": "NAV"
+          }
+        ]
+      }
+    ],
+    "1440:/settings": [
+      {
+        "type": "tap",
+        "detail": [
+          {
+            "w": 183,
+            "h": 44,
+            "label": "Your profile"
+          },
+          {
+            "w": 183,
+            "h": 44,
+            "label": "Orders"
+          },
+          {
+            "w": 183,
+            "h": 44,
+            "label": "Messages"
+          },
+          {
+            "w": 183,
+            "h": 44,
+            "label": "Payments"
+          },
+          {
+            "w": 183,
+            "h": 44,
+            "label": "Notifications"
+          },
+          {
+            "w": 183,
+            "h": 44,
+            "label": "Settings"
+          },
+          {
+            "w": 183,
+            "h": 44,
+            "label": "Security"
+          },
+          {
+            "w": 183,
+            "h": 44,
+            "label": "Explore marketplace"
+          },
+          {
+            "w": 183,
+            "h": 44,
+            "label": "Buy and sell"
+          },
+          {
+            "w": 85,
+            "h": 16,
+            "label": "Cookie policy"
+          },
+          {
+            "w": 65,
+            "h": 36,
+            "label": "Choose"
+          },
+          {
+            "w": 42,
+            "h": 36,
+            "label": "OK"
+          }
+        ]
+      },
+      {
+        "type": "contrast-sample",
+        "detail": [
+          {
+            "fg": "rgb(245, 242, 236)",
+            "bg": "rgb(17, 17, 17)",
+            "tag": "MAIN"
+          },
+          {
+            "fg": "rgb(245, 242, 236)",
+            "bg": "oklab(0.177624 0.00000809133 0.00000356138 / 0.95)",
+            "tag": "HEADER"
+          },
+          {
+            "fg": "rgb(245, 242, 236)",
+            "bg": "rgba(0, 0, 0, 0)",
+            "tag": "NAV"
+          }
+        ]
+      }
+    ],
+    "1440:/admin": [
+      {
+        "type": "tap",
+        "detail": [
+          {
+            "w": 85,
+            "h": 16,
+            "label": "Cookie policy"
+          },
+          {
+            "w": 65,
+            "h": 36,
+            "label": "Choose"
+          },
+          {
+            "w": 42,
+            "h": 36,
+            "label": "OK"
+          }
+        ]
+      },
+      {
+        "type": "contrast-sample",
+        "detail": [
+          {
+            "fg": "rgb(245, 242, 236)",
+            "bg": "rgb(17, 17, 17)",
+            "tag": "MAIN"
+          }
+        ]
+      }
+    ],
+    "1440:/design-review": [
+      {
+        "type": "contrast-sample",
+        "detail": [
+          {
+            "fg": "rgb(245, 242, 236)",
+            "bg": "rgb(17, 17, 17)",
+            "tag": "MAIN"
+          }
+        ]
+      }
+    ],
+    "1440:/legal/terms": [
+      {
+        "type": "tap",
+        "detail": [
+          {
+            "w": 39,
+            "h": 17,
+            "label": "Home"
+          },
+          {
+            "w": 230,
+            "h": 19,
+            "label": "1. Acceptance of Terms"
+          },
+          {
+            "w": 230,
+            "h": 19,
+            "label": "2. Nature of the Platform"
+          },
+          {
+            "w": 230,
+            "h": 19,
+            "label": "3. Account Registration & Verification"
+          },
+          {
+            "w": 230,
+            "h": 19,
+            "label": "4. Escrow Payment Mechanism"
+          },
+          {
+            "w": 230,
+            "h": 19,
+            "label": "5. Buyer Obligations"
+          },
+          {
+            "w": 230,
+            "h": 19,
+            "label": "6. Seller Obligations"
+          },
+          {
+            "w": 230,
+            "h": 19,
+            "label": "7. Prohibited Conduct"
+          },
+          {
+            "w": 230,
+            "h": 19,
+            "label": "8. Fees & Commission"
+          },
+          {
+            "w": 230,
+            "h": 19,
+            "label": "9. Intellectual Property"
+          },
+          {
+            "w": 230,
+            "h": 19,
+            "label": "10. Dispute Resolution"
+          },
+          {
+            "w": 230,
+            "h": 19,
+            "label": "11. Limitation of Liability"
+          }
+        ]
+      },
+      {
+        "type": "contrast-sample",
+        "detail": [
+          {
+            "fg": "rgb(245, 242, 236)",
+            "bg": "rgb(17, 17, 17)",
+            "tag": "MAIN"
+          },
+          {
+            "fg": "rgb(245, 242, 236)",
+            "bg": "oklab(0.177624 0.00000809133 0.00000356138 / 0.95)",
+            "tag": "HEADER"
+          },
+          {
+            "fg": "rgb(245, 242, 236)",
+            "bg": "rgba(0, 0, 0, 0)",
+            "tag": "NAV"
+          }
+        ]
+      }
+    ],
+    "1440:/sellers/00000000-0000-4000-8000-000000000001": [
+      {
+        "type": "tap",
+        "detail": [
+          {
+            "w": 85,
+            "h": 16,
+            "label": "Cookie policy"
+          },
+          {
+            "w": 65,
+            "h": 36,
+            "label": "Choose"
+          },
+          {
+            "w": 42,
+            "h": 36,
+            "label": "OK"
+          }
+        ]
+      },
+      {
+        "type": "contrast-sample",
+        "detail": [
+          {
+            "fg": "rgb(245, 242, 236)",
+            "bg": "rgb(17, 17, 17)",
+            "tag": "MAIN"
+          }
+        ]
+      }
+    ]
+  }
+}

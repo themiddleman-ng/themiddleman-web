@@ -4,6 +4,9 @@ import Link from 'next/link';
 import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabaseClient';
+import { signinHref } from '@/lib/auth/signin-redirect.mjs';
+import DraftRestoredNotice from '@/components/forms/DraftRestoredNotice';
+import { usePersistedForm } from '@/lib/forms/usePersistedForm';
 
 const SERVICE_CATEGORIES = ['Development', 'Design', 'Marketing', 'Writing', 'AI-assisted services'];
 const ID_DOCUMENT_TYPES = ['National ID (NIN)', 'International passport', "Driver's licence", "Voter's card", 'CAC business certificate'];
@@ -25,17 +28,60 @@ function getUploadErrorMessage(uploadError) {
 
 export default function SellerOnboardingPage() {
   const router = useRouter();
-  const [displayName, setDisplayName] = useState('');
-  const [bio, setBio] = useState('');
-  const [skills, setSkills] = useState('');
-  const [portfolio, setPortfolio] = useState('');
-  const [linkedin, setLinkedin] = useState('');
-  const [experience, setExperience] = useState('');
-  const [selectedTypes, setSelectedTypes] = useState([]);
-  const [idDocumentType, setIdDocumentType] = useState('');
+  const [userId, setUserId] = useState('');
+  const [sellerDraft, setSellerDraft] = useState({
+    displayName: '',
+    bio: '',
+    skills: '',
+    portfolio: '',
+    linkedin: '',
+    experience: '',
+    selectedTypes: [],
+    idDocumentType: '',
+    accepted: false,
+    bankCode: '',
+    accountNumber: '',
+    payoutConfirmed: false,
+  });
+  const {
+    restored: sellerDraftRestored,
+    discardDraft: discardSellerDraft,
+    clearDraft: clearSellerDraft,
+  } = usePersistedForm({
+    formId: 'seller-onboarding',
+    userId,
+    values: sellerDraft,
+    setValues: setSellerDraft,
+    secretKeys: ['accountNumber', 'bankCode'],
+  });
+  const {
+    displayName,
+    bio,
+    skills,
+    portfolio,
+    linkedin,
+    experience,
+    selectedTypes,
+    idDocumentType,
+    accepted,
+    bankCode,
+    accountNumber,
+    payoutConfirmed,
+  } = sellerDraft;
+  const setDisplayName = (value) => setSellerDraft((current) => ({ ...current, displayName: value }));
+  const setBio = (value) => setSellerDraft((current) => ({ ...current, bio: value }));
+  const setSkills = (value) => setSellerDraft((current) => ({ ...current, skills: value }));
+  const setPortfolio = (value) => setSellerDraft((current) => ({ ...current, portfolio: value }));
+  const setLinkedin = (value) => setSellerDraft((current) => ({ ...current, linkedin: value }));
+  const setExperience = (value) => setSellerDraft((current) => ({ ...current, experience: value }));
+  const setSelectedTypes = (value) => setSellerDraft((current) => ({ ...current, selectedTypes: value }));
+  const setIdDocumentType = (value) => setSellerDraft((current) => ({ ...current, idDocumentType: value }));
+  const setAccepted = (value) => setSellerDraft((current) => ({ ...current, accepted: value }));
+  const setBankCode = (value) => setSellerDraft((current) => ({ ...current, bankCode: value }));
+  const setAccountNumber = (value) => setSellerDraft((current) => ({ ...current, accountNumber: value }));
+  const setPayoutConfirmed = (value) => setSellerDraft((current) => ({ ...current, payoutConfirmed: value }));
   const [idFile, setIdFile] = useState(null);
   const [uploadedDocumentPath, setUploadedDocumentPath] = useState('');
-  const [accepted, setAccepted] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [pageReady, setPageReady] = useState(false);
@@ -43,10 +89,7 @@ export default function SellerOnboardingPage() {
   const [banksLoading, setBanksLoading] = useState(false);
   const [payoutSetupEnabled, setPayoutSetupEnabled] = useState(false);
   const [banksError, setBanksError] = useState('');
-  const [bankCode, setBankCode] = useState('');
-  const [accountNumber, setAccountNumber] = useState('');
   const [verifiedAccountName, setVerifiedAccountName] = useState('');
-  const [payoutConfirmed, setPayoutConfirmed] = useState(false);
   const [verifyingPayout, setVerifyingPayout] = useState(false);
   const [agreementHighlighted, setAgreementHighlighted] = useState(false);
   const agreementRef = useRef(null);
@@ -56,9 +99,10 @@ export default function SellerOnboardingPage() {
     async function guardSellerAccess() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
-        router.replace('/signup');
+        router.replace(signinHref('/onboarding/seller'));
         return;
       }
+      setUserId(user.id);
 
       const { data: userRow, error: userError } = await supabase
         .from('users')
@@ -107,9 +151,12 @@ export default function SellerOnboardingPage() {
   }, [pageReady]);
 
   const toggleType = (type) =>
-    setSelectedTypes((current) =>
-      current.includes(type) ? current.filter((item) => item !== type) : [...current, type]
-    );
+    setSellerDraft((current) => ({
+      ...current,
+      selectedTypes: current.selectedTypes.includes(type)
+        ? current.selectedTypes.filter((item) => item !== type)
+        : [...current.selectedTypes, type],
+    }));
 
   function flashAgreement() {
     agreementRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -213,6 +260,7 @@ export default function SellerOnboardingPage() {
       }
     }
 
+    clearSellerDraft();
     router.push('/onboarding/pending');
   }
 
@@ -229,25 +277,51 @@ export default function SellerOnboardingPage() {
       <section className="mx-auto w-full max-w-4xl">
         <div className="mb-5 flex items-center justify-between gap-3 sm:mb-8">
           <Link href="/" className="font-display text-lg font-bold tracking-tight text-bone">
-            <span className="mr-2 inline-block h-2 w-2 rounded-full bg-ember shadow-[0_0_0_6px_rgba(242,100,25,.14)]" />
+            <span className="mr-2 inline-block h-2 w-2 rounded-full bg-ember shadow-[0_0_0_6px_rgba(249,115,22,.14)]" />
             The Middleman
           </Link>
-          <span className="shrink-0 rounded-full border border-ember/30 bg-ember/10 px-3 py-1 text-xs font-medium text-ember shadow-[0_0_0_1px_rgba(242,100,25,.08)]">Step 2 of 2</span>
+          <span className="shrink-0 rounded-full border border-ember/30 bg-ember/10 px-3 py-1 text-xs font-medium text-ember shadow-[0_0_0_1px_rgba(249,115,22,.08)]">Step 2 of 2</span>
         </div>
 
         <form onSubmit={handleSubmit} className="overflow-hidden rounded-3xl border border-line bg-paper text-bone shadow-2xl shadow-black/25">
-          <header className="border-b border-line bg-[radial-gradient(circle_at_top_right,_rgba(242,100,25,.2),_transparent_42%),linear-gradient(180deg,rgba(23,23,23,.92),rgba(17,17,17,1))] px-5 py-7 sm:px-10 sm:py-10">
+          <header className="border-b border-line bg-[radial-gradient(circle_at_top_right,_rgba(249,115,22,.2),_transparent_42%),linear-gradient(180deg,rgba(23,23,23,.92),rgba(17,17,17,1))] px-5 py-7 sm:px-10 sm:py-10">
             <p className="text-xs font-semibold tracking-[.2em] text-ember">SELLER VERIFICATION</p>
             <h1 className="mt-3 font-display text-3xl font-bold text-bone sm:text-5xl">Show buyers what you deliver.</h1>
             <p className="mt-4 max-w-2xl text-sm leading-relaxed text-slate sm:text-base">
-              Complete your creator profile, verify your payout account and securely submit one identity document. A member of our team
-              reviews every application by hand before you can publish products.
+              Complete your creator profile and securely submit one identity document.
+              {payoutSetupEnabled
+                ? " Verify your payout account before you submit."
+                : " Payout account checks are off, so this form does not save a bank account."}{" "}
+              A member of our team reviews every application by hand before you can publish products.
             </p>
             <div className="mt-6 inline-flex items-center gap-2 rounded-full border border-ember/30 bg-ember/10 px-4 py-2 text-xs font-medium text-ember">
               <span className="h-2 w-2 rounded-full bg-ember" />
               Required step before publishing products
             </div>
           </header>
+
+          <div className="px-4 pt-4 sm:px-10">
+            <DraftRestoredNotice
+              visible={sellerDraftRestored}
+              onDiscard={() => {
+                discardSellerDraft();
+                setSellerDraft({
+                  displayName: '',
+                  bio: '',
+                  skills: '',
+                  portfolio: '',
+                  linkedin: '',
+                  experience: '',
+                  selectedTypes: [],
+                  idDocumentType: '',
+                  accepted: false,
+                  bankCode: '',
+                  accountNumber: '',
+                  payoutConfirmed: false,
+                });
+              }}
+            />
+          </div>
 
           <div className="grid min-w-0 gap-6 p-4 sm:gap-8 sm:p-10 lg:grid-cols-[1.3fr_.7fr]">
             <div className="space-y-6">
@@ -342,7 +416,7 @@ export default function SellerOnboardingPage() {
               </section>
 
               <section className="border-t border-line pt-6">
-                <div className="rounded-2xl border border-ember/20 bg-[linear-gradient(180deg,rgba(242,100,25,.12),rgba(242,100,25,.04))] p-5 shadow-[0_12px_30px_rgba(0,0,0,.14)]">
+                <div className="rounded-2xl border border-ember/20 bg-[linear-gradient(180deg,rgba(249,115,22,.12),rgba(249,115,22,.04))] p-5 shadow-[0_12px_30px_rgba(0,0,0,.14)]">
                   <div className="flex items-center gap-2">
                     <span className="rounded-full bg-ember px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[.2em] text-ink">Required</span>
                     <p className="text-xs font-bold tracking-[.16em] text-ember">03 · IDENTITY CHECK</p>
@@ -399,7 +473,7 @@ export default function SellerOnboardingPage() {
               <section className="border-t border-line pt-6">
                 <p className="text-xs font-bold tracking-[.16em] text-ember">04 · PAYOUT ACCOUNT</p>
                 <p className="mt-3 max-w-2xl text-sm leading-relaxed text-slate">
-                  Add the Nigerian bank account where approved seller payouts should go. Paystack checks the account name before we save it.
+                  Payout accounts are collected only when seller payouts are enabled. This launch does not save a bank account or run a name check unless that switch is on.
                 </p>
                 {payoutSetupEnabled ? (
                   <>
@@ -485,7 +559,7 @@ export default function SellerOnboardingPage() {
               </section>
             </div>
 
-            <aside className="h-fit rounded-2xl border border-ember/15 bg-[radial-gradient(circle_at_top,_rgba(242,100,25,.12),_transparent_50%),linear-gradient(180deg,rgba(23,23,23,.82),rgba(13,13,13,.96))] p-4 shadow-[0_18px_50px_rgba(0,0,0,.22)] sm:p-6">
+            <aside className="h-fit rounded-2xl border border-ember/15 bg-[radial-gradient(circle_at_top,_rgba(249,115,22,.12),_transparent_50%),linear-gradient(180deg,rgba(23,23,23,.82),rgba(13,13,13,.96))] p-4 shadow-[0_18px_50px_rgba(0,0,0,.22)] sm:p-6">
               <p className="text-xs font-bold tracking-[.16em] text-ember">WHAT HAPPENS NEXT</p>
               <ol className="mt-5 space-y-5 text-sm text-slate">
                 <li><span className="mr-3 font-mono text-ember">01</span>A person on our team reviews your profile and document by hand.</li>
@@ -495,7 +569,7 @@ export default function SellerOnboardingPage() {
               <div
                 ref={agreementRef}
                 className={`mt-7 rounded-2xl border border-line bg-ink/30 p-5 transition-all duration-300 ${
-                  agreementHighlighted ? 'border-ember bg-ember/10 shadow-[0_0_0_4px_rgba(242,100,25,.15)]' : ''
+                  agreementHighlighted ? 'border-ember bg-ember/10 shadow-[0_0_0_4px_rgba(249,115,22,.15)]' : ''
                 }`}
               >
                 <p className="mb-3 text-[11px] font-bold uppercase tracking-[.22em] text-ember">Confirmation required</p>
@@ -524,7 +598,7 @@ export default function SellerOnboardingPage() {
             <p className="text-xs text-slate">Your document is only used for verification and reviewed by a person, not an algorithm.</p>
             <button
               disabled={loading}
-              className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-ember px-6 py-3 text-sm font-semibold text-ink shadow-lg shadow-ember/25 transition-transform hover:-translate-y-0.5 hover:bg-ember/90 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto sm:px-8"
+              className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-ember px-6 py-3 text-sm font-semibold text-ink shadow-lg shadow-ember/25 transition-transform hover:-translate-y-0.5 hover:bg-ember-hover disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto sm:px-8"
             >
               <span className="h-2 w-2 rounded-full bg-ink/60" />
               {loading ? 'Submitting application...' : 'Submit for review'}
