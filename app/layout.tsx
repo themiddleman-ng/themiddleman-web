@@ -51,12 +51,14 @@ export const metadata: Metadata = {
     title: "The Middleman | Nigerian Digital Products Marketplace",
     description:
       "Find ready-made digital products from Nigerian creators. Purchases are paused, so browsing does not start a payment.",
+    images: [{ url: "/opengraph-image", width: 1200, height: 630, alt: "The Middleman" }],
   },
   twitter: {
     card: "summary_large_image",
     title: "The Middleman | Nigerian Digital Products Marketplace",
     description:
       "Find ready-made digital products from Nigerian creators. Purchases are paused, so browsing does not start a payment.",
+    images: ["/opengraph-image"],
   },
   robots: {
     index: true,
