@@ -375,7 +375,11 @@ function AuthPageInner() {
       setPhase('idle');
     };
     const desktopQuery = window.matchMedia('(min-width: 768px)');
+    // The pinned copy inside the stage is decorative on desktop; keep its link out of the tab order there.
+    const syncPin = () => { if (pinRef.current) pinRef.current.inert = desktopQuery.matches; };
+    syncPin();
     const onResize = () => {
+      syncPin();
       if (run.current.phase === 'idle') return;
       const target = run.current.target;
       run.current.token += 1;
@@ -425,7 +429,7 @@ function AuthPageInner() {
   }, [searchParams]);
 
   function switchMode(signin, source = 'pointer') {
-    requestMode(signin ? 'signin' : 'signup', source);
+    return requestMode(signin ? 'signin' : 'signup', source);
   }
 
   function promoteLayers(on) {
@@ -593,8 +597,10 @@ function AuthPageInner() {
           <img className="mm-auth-edge mm-auth-edge--r" src="/design/auth-edge-r.svg" alt="" />
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img className="mm-auth-edge mm-auth-edge--l" src="/design/auth-edge-l.svg" alt="" />
-          <div className="mm-auth-pin" ref={pinRef} aria-hidden="true">
-            <Logo variant="horizontal" onPanel className="mm-auth-logo" textClass="text-[17px]" markClass="h-8 w-8" />
+          <div className="mm-auth-pin-clip">
+            <div className="mm-auth-pin" ref={pinRef} aria-hidden="true">
+              <Logo variant="horizontal" onPanel className="mm-auth-logo" textClass="text-[17px]" markClass="h-8 w-8" />
+            </div>
           </div>
           <div className="mm-auth-hero-bar">
             <Link href="/marketplace" className="mm-auth-browse inline-flex min-h-11 items-center text-[16px] font-semibold">Browse first</Link>
@@ -611,7 +617,7 @@ function AuthPageInner() {
         </div>
 
         <section className="mm-auth-slot mm-auth-form">
-          <div className="mx-auto w-full max-w-lg">
+          <div className="mm-auth-slot-tabs mx-auto w-full max-w-lg">
             <AuthModeTabs signin={signin} onSelect={switchMode} tabRefs={tabRefs} onPromote={promoteLayers} />
           </div>
           <div
