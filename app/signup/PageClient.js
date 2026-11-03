@@ -1,6 +1,6 @@
 'use client';
 
-import { Suspense, useEffect, useRef, useState } from 'react';
+import { Suspense, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { flushSync } from 'react-dom';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { EyeIcon } from '@phosphor-icons/react/dist/csr/Eye';
@@ -435,7 +435,12 @@ function AuthPageInner() {
       setPhase('idle');
     };
     const desktopQuery = window.matchMedia('(min-width: 768px)');
+    const syncPin = () => {
+      if (pinRef.current) pinRef.current.inert = desktopQuery.matches;
+    };
+    syncPin();
     const onResize = () => {
+      syncPin();
       if (run.current.phase === 'idle') return;
       const target = run.current.target;
       run.current.token += 1;
@@ -473,7 +478,17 @@ function AuthPageInner() {
     clearRun();
   }, []);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
+    const query = window.matchMedia('(min-width: 768px)');
+    const apply = () => {
+      if (pinRef.current) pinRef.current.inert = query.matches;
+    };
+    apply();
+    query.addEventListener('change', apply);
+    return () => query.removeEventListener('change', apply);
+  }, []);
+
+  useLayoutEffect(() => {
     const root = document.documentElement;
     const sync = () => {
       const bar = document.querySelector('[aria-label="Cookie notice"]');
