@@ -1,6 +1,7 @@
 'use client';
 
 import { Suspense, useEffect, useRef, useState } from 'react';
+import { flushSync } from 'react-dom';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { EyeIcon } from '@phosphor-icons/react/dist/csr/Eye';
 import { EyeSlashIcon } from '@phosphor-icons/react/dist/csr/EyeSlash';
@@ -54,7 +55,7 @@ function AuthCallout({ alert, onAction }) {
   return (
     <div
       id="auth-alert"
-      className={`flex items-start gap-2 rounded-md border-l-[3px] border-l-ember-cta bg-paper px-3 ${compact ? 'py-2' : 'py-2.5'}`}
+      className={`mm-auth-alert flex items-start gap-2 rounded-md border-l-[3px] border-l-ember-cta bg-paper px-3 ${compact ? 'py-2' : 'py-2.5'}`}
       role="alert"
       aria-live="assertive"
     >
@@ -127,15 +128,16 @@ function PasswordChecklist({ value }) {
   );
 }
 
+const DESKTOP_MS = 760;
+const DESKTOP_SWAP_MS = 340;
+const DESKTOP_ENTER_MS = 500;
+const MOBILE_SWAP_MS = 100;
+const MOBILE_MS = 240;
+
 function getInitialMode(searchParams) {
   const fromUrl = searchParams.get('mode');
-  if (fromUrl === 'signin') return true;
-  if (fromUrl === 'signup') return false;
-  if (typeof window !== 'undefined') {
-    try { return window.localStorage.getItem('mm_last_auth_mode') === 'signin'; }
-    catch { return false; }
-  }
-  return false;
+  if (fromUrl === 'signin') return 'signin';
+  return 'signup';
 }
 
 function buildAuthUrl(signin, searchParams) {
@@ -147,9 +149,17 @@ function buildAuthUrl(signin, searchParams) {
   return `/signup?${params.toString()}`;
 }
 
-function AuthModeTabs({ signin, onSelect, tabRefs }) {
+function AuthModeTabs({ signin, onSelect, tabRefs, onPromote }) {
   return (
-    <div className="mm-auth-tabs" role="tablist" aria-label="Account access">
+    <div
+      className="mm-auth-tabs"
+      role="tablist"
+      aria-label="Account access"
+      onPointerEnter={() => onPromote?.(true)}
+      onPointerLeave={() => onPromote?.(false)}
+      onFocus={() => onPromote?.(true)}
+      onBlur={() => onPromote?.(false)}
+    >
       <span className="mm-auth-tab-indicator" aria-hidden="true" />
       <button
         type="button"
@@ -159,12 +169,11 @@ function AuthModeTabs({ signin, onSelect, tabRefs }) {
         aria-selected={!signin}
         aria-controls="auth-panel-signup"
         tabIndex={signin ? -1 : 0}
-        onClick={() => onSelect(false)}
+        onClick={() => onSelect(false, 'pointer')}
         onKeyDown={(event) => {
           if (event.key === 'ArrowRight' || event.key === 'ArrowLeft') {
             event.preventDefault();
-            onSelect(true);
-            tabRefs.current[1]?.focus();
+            if (onSelect(true, 'arrow-key')) tabRefs.current[1]?.focus();
           }
         }}
       >
@@ -178,12 +187,11 @@ function AuthModeTabs({ signin, onSelect, tabRefs }) {
         aria-selected={signin}
         aria-controls="auth-panel-signin"
         tabIndex={signin ? 0 : -1}
-        onClick={() => onSelect(true)}
+        onClick={() => onSelect(true, 'pointer')}
         onKeyDown={(event) => {
           if (event.key === 'ArrowRight' || event.key === 'ArrowLeft') {
             event.preventDefault();
-            onSelect(false);
-            tabRefs.current[0]?.focus();
+            if (onSelect(false, 'arrow-key')) tabRefs.current[0]?.focus();
           }
         }}
       >
@@ -196,17 +204,200 @@ function AuthModeTabs({ signin, onSelect, tabRefs }) {
 function AuthPageInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [flipped, setFlipped] = useState(() => getInitialMode(searchParams));
-  const [switching, setSwitching] = useState(false);
-  const switchTimer = useRef(0);
+  const [mode, setMode] = useState(() => getInitialMode(searchParams));
+  const [pill, setPill] = useState(() => getInitialMode(searchParams));
+  const [phase, setPhase] = useState('idle');
+  const [promote, setPromote] = useState(false);
+  const run = useRef({ token: 0, timers: [], anim: null, pin: null, phase: 'idle', target: null });
+  const modeRef = useRef(mode);
+  const searchRef = useRef(searchParams);
+  const stageRef = useRef(null);
+  const pinRef = useRef(null);
   const tabRefs = useRef([]);
+  const requestModeRef = useRef(null);
   const returnPath = readReturnPath(searchParams);
+  modeRef.current = mode;
+  searchRef.current = searchParams;
+
+  function clearRun() {
+    run.current.timers.forEach((id) => window.clearTimeout(id));
+    run.current.timers = [];
+    run.current.anim?.cancel();
+    run.current.pin?.cancel();
+    run.current.anim = null;
+    run.current.pin = null;
+  }
+
+  function arm(fn, ms, token) {
+    const id = window.setTimeout(() => {
+      if (run.current.token !== token) return;
+      fn();
+    }, ms);
+    run.current.timers.push(id);
+    return id;
+  }
+
+  function pushMode(next) {
+    const url = buildAuthUrl(next === 'signin', searchRef.current);
+    if (`${window.location.pathname}${window.location.search}` === url) return;
+    const state = window.history.state;
+    if (state && (state.__NA || state._N)) {
+      window.history.pushState(state, '', url);
+      return;
+    }
+    History.prototype.pushState.call(window.history, state, '', url);
+  }
+
+  function finish(next, source) {
+    run.current.anim?.cancel();
+    run.current.pin?.cancel();
+    run.current.anim = null;
+    run.current.pin = null;
+    run.current.phase = 'idle';
+    run.current.target = null;
+    flushSync(() => setPhase('idle'));
+    try { window.localStorage.setItem('mm_last_auth_mode', next); }
+    catch { /* Preference storage can be blocked. The form still works. */ }
+    if (source === 'pointer' || source === 'link') {
+      const field = next === 'signup' ? 'signup-name' : 'login-email';
+      document.getElementById(field)?.focus({ preventScroll: true });
+    }
+  }
+
+  function requestMode(next, source = 'pointer') {
+    if (run.current.phase !== 'idle') return false;
+    if (next !== 'signin' && next !== 'signup') return false;
+    if (next === modeRef.current) {
+      if (source !== 'popstate') pushMode(next);
+      return true;
+    }
+    const token = ++run.current.token;
+    clearRun();
+    run.current.target = next;
+    setPill(next);
+    const desktop = window.matchMedia('(min-width: 768px)').matches;
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    const commit = () => {
+      flushSync(() => setMode(next));
+      modeRef.current = next;
+      if (source !== 'popstate') pushMode(next);
+    };
+
+    if (reduce) {
+      let committed = false;
+      const go = () => { if (!committed) { committed = true; commit(); } };
+      try {
+        if (typeof document.startViewTransition === 'function') document.startViewTransition(go);
+      } catch { /* The instant swap below still runs. */ }
+      go();
+      finish(next, source);
+      return true;
+    }
+
+    run.current.phase = 'leaving';
+    setPhase('leaving');
+
+    if (!desktop) {
+      arm(() => {
+        run.current.phase = 'swapping';
+        setPhase('swapping');
+        commit();
+        run.current.phase = 'entering';
+        setPhase('entering');
+      }, MOBILE_SWAP_MS, token);
+      arm(() => finish(next, source), MOBILE_MS, token);
+      return true;
+    }
+
+    const stage = stageRef.current;
+    const pin = pinRef.current;
+    if (!stage) {
+      commit();
+      finish(next, source);
+      return true;
+    }
+    const toSignup = next === 'signup';
+    const stageTo = toSignup ? 'translateX(100%)' : 'translateX(0%)';
+    const pinTo = toSignup ? 'translateX(-100%)' : 'translateX(0%)';
+    const stageFrom = getComputedStyle(stage).transform;
+    const pinFrom = pin ? getComputedStyle(pin).transform : 'none';
+    const ease = 'cubic-bezier(.65, 0, .2, 1)';
+    run.current.anim = stage.animate(
+      [{ transform: stageFrom }, { transform: stageTo }],
+      { duration: DESKTOP_MS, easing: ease, fill: 'forwards' },
+    );
+    if (pin) {
+      run.current.pin = pin.animate(
+        [{ transform: pinFrom }, { transform: pinTo }],
+        { duration: DESKTOP_MS, easing: ease, fill: 'forwards' },
+      );
+    }
+    arm(() => {
+      run.current.phase = 'swapping';
+      setPhase('swapping');
+      commit();
+    }, DESKTOP_SWAP_MS, token);
+    arm(() => {
+      run.current.phase = 'entering';
+      setPhase('entering');
+    }, DESKTOP_ENTER_MS, token);
+    arm(() => finish(next, source), DESKTOP_MS, token);
+    return true;
+  }
+  requestModeRef.current = requestMode;
+
+  function fromHistory(next) {
+    run.current.token += 1;
+    clearRun();
+    run.current.phase = 'idle';
+    setPhase('idle');
+    if (next !== 'signin' && next !== 'signup') return;
+    if (next === modeRef.current) return;
+    requestMode(next, 'popstate');
+  }
+  const fromHistoryRef = useRef(fromHistory);
+  fromHistoryRef.current = fromHistory;
 
   useEffect(() => {
-    const mode = searchParams.get('mode');
-    if (mode === 'signin') setFlipped(true);
-    else if (mode === 'signup') setFlipped(false);
-  }, [searchParams]);
+    const onPopState = (event) => {
+      const url = new URL(window.location.href);
+      if (url.pathname !== '/signup') return;
+      event.stopImmediatePropagation();
+      const next = url.searchParams.get('mode') === 'signin' ? 'signin' : 'signup';
+      fromHistoryRef.current(next);
+    };
+    const onPageShow = (event) => {
+      if (!event.persisted) return;
+      run.current.token += 1;
+      clearRun();
+      run.current.phase = 'idle';
+      setPhase('idle');
+    };
+    const desktopQuery = window.matchMedia('(min-width: 768px)');
+    const onResize = () => {
+      if (run.current.phase === 'idle') return;
+      const target = run.current.target;
+      run.current.token += 1;
+      clearRun();
+      if (target && target !== modeRef.current) {
+        flushSync(() => setMode(target));
+        modeRef.current = target;
+        pushMode(target);
+      }
+      run.current.phase = 'idle';
+      run.current.target = null;
+      setPhase('idle');
+    };
+    window.addEventListener('popstate', onPopState, true);
+    window.addEventListener('pageshow', onPageShow);
+    desktopQuery.addEventListener('change', onResize);
+    return () => {
+      window.removeEventListener('popstate', onPopState, true);
+      window.removeEventListener('pageshow', onPageShow);
+      desktopQuery.removeEventListener('change', onResize);
+    };
+  }, []);
 
   useEffect(() => {
     let active = true;
@@ -217,35 +408,29 @@ function AuthPageInner() {
     return () => { active = false; };
   }, [router, returnPath]);
 
+  useEffect(() => () => {
+    run.current.token += 1;
+    clearRun();
+  }, []);
+
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      try { window.localStorage.setItem('mm_last_auth_mode', flipped ? 'signin' : 'signup'); }
-      catch { /* The auth form still works when preference storage is blocked. */ }
-    }
-  }, [flipped]);
+    const raw = searchParams.get('mode');
+    if (raw !== 'signin' && raw !== 'signup') return;
+    if (raw === modeRef.current || raw === run.current.target) return;
+    run.current.token += 1;
+    clearRun();
+    run.current.phase = 'idle';
+    setPhase('idle');
+    requestModeRef.current?.(raw, 'popstate');
+  }, [searchParams]);
 
-  useEffect(() => () => window.clearTimeout(switchTimer.current), []);
+  function switchMode(signin, source = 'pointer') {
+    requestMode(signin ? 'signin' : 'signup', source);
+  }
 
-  function switchMode(signin) {
-    if (signin === flipped && searchParams.get('mode') === (signin ? 'signin' : 'signup')) return;
-    const reduceMotion = typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    const desktop = typeof window !== 'undefined' && window.matchMedia('(min-width: 768px)').matches;
-    const applyMode = () => {
-      setFlipped(signin);
-      router.replace(buildAuthUrl(signin, searchParams), { scroll: false });
-    };
-    if (reduceMotion || desktop) {
-      applyMode();
-      return;
-    }
-    if (signin === flipped) {
-      applyMode();
-      return;
-    }
-    setSwitching(true);
-    window.clearTimeout(switchTimer.current);
-    window.setTimeout(applyMode, 300);
-    switchTimer.current = window.setTimeout(() => setSwitching(false), 720);
+  function promoteLayers(on) {
+    if (!on && run.current.phase !== 'idle') return;
+    setPromote(on);
   }
 
   const [signupDraft, setSignupDraft] = useState({
@@ -388,16 +573,33 @@ function AuthPageInner() {
   const invalidInput = 'border-line focus:border-line focus:ring-line/15';
   const labelClass = 'block text-sm font-medium text-muted';
 
+  const signin = mode === 'signin';
+  const busy = phase !== 'idle';
+  const linkPromote = {
+    onPointerEnter: () => promoteLayers(true),
+    onPointerLeave: () => promoteLayers(false),
+    onFocus: () => promoteLayers(true),
+    onBlur: () => promoteLayers(false),
+  };
+
   return (
-    <main data-mode={flipped ? 'signin' : 'signup'} data-switching={switching || undefined} className="mm-auth relative min-h-[100svh] bg-paper text-bone">
-      <div className="mm-auth-panel mx-auto grid min-h-[100svh] w-full overflow-hidden md:min-h-[680px] md:grid-cols-[.85fr_1.15fr]">
-        <aside className="mm-auth-hero relative flex flex-col justify-between overflow-hidden p-10 lg:p-12">
-          <div aria-hidden="true" />
-          <div className="mm-auth-hero-bar">
+    <main data-mode={mode} data-pill={pill} data-phase={phase} data-promote={promote ? 'true' : undefined} className="mm-auth relative bg-paper text-bone">
+      <div className="mm-auth-panel">
+        <div className="mm-auth-brand">
+          <Logo variant="horizontal" className="mm-auth-logo" textClass="text-[17px]" markClass="h-8 w-8" />
+        </div>
+        <div className="mm-auth-stage" ref={stageRef}>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img className="mm-auth-edge mm-auth-edge--r" src="/design/auth-edge-r.svg" alt="" />
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img className="mm-auth-edge mm-auth-edge--l" src="/design/auth-edge-l.svg" alt="" />
+          <div className="mm-auth-pin" ref={pinRef} aria-hidden="true">
             <Logo variant="horizontal" onPanel className="mm-auth-logo" textClass="text-[17px]" markClass="h-8 w-8" />
+          </div>
+          <div className="mm-auth-hero-bar">
             <Link href="/marketplace" className="mm-auth-browse inline-flex min-h-11 items-center text-[16px] font-semibold">Browse first</Link>
           </div>
-          <div className="mm-auth-hero-copy relative">
+          <div className="mm-auth-hero-copy">
             <p className="max-w-sm font-display text-4xl font-semibold leading-[1.08] tracking-[-.035em]">
               Ready-made.<br />Made yours.
             </p>
@@ -405,15 +607,21 @@ function AuthPageInner() {
               Find useful digital products. Customize them with the creator.
             </p>
           </div>
-          <p className="mm-auth-hero-note relative text-[16px]">Purchases are paused. Signing up does not charge you.</p>
-        </aside>
+          <p className="mm-auth-hero-note">Purchases are paused. Signing up does not charge you.</p>
+        </div>
 
-        <section className="mm-auth-form min-w-0 w-full flex-col px-5 py-6 sm:px-9 sm:py-9 md:px-12 md:py-10">
+        <section className="mm-auth-slot mm-auth-form">
           <div className="mx-auto w-full max-w-lg">
-            <AuthModeTabs signin={flipped} onSelect={switchMode} tabRefs={tabRefs} />
+            <AuthModeTabs signin={signin} onSelect={switchMode} tabRefs={tabRefs} onPromote={promoteLayers} />
           </div>
-          <div key={flipped ? 'signin' : 'signup'} className="mm-auth-form-face mx-auto w-full max-w-lg">
-            {!flipped ? (
+          <div
+            key={mode}
+            className="mm-auth-slot-face mm-auth-form-face mx-auto w-full max-w-lg"
+            inert={busy || undefined}
+            aria-hidden={busy || undefined}
+            aria-busy={busy || undefined}
+          >
+            {mode === 'signup' ? (
               <>
                 <h1 className="font-display text-[2rem] font-bold leading-tight tracking-[-.035em] sm:text-4xl">Create your account</h1>
                 <p className="mt-2 text-[15px] leading-6 text-muted">Browse digital products or set up a creator profile when you’re ready. Purchases are paused.</p>
@@ -465,11 +673,11 @@ function AuthPageInner() {
                       I agree to the <Link href="/legal/terms" className="inline-flex min-h-11 items-center font-semibold text-eyebrow underline">Terms of Service</Link>, <Link href="/legal/privacy" className="inline-flex min-h-11 items-center font-semibold text-eyebrow underline">Privacy Policy</Link>, and <Link href="/legal/refunds" className="inline-flex min-h-11 items-center font-semibold text-eyebrow underline">Refund Policy</Link>.
                     </label>
                   </div>
-                  <AuthCallout alert={signupAlert} onAction={signupAlert?.actionLabel ? () => { switchMode(true); setSignupAlert(null); } : undefined} />
+                  <AuthCallout alert={signupAlert} onAction={signupAlert?.actionLabel ? () => { switchMode(true, 'link'); setSignupAlert(null); } : undefined} />
                   {signupNotice ? (
-                    <div className="rounded-xl bg-paper p-4 text-sm leading-6 text-muted" role="status">
+                    <div className="mm-auth-alert rounded-xl bg-paper p-4 text-sm leading-6 text-muted" role="status">
                       <p>{signupNotice}</p>
-                      <button type="button" onClick={() => switchMode(true)} className="mt-2 font-semibold underline">Go to sign in</button>
+                      <button type="button" onClick={() => switchMode(true, 'link')} {...linkPromote} className="mt-2 font-semibold underline">Go to sign in</button>
                     </div>
                   ) : (
                     <button className="w-full rounded-xl bg-ember-cta px-5 py-3.5 text-sm font-bold text-ink transition hover:bg-ember-hover focus:outline-none focus:ring-4 focus:ring-line/20 disabled:cursor-not-allowed disabled:opacity-50" type="submit" disabled={signupLoading || !signupReady}>
@@ -478,7 +686,7 @@ function AuthPageInner() {
                   )}
                 </form>
 
-                <p className="mt-5 text-center text-[16px] text-muted">Already have an account? <button type="button" onClick={() => switchMode(true)} className="inline-flex min-h-11 items-center font-semibold text-eyebrow hover:underline">Log in</button></p>
+                <p className="mt-5 text-center text-[16px] text-muted">Already have an account? <button type="button" onClick={() => switchMode(true, 'link')} {...linkPromote} className="inline-flex min-h-11 items-center font-semibold text-eyebrow hover:underline">Log in</button></p>
               </>
             ) : (
               <>
@@ -513,7 +721,7 @@ function AuthPageInner() {
                     />
                   </div>
                   {loginSuccess ? (
-                    <div className="flex items-center gap-2 rounded-md bg-paper px-3 py-2.5 text-[13px] font-semibold text-muted" role="status" aria-live="polite">
+                    <div className="mm-auth-alert flex items-center gap-2 rounded-md bg-paper px-3 py-2.5 text-[13px] font-semibold text-muted" role="status" aria-live="polite">
                       <CheckCircleIcon size={16} weight="fill" aria-hidden="true" />
                       Signed in successfully
                     </div>
@@ -524,13 +732,12 @@ function AuthPageInner() {
                     {loginSuccess ? 'Continuing…' : loginLoading ? 'Logging in…' : 'Log in'}
                   </button>
                 </form>
-                <p className="mt-6 text-center text-[16px] text-muted">New to The Middleman? <button type="button" onClick={() => switchMode(false)} className="inline-flex min-h-11 items-center font-semibold text-eyebrow hover:underline">Create an account</button></p>
+                <p className="mt-6 text-center text-[16px] text-muted">New to The Middleman? <button type="button" onClick={() => switchMode(false, 'link')} {...linkPromote} className="inline-flex min-h-11 items-center font-semibold text-eyebrow hover:underline">Create an account</button></p>
                 <p className="mt-8 border-t border-line pt-5 text-center text-[14px] leading-6 text-muted">By continuing, you agree to the <Link href="/legal/terms" className="inline-flex min-h-11 items-center font-semibold underline">Terms of Service</Link> and <Link href="/legal/privacy" className="inline-flex min-h-11 items-center font-semibold underline">Privacy Policy</Link>.</p>
               </>
             )}
           </div>
         </section>
-        <div className="mm-auth-wipe" aria-hidden="true" />
       </div>
     </main>
   );
