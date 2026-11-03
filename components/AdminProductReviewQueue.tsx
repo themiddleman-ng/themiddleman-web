@@ -93,7 +93,7 @@ function ReviewCard({ item, onReviewed }: { item: ProductReview; onReviewed: (em
             {item.seller?.display_name || "Seller"} · {item.seller?.verification_status === "approved" ? "Verified seller" : "Seller verification needs attention"}
           </p>
         </div>
-        <span className="rounded-full bg-ember/10 px-3 py-1 text-xs font-medium text-ember">Awaiting review</span>
+        <span className="rounded-full bg-elevated px-3 py-1 text-xs font-medium text-link">Awaiting review</span>
       </div>
 
       {item.gig ? (
@@ -110,12 +110,12 @@ function ReviewCard({ item, onReviewed }: { item: ProductReview; onReviewed: (em
       {(item.gig?.media?.length || item.gig?.demo_links?.length || item.gig?.demo_video_url) ? (
         <div className="mt-4 flex flex-wrap gap-3 text-xs">
           {item.gig?.media?.map((media, index) => (
-            <a key={media.path} href={media.url} target="_blank" rel="noopener noreferrer" className="text-ember underline underline-offset-2">
+            <a key={media.path} href={media.url} target="_blank" rel="noopener noreferrer" className="text-link underline underline-offset-2">
               Preview image {index + 1}
             </a>
           ))}
-          {item.gig?.demo_video_url ? <a href={item.gig.demo_video_url} target="_blank" rel="noopener noreferrer" className="text-ember underline underline-offset-2">Demo video</a> : null}
-          {item.gig?.demo_links?.map((url) => <a key={url} href={url} target="_blank" rel="noopener noreferrer" className="text-ember underline underline-offset-2">External demo</a>)}
+          {item.gig?.demo_video_url ? <a href={item.gig.demo_video_url} target="_blank" rel="noopener noreferrer" className="text-link underline underline-offset-2">Demo video</a> : null}
+          {item.gig?.demo_links?.map((url) => <a key={url} href={url} target="_blank" rel="noopener noreferrer" className="text-link underline underline-offset-2">External demo</a>)}
         </div>
       ) : null}
 
@@ -125,7 +125,7 @@ function ReviewCard({ item, onReviewed }: { item: ProductReview; onReviewed: (em
             <h3 className="text-sm font-semibold">Private product package · v{item.version_number}</h3>
             <p className="mt-1 break-all text-xs text-slate">{item.original_filename} · {item.content_type} · {bytes(item.file_size)}</p>
           </div>
-          <a href={"/api/admin/products/" + item.id + "/file"} className="shrink-0 rounded-full border border-white/15 px-3 py-2 text-xs text-bone hover:border-ember">
+          <a href={"/api/admin/products/" + item.id + "/file"} className="shrink-0 rounded-full border border-white/15 px-3 py-2 text-xs text-bone hover:border-line">
             Download to inspect
           </a>
         </div>

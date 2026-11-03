@@ -11,7 +11,7 @@ export default async function EscrowAdmin() {
       <main className="min-h-screen bg-ink text-bone">
         <SiteHeader />
         <section className="mx-auto max-w-3xl px-5 py-12">
-          <Link href="/admin" className="text-ember">
+          <Link href="/admin" className="text-link">
             ← Operations
           </Link>
           <h1 className="mt-4 font-display text-3xl font-bold">
@@ -76,7 +76,7 @@ export default async function EscrowAdmin() {
     <main className="min-h-screen bg-ink text-bone">
       <SiteHeader />
       <section className="mx-auto max-w-6xl px-5 py-12">
-        <Link href="/admin" className="text-ember">
+        <Link href="/admin" className="text-link">
           ← Operations
         </Link>
         <h1 className="mt-4 font-display text-4xl font-bold">

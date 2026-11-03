@@ -112,7 +112,7 @@ function PasswordChecklist({ value }) {
           <li
             key={rule.key}
             className={`text-[11px] flex items-center gap-1.5 transition-colors duration-200 ${
-              met ? 'text-ember' : 'text-slate'
+              met ? 'text-link' : 'text-slate'
             }`}
           >
             <span

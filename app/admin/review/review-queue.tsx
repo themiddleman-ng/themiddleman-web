@@ -39,7 +39,7 @@ export default function ReviewQueue({ deliveries }: { deliveries: Delivery[] }) 
   }
   return <section className="mt-9">
     <div className="flex items-center justify-between"><h2 className="font-display text-xl font-semibold">Waiting for review</h2>
-      <span className="rounded-full border border-line px-3 py-1 text-sm text-ember">{deliveries.length}</span></div>
+      <span className="rounded-full border border-line px-3 py-1 text-sm text-link">{deliveries.length}</span></div>
     {error && <p role="alert" className="mt-4 text-red-300">{error}</p>}
     {deliveries.length === 0 && <p className="mt-5 rounded-2xl border border-line bg-paper p-6 text-slate">Your review queue is empty.</p>}
     <div className="mt-5 grid gap-4">
@@ -49,7 +49,7 @@ export default function ReviewQueue({ deliveries }: { deliveries: Delivery[] }) 
             <p className="mt-1 text-xs text-slate">Order {delivery.order_id.slice(0, 8)} · Submitted {new Date(delivery.created_at).toLocaleString('en-NG', { timeZone: 'Africa/Lagos' })}</p></div>
           <p className="text-sm">₦{Number(delivery.orders?.amount ?? 0).toLocaleString('en-NG')}</p>
         </div>
-        <button type="button" className="mt-5 text-sm font-semibold text-ember underline" onClick={() => viewFile(delivery.order_id)}>Open seller file</button>
+        <button type="button" className="mt-5 text-sm font-semibold text-link underline" onClick={() => viewFile(delivery.order_id)}>Open seller file</button>
         <label className="mt-5 block text-sm text-slate" htmlFor={`notes-${delivery.id}`}>Package and repo parity findings (required)</label>
         <textarea id={`notes-${delivery.id}`} className="auth-input mt-2 w-full min-h-24" maxLength={2000}
           value={notes[delivery.id] || ''} onChange={event => setNotes({ ...notes, [delivery.id]: event.target.value })}

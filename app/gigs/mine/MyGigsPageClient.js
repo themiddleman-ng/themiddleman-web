@@ -98,7 +98,7 @@ export default function MyGigsPage() {
       <section className="mx-auto max-w-4xl px-4 py-6 sm:px-6 sm:py-10">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div>
-            <p className="text-xs font-semibold tracking-[.2em] text-ember">SELLER DASHBOARD</p>
+            <p className="text-xs font-semibold tracking-[.2em] text-link">SELLER DASHBOARD</p>
             <h1 className="mt-2 font-display text-3xl font-bold">My products</h1>
           </div>
           <div className="flex w-full flex-wrap gap-2 sm:w-auto sm:gap-3">
@@ -117,7 +117,7 @@ export default function MyGigsPage() {
 
         {!loading && !loadError && gigs.length === 0 && (
           <p className="mt-8 text-sm text-slate">
-            You haven&apos;t listed a product yet. <Link href="/gigs/new" className="text-ember hover:underline">List your first one</Link>.
+            You haven&apos;t listed a product yet. <Link href="/gigs/new" className="text-link hover:underline">List your first one</Link>.
           </p>
         )}
 
@@ -129,12 +129,12 @@ export default function MyGigsPage() {
               <div key={gig.id} className="flex min-w-0 flex-wrap items-center justify-between gap-3 rounded-2xl border border-line bg-paper p-4 sm:gap-4 sm:p-5">
                 <div className="min-w-0 flex-1 basis-full">
                   <div className="flex items-center gap-2 flex-wrap">
-                    <Link href={`/gigs/${gig.id}`} className="font-display font-bold hover:text-ember transition-colors">
+                    <Link href={`/gigs/${gig.id}`} className="font-display font-bold hover:text-link transition-colors">
                       {gig.title}
                     </Link>
                     <span
                       className={`rounded-full px-2.5 py-0.5 text-[11px] font-medium ${
-                        gig.status === "active" ? "bg-ember/15 text-ember" : "bg-line text-slate"
+                        gig.status === "active" ? "bg-elevated text-link" : "bg-line text-slate"
                       }`}
                     >
                       {gig.status}

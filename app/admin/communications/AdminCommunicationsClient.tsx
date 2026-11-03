@@ -145,7 +145,7 @@ export default function AdminCommunicationsClient() {
         <section className="rounded-2xl border border-line bg-paper p-5">
           <div className="flex items-center justify-between gap-3">
             <h2 className="font-display text-xl font-semibold">Conversations</h2>
-            <button type="button" onClick={() => void load()} className="text-xs font-semibold text-ember hover:underline">Refresh</button>
+            <button type="button" onClick={() => void load()} className="text-xs font-semibold text-link hover:underline">Refresh</button>
           </div>
           {loading ? <p className="mt-4 text-sm text-slate">Loading conversations…</p> : threads.length ? (
             <div className="mt-4 space-y-2">
@@ -154,7 +154,7 @@ export default function AdminCommunicationsClient() {
                   type="button"
                   key={thread.id}
                   onClick={() => setActiveId(thread.id)}
-                  className={"w-full rounded-xl border p-3 text-left transition " + (thread.id === activeId ? "border-ember/50 bg-ember/8" : "border-line hover:border-slate")}
+                  className={"w-full rounded-xl border p-3 text-left transition " + (thread.id === activeId ? "border-line/50 bg-elevated" : "border-line hover:border-slate")}
                 >
                   <div className="flex items-start justify-between gap-3">
                     <span className="min-w-0">

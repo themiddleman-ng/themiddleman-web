@@ -37,7 +37,7 @@ export function ProductPackageField({ file, onChange, required = true }: { file:
     <section className="rounded-xl border border-line bg-paper/40 p-5">
       <div className="mb-3 flex items-start justify-between gap-3">
         <div>
-          <h2 className="font-display text-lg font-semibold text-bone">Product file {required ? <span className="text-ember">*</span> : null}</h2>
+          <h2 className="font-display text-lg font-semibold text-bone">Product file {required ? <span className="text-link">*</span> : null}</h2>
           <p className="mt-1 text-sm text-slate">Upload the files a buyer would receive after a purchase. Purchases are paused on this launch. This file stays private until review approves it.</p>
         </div>
         <span className="shrink-0 rounded-full bg-white/5 px-2.5 py-1 text-xs text-slate">10 MB max</span>
@@ -46,7 +46,7 @@ export function ProductPackageField({ file, onChange, required = true }: { file:
         Code, templates and collections: upload a ZIP. Single documents or images can be uploaded as PDF, PNG or JPG; TXT is supported. Remove .git, .env files, credentials and private keys first. Executables are not accepted.
       </p>
       <label
-        className={"relative block w-full overflow-hidden rounded-lg border border-dashed px-4 py-5 text-left transition-colors focus-within:outline focus-within:outline-2 focus-within:outline-ember " + (dragging ? "border-ember bg-ember/10" : "border-white/15 bg-ink/30 hover:border-white/30")}
+        className={"relative block w-full overflow-hidden rounded-lg border border-dashed px-4 py-5 text-left transition-colors focus-within:outline focus-within:outline-2 focus-within:outline-ember " + (dragging ? "border-line bg-elevated" : "border-white/15 bg-ink/30 hover:border-white/30")}
         onDragOver={(event) => { event.preventDefault(); setDragging(true); }}
         onDragLeave={() => setDragging(false)}
         onDrop={(event) => { event.preventDefault(); setDragging(false); choose(event.dataTransfer.files?.[0] || null); }}
@@ -65,7 +65,7 @@ export function ProductPackageField({ file, onChange, required = true }: { file:
               <span className="block truncate text-sm font-medium text-bone">{file.name}</span>
               <span className="mt-1 block text-xs text-slate">{fileSize(file.size)} · {file.name.split(".").pop()?.toUpperCase()}</span>
             </span>
-            <span className="text-xs font-medium text-ember">Replace</span>
+            <span className="text-xs font-medium text-link">Replace</span>
           </span>
         ) : (
           <span>

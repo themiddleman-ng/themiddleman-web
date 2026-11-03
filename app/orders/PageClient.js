@@ -19,7 +19,7 @@ const STATUS_LABELS = {
 
 function StatusBadge({ status }) {
   const tone =
-    status === "approved" ? "text-ember" :
+    status === "approved" ? "text-link" :
     status === "disputed" ? "text-muted" :
     "text-slate";
   return <span className={`text-xs font-medium ${tone}`}>{STATUS_LABELS[status] || status}</span>;
@@ -224,8 +224,8 @@ export default function OrdersPage() {
       <SiteHeader />
 
       <section className="mx-auto max-w-4xl px-4 py-5 sm:px-6 sm:py-10">
-        <p className="text-xs font-semibold tracking-[.2em] text-ember">MY ORDERS</p>
-        <h1 className="mt-2 font-display text-2xl font-bold sm:text-3xl">My orders</h1><p className="mt-2 text-sm text-slate">Track orders that already exist. New purchases are paused, so this page does not start a payment.</p><Link href="/disputes" className="mt-3 inline-block min-h-10 text-sm font-medium text-ember hover:underline">Respond to a dispute</Link>
+        <p className="text-xs font-semibold tracking-[.2em] text-link">MY ORDERS</p>
+        <h1 className="mt-2 font-display text-2xl font-bold sm:text-3xl">My orders</h1><p className="mt-2 text-sm text-slate">Track orders that already exist. New purchases are paused, so this page does not start a payment.</p><Link href="/disputes" className="mt-3 inline-block min-h-10 text-sm font-medium text-link hover:underline">Respond to a dispute</Link>
 
         <div className="mm-order-controls mt-5 flex flex-col gap-3 rounded-xl border border-line bg-white p-4 sm:flex-row sm:flex-wrap sm:items-end">
           <label className="min-w-0 flex-1 text-xs font-semibold">Search orders<input type="search" value={orderQuery} onChange={(event) => setOrderQuery(event.target.value)} placeholder="Product or order ID" className="mt-2 block min-h-11 w-full border px-3 text-sm font-normal" /></label>
@@ -237,7 +237,7 @@ export default function OrdersPage() {
 
         {!loadError && orders.length === 0 && (
           <p className="mt-6 text-sm text-slate">
-            No orders yet. <Link href="/marketplace" className="text-ember hover:underline">Browse the marketplace</Link> to find a product.
+            No orders yet. <Link href="/marketplace" className="text-link hover:underline">Browse the marketplace</Link> to find a product.
           </p>
         )}
 
@@ -315,7 +315,7 @@ export default function OrdersPage() {
                   )}
 
                   {deliveryEnabled && isBuyer && ['delivered','approved','disputed'].includes(order.status) && order.deliveries?.[0]?.status === 'delivered' && (
-                    <button onClick={() => openDelivery(order.id)} className="rounded-full border border-line px-4 py-2 text-xs font-medium text-ember">Download delivery</button>
+                    <button onClick={() => openDelivery(order.id)} className="rounded-full border border-line px-4 py-2 text-xs font-medium text-link">Download delivery</button>
                   )}
 
                   {deliveryEnabled && isBuyer && order.status === "approved" && !alreadyReviewed && (

@@ -102,7 +102,7 @@ export default function NotificationsPage() {
         <section className="mx-auto max-w-3xl px-5 py-8 sm:px-7">
           <header className="flex flex-wrap items-end justify-between gap-4 border-b border-line pb-5">
             <div>
-              <p className="text-xs font-semibold tracking-[.14em] text-ember">YOUR ACCOUNT</p>
+              <p className="text-xs font-semibold tracking-[.14em] text-link">YOUR ACCOUNT</p>
               <h1 className="mt-2 font-display text-3xl font-bold">Notifications</h1>
               {!loading && !signedOut ? <p className="mt-2 text-sm text-slate">{unreadCount} unread</p> : null}
             </div>
@@ -115,10 +115,10 @@ export default function NotificationsPage() {
 
           <div className="mt-5 divide-y divide-white/10 sm:mt-6">
             {items.map((item) => (
-              <button key={item.id} onClick={() => openItem(item)} className={"block w-full py-4 text-left sm:py-5 " + (!item.read_at ? "border-l-2 border-ember pl-3 sm:pl-4" : "pl-[14px] sm:pl-[18px]")}>
+              <button key={item.id} onClick={() => openItem(item)} className={"block w-full py-4 text-left sm:py-5 " + (!item.read_at ? "border-l-2 border-line pl-3 sm:pl-4" : "pl-[14px] sm:pl-[18px]")}>
                 <span className="flex flex-wrap items-center gap-2">
                   <span className="font-semibold">{item.title}</span>
-                  {!item.read_at ? <span className="rounded-full bg-ember/10 px-2 py-0.5 text-[10px] text-ember">Unread</span> : null}
+                  {!item.read_at ? <span className="rounded-full bg-elevated px-2 py-0.5 text-[10px] text-link">Unread</span> : null}
                   {item.action_required ? <span className="rounded-full bg-white/5 px-2 py-0.5 text-[10px] text-slate">Action needed</span> : null}
                 </span>
                 <span className="mt-1 block text-sm leading-6 text-slate">{item.body}</span>

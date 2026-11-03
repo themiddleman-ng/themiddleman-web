@@ -252,7 +252,7 @@ export default function NewGigPage() {
 			<header className="border-b border-line bg-paper/50 backdrop-blur sticky top-0 z-20">
 				<div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-3 sm:px-6 sm:py-4">
 					<Link href="/" className="font-display font-bold text-lg tracking-tight flex items-center gap-2">
-						<span className="h-2.5 w-2.5 rounded-full bg-ember shadow-[0_0_0_4px_rgba(249,115,22,.15)]" />
+						<span className="h-2.5 w-2.5 rounded-full bg-ember shadow-[0_0_0_4px_rgba(255,176,114,.15)]" />
 						<span className="truncate">The Middleman</span>
 					</Link>
 					<Link href="/gigs/mine" className="inline-flex shrink-0 items-center gap-1.5 text-xs text-slate transition-colors hover:text-bone sm:gap-2 sm:text-sm">
@@ -264,7 +264,7 @@ export default function NewGigPage() {
 
 			<div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-8 lg:py-10">
 				<div className="mb-6 sm:mb-10">
-					<p className="text-xs font-bold tracking-[.2em] text-ember uppercase">New digital product</p>
+					<p className="text-xs font-bold tracking-[.2em] text-link uppercase">New digital product</p>
 					<h1 className="mt-2 font-display text-[1.65rem] font-bold sm:text-4xl">List a ready-made product</h1>
 					<p className="mt-3 text-sm text-slate max-w-xl">Describe the ready-made product, what it includes, supported formats and any requirements. Every submission is reviewed before it appears in the marketplace.</p>
 				</div>
@@ -382,7 +382,7 @@ export default function NewGigPage() {
 
 					<div className="lg:sticky lg:top-24 h-fit">
 						<div className="flex items-center justify-between mb-4">
-							<p className="text-[10px] font-bold tracking-[.16em] text-ember uppercase">Live Preview</p>
+							<p className="text-[10px] font-bold tracking-[.16em] text-link uppercase">Live Preview</p>
 							<span className="flex items-center gap-1.5 text-[10px] text-slate"><span className="h-1.5 w-1.5 rounded-full bg-green-500 animate-pulse" />Auto-updating</span>
 						</div>
 
@@ -413,7 +413,7 @@ export default function NewGigPage() {
 
 							{isAiAssisted && (
 								<div className="mt-4 pt-4 border-t border-white/5">
-									<span className="inline-flex items-center gap-1.5 text-[9px] font-bold tracking-wider text-[#111111] bg-[#F97316] border border-[#FB923C] px-2 py-0.5 rounded">
+									<span className="inline-flex items-center gap-1.5 text-[9px] font-bold tracking-wider text-bone bg-elevated border border-line px-2 py-0.5 rounded">
 										<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
 										AI-ASSISTED DELIVERY
 									</span>

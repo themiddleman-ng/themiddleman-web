@@ -200,7 +200,7 @@ export default function SiteHeader({ isSeller: sellerHint = false, compact = fal
             aria-haspopup="menu"
             aria-controls="account-menu"
             data-onboarding-target="menu"
-            className="relative grid h-11 w-11 place-items-center overflow-hidden rounded-full border border-line bg-paper text-bone shadow-sm transition hover:border-ember/60 hover:bg-elevated focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-ember/15"
+            className="relative grid h-11 w-11 place-items-center overflow-hidden rounded-full border border-line bg-paper text-bone shadow-sm transition hover:border-line/60 hover:bg-elevated focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-ember/15"
           >
             {user ? (
               <OwnerAvatar

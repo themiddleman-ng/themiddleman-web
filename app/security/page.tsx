@@ -9,7 +9,7 @@ export default function SecurityPage() {
     <main className="min-h-screen bg-ink text-bone">
       <SiteHeader />
       <section className="mx-auto max-w-2xl px-4 py-6 sm:px-6 sm:py-10">
-        <p className="text-xs tracking-widest text-ember">ACCOUNT SECURITY</p>
+        <p className="text-xs tracking-widest text-link">ACCOUNT SECURITY</p>
         <h1 className="mt-2 font-display text-3xl font-bold sm:mt-3 sm:text-4xl">
           Authenticator and password
         </h1>

@@ -24,15 +24,15 @@ export default function NotFound() {
           <Link href="/" className="rounded-full bg-ember px-6 py-3 text-sm font-bold text-ink transition-colors hover:bg-ember-hover">
             Back to homepage
           </Link>
-          <Link href="/marketplace" className="rounded-full border border-line px-6 py-3 text-sm font-semibold text-bone transition-colors hover:border-ember/40">
+          <Link href="/marketplace" className="rounded-full border border-line px-6 py-3 text-sm font-semibold text-bone transition-colors hover:border-line/40">
             Browse the marketplace
           </Link>
-          <Link href="/signup?mode=signin" className="rounded-full border border-line px-6 py-3 text-sm font-semibold text-bone transition-colors hover:border-ember/40">
+          <Link href="/signup?mode=signin" className="rounded-full border border-line px-6 py-3 text-sm font-semibold text-bone transition-colors hover:border-line/40">
             Sign in
           </Link>
         </div>
 
-        <div className="ink-stamp absolute -top-3 right-6 rounded-md border-2 border-ember bg-paper px-2.5 py-1 font-display text-[10px] font-bold tracking-wider text-ember" style={{ transform: "rotate(-8deg)" }}>
+        <div className="ink-stamp absolute -top-3 right-6 rounded-md border-2 border-line bg-paper px-2.5 py-1 font-display text-[10px] font-bold tracking-wider text-link" style={{ transform: "rotate(-8deg)" }}>
           NOT FOUND
         </div>
       </div>

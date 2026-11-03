@@ -27,7 +27,7 @@ export default function BrowsePage() {
     <main className="min-h-screen bg-ink text-bone">
       <SiteHeader />
       <div className="mx-auto max-w-6xl px-4 pb-10 pt-5 sm:px-5 sm:pt-8">
-        <p className="font-mono text-[10px] font-semibold uppercase tracking-[.2em] text-ember">Browse</p>
+        <p className="font-mono text-[10px] font-semibold uppercase tracking-[.2em] text-link">Browse</p>
         <h1 className="mt-2 font-display text-[1.75rem] font-bold tracking-tight sm:text-3xl">Find something worth building on.</h1>
 
         <form onSubmit={submit} className="sticky top-16 z-20 mt-5 rounded-2xl border border-line bg-paper/95 p-3 shadow-[0_8px_24px_rgba(28,37,47,.06)] backdrop-blur sm:static sm:mt-6 sm:rounded-none sm:border-0 sm:bg-transparent sm:p-0 sm:shadow-none">

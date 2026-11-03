@@ -130,7 +130,7 @@ export default function AccountDeletionClient() {
             <input id="delete-account-confirmation" value={confirmation} onChange={(event) => setConfirmation(event.target.value)} autoCapitalize="characters" autoComplete="off" spellCheck={false} required className="mt-1.5 w-full rounded-xl border border-line bg-white px-3.5 py-3 text-[15px] text-bone outline-none focus:border-line focus:ring-4 focus:ring-ember-cta/10" />
           </div>
           <label className="flex items-start gap-3 rounded-xl border border-line p-3.5 text-sm leading-5 text-muted">
-            <input type="checkbox" checked={understood} onChange={(event) => setUnderstood(event.target.checked)} className="mt-0.5 h-4 w-4 shrink-0 accent-[#F97316]" />
+            <input type="checkbox" checked={understood} onChange={(event) => setUnderstood(event.target.checked)} className="mt-0.5 h-4 w-4 shrink-0 accent-ember" />
             <span>I understand the account cannot be restored and some de-identified transaction records will be retained.</span>
           </label>
           {error && <p role="alert" className="rounded-xl bg-paper px-3.5 py-3 text-sm leading-5 text-muted">{error}</p>}

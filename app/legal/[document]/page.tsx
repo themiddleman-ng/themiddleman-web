@@ -157,7 +157,7 @@ export default async function LegalPage({ params }: { params: Promise<{ document
           </ol>
         </nav>
         <div className="mb-10">
-          <p className="text-xs font-bold tracking-[.16em] text-ember uppercase">Legal Document</p>
+          <p className="text-xs font-bold tracking-[.16em] text-link uppercase">Legal Document</p>
           <h1 className="mt-2 font-display text-[1.85rem] font-bold sm:text-4xl">{doc.title}</h1>
           <p className="mt-3 text-sm text-slate">Last updated: {doc.updated}</p>
         </div>
@@ -192,7 +192,7 @@ export default async function LegalPage({ params }: { params: Promise<{ document
               className={`rounded-full px-4 py-2 text-xs font-semibold transition-colors ${
                 key === document
                   ? 'bg-ember text-ink'
-                  : 'border border-line text-slate hover:border-ember/40 hover:text-bone'
+                  : 'border border-line text-slate hover:border-line/40 hover:text-bone'
               }`}
             >
               {d.title}

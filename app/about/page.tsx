@@ -15,7 +15,7 @@ export default function AboutPage() {
       <SiteHeader />
 
       <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6 sm:py-12">
-        <p className="text-xs font-bold uppercase tracking-[.16em] text-ember">About us</p>
+        <p className="text-xs font-bold uppercase tracking-[.16em] text-link">About us</p>
         <h1 className="mt-2 font-display text-[1.85rem] font-bold tracking-tight sm:text-5xl">A marketplace for useful digital products.</h1>
 
         <div className="mt-10 space-y-6 text-[15px] leading-relaxed text-slate">
@@ -27,7 +27,7 @@ export default function AboutPage() {
         <div className="relative mt-8 overflow-hidden rounded-2xl border border-line bg-paper p-5 sm:mt-12 sm:p-8">
           <div className="pointer-events-none absolute left-0 top-1/2 hidden h-4 w-4 -translate-x-1/2 -translate-y-1/2 rounded-full border border-line bg-ink sm:block" />
           <div className="pointer-events-none absolute right-0 top-1/2 hidden h-4 w-4 -translate-y-1/2 translate-x-1/2 rounded-full border border-line bg-ink sm:block" />
-          <p className="text-xs font-bold uppercase tracking-[.16em] text-ember">What we hold to</p>
+          <p className="text-xs font-bold uppercase tracking-[.16em] text-link">What we hold to</p>
           <ul className="mt-5 space-y-4">
             {[
               ["Ready-made products", "Browse digital products made by independent creators."],
@@ -45,7 +45,7 @@ export default function AboutPage() {
 
         <div className="mt-8 grid gap-3 sm:mt-10 sm:flex sm:flex-wrap">
           <Link href="/marketplace" className="inline-flex min-h-12 items-center justify-center rounded-xl bg-ember-cta px-6 py-3 text-sm font-bold text-ink transition-colors hover:bg-ember-hover sm:rounded-full">Browse the marketplace</Link>
-          <Link href="/signup" className="inline-flex min-h-12 items-center justify-center rounded-xl border border-line px-6 py-3 text-sm font-semibold text-bone transition-colors hover:border-ember/40 sm:rounded-full">Create an account</Link>
+          <Link href="/signup" className="inline-flex min-h-12 items-center justify-center rounded-xl border border-line px-6 py-3 text-sm font-semibold text-bone transition-colors hover:border-line/40 sm:rounded-full">Create an account</Link>
         </div>
       </div>
     </main>

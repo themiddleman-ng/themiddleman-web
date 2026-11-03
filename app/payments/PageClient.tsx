@@ -66,7 +66,7 @@ export default function PaymentsPage() {
       <SiteHeader />
 
       <div className="mx-auto max-w-5xl px-4 py-5 sm:px-6 sm:py-9">
-        <p className="text-xs font-bold tracking-[.2em] text-ember">PAYMENTS</p>
+        <p className="text-xs font-bold tracking-[.2em] text-link">PAYMENTS</p>
         <h1 className="mt-2 font-display text-[1.65rem] font-bold leading-tight tracking-tight sm:text-4xl">Payment activity</h1>
         <p className="mt-3 max-w-2xl text-sm leading-6 text-slate sm:text-base">
           Checkout is paused. This page does not start a payment. If a past test payment exists, you can review its status here. A buyer accepting delivery does not by itself send a seller payout.
@@ -76,7 +76,7 @@ export default function PaymentsPage() {
         <div className="mt-5 grid gap-3 sm:mt-7 sm:gap-4 md:grid-cols-3">
           {steps.map(([number, title, text]) => (
             <div key={number} className="rounded-2xl border border-line bg-paper p-4 sm:p-5">
-              <span className="font-mono text-sm text-ember">0{number}</span>
+              <span className="font-mono text-sm text-link">0{number}</span>
               <h2 className="mt-3 font-display text-lg font-bold sm:mt-4 sm:text-xl">{title}</h2>
               <p className="mt-3 text-sm leading-relaxed text-slate">{text}</p>
             </div>
@@ -116,7 +116,7 @@ export default function PaymentsPage() {
                   </div>
                   <div className="flex shrink-0 items-center justify-between gap-3 sm:block sm:text-right">
                     <p className="font-mono text-sm text-bone">₦{payment.amount.toLocaleString()}</p>
-                    <p className="text-xs text-ember font-sans">{ESCROW_STATUS_LABELS[payment.escrow_status] ?? payment.escrow_status}</p>
+                    <p className="text-xs text-link font-sans">{ESCROW_STATUS_LABELS[payment.escrow_status] ?? payment.escrow_status}</p>
                   </div>
                 </div>
               ))}

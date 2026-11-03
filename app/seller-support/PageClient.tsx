@@ -106,7 +106,7 @@ export default function SellerSupportPage() {
     <main className="min-h-screen bg-ink text-bone">
       <SiteHeader />
       <div className="mx-auto max-w-6xl px-4 py-6 sm:px-5 sm:py-8 md:py-12">
-        <p className="text-xs font-bold uppercase tracking-[.16em] text-ember">Seller support</p>
+        <p className="text-xs font-bold uppercase tracking-[.16em] text-link">Seller support</p>
         <h1 className="mt-2 font-display text-3xl font-bold md:text-4xl">Operations messages</h1>
         <p className="mt-2 max-w-2xl text-sm leading-6 text-slate">Private notes from The Middleman team about your seller account and product operations.</p>
 
@@ -122,7 +122,7 @@ export default function SellerSupportPage() {
           <aside className={`${mobileThreadOpen ? "hidden" : "block"} rounded-2xl border border-line bg-paper p-4 lg:block`}>
             <div className="flex items-center justify-between">
               <h2 className="font-display text-xl font-semibold">Your conversations</h2>
-              <button type="button" onClick={() => void load()} className="text-xs font-semibold text-ember hover:underline">Refresh</button>
+              <button type="button" onClick={() => void load()} className="text-xs font-semibold text-link hover:underline">Refresh</button>
             </div>
             {loading ? <p className="mt-4 text-sm text-slate">Loading…</p> : threads.length ? (
               <div className="mt-4 space-y-2">
@@ -131,7 +131,7 @@ export default function SellerSupportPage() {
                     type="button"
                     key={thread.id}
                     onClick={() => { setActiveId(thread.id); setMobileThreadOpen(true); }}
-                    className={"w-full rounded-xl border p-3 text-left transition " + (thread.id === activeId ? "border-ember/50 bg-ember/8" : "border-line hover:border-slate")}
+                    className={"w-full rounded-xl border p-3 text-left transition " + (thread.id === activeId ? "border-line/50 bg-elevated" : "border-line hover:border-slate")}
                   >
                     <span className="block truncate text-sm font-semibold">{thread.subject}</span>
                     <span className="mt-1 block text-xs capitalize text-slate">{thread.status} · {thread.messages.length} messages</span>
