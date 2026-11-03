@@ -131,8 +131,9 @@ function PasswordChecklist({ value }) {
 const DESKTOP_MS = 760;
 const DESKTOP_SWAP_MS = 340;
 const DESKTOP_ENTER_MS = 500;
-const MOBILE_SWAP_MS = 100;
-const MOBILE_MS = 240;
+const MOBILE_FADE_MS = 100;
+const MOBILE_SWAP_MS = 132;
+const MOBILE_MS = 260;
 
 function getInitialMode(searchParams) {
   const fromUrl = searchParams.get('mode');
@@ -206,10 +207,13 @@ function AuthPageInner() {
   const searchParams = useSearchParams();
   const [mode, setMode] = useState(() => getInitialMode(searchParams));
   const [pill, setPill] = useState(() => getInitialMode(searchParams));
+  const [layout, setLayout] = useState(() => getInitialMode(searchParams));
   const [phase, setPhase] = useState('idle');
+  const [motion, setMotion] = useState('fade');
   const [promote, setPromote] = useState(false);
   const run = useRef({ token: 0, timers: [], anim: null, pin: null, phase: 'idle', target: null });
   const modeRef = useRef(mode);
+  const layoutRef = useRef(layout);
   const searchRef = useRef(searchParams);
   const stageRef = useRef(null);
   const pinRef = useRef(null);
@@ -217,7 +221,29 @@ function AuthPageInner() {
   const requestModeRef = useRef(null);
   const returnPath = readReturnPath(searchParams);
   modeRef.current = mode;
+  layoutRef.current = layout;
   searchRef.current = searchParams;
+
+  function captureMotion() {
+    const stage = stageRef.current;
+    const pin = pinRef.current;
+    return {
+      stage: stage ? getComputedStyle(stage).transform : null,
+      pin: pin ? getComputedStyle(pin).transform : null,
+    };
+  }
+
+  function holdMotion(captured) {
+    const stage = stageRef.current;
+    const pin = pinRef.current;
+    if (stage && captured?.stage && captured.stage !== "none") stage.style.transform = captured.stage;
+    if (pin && captured?.pin && captured.pin !== "none") pin.style.transform = captured.pin;
+  }
+
+  function releaseMotion() {
+    if (stageRef.current) stageRef.current.style.transform = "";
+    if (pinRef.current) pinRef.current.style.transform = "";
+  }
 
   function clearRun() {
     run.current.timers.forEach((id) => window.clearTimeout(id));
@@ -237,11 +263,12 @@ function AuthPageInner() {
     return id;
   }
 
-  function pushMode(next) {
+  function pushMode(next, motionKind, layoutSide) {
     const url = buildAuthUrl(next === 'signin', searchRef.current);
     if (`${window.location.pathname}${window.location.search}` === url) return;
-    const state = window.history.state;
-    if (state && (state.__NA || state._N)) {
+    const prev = window.history.state && typeof window.history.state === 'object' ? window.history.state : {};
+    const state = { ...prev, mmMotion: motionKind, mmLayout: layoutSide };
+    if (state.__NA || state._N) {
       window.history.pushState(state, '', url);
       return;
     }
@@ -249,6 +276,7 @@ function AuthPageInner() {
   }
 
   function finish(next, source) {
+    releaseMotion();
     run.current.anim?.cancel();
     run.current.pin?.cancel();
     run.current.anim = null;
@@ -256,57 +284,79 @@ function AuthPageInner() {
     run.current.phase = 'idle';
     run.current.target = null;
     flushSync(() => setPhase('idle'));
-    try { window.localStorage.setItem('mm_last_auth_mode', next); }
-    catch { /* Preference storage can be blocked. The form still works. */ }
-    if (source === 'pointer' || source === 'link') {
-      const field = next === 'signup' ? 'signup-name' : 'login-email';
-      document.getElementById(field)?.focus({ preventScroll: true });
+    if (source === 'arrow-key') {
+      const tab = next === 'signin' ? 'auth-tab-signin' : 'auth-tab-signup';
+      document.getElementById(tab)?.focus({ preventScroll: true });
+      return;
     }
+    const field = next === 'signup' ? 'signup-name' : 'login-email';
+    document.getElementById(field)?.focus({ preventScroll: true });
   }
 
-  function requestMode(next, source = 'pointer') {
+  function requestMode(next, source = 'pointer', historyOpts = null) {
     if (run.current.phase !== 'idle') return false;
     if (next !== 'signin' && next !== 'signup') return false;
-    if (next === modeRef.current) {
-      if (source !== 'popstate') pushMode(next);
+    if (next === modeRef.current && !(source === 'popstate' && historyOpts?.motion === 'slide' && historyOpts.layout && historyOpts.layout !== layoutRef.current)) {
+      if (source !== 'popstate') pushMode(next, 'fade', layoutRef.current);
       return true;
     }
     const token = ++run.current.token;
     clearRun();
     run.current.target = next;
-    setPill(next);
+    run.current.source = source;
     const desktop = window.matchMedia('(min-width: 768px)').matches;
     const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const useSlide = !reduce && desktop && (
+      source === 'link' || (source === 'popstate' && historyOpts?.motion === 'slide')
+    );
+    const layoutTarget = useSlide ? (historyOpts?.layout || next) : layoutRef.current;
+    run.current.motion = useSlide ? 'slide' : 'fade';
+    setMotion(useSlide ? 'slide' : 'fade');
 
     const commit = () => {
-      flushSync(() => setMode(next));
+      flushSync(() => {
+        setMode(next);
+        setPill(next);
+        if (useSlide) setLayout(layoutTarget);
+      });
       modeRef.current = next;
-      if (source !== 'popstate') pushMode(next);
+      if (useSlide) layoutRef.current = layoutTarget;
+      if (source !== 'popstate') pushMode(next, useSlide ? 'slide' : 'fade', useSlide ? layoutTarget : layoutRef.current);
     };
 
     if (reduce) {
-      let committed = false;
-      const go = () => { if (!committed) { committed = true; commit(); } };
-      try {
-        if (typeof document.startViewTransition === 'function') document.startViewTransition(go);
-      } catch { /* The instant swap below still runs. */ }
-      go();
-      finish(next, source);
+      run.current.phase = 'leaving';
+      const apply = () => {
+        commit();
+        finish(next, source);
+      };
+      if (typeof document.startViewTransition === 'function') {
+        try {
+          document.startViewTransition(() => { apply(); });
+          return true;
+        } catch { /* Fall through to an instant swap. */ }
+      }
+      apply();
       return true;
     }
 
     run.current.phase = 'leaving';
     setPhase('leaving');
 
-    if (!desktop) {
+    if (!useSlide) {
+      const fadeOut = desktop ? 90 : MOBILE_FADE_MS;
+      const fadeSwap = desktop ? 100 : MOBILE_SWAP_MS;
+      const fadeDone = desktop ? 180 : MOBILE_MS;
       arm(() => {
         run.current.phase = 'swapping';
         setPhase('swapping');
+      }, fadeOut, token);
+      arm(() => {
         commit();
         run.current.phase = 'entering';
         setPhase('entering');
-      }, MOBILE_SWAP_MS, token);
-      arm(() => finish(next, source), MOBILE_MS, token);
+      }, fadeSwap, token);
+      arm(() => finish(next, source), fadeDone, token);
       return true;
     }
 
@@ -347,14 +397,23 @@ function AuthPageInner() {
   }
   requestModeRef.current = requestMode;
 
-  function fromHistory(next) {
+  function fromHistory(next, historyState) {
+    if (next !== 'signin' && next !== 'signup') return;
+    const sliding = run.current.motion === 'slide' && run.current.phase !== 'idle';
+    const storedLayout = historyState?.mmLayout === 'signin' || historyState?.mmLayout === 'signup' ? historyState.mmLayout : next;
+    const motion = sliding || storedLayout !== layoutRef.current ? 'slide' : 'fade';
+    if (run.current.phase !== 'idle' && run.current.target === next && !sliding) return;
+    const captured = captureMotion();
     run.current.token += 1;
     clearRun();
+    if (motion === 'slide') holdMotion(captured);
     run.current.phase = 'idle';
     setPhase('idle');
-    if (next !== 'signin' && next !== 'signup') return;
-    if (next === modeRef.current) return;
-    requestMode(next, 'popstate');
+    if (next === modeRef.current && storedLayout === layoutRef.current) {
+      releaseMotion();
+      return;
+    }
+    requestMode(next, 'popstate', { motion, layout: storedLayout });
   }
   const fromHistoryRef = useRef(fromHistory);
   fromHistoryRef.current = fromHistory;
@@ -365,7 +424,8 @@ function AuthPageInner() {
       if (url.pathname !== '/signup') return;
       event.stopImmediatePropagation();
       const next = url.searchParams.get('mode') === 'signin' ? 'signin' : 'signup';
-      fromHistoryRef.current(next);
+      const historyState = event.state;
+      queueMicrotask(() => fromHistoryRef.current(next, historyState));
     };
     const onPageShow = (event) => {
       if (!event.persisted) return;
@@ -383,7 +443,7 @@ function AuthPageInner() {
       if (target && target !== modeRef.current) {
         flushSync(() => setMode(target));
         modeRef.current = target;
-        pushMode(target);
+        pushMode(target, 'fade', layoutRef.current);
       }
       run.current.phase = 'idle';
       run.current.target = null;
@@ -414,18 +474,35 @@ function AuthPageInner() {
   }, []);
 
   useEffect(() => {
+    const root = document.documentElement;
+    const sync = () => {
+      const bar = document.querySelector('[aria-label="Cookie notice"]');
+      const height = bar ? Math.ceil(bar.getBoundingClientRect().height) : 0;
+      root.style.setProperty("--mm-auth-cookie", `${height}px`);
+    };
+    sync();
+    const observer = new MutationObserver(sync);
+    observer.observe(document.body, { childList: true, subtree: true, attributes: true });
+    window.addEventListener("resize", sync);
+    return () => {
+      observer.disconnect();
+      window.removeEventListener("resize", sync);
+      root.style.removeProperty("--mm-auth-cookie");
+    };
+  }, []);
+
+  useEffect(() => {
     const raw = searchParams.get('mode');
     if (raw !== 'signin' && raw !== 'signup') return;
     if (raw === modeRef.current || raw === run.current.target) return;
-    run.current.token += 1;
-    clearRun();
-    run.current.phase = 'idle';
-    setPhase('idle');
-    requestModeRef.current?.(raw, 'popstate');
+    queueMicrotask(() => {
+      if (raw === modeRef.current || raw === run.current.target) return;
+      fromHistoryRef.current(raw, window.history.state);
+    });
   }, [searchParams]);
 
   function switchMode(signin, source = 'pointer') {
-    requestMode(signin ? 'signin' : 'signup', source);
+    return requestMode(signin ? 'signin' : 'signup', source);
   }
 
   function promoteLayers(on) {
@@ -583,7 +660,7 @@ function AuthPageInner() {
   };
 
   return (
-    <main data-mode={mode} data-pill={pill} data-phase={phase} data-promote={promote ? 'true' : undefined} className="mm-auth relative bg-paper text-bone">
+    <main data-mode={mode} data-layout={layout} data-pill={pill} data-phase={phase} data-motion={motion} data-promote={promote ? 'true' : undefined} className="mm-auth relative bg-paper text-bone">
       <div className="mm-auth-panel">
         <div className="mm-auth-brand">
           <Logo variant="horizontal" className="mm-auth-logo" textClass="text-[17px]" markClass="h-8 w-8" />
@@ -593,27 +670,26 @@ function AuthPageInner() {
           <img className="mm-auth-edge mm-auth-edge--r" src="/design/auth-edge-r.svg" alt="" />
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img className="mm-auth-edge mm-auth-edge--l" src="/design/auth-edge-l.svg" alt="" />
-          <div className="mm-auth-pin" ref={pinRef} aria-hidden="true">
-            <Logo variant="horizontal" onPanel className="mm-auth-logo" textClass="text-[17px]" markClass="h-8 w-8" />
+          <div className="mm-auth-clip">
+            <div className="mm-auth-pin" ref={pinRef} aria-hidden="true">
+              <Logo variant="horizontal" onPanel className="mm-auth-logo" textClass="text-[17px]" markClass="h-8 w-8" />
+            </div>
           </div>
           <div className="mm-auth-hero-bar">
             <Link href="/marketplace" className="mm-auth-browse inline-flex min-h-11 items-center text-[16px] font-semibold">Browse first</Link>
           </div>
           <div className="mm-auth-hero-copy">
-            <p className="max-w-sm font-display text-4xl font-semibold leading-[1.08] tracking-[-.035em]">
-              Ready-made.<br />Made yours.
+            <p className="max-w-[470px] font-display text-4xl font-semibold leading-[1.08] tracking-[-.035em]">
+              {"Ready\u2011made."}<br />Made yours.
             </p>
-            <p className="mt-5 max-w-sm text-[16px] leading-7">
+            <p className="mm-auth-hero-sub mt-5 max-w-[470px] text-[16px] leading-7">
               Find useful digital products. Customize them with the creator.
             </p>
           </div>
-          <p className="mm-auth-hero-note">Purchases are paused. Signing up does not charge you.</p>
+          <p className="mm-auth-hero-note mt-4 max-w-[470px] text-[16px] leading-7">Purchases are paused. Signing up does not charge you.</p>
         </div>
 
         <section className="mm-auth-slot mm-auth-form">
-          <div className="mx-auto w-full max-w-lg">
-            <AuthModeTabs signin={signin} onSelect={switchMode} tabRefs={tabRefs} onPromote={promoteLayers} />
-          </div>
           <div
             key={mode}
             className="mm-auth-slot-face mm-auth-form-face mx-auto w-full max-w-lg"
@@ -621,6 +697,7 @@ function AuthPageInner() {
             aria-hidden={busy || undefined}
             aria-busy={busy || undefined}
           >
+            <AuthModeTabs signin={signin} onSelect={switchMode} tabRefs={tabRefs} onPromote={promoteLayers} />
             {mode === 'signup' ? (
               <>
                 <h1 className="font-display text-[2rem] font-bold leading-tight tracking-[-.035em] sm:text-4xl">Create your account</h1>

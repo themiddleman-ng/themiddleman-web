@@ -5,6 +5,7 @@ import {
   clearFormDraft,
   readFormDraft,
   resolveFormDraftKey,
+  draftHasContent,
   sanitizeDraftValues,
   writeFormDraft,
 } from "@/lib/forms/persisted-form.mjs";
@@ -62,7 +63,7 @@ export function usePersistedForm<T extends Record<string, unknown>>({
     setRestored(false);
     const store = getStorage(storage);
     const draft = readFormDraft(store, storageKey);
-    if (!draft) return;
+    if (!draft || !draftHasContent(draft)) return;
     setValues((current) => ({ ...current, ...draft }));
     setRestored(true);
   }, [enabled, setValues, storage, storageKey]);
@@ -73,7 +74,12 @@ export function usePersistedForm<T extends Record<string, unknown>>({
     if (!store) return;
     if (timerRef.current) clearTimeout(timerRef.current);
     timerRef.current = setTimeout(() => {
-      writeFormDraft(store, storageKey, values, secretList);
+      const safe = sanitizeDraftValues(values, secretList);
+      if (!draftHasContent(safe)) {
+        clearFormDraft(store, storageKey);
+        return;
+      }
+      writeFormDraft(store, storageKey, safe);
     }, debounceMs);
     return () => {
       if (timerRef.current) clearTimeout(timerRef.current);
