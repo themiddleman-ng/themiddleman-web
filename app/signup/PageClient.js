@@ -128,9 +128,9 @@ function PasswordChecklist({ value }) {
   );
 }
 
-const DESKTOP_MS = 760;
-const DESKTOP_SWAP_MS = 340;
-const DESKTOP_ENTER_MS = 500;
+const DESKTOP_MS = 480;
+const DESKTOP_SWAP_MS = 200;
+const DESKTOP_ENTER_MS = 220;
 const MOBILE_FADE_MS = 100;
 const MOBILE_SWAP_MS = 132;
 const MOBILE_MS = 260;
@@ -313,7 +313,7 @@ function AuthPageInner() {
     const pinTo = toSignup ? 'translateX(-100%)' : 'translateX(0%)';
     const stageFrom = getComputedStyle(stage).transform;
     const pinFrom = pin ? getComputedStyle(pin).transform : 'none';
-    const ease = 'cubic-bezier(.65, 0, .2, 1)';
+    const ease = 'cubic-bezier(.4, 0, .1, 1)';
     run.current.anim = stage.animate(
       [{ transform: stageFrom }, { transform: stageTo }],
       { duration: DESKTOP_MS, easing: ease, fill: 'forwards' },

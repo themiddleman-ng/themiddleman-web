@@ -1179,13 +1179,17 @@ html [class*="border-[#172b45]"] {
   min-height: 0;
 }
 
-/* Auth panel slide. Only the stage moves. The form fades while it is hidden. */
+/* Auth panel slide. Only the stage moves. The form fades while it is hidden.
+   Desktop (§14): 480ms, cubic-bezier(.4, 0, .1, 1).
+   Form out 100ms ease-in. Copy out 120ms. Swap at 200ms (progress 0.5).
+   Copy in 200ms from 220ms. Form in 180ms from 240ms, ease-out.
+   Mobile fade and the 150ms reduced-motion dissolve stay as they are. */
 .mm-auth {
-  --mm-ease-in-out: cubic-bezier(.65, 0, .2, 1);
+  --mm-ease-in-out: cubic-bezier(.4, 0, .1, 1);
   --mm-ease-in: cubic-bezier(.4, 0, 1, 1);
   --mm-ease-out: cubic-bezier(.22, 1, .36, 1);
   --mm-ease-snap: cubic-bezier(.2, 0, 0, 1);
-  --mm-auth-dur: 760ms;
+  --mm-auth-dur: 480ms;
   --mm-auth-min-h: 1048px;
   view-transition-name: none;
 }
@@ -1266,8 +1270,30 @@ html [class*="border-[#172b45]"] {
 .mm-auth[data-motion="fade"][data-phase="entering"] .mm-auth-slot-face {
   animation: mm-auth-fade-in 90ms linear forwards;
 }
+.mm-auth[data-motion="slide"][data-phase="leaving"] .mm-auth-slot-face {
+  animation: mm-form-out 100ms var(--mm-ease-in) forwards;
+}
+.mm-auth[data-motion="slide"][data-phase="leaving"] .mm-auth-hero-copy,
+.mm-auth[data-motion="slide"][data-phase="leaving"] .mm-auth-hero-note {
+  animation: mm-copy-out 120ms var(--mm-ease-in) forwards;
+}
+.mm-auth[data-motion="slide"][data-phase="swapping"] .mm-auth-hero-copy,
+.mm-auth[data-motion="slide"][data-phase="swapping"] .mm-auth-hero-note {
+  opacity: 0;
+}
+.mm-auth[data-motion="slide"][data-phase="entering"] .mm-auth-slot-face {
+  animation: mm-form-in 180ms var(--mm-ease-out) 20ms both;
+}
+.mm-auth[data-motion="slide"][data-phase="entering"] .mm-auth-hero-copy,
+.mm-auth[data-motion="slide"][data-phase="entering"] .mm-auth-hero-note {
+  animation: mm-copy-in 200ms var(--mm-ease-out) both;
+}
 @keyframes mm-auth-fade-out { from { opacity: 1; } to { opacity: 0; } }
 @keyframes mm-auth-fade-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes mm-form-out { from { opacity: 1; } to { opacity: 0; } }
+@keyframes mm-form-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes mm-copy-out { from { opacity: 1; } to { opacity: 0; } }
+@keyframes mm-copy-in { from { opacity: 0; } to { opacity: 1; } }
 @keyframes mm-slot-out {
   from { opacity: 1; transform: translateY(0); }
   to { opacity: 0; transform: translateY(-6px); }
