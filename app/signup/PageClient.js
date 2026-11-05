@@ -150,63 +150,10 @@ function buildAuthUrl(signin, searchParams) {
   return `/signup?${params.toString()}`;
 }
 
-function AuthModeTabs({ signin, onSelect, tabRefs, onPromote }) {
-  return (
-    <div
-      className="mm-auth-tabs"
-      role="tablist"
-      aria-label="Account access"
-      onPointerEnter={() => onPromote?.(true)}
-      onPointerLeave={() => onPromote?.(false)}
-      onFocus={() => onPromote?.(true)}
-      onBlur={() => onPromote?.(false)}
-    >
-      <span className="mm-auth-tab-indicator" aria-hidden="true" />
-      <button
-        type="button"
-        role="tab"
-        id="auth-tab-signup"
-        ref={(node) => { tabRefs.current[0] = node; }}
-        aria-selected={!signin}
-        aria-controls="auth-panel-signup"
-        tabIndex={signin ? -1 : 0}
-        onClick={() => onSelect(false, 'pointer')}
-        onKeyDown={(event) => {
-          if (event.key === 'ArrowRight' || event.key === 'ArrowLeft') {
-            event.preventDefault();
-            if (onSelect(true, 'arrow-key')) tabRefs.current[1]?.focus();
-          }
-        }}
-      >
-        Create account
-      </button>
-      <button
-        type="button"
-        role="tab"
-        id="auth-tab-signin"
-        ref={(node) => { tabRefs.current[1] = node; }}
-        aria-selected={signin}
-        aria-controls="auth-panel-signin"
-        tabIndex={signin ? 0 : -1}
-        onClick={() => onSelect(true, 'pointer')}
-        onKeyDown={(event) => {
-          if (event.key === 'ArrowRight' || event.key === 'ArrowLeft') {
-            event.preventDefault();
-            if (onSelect(false, 'arrow-key')) tabRefs.current[0]?.focus();
-          }
-        }}
-      >
-        Sign in
-      </button>
-    </div>
-  );
-}
-
 function AuthPageInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [mode, setMode] = useState(() => getInitialMode(searchParams));
-  const [pill, setPill] = useState(() => getInitialMode(searchParams));
   const [layout, setLayout] = useState(() => getInitialMode(searchParams));
   const [phase, setPhase] = useState('idle');
   const [motion, setMotion] = useState('fade');
@@ -217,7 +164,6 @@ function AuthPageInner() {
   const searchRef = useRef(searchParams);
   const stageRef = useRef(null);
   const pinRef = useRef(null);
-  const tabRefs = useRef([]);
   const requestModeRef = useRef(null);
   const returnPath = readReturnPath(searchParams);
   modeRef.current = mode;
@@ -263,19 +209,20 @@ function AuthPageInner() {
     return id;
   }
 
-  function pushMode(next, motionKind, layoutSide) {
+  function writeMode(next, motionKind, layoutSide, replace) {
     const url = buildAuthUrl(next === 'signin', searchRef.current);
     if (`${window.location.pathname}${window.location.search}` === url) return;
     const prev = window.history.state && typeof window.history.state === 'object' ? window.history.state : {};
     const state = { ...prev, mmMotion: motionKind, mmLayout: layoutSide };
+    const method = replace ? 'replaceState' : 'pushState';
     if (state.__NA || state._N) {
-      window.history.pushState(state, '', url);
+      window.history[method](state, '', url);
       return;
     }
-    History.prototype.pushState.call(window.history, state, '', url);
+    History.prototype[method].call(window.history, state, '', url);
   }
 
-  function finish(next, source) {
+  function finish(next) {
     releaseMotion();
     run.current.anim?.cancel();
     run.current.pin?.cancel();
@@ -284,11 +231,6 @@ function AuthPageInner() {
     run.current.phase = 'idle';
     run.current.target = null;
     flushSync(() => setPhase('idle'));
-    if (source === 'arrow-key') {
-      const tab = next === 'signin' ? 'auth-tab-signin' : 'auth-tab-signup';
-      document.getElementById(tab)?.focus({ preventScroll: true });
-      return;
-    }
     const field = next === 'signup' ? 'signup-name' : 'login-email';
     document.getElementById(field)?.focus({ preventScroll: true });
   }
@@ -297,7 +239,7 @@ function AuthPageInner() {
     if (run.current.phase !== 'idle') return false;
     if (next !== 'signin' && next !== 'signup') return false;
     if (next === modeRef.current && !(source === 'popstate' && historyOpts?.motion === 'slide' && historyOpts.layout && historyOpts.layout !== layoutRef.current)) {
-      if (source !== 'popstate') pushMode(next, 'fade', layoutRef.current);
+      if (source !== 'popstate') writeMode(next, 'fade', layoutRef.current, true);
       return true;
     }
     const token = ++run.current.token;
@@ -316,19 +258,18 @@ function AuthPageInner() {
     const commit = () => {
       flushSync(() => {
         setMode(next);
-        setPill(next);
         if (useSlide) setLayout(layoutTarget);
       });
       modeRef.current = next;
       if (useSlide) layoutRef.current = layoutTarget;
-      if (source !== 'popstate') pushMode(next, useSlide ? 'slide' : 'fade', useSlide ? layoutTarget : layoutRef.current);
+      if (source !== 'popstate') writeMode(next, useSlide ? 'slide' : 'fade', useSlide ? layoutTarget : layoutRef.current, false);
     };
 
     if (reduce) {
       run.current.phase = 'leaving';
       const apply = () => {
         commit();
-        finish(next, source);
+        finish(next);
       };
       if (typeof document.startViewTransition === 'function') {
         try {
@@ -356,7 +297,7 @@ function AuthPageInner() {
         run.current.phase = 'entering';
         setPhase('entering');
       }, fadeSwap, token);
-      arm(() => finish(next, source), fadeDone, token);
+      arm(() => finish(next), fadeDone, token);
       return true;
     }
 
@@ -364,7 +305,7 @@ function AuthPageInner() {
     const pin = pinRef.current;
     if (!stage) {
       commit();
-      finish(next, source);
+      finish(next);
       return true;
     }
     const toSignup = next === 'signup';
@@ -392,7 +333,7 @@ function AuthPageInner() {
       run.current.phase = 'entering';
       setPhase('entering');
     }, DESKTOP_ENTER_MS, token);
-    arm(() => finish(next, source), DESKTOP_MS, token);
+    arm(() => finish(next), DESKTOP_MS, token);
     return true;
   }
   requestModeRef.current = requestMode;
@@ -448,7 +389,7 @@ function AuthPageInner() {
       if (target && target !== modeRef.current) {
         flushSync(() => setMode(target));
         modeRef.current = target;
-        pushMode(target, 'fade', layoutRef.current);
+        writeMode(target, 'fade', layoutRef.current, true);
       }
       run.current.phase = 'idle';
       run.current.target = null;
@@ -516,8 +457,8 @@ function AuthPageInner() {
     });
   }, [searchParams]);
 
-  function switchMode(signin, source = 'pointer') {
-    return requestMode(signin ? 'signin' : 'signup', source);
+  function switchMode(signin) {
+    return requestMode(signin ? 'signin' : 'signup', 'link');
   }
 
   function promoteLayers(on) {
@@ -665,7 +606,6 @@ function AuthPageInner() {
   const invalidInput = 'border-line focus:border-line focus:ring-line/15';
   const labelClass = 'block text-sm font-medium text-muted';
 
-  const signin = mode === 'signin';
   const busy = phase !== 'idle';
   const linkPromote = {
     onPointerEnter: () => promoteLayers(true),
@@ -675,7 +615,7 @@ function AuthPageInner() {
   };
 
   return (
-    <main data-mode={mode} data-layout={layout} data-pill={pill} data-phase={phase} data-motion={motion} data-promote={promote ? 'true' : undefined} className="mm-auth relative bg-paper text-bone">
+    <main data-mode={mode} data-layout={layout} data-phase={phase} data-motion={motion} data-promote={promote ? 'true' : undefined} className="mm-auth relative bg-paper text-bone">
       <div className="mm-auth-panel">
         <div className="mm-auth-brand">
           <Logo variant="horizontal" className="mm-auth-logo" textClass="text-[17px]" markClass="h-8 w-8" />
@@ -712,7 +652,6 @@ function AuthPageInner() {
             aria-hidden={busy || undefined}
             aria-busy={busy || undefined}
           >
-            <AuthModeTabs signin={signin} onSelect={switchMode} tabRefs={tabRefs} onPromote={promoteLayers} />
             {mode === 'signup' ? (
               <>
                 <h1 className="font-display text-[2rem] font-bold leading-tight tracking-[-.035em] sm:text-4xl">Create your account</h1>
@@ -725,7 +664,7 @@ function AuthPageInner() {
                   }}
                 />
 
-                <form onSubmit={handleSignup} className="mt-6 space-y-4" id="auth-panel-signup" role="tabpanel" aria-labelledby="auth-tab-signup">
+                <form onSubmit={handleSignup} className="mt-6 space-y-4" id="auth-panel-signup">
                   <label className={labelClass} htmlFor="signup-name">Full name
                     <input id="signup-name" type="text" autoComplete="name" placeholder="Ada Obi" value={fullName} onChange={(e) => setFullName(e.target.value)} required className={`${inputClass} ${validInput}`} />
                   </label>
@@ -765,11 +704,11 @@ function AuthPageInner() {
                       I agree to the <Link href="/legal/terms" className="inline-flex min-h-11 items-center font-semibold text-eyebrow underline">Terms of Service</Link>, <Link href="/legal/privacy" className="inline-flex min-h-11 items-center font-semibold text-eyebrow underline">Privacy Policy</Link>, and <Link href="/legal/refunds" className="inline-flex min-h-11 items-center font-semibold text-eyebrow underline">Refund Policy</Link>.
                     </label>
                   </div>
-                  <AuthCallout alert={signupAlert} onAction={signupAlert?.actionLabel ? () => { switchMode(true, 'link'); setSignupAlert(null); } : undefined} />
+                  <AuthCallout alert={signupAlert} onAction={signupAlert?.actionLabel ? () => { switchMode(true); setSignupAlert(null); } : undefined} />
                   {signupNotice ? (
                     <div className="mm-auth-alert rounded-xl bg-paper p-4 text-sm leading-6 text-muted" role="status">
                       <p>{signupNotice}</p>
-                      <button type="button" onClick={() => switchMode(true, 'link')} {...linkPromote} className="mt-2 font-semibold underline">Go to sign in</button>
+                      <button type="button" onClick={() => switchMode(true)} {...linkPromote} className="mt-2 font-semibold underline">Go to sign in</button>
                     </div>
                   ) : (
                     <button className="w-full rounded-xl bg-ember-cta px-5 py-3.5 text-sm font-bold text-ink transition hover:bg-ember-hover focus:outline-none focus:ring-4 focus:ring-line/20 disabled:cursor-not-allowed disabled:opacity-50" type="submit" disabled={signupLoading || !signupReady}>
@@ -778,7 +717,7 @@ function AuthPageInner() {
                   )}
                 </form>
 
-                <p className="mt-5 text-center text-[16px] text-muted">Already have an account? <button type="button" onClick={() => switchMode(true, 'link')} {...linkPromote} className="inline-flex min-h-11 items-center font-semibold text-eyebrow hover:underline">Log in</button></p>
+                <p className="mt-5 text-center text-[16px] text-muted">Already have an account? <button type="button" onClick={() => switchMode(true)} {...linkPromote} className="inline-flex min-h-11 items-center font-semibold text-eyebrow hover:underline">Log in</button></p>
               </>
             ) : (
               <>
@@ -790,7 +729,7 @@ function AuthPageInner() {
                   </p>
                 ) : null}
                 {loginNotice && <p role="status" className="mt-5 rounded-xl bg-paper px-3.5 py-3 text-sm leading-5 text-muted">{loginNotice}</p>}
-                <form noValidate onSubmit={handleLogin} className="mt-7 space-y-5" id="auth-panel-signin" role="tabpanel" aria-labelledby="auth-tab-signin">
+                <form noValidate onSubmit={handleLogin} className="mt-7 space-y-5" id="auth-panel-signin">
                   <label className={labelClass} htmlFor="login-email">Email address
                     <input ref={loginEmailRef} id="login-email" type="email" autoComplete="email" inputMode="email" placeholder="Enter your email" value={loginEmail} onChange={(e) => { setLoginEmail(e.target.value); if (loginAlert && loginAlert.field !== 'password') setLoginAlert(null); }} aria-invalid={loginAlert?.field === 'email' || loginAlert?.field === 'credentials' || undefined} aria-describedby={loginAlert ? 'auth-alert' : undefined} className={`${inputClass} ${loginAlert?.field === 'email' || loginAlert?.field === 'credentials' ? invalidInput : validInput}`} />
                   </label>
@@ -824,7 +763,7 @@ function AuthPageInner() {
                     {loginSuccess ? 'Continuing…' : loginLoading ? 'Logging in…' : 'Log in'}
                   </button>
                 </form>
-                <p className="mt-6 text-center text-[16px] text-muted">New to The Middleman? <button type="button" onClick={() => switchMode(false, 'link')} {...linkPromote} className="inline-flex min-h-11 items-center font-semibold text-eyebrow hover:underline">Create an account</button></p>
+                <p className="mt-6 text-center text-[16px] text-muted">New to The Middleman? <button type="button" onClick={() => switchMode(false)} {...linkPromote} className="inline-flex min-h-11 items-center font-semibold text-eyebrow hover:underline">Create an account</button></p>
                 <p className="mt-8 border-t border-line pt-5 text-center text-[14px] leading-6 text-muted">By continuing, you agree to the <Link href="/legal/terms" className="inline-flex min-h-11 items-center font-semibold underline">Terms of Service</Link> and <Link href="/legal/privacy" className="inline-flex min-h-11 items-center font-semibold underline">Privacy Policy</Link>.</p>
               </>
             )}
