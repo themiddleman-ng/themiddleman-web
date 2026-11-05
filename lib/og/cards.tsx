@@ -3,7 +3,7 @@ import { naira, type PublicGigCard } from "@/lib/og/public-gig";
 const ink = "#1E1E22";
 const bone = "#F5F2EC";
 const muted = "#A1A1AA";
-const peach = "#FFB072";
+const peach = "#F97316";
 const sans = "Noto Sans";
 
 export function defaultOgCard(logoSrc: string | null) {

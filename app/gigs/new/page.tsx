@@ -252,7 +252,7 @@ export default function NewGigPage() {
 			<header className="border-b border-line bg-paper/50 backdrop-blur sticky top-0 z-20">
 				<div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-3 sm:px-6 sm:py-4">
 					<Link href="/" className="font-display font-bold text-lg tracking-tight flex items-center gap-2">
-						<span className="h-2.5 w-2.5 rounded-full bg-ember shadow-[0_0_0_4px_rgba(255,176,114,.15)]" />
+						<span className="h-2.5 w-2.5 rounded-full bg-ember shadow-[0_0_0_4px_rgba(249,115,22,.15)]" />
 						<span className="truncate">The Middleman</span>
 					</Link>
 					<Link href="/gigs/mine" className="inline-flex shrink-0 items-center gap-1.5 text-xs text-slate transition-colors hover:text-bone sm:gap-2 sm:text-sm">

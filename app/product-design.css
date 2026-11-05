@@ -639,7 +639,7 @@
     height: 44px;
     z-index: 2;
     pointer-events: none;
-    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 390 44' preserveAspectRatio='none'%3E%3Cpath fill='%23ffffff' d='M0 44V20C65 4 130 36 195 20S325 4 390 24v20z'/%3E%3Cpath fill='none' stroke='%236ea4e8' stroke-width='2' d='M0 20C65 4 130 36 195 20S325 4 390 24'/%3E%3Cpath fill='none' stroke='%23FFC48A' stroke-width='3.5' d='M0 16C65 0 130 32 195 16S325 0 390 20'/%3E%3C/svg%3E") no-repeat center bottom / 100% 44px;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 390 44' preserveAspectRatio='none'%3E%3Cpath fill='%23ffffff' d='M0 44V20C65 4 130 36 195 20S325 4 390 24v20z'/%3E%3Cpath fill='none' stroke='%236ea4e8' stroke-width='2' d='M0 20C65 4 130 36 195 20S325 4 390 24'/%3E%3Cpath fill='none' stroke='%23F97316' stroke-width='3.5' d='M0 16C65 0 130 32 195 16S325 0 390 20'/%3E%3C/svg%3E") no-repeat center bottom / 100% 44px;
     transition: transform 280ms cubic-bezier(0.16, 1, 0.3, 1);
   }
   .mm-auth[data-mode=signup] .mm-auth-hero::after {
@@ -916,11 +916,11 @@
   .mm-auth { background: var(--ink) !important; }
   .mm-auth .mm-auth-hero { background: var(--auth-hero-bg) !important; }
   .mm-auth .mm-auth-hero::after {
-    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 390 44' preserveAspectRatio='none'%3E%3Cpath fill='%232A2A2E' d='M0 44V20C65 4 130 36 195 20S325 4 390 24v20z'/%3E%3Cpath fill='none' stroke='%23FFB072' stroke-width='2' d='M0 20C65 4 130 36 195 20S325 4 390 24'/%3E%3Cpath fill='none' stroke='%23FFC48A' stroke-width='3.5' d='M0 16C65 0 130 32 195 16S325 0 390 20'/%3E%3C/svg%3E") no-repeat center bottom / 100% 44px;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 390 44' preserveAspectRatio='none'%3E%3Cpath fill='%232A2A2E' d='M0 44V20C65 4 130 36 195 20S325 4 390 24v20z'/%3E%3Cpath fill='none' stroke='%23F97316' stroke-width='2' d='M0 20C65 4 130 36 195 20S325 4 390 24'/%3E%3Cpath fill='none' stroke='%23F97316' stroke-width='3.5' d='M0 16C65 0 130 32 195 16S325 0 390 20'/%3E%3C/svg%3E") no-repeat center bottom / 100% 44px;
   }
   .mm-marketplace .mp-content {
     background:
-      radial-gradient(120% 70% at 100% -8%, rgba(255,176,114, .16), transparent 48%),
+      radial-gradient(120% 70% at 100% -8%, rgba(249,115,22, .16), transparent 48%),
       linear-gradient(var(--ink), var(--ink) 38%);
   }
 }
@@ -1141,7 +1141,7 @@ html [class*="border-[#172b45]"] {
     width: 56px;
     z-index: 2;
     pointer-events: none;
-    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 56 800' preserveAspectRatio='none'%3E%3Cpath fill='%232A2A2E' d='M56 0H30C10 80 50 160 30 240S10 400 30 480 50 640 30 720 10 800 30 800H56Z'/%3E%3Cpath fill='none' stroke='%23FFB072' stroke-width='3' d='M30 0C10 80 50 160 30 240S10 400 30 480 50 640 30 720 10 800 30 800'/%3E%3C/svg%3E") no-repeat center right / 56px 100%;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 56 800' preserveAspectRatio='none'%3E%3Cpath fill='%232A2A2E' d='M56 0H30C10 80 50 160 30 240S10 400 30 480 50 640 30 720 10 800 30 800H56Z'/%3E%3Cpath fill='none' stroke='%23F97316' stroke-width='3' d='M30 0C10 80 50 160 30 240S10 400 30 480 50 640 30 720 10 800 30 800'/%3E%3C/svg%3E") no-repeat center right / 56px 100%;
   }
   .mm-auth .mm-auth-hero { container-type: inline-size; }
   .mm-auth .mm-auth-hero::after {
