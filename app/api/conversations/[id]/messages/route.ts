@@ -1,4 +1,6 @@
 import { authenticatedUser, privateJson, serviceClient, uuidPattern } from '@/lib/server/marketplace';
+import { ENQUIRY_MESSAGE_MAX_LENGTH } from '@/lib/server/enquiry-limits.mjs';
+import { prePurchaseEnquiryEnabled } from '@/lib/server/messaging-config.mjs';
 import { sameOriginMutation } from '@/lib/server/same-origin.mjs';
 
 export const runtime = 'nodejs';
@@ -11,10 +13,11 @@ async function access(id: string) {
   const { data: conversation } = await db.from('conversations')
     .select('buyer_id,seller_id,gig_id').eq('id', id).maybeSingle();
   if (!conversation || (conversation.buyer_id !== user.id && conversation.seller_id !== user.id)) return null;
+  const { data: sellerProfile } = await db.from('seller_profiles').select('id').eq('user_id', conversation.seller_id).maybeSingle();
   const { data: paidOrder } = await db.from('orders').select('id')
-    .eq('buyer_id', conversation.buyer_id).eq('seller_id', conversation.seller_id).eq('gig_id', conversation.gig_id)
+    .eq('buyer_id', conversation.buyer_id).eq('seller_id', sellerProfile?.id ?? '').eq('gig_id', conversation.gig_id)
     .in('status', ['in_escrow', 'delivered', 'approved', 'disputed']).limit(1).maybeSingle();
-  if (!paidOrder) return null;
+  if (!paidOrder && !prePurchaseEnquiryEnabled()) return null;
   return { user, db };
 }
 
@@ -40,7 +43,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   let body: { text?: string };
   try { body = await request.json(); } catch { return privateJson({ error: 'Invalid message.' }, 400); }
   const text = typeof body.text === 'string' ? body.text.trim() : '';
-  if (!text || text.length > 3000 || /https?:\/\/|www\.|[\w.+-]+@[\w.-]+\.[a-z]{2,}|\+?\d[\d\s-]{7,}\d|\b[a-z0-9-]+\.(?:com|net|org|ng|io|co|me|link)\b/i.test(text)) {
+  if (!text || text.length > ENQUIRY_MESSAGE_MAX_LENGTH || /https?:\/\/|www\.|[\w.+-]+@[\w.-]+\.[a-z]{2,}|\+?\d[\d\s-]{7,}\d|\b[a-z0-9-]+\.(?:com|net|org|ng|io|co|me|link)\b/i.test(text)) {
     return privateJson({ error: 'Keep contact details and links out of messages (max 3000 characters).' }, 400);
   }
   const { data, error } = await session.db.from('messages')

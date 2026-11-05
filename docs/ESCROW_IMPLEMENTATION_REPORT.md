@@ -19,7 +19,8 @@ metadata and preserves the user's email. No production trigger was changed.
 
 An isolated Supabase project, **the-middleman-escrow-preview**
 (`vhfskuabgsudbaiqotth`, EU West), was created in the existing organization after
-the user selected a separate test project. Creation was quoted at $0/month.
+the user selected a separate test project. It is not production
+(`uwigyojtiudefnwjezhm`). These are the only two projects. Creation was quoted at $0/month.
 Only schema and bucket configuration were copied: no production accounts,
 orders, uploaded files or settings values. Synthetic smoke-test rows rolled back.
 
