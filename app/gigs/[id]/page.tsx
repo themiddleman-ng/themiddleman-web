@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
+import { notFound } from "next/navigation";
 import PageClient from "./PageClient";
 import { gatewayTestEnabled } from "@/lib/server/escrow-config.mjs";
 import { prePurchaseEnquiryEnabled } from "@/lib/server/messaging-config.mjs";
 import { loadGigPackageListing } from "@/lib/server/gig-package-listing";
-import { gigPageUrl, gigShareImageUrl, loadPublicGigCard } from "@/lib/og/public-gig";
+import { loadPublicGigCard } from "@/lib/og/public-gig";
+import { productShareImageUrl, productShareUrl, shareDescription } from "@/lib/share/product-link.mjs";
 
 export const dynamic = "force-dynamic";
 
@@ -13,19 +15,17 @@ export async function generateMetadata({
   params: Promise<{ id: string }>;
 }): Promise<Metadata> {
   const { id } = await params;
-  const canonical = "/gigs/" + encodeURIComponent(id);
-  const url = gigPageUrl(id);
+  const url = productShareUrl(id);
   const gig = await loadPublicGigCard(id);
 
   if (!gig) {
     return {
       title: "Product unavailable",
       description: "This product is not available on The Middleman.",
-      alternates: { canonical },
       robots: { index: false, follow: false },
       openGraph: {
         type: "website",
-        url,
+        ...(url ? { url } : {}),
         siteName: "The Middleman",
         title: "Product unavailable",
         description: "This product is not available on The Middleman.",
@@ -34,34 +34,38 @@ export async function generateMetadata({
     };
   }
 
-  const image = gigShareImageUrl(id);
+  const description = shareDescription({ sellerName: gig.sellerName, summary: gig.summary, priceLabel: gig.priceLabel });
+  const image = productShareImageUrl(id);
   return {
     title: gig.title,
-    description: gig.description,
-    alternates: { canonical },
+    description,
+    ...(url ? { alternates: { canonical: url } } : {}),
     openGraph: {
       type: "website",
-      url,
+      ...(url ? { url } : {}),
       siteName: "The Middleman",
       title: gig.title,
-      description: gig.description,
-      images: [{ url: image, width: 1200, height: 630, alt: gig.title }],
+      description,
+      ...(image ? { images: [{ url: image, width: 1200, height: 630, alt: gig.title }] } : {}),
     },
     twitter: {
       card: "summary_large_image",
       title: gig.title,
-      description: gig.description,
-      images: [image],
+      description,
+      ...(image ? { images: [image] } : {}),
     },
   };
 }
 
 export default async function Page({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
+  const gig = await loadPublicGigCard(id);
+  if (!gig) notFound();
   const packageListing = await loadGigPackageListing(id);
   return (
     <PageClient
       gigId={id}
+      shareUrl={productShareUrl(id) ?? ""}
       purchasesEnabled={gatewayTestEnabled()}
       prePurchaseEnquiryEnabled={prePurchaseEnquiryEnabled()}
       packageListing={packageListing}

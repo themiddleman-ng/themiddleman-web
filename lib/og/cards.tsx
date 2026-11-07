@@ -1,4 +1,4 @@
-import { naira, type PublicGigCard } from "@/lib/og/public-gig";
+import type { PublicGigCard } from "@/lib/og/public-gig";
 
 const ink = "#1E1E22";
 const bone = "#F5F2EC";
@@ -41,9 +41,10 @@ export function gigOgCard(gig: PublicGigCard, logoSrc: string | null, coverSrc: 
           <div style={{ display: "flex", marginLeft: 14, fontSize: 24, fontWeight: 700, fontFamily: sans }}>The Middleman</div>
         </div>
         <div style={{ display: "flex", flexDirection: "column" }}>
-          <div style={{ display: "flex", fontSize: 52, fontWeight: 700, lineHeight: 1.08, letterSpacing: -1.5, fontFamily: sans }}>{gig.title}</div>
-          <div style={{ display: "flex", marginTop: 22, fontSize: 42, fontWeight: 700, color: peach, fontFamily: sans }}>{gig.priceNgn > 0 ? naira(gig.priceNgn) : "Free example"}</div>
-          <div style={{ display: "flex", marginTop: 18, fontSize: 24, lineHeight: 1.35, color: muted, fontFamily: sans }}>{gig.description}</div>
+          <div style={{ display: "flex", width: coverSrc ? 608 : 1040, fontSize: 46, fontWeight: 700, lineHeight: 1.08, letterSpacing: -1.2, fontFamily: sans }}>{gig.title}</div>
+          {gig.sellerName ? <div style={{ display: "flex", marginTop: 16, fontSize: 28, fontWeight: 700, fontFamily: sans }}>{gig.sellerName}</div> : null}
+          <div style={{ display: "flex", width: coverSrc ? 608 : 1040, marginTop: 12, fontSize: 24, lineHeight: 1.35, color: muted, fontFamily: sans }}>{gig.summary}</div>
+          {gig.priceLabel ? <div style={{ display: "flex", marginTop: 18, fontSize: 36, fontWeight: 700, color: peach, fontFamily: sans }}>{gig.priceLabel}</div> : null}
         </div>
       </div>
     </div>

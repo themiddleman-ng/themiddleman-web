@@ -68,11 +68,13 @@ type DetailTabId = (typeof DETAIL_TABS)[number]["id"];
 
 export default function GigPageClient({
   gigId,
+  shareUrl,
   purchasesEnabled,
   prePurchaseEnquiryEnabled = false,
   packageListing = null,
 }: {
   gigId: string;
+  shareUrl: string;
   purchasesEnabled: boolean;
   prePurchaseEnquiryEnabled?: boolean;
   packageListing?: GigPackageListing | null;
@@ -721,7 +723,7 @@ export default function GigPageClient({
             </ol>
           </nav>
           <div className="flex shrink-0 items-center gap-1">
-            <ProductShareMenu productId={gig.id} title={gig.title} />
+            <ProductShareMenu title={gig.title} url={shareUrl} />
           {!isOwnGig ? (
             <>
               <button

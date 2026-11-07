@@ -4,14 +4,13 @@ import { useEffect, useRef, useState } from "react";
 import { CopyIcon } from "@phosphor-icons/react/dist/csr/Copy";
 import { ShareNetworkIcon } from "@phosphor-icons/react/dist/csr/ShareNetwork";
 import { WhatsappLogoIcon } from "@phosphor-icons/react/dist/csr/WhatsappLogo";
-import { productShareUrl, whatsappShareHref } from "@/lib/share/product-link.mjs";
+import { whatsappShareHref } from "@/lib/share/product-link.mjs";
 
-export default function ProductShareMenu({ productId, title }: { productId: string; title: string }) {
+export default function ProductShareMenu({ title, url }: { title: string; url: string }) {
   const [open, setOpen] = useState(false);
   const [notice, setNotice] = useState("");
   const [canNativeShare, setCanNativeShare] = useState(false);
   const menuRef = useRef<HTMLDivElement | null>(null);
-  const url = productShareUrl(productId);
 
   useEffect(() => {
     setCanNativeShare(typeof navigator.share === "function");
@@ -51,6 +50,8 @@ export default function ProductShareMenu({ productId, title }: { productId: stri
       setNotice(url);
     }
   }
+
+  if (!url) return null;
 
   return (
     <div className="relative" ref={menuRef}>

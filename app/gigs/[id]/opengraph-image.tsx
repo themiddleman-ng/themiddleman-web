@@ -2,7 +2,9 @@ import { readFile } from "node:fs/promises";
 import path from "node:path";
 import type { ReactElement } from "react";
 import { ImageResponse } from "next/og";
+import sharp from "sharp";
 import { defaultOgCard, gigOgCard } from "@/lib/og/cards";
+import { localPublicImage } from "@/lib/og/local-cover.mjs";
 import { loadPublicGigCard } from "@/lib/og/public-gig";
 
 export const alt = "The Middleman";
@@ -10,30 +12,27 @@ export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 export const runtime = "nodejs";
 
-const MAX_BYTES = 280_000;
+const MAX_BYTES = 450_000;
 
 async function logoSrc() {
   const file = await readFile(path.join(process.cwd(), "public/brand/app-icon.png"));
   return `data:image/png;base64,${file.toString("base64")}`;
 }
 
-function mimeFor(file: string) {
-  if (file.endsWith(".png")) return "image/png";
-  if (file.endsWith(".jpg") || file.endsWith(".jpeg")) return "image/jpeg";
-  if (file.endsWith(".webp")) return "image/webp";
-  return "application/octet-stream";
-}
-
 async function coverSrc(cover: string | null) {
-  if (!cover) return null;
+  const file = cover ? localPublicImage(cover) : null;
+  if (!file) return null;
   try {
-    const bytes = cover.startsWith("/")
-      ? await readFile(path.join(process.cwd(), "public", cover.replace(/^\//, "")))
-      : Buffer.from(await (await fetch(cover)).arrayBuffer());
-    const mime = mimeFor(cover.split("?")[0]);
-    if (mime === "image/webp" || bytes.byteLength > 250_000) return null;
-    return `data:${mime};base64,${bytes.toString("base64")}`;
-  } catch {
+    const input = await readFile(file);
+    const jpeg = await sharp(input, { failOn: "error", limitInputPixels: 8_000_000, pages: 1 })
+      .rotate()
+      .resize(480, 630, { fit: "contain", background: { r: 30, g: 30, b: 34, alpha: 1 } })
+      .jpeg({ quality: 70 })
+      .toBuffer();
+    if (jpeg.byteLength > 180_000) return null;
+    return `data:image/jpeg;base64,${jpeg.toString("base64")}`;
+  } catch (error) {
+    console.error("Could not prepare the local cover.", error instanceof Error ? error.message : "unknown");
     return null;
   }
 }
@@ -67,6 +66,7 @@ export default async function Image({ params }: { params: Promise<{ id: string }
     try {
       const bytes = await pngBytes(gigOgCard(gig, logo, cover));
       if (bytes.byteLength <= MAX_BYTES) return new Response(bytes, { headers });
+      console.error("Share image with the cover was too large.", bytes.byteLength);
     } catch (error) {
       console.error("Could not draw the gig cover on the share image.", error instanceof Error ? error.message : "unknown");
     }
