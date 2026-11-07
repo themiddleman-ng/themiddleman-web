@@ -3,7 +3,7 @@ import PageClient from "./PageClient";
 import { gatewayTestEnabled } from "@/lib/server/escrow-config.mjs";
 import { prePurchaseEnquiryEnabled } from "@/lib/server/messaging-config.mjs";
 import { loadGigPackageListing } from "@/lib/server/gig-package-listing";
-import { gigPageUrl, loadPublicGigCard } from "@/lib/og/public-gig";
+import { gigPageUrl, gigShareImageUrl, loadPublicGigCard } from "@/lib/og/public-gig";
 
 export const dynamic = "force-dynamic";
 
@@ -34,6 +34,7 @@ export async function generateMetadata({
     };
   }
 
+  const image = gigShareImageUrl(id);
   return {
     title: gig.title,
     description: gig.description,
@@ -44,11 +45,13 @@ export async function generateMetadata({
       siteName: "The Middleman",
       title: gig.title,
       description: gig.description,
+      images: [{ url: image, width: 1200, height: 630, alt: gig.title }],
     },
     twitter: {
       card: "summary_large_image",
       title: gig.title,
       description: gig.description,
+      images: [image],
     },
   };
 }

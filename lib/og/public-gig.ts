@@ -1,5 +1,6 @@
 import { createClient } from "@supabase/supabase-js";
 import { DESIGN_PREVIEW_GIGS } from "@/lib/design-preview/catalog";
+import { PRODUCT_ORIGIN, productShareImageUrl, productShareUrl } from "@/lib/share/product-link.mjs";
 
 export type PublicGigCard = {
   title: string;
@@ -7,8 +8,6 @@ export type PublicGigCard = {
   priceNgn: number;
   cover: string | null;
 };
-
-const SITE_URL = "https://themiddleman.com.ng";
 
 function configured() {
   return Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
@@ -18,7 +17,8 @@ function clip(value: string, max: number) {
   return value.replace(/\s+/g, " ").trim().slice(0, max);
 }
 
-function fromPreview(id: string): PublicGigCard | null {
+/** Local catalogue rows only. These are fixtures, not live marketplace listings. */
+export function fixtureGigCard(id: string): PublicGigCard | null {
   const preview = DESIGN_PREVIEW_GIGS.find((item) => item.id === id);
   if (!preview) return null;
   const cover = preview.gallery_image_paths?.[0] ?? null;
@@ -32,7 +32,7 @@ function fromPreview(id: string): PublicGigCard | null {
 
 /** Active listings and the local sample catalogue only. Drafts and hidden rows return null. */
 export async function loadPublicGigCard(id: string): Promise<PublicGigCard | null> {
-  if (!configured()) return fromPreview(id);
+  if (!configured()) return fixtureGigCard(id);
 
   const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!, {
     auth: { autoRefreshToken: false, persistSession: false },
@@ -61,8 +61,14 @@ export async function loadPublicGigCard(id: string): Promise<PublicGigCard | nul
 }
 
 export function gigPageUrl(id: string) {
-  return `${SITE_URL}/gigs/${encodeURIComponent(id)}`;
+  return productShareUrl(id);
 }
+
+export function gigShareImageUrl(id: string) {
+  return productShareImageUrl(id);
+}
+
+export { PRODUCT_ORIGIN };
 
 export function naira(amount: number) {
   return `₦${Math.round(amount).toLocaleString("en-NG")}`;

@@ -9,9 +9,7 @@ import { CaretRightIcon } from "@phosphor-icons/react/dist/csr/CaretRight";
 import { DotsThreeIcon } from "@phosphor-icons/react/dist/csr/DotsThree";
 import { HeartIcon } from "@phosphor-icons/react/dist/csr/Heart";
 import { SealCheckIcon } from "@phosphor-icons/react/dist/csr/SealCheck";
-import { ShareNetworkIcon } from "@phosphor-icons/react/dist/csr/ShareNetwork";
-import { WhatsappLogoIcon } from "@phosphor-icons/react/dist/csr/WhatsappLogo";
-import { CopyIcon } from "@phosphor-icons/react/dist/csr/Copy";
+import ProductShareMenu from "@/components/gigs/ProductShareMenu";
 import { signinHref } from "@/lib/auth/signin-redirect.mjs";
 import DraftRestoredNotice from "@/components/forms/DraftRestoredNotice";
 import { usePersistedForm } from "@/lib/forms/usePersistedForm";
@@ -119,14 +117,10 @@ export default function GigPageClient({
   const [wishlisted, setWishlisted] = useState(false);
   const [wishlistBusy, setWishlistBusy] = useState(false);
   const [wishlistNotice, setWishlistNotice] = useState("");
-  const [shareNotice, setShareNotice] = useState("");
-  const [shareOpen, setShareOpen] = useState(false);
-  const [canNativeShare, setCanNativeShare] = useState(false);
   const [messageBusy, setMessageBusy] = useState(false);
   const [messageError, setMessageError] = useState("");
   const orderRequestKey = useRef<string | null>(null);
   const moreMenuRef = useRef<HTMLDivElement | null>(null);
-  const shareMenuRef = useRef<HTMLDivElement | null>(null);
   const returnPath = `/gigs/${gigId}`;
   const purchasesPausedTitle =
     "Checkout is not open. Browsing this product does not take a payment.";
@@ -244,28 +238,19 @@ export default function GigPageClient({
   }, [gigId, userId]);
 
   useEffect(() => {
-    setCanNativeShare(typeof navigator.share === "function");
-  }, []);
-
-  useEffect(() => {
-    if (!moreOpen && !shareOpen) return;
+    if (!moreOpen) return;
     function closeOnPointer(event: MouseEvent) {
-      const target = event.target as Node;
-      if (moreOpen && !moreMenuRef.current?.contains(target)) setMoreOpen(false);
-      if (shareOpen && !shareMenuRef.current?.contains(target)) setShareOpen(false);
+      if (!moreMenuRef.current?.contains(event.target as Node)) setMoreOpen(false);
     }
     window.addEventListener("mousedown", closeOnPointer);
     return () => window.removeEventListener("mousedown", closeOnPointer);
-  }, [moreOpen, shareOpen]);
+  }, [moreOpen]);
 
   useEffect(() => {
-    if (!shareNotice && !wishlistNotice) return;
-    const timer = window.setTimeout(() => {
-      setShareNotice("");
-      setWishlistNotice("");
-    }, 3200);
+    if (!wishlistNotice) return;
+    const timer = window.setTimeout(() => setWishlistNotice(""), 3200);
     return () => window.clearTimeout(timer);
-  }, [shareNotice, wishlistNotice]);
+  }, [wishlistNotice]);
 
   const [checkout, setCheckout] = useState<Checkout | null>(null);
 
@@ -363,34 +348,6 @@ export default function GigPageClient({
       setWishlistNotice(cause instanceof Error ? cause.message : "Could not update your saved list.");
     } finally {
       setWishlistBusy(false);
-    }
-  }
-
-  function sharePayload() {
-    const url = window.location.href;
-    const title = gig?.title ?? "Product on The Middleman";
-    return { url, title, whatsapp: `https://wa.me/?text=${encodeURIComponent(`${title}\n${url}`)}` };
-  }
-
-  async function shareNatively() {
-    const { url, title } = sharePayload();
-    setShareOpen(false);
-    try {
-      await navigator.share({ title, url });
-    } catch (cause) {
-      if (cause instanceof Error && cause.name === "AbortError") return;
-      setShareNotice("Couldn't open the share sheet.");
-    }
-  }
-
-  async function copyShareLink() {
-    const { url } = sharePayload();
-    setShareOpen(false);
-    try {
-      await navigator.clipboard.writeText(url);
-      setShareNotice("Link copied.");
-    } catch {
-      setShareNotice("Copy this link from your browser address bar.");
     }
   }
 
@@ -763,8 +720,10 @@ export default function GigPageClient({
               <li className="truncate text-bone">{gig.title}</li>
             </ol>
           </nav>
+          <div className="flex shrink-0 items-center gap-1">
+            <ProductShareMenu productId={gig.id} title={gig.title} />
           {!isOwnGig ? (
-            <div className="flex shrink-0 items-center gap-1">
+            <>
               <button
                 type="button"
                 aria-label={wishlisted ? "Remove from saved list" : "Save product"}
@@ -775,33 +734,6 @@ export default function GigPageClient({
               >
                 <HeartIcon size={22} weight={wishlisted ? "fill" : "regular"} className={wishlisted ? "text-link" : ""} aria-hidden="true" />
               </button>
-              <div className="relative" ref={shareMenuRef}>
-                <button
-                  type="button"
-                  aria-label="Share product"
-                  aria-expanded={shareOpen}
-                  aria-haspopup="menu"
-                  onClick={() => setShareOpen((open) => !open)}
-                  className="grid h-11 w-11 place-items-center rounded-full text-bone hover:bg-elevated"
-                >
-                  <ShareNetworkIcon size={22} weight="regular" aria-hidden="true" />
-                </button>
-                {shareOpen ? (
-                  <div role="menu" aria-label="Share product" className="absolute right-0 top-12 z-20 min-w-44 rounded-xl border border-line bg-paper p-1.5 shadow-lg">
-                    {canNativeShare ? (
-                      <button type="button" role="menuitem" onClick={() => void shareNatively()} className="flex min-h-11 w-full items-center gap-2 rounded-lg px-3 text-left text-sm font-semibold text-bone hover:bg-elevated">
-                        <ShareNetworkIcon size={18} aria-hidden="true" /> Share
-                      </button>
-                    ) : null}
-                    <a role="menuitem" href={sharePayload().whatsapp} target="_blank" rel="noopener noreferrer" className="flex min-h-11 items-center gap-2 rounded-lg px-3 text-sm font-semibold text-bone hover:bg-elevated">
-                      <WhatsappLogoIcon size={18} aria-hidden="true" /> WhatsApp
-                    </a>
-                    <button type="button" role="menuitem" onClick={() => void copyShareLink()} className="flex min-h-11 w-full items-center gap-2 rounded-lg px-3 text-left text-sm font-semibold text-bone hover:bg-elevated">
-                      <CopyIcon size={18} aria-hidden="true" /> Copy link
-                    </button>
-                  </div>
-                ) : null}
-              </div>
               <div className="relative" ref={moreMenuRef}>
                 <button
                   type="button"
@@ -828,13 +760,12 @@ export default function GigPageClient({
                   </div>
                 ) : null}
               </div>
-            </div>
-          ) : null}
+              </>
+            ) : null}
+          </div>
         </div>
-        {shareNotice || wishlistNotice ? (
-          <p className="mt-2 text-right text-xs font-semibold text-link" role="status">
-            {shareNotice || wishlistNotice}
-          </p>
+        {wishlistNotice ? (
+          <p className="mt-2 text-right text-xs font-semibold text-link" role="status">{wishlistNotice}</p>
         ) : null}
 
         <div className="mt-6 grid min-w-0 grid-cols-1 gap-8 lg:grid-cols-12 lg:gap-10">
