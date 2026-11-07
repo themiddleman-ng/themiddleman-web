@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { isSupabaseConfigured, supabase } from "@/lib/supabaseClient";
 import GigCard, { type CardGig, type CardRating } from "./GigCard";
-import { DESIGN_PREVIEW_GIGS } from "@/lib/design-preview/catalog";
+import { DESIGN_PREVIEW_GIGS, withHelloWorldExample } from "@/lib/design-preview/catalog";
 import { MARKETPLACE_CATEGORIES } from "@/lib/marketplace/categories";
 import { attachPublicSellerCards } from "@/lib/marketplace/attach-public-sellers.mjs";
 import { CategoryIcon } from "./ProductCover";
@@ -36,7 +36,7 @@ export default function HomeFeed() {
 
     async function load() {
       if (!isSupabaseConfigured) {
-        setGigs(DESIGN_PREVIEW_GIGS as GigRow[]);
+        setGigs(withHelloWorldExample(DESIGN_PREVIEW_GIGS as GigRow[]));
         setLoading(false);
         return;
       }
@@ -52,13 +52,14 @@ export default function HomeFeed() {
 
       if (cancelled) return;
       if (gigsResult.error) {
+        setGigs(withHelloWorldExample([]));
         setLoadError(true);
         setLoading(false);
         return;
       }
 
       const rows = await attachPublicSellerCards(supabase, (gigsResult.data as unknown as GigRow[]) ?? []);
-      setGigs(rows as GigRow[]);
+      setGigs(withHelloWorldExample(rows as GigRow[]));
       const ratingMap: Record<string, CardRating> = {};
       ((ratingsResult.data as Array<{ gig_id: string } & CardRating>) ?? []).forEach((row) => {
         ratingMap[row.gig_id] = row;

@@ -5,7 +5,7 @@ import Image from "next/image";
 import { useEffect, useState } from "react";
 import { isSupabaseConfigured, supabase } from "@/lib/supabaseClient";
 import ProductCover from "./ProductCover";
-import { DESIGN_PREVIEW_GIGS } from "@/lib/design-preview/catalog";
+import { DESIGN_PREVIEW_GIGS, EXAMPLE_HELLO_WORLD_ID, withHelloWorldExample } from "@/lib/design-preview/catalog";
 import { listingImageSrc } from "@/lib/marketplace/listing-image.mjs";
 
 type HeroGig = {
@@ -25,7 +25,7 @@ export default function HeroListingStack() {
 
     async function load() {
       if (!isSupabaseConfigured) {
-        setGigs(DESIGN_PREVIEW_GIGS.slice(0, 3));
+        setGigs(withHelloWorldExample(DESIGN_PREVIEW_GIGS).slice(0, 3));
         return;
       }
 
@@ -38,10 +38,10 @@ export default function HeroListingStack() {
 
       if (cancelled) return;
       if (error || !data?.length) {
-        setGigs([]);
+        setGigs(withHelloWorldExample([]));
         return;
       }
-      setGigs(data as HeroGig[]);
+      setGigs(withHelloWorldExample(data as HeroGig[]).slice(0, 3));
     }
 
     void load();
@@ -77,7 +77,7 @@ export default function HeroListingStack() {
           </div>
           <div className="hero-listing-body">
             <p className="line-clamp-2 text-[15px] font-semibold leading-5 text-bone">{gig.title}</p>
-            <p className="mt-2 text-[16px] font-bold text-bone">₦{gig.price_ngn.toLocaleString("en-NG")}</p>
+            <p className="mt-2 text-[16px] font-bold text-bone">{gig.id === EXAMPLE_HELLO_WORLD_ID ? "Free example" : `₦${gig.price_ngn.toLocaleString("en-NG")}`}</p>
           </div>
         </Link>
         );

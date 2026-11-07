@@ -6,6 +6,7 @@ import FirstRunExperience from "@/components/onboarding/FirstRunExperience";
 import DesignFrame from "@/components/design/DesignFrame";
 import SignedInToast from "@/components/feedback/SignedInToast";
 import "./product-design.css";
+import { appearanceBootScript } from "@/lib/theme/appearance";
 
 const SITE_URL = "https://themiddleman.com.ng";
 const siteSchema = {
@@ -84,7 +85,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html dir="ltr" lang="en" className="h-full antialiased">
+    <html dir="ltr" lang="en" className="h-full antialiased" suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: appearanceBootScript }} />
+      </head>
       <body className="min-h-full flex flex-col bg-ink text-bone">
         <script
           type="application/ld+json"

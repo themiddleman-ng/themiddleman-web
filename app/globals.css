@@ -40,6 +40,48 @@ html.dark {
   --eyebrow: var(--muted);
 }
 
+/* Light is opt-in. :root stays the approved dark theme, so the first paint is dark
+   until the boot script applies a saved or system light choice. */
+html[data-theme="light"] {
+  color-scheme: light;
+  --ink: #FFFFFF;
+  --paper: #FFFFFF;
+  --elevated: #F4F4F5;
+  --line: #8A8A8A;
+  --bone: #1A1A1A;
+  --muted: #52525B;
+  --link: #1A1A1A;
+  --slate: var(--muted);
+  --eyebrow: var(--muted);
+  --ember: #F97316;
+  --ember-cta: #F97316;
+  --ember-hover: #F97316;
+  --on-ember: #111111;
+  --focus: #F97316;
+  --auth-hero-bg: #F97316;
+  --auth-hero-ink: #111111;
+  --logo-orange: #E8590C;
+}
+
+html[data-theme="light"] body,
+html[data-theme="light"] .bg-ink,
+html[data-theme="light"] .homepage-hero,
+html[data-theme="light"] #how-it-works,
+html[data-theme="light"] #listings {
+  background-color: #FFFFFF;
+}
+
+html[data-theme="light"] .homepage-hero::before,
+html[data-theme="light"] .homepage-hero::after {
+  display: none;
+}
+
+/* Orange controls keep dark text. --ink becomes the white page, so text-ink would otherwise turn white. */
+html[data-theme="light"] :is(.bg-ember, .bg-ember-cta, .bg-ember-hover, .auth-button, .btn-primary, [class*="bg-ember-cta/"]),
+html[data-theme="light"] :is(a, button)[class*="bg-ember"] {
+  color: #111111;
+}
+
 @theme inline {
   --color-ink: var(--ink);
   --color-ember: var(--ember);

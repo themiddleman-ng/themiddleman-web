@@ -7,6 +7,7 @@ import SiteHeader from '@/components/SiteHeader';
 import { useAdminAccount } from '@/lib/account/use-admin-account';
 import { supabase } from '@/lib/supabaseClient';
 import { signinHref } from '@/lib/auth/signin-redirect.mjs';
+import { AppearanceChoices } from '@/components/theme/AppearanceControl';
 
 export default function SettingsPageClient() {
   const router = useRouter();
@@ -48,7 +49,7 @@ export default function SettingsPageClient() {
   }
 
   return (
-    <main className="min-h-screen bg-[radial-gradient(ellipse_at_88%_4%,rgba(227,127,72,.12),transparent_28%),#f7f3ec] text-bone">
+    <main className="min-h-screen bg-ink text-bone">
       <SiteHeader />
       <div className="mx-auto max-w-4xl px-4 pb-12 pt-7 sm:px-6 sm:pt-10">
         <div className="mb-7">
@@ -57,7 +58,14 @@ export default function SettingsPageClient() {
           <p className="mt-2 max-w-xl text-sm leading-6 text-muted">Manage your profile, the welcome tour and privacy choices.</p>
         </div>
 
-        <div className="divide-y divide-[#eee7de] rounded-[24px] bg-paper px-5 shadow-[0_12px_40px_rgba(48,40,31,.06)] sm:px-7">
+        <div className="divide-y divide-line rounded-[24px] border border-line bg-paper px-5 sm:px-7">
+          <section className="flex flex-col gap-4 py-5 sm:py-6">
+            <div>
+              <p className="text-sm font-semibold text-bone">Appearance</p>
+              <p className="mt-1 text-sm leading-6 text-muted">Choose a white page or the dark page. The choice is saved on this device.</p>
+            </div>
+            <AppearanceChoices />
+          </section>
           <section className="flex flex-col gap-4 py-5 sm:flex-row sm:items-center sm:justify-between sm:py-6">
             <div>
               <p className="text-sm font-semibold text-muted">Profile</p>
@@ -72,7 +80,7 @@ export default function SettingsPageClient() {
               <p className="mt-1 max-w-xl text-sm leading-6 text-muted">Start again from the friendly welcome question. Pick “I’m new here” for the guided tour, or skip if you already know your way around.</p>
               {welcomeReset && <p role="status" className="mt-2 text-sm font-medium text-muted">The welcome question is ready.</p>}
             </div>
-            <button type="button" onClick={replayWelcome} className="inline-flex min-h-11 w-full shrink-0 items-center justify-center rounded-xl bg-paper px-4 text-sm font-semibold text-white transition hover:bg-paper sm:w-auto">Replay welcome</button>
+            <button type="button" onClick={replayWelcome} className="inline-flex min-h-11 w-full shrink-0 items-center justify-center rounded-xl border border-line bg-paper px-4 text-sm font-semibold text-bone transition hover:bg-elevated sm:w-auto">Replay welcome</button>
           </section>
 
           <section className="flex flex-col gap-4 py-5 sm:flex-row sm:items-center sm:justify-between sm:py-6">

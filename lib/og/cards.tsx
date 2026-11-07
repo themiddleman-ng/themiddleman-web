@@ -42,7 +42,7 @@ export function gigOgCard(gig: PublicGigCard, logoSrc: string | null, coverSrc: 
         </div>
         <div style={{ display: "flex", flexDirection: "column" }}>
           <div style={{ display: "flex", fontSize: 52, fontWeight: 700, lineHeight: 1.08, letterSpacing: -1.5, fontFamily: sans }}>{gig.title}</div>
-          <div style={{ display: "flex", marginTop: 22, fontSize: 42, fontWeight: 700, color: peach, fontFamily: sans }}>{naira(gig.priceNgn)}</div>
+          <div style={{ display: "flex", marginTop: 22, fontSize: 42, fontWeight: 700, color: peach, fontFamily: sans }}>{gig.priceNgn > 0 ? naira(gig.priceNgn) : "Free example"}</div>
           <div style={{ display: "flex", marginTop: 18, fontSize: 24, lineHeight: 1.35, color: muted, fontFamily: sans }}>{gig.description}</div>
         </div>
       </div>

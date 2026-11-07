@@ -1,9 +1,29 @@
 import type { CardGig } from "@/components/marketplace/GigCard";
 
-/** Read-only sample listings used only on local and Vercel preview builds. */
+/** Read-only sample listings used when the app has no database, plus one in-code example. */
 const sampleSeller = { display_name: "Sample seller", verification_status: "sample" };
+const exampleListing = { display_name: "Example listing", verification_status: "sample" };
+
+export const EXAMPLE_HELLO_WORLD_ID = "preview-hello-world";
+
+export function withHelloWorldExample<T extends { id: string }>(rows: T[]): T[] {
+  const example = DESIGN_PREVIEW_GIGS.find((item) => item.id === EXAMPLE_HELLO_WORLD_ID);
+  if (!example || rows.some((row) => row.id === example.id)) return rows;
+  return [example as unknown as T, ...rows];
+}
 
 export const DESIGN_PREVIEW_GIGS: Array<CardGig & { created_at: string }> = [
+  {
+    id: EXAMPLE_HELLO_WORLD_ID,
+    title: "Hello World example",
+    description: "A free example you can run in the browser and download. It prints Hello World. This is not a real seller, not a sale, and checkout stays paused.",
+    category: "development",
+    price_ngn: 0,
+    is_ai_assisted: false,
+    gallery_image_paths: ["/examples/hello-world/cover.png"],
+    created_at: "2026-11-07T00:00:00.000Z",
+    seller_profiles: exampleListing,
+  },
   {
     id: "preview-invoice-tracker",
     title: "Invoice & Expense Tracker",

@@ -6,7 +6,7 @@ import { useSearchParams } from "next/navigation";
 import { isSupabaseConfigured, supabase } from "@/lib/supabaseClient";
 import SiteHeader from "@/components/SiteHeader";
 import GigCard, { type CardGig, type CardRating } from "@/components/marketplace/GigCard";
-import { DESIGN_PREVIEW_GIGS } from "@/lib/design-preview/catalog";
+import { DESIGN_PREVIEW_GIGS, withHelloWorldExample } from "@/lib/design-preview/catalog";
 import { countActiveMarketplaceFilters, clearedMarketplaceFilters } from "@/lib/marketplace/active-filters.mjs";
 import { attachPublicSellerCards } from "@/lib/marketplace/attach-public-sellers.mjs";
 
@@ -135,10 +135,10 @@ export default function MarketplacePage({ designPreview = false }: { designPrevi
 
       if (!isSupabaseConfigured) {
         if (designPreview) {
-          setGigs(DESIGN_PREVIEW_GIGS as GigRow[]);
+          setGigs(withHelloWorldExample(DESIGN_PREVIEW_GIGS as GigRow[]));
           setFetchError(null);
         } else {
-          setGigs([]);
+          setGigs(withHelloWorldExample([]));
           setFetchError({
             title: "Marketplace connection is not configured",
             message: "This deployment has not been connected to the product catalogue yet.",
@@ -165,7 +165,7 @@ export default function MarketplacePage({ designPreview = false }: { designPrevi
 
         if (gigsResult.error) throw gigsResult.error;
         const rows = await attachPublicSellerCards(supabase, (gigsResult.data as unknown as GigRow[]) ?? []);
-        setGigs(rows as GigRow[]);
+        setGigs(withHelloWorldExample(rows as GigRow[]));
 
         const ratingsMap: Record<string, GigRating> = {};
         if (ratingsResult.error) {
@@ -179,7 +179,7 @@ export default function MarketplacePage({ designPreview = false }: { designPrevi
       } catch (error) {
         if (cancelled) return;
         console.error("[marketplace] Product loading failed", error);
-        setGigs([]);
+        setGigs(withHelloWorldExample([]));
         setFetchError(describeMarketplaceError(error));
       }
 

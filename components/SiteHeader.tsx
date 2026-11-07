@@ -8,6 +8,7 @@ import Logo from '@/components/Logo';
 import OwnerAvatar from '@/components/profile/OwnerAvatar';
 import { useAdminAccount } from '@/lib/account/use-admin-account';
 import { publishOwnerAvatar, useOwnerAvatar } from '@/lib/profile/use-owner-avatar';
+import { AppearanceChoices, AppearanceToggle } from '@/components/theme/AppearanceControl';
 
 type HeaderUser = {
   id: string;
@@ -181,6 +182,7 @@ export default function SiteHeader({ isSeller: sellerHint = false, compact = fal
               />
             </label>
           </form>
+          <AppearanceToggle />
           <Link href="/browse" aria-label="Search products" className="grid h-11 w-11 place-items-center rounded-full border border-line bg-paper text-bone lg:hidden">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
               <circle cx="10.8" cy="10.8" r="6.8" />
@@ -230,6 +232,10 @@ export default function SiteHeader({ isSeller: sellerHint = false, compact = fal
                       {user.email && <p className="mt-0.5 truncate text-xs text-muted">{user.email}</p>}
                     </div>
                   </div>
+                  <div className="px-3 py-2">
+                    <p className="mb-2 text-xs font-semibold text-muted">Appearance</p>
+                    <AppearanceChoices />
+                  </div>
                   <nav aria-label="Account navigation" className="space-y-0.5">
                     <Link role="menuitem" href="/profile" data-onboarding-target="profile" className={mobileLink}>Profile</Link>
                     <Link role="menuitem" href="/orders" data-onboarding-target="orders" className={`${mobileLink} md:hidden`}>My orders</Link>
@@ -255,6 +261,10 @@ export default function SiteHeader({ isSeller: sellerHint = false, compact = fal
                   <div className="px-3 pb-3 pt-2">
                     <p className="font-display text-lg font-semibold">Welcome to The Middleman</p>
                     <p className="mt-1 text-xs leading-5 text-muted">Browse products now, then sign in when you’re ready to buy or sell.</p>
+                  </div>
+                  <div className="px-3 pb-3">
+                    <p className="mb-2 text-xs font-semibold text-muted">Appearance</p>
+                    <AppearanceChoices />
                   </div>
                   <nav aria-label="Guest account menu" className="space-y-0.5">
                     <Link role="menuitem" href="/marketplace" className={mobileLink}>Browse products</Link>

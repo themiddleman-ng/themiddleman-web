@@ -19,7 +19,7 @@ import SiteHeader from "@/components/SiteHeader";
 import ProductCover from "@/components/marketplace/ProductCover";
 import EscrowTrustLine from "@/components/EscrowTrustLine";
 import FileTypeIcon, { fileKindFromName } from "@/components/gigs/FileTypeIcon";
-import { DESIGN_PREVIEW_GIGS } from "@/lib/design-preview/catalog";
+import { DESIGN_PREVIEW_GIGS, EXAMPLE_HELLO_WORLD_ID } from "@/lib/design-preview/catalog";
 import type { GigPackageListing } from "@/lib/gig-package-listing";
 
 type SellerProfile = { user_id: string; display_name: string; bio: string | null; verification_status: string };
@@ -158,7 +158,7 @@ export default function GigPageClient({
       setLoading(true); setLoadError("");
       const { data: { user } } = await supabase.auth.getUser();
       if (!cancelled && user) { setUserId(user.id); setUserEmail(user.email ?? null); }
-      if (!isSupabaseConfigured) {
+      if (gigId === EXAMPLE_HELLO_WORLD_ID || !isSupabaseConfigured) {
         const preview = DESIGN_PREVIEW_GIGS.find((item) => item.id === gigId);
         if (preview) {
           setGig({
@@ -173,7 +173,7 @@ export default function GigPageClient({
             delivery_days: 3,
             experience_tier: null,
             demo_video_path: null,
-            demo_links: ["https://example.com"],
+            demo_links: preview.id === EXAMPLE_HELLO_WORLD_ID ? ["/examples/hello-world/demo.html"] : ["https://example.com"],
             seller_profiles: {
               user_id: "preview-seller",
               display_name: preview.seller_profiles?.display_name ?? "Unknown seller",
@@ -500,7 +500,7 @@ export default function GigPageClient({
     <div className="rounded-2xl border border-line bg-paper p-5 shadow-sm sm:p-6">
       <h1 className="break-words font-display text-2xl font-bold tracking-tight sm:text-[1.65rem]">{gig.title}</h1>
       <div className="mt-4 flex flex-wrap items-center gap-2">
-        <p className="font-mono text-2xl font-semibold text-ember-cta">₦{gig.price_ngn.toLocaleString()}</p>
+        <p className="font-mono text-2xl font-semibold text-ember-cta">{gig.id === EXAMPLE_HELLO_WORLD_ID ? "Free example" : `₦${gig.price_ngn.toLocaleString()}`}</p>
         {showAiPill ? (
           <span className="rounded-full bg-ember-cta/10 px-3 py-1 text-xs font-semibold text-link">AI-assisted</span>
         ) : null}
@@ -864,6 +864,14 @@ export default function GigPageClient({
               {tabPanel}
             </div>
 
+            {gig.id === EXAMPLE_HELLO_WORLD_ID ? (
+              <section className="mt-8 rounded-2xl border border-line bg-paper p-5" aria-labelledby="hello-world-example">
+                <h2 id="hello-world-example" className="font-display text-xl font-bold">Run the example</h2>
+                <p className="mt-2 text-sm leading-6 text-muted">This listing lives in the app preview, not in the product database. It is free, it is not a seller, and it does not take a payment. Press the button inside the frame. The download is the same source files.</p>
+                <iframe title="Hello World example" sandbox="allow-scripts" src="/examples/hello-world/demo.html" className="mt-4 h-80 w-full rounded-xl border border-line bg-white" />
+                <a href="/examples/hello-world/hello-world-test.zip" download className="mt-4 inline-flex min-h-11 items-center rounded-xl border border-line px-4 text-sm font-semibold text-bone">Download the example files</a>
+              </section>
+            ) : null}
             <section className="mt-10 border-t border-line pt-8">
               <h2 className="font-display text-xl font-bold">Reviews {rating.count > 0 ? `(${rating.count})` : ""}</h2>
               {reviews.length === 0 ? (
@@ -922,7 +930,7 @@ export default function GigPageClient({
         <div className="flex items-center gap-3">
           <div className="min-w-0">
             <p className="text-[13px] text-slate">Price</p>
-            <p className="font-mono text-lg font-semibold text-bone">₦{gig.price_ngn.toLocaleString()}</p>
+            <p className="font-mono text-lg font-semibold text-bone">{gig.id === EXAMPLE_HELLO_WORLD_ID ? "Free example" : `₦${gig.price_ngn.toLocaleString()}`}</p>
           </div>
           {purchasesEnabled ? (
             <button type="button" onClick={checkout ? payReviewedCheckout : handleBuyAndPay} disabled={paying} className="btn-primary ml-auto inline-flex min-h-11 flex-1 items-center justify-center rounded-xl px-4 text-sm font-semibold disabled:opacity-50">
@@ -933,7 +941,7 @@ export default function GigPageClient({
               type="button"
               disabled
               title={purchasesPausedTitle}
-              className="ml-auto inline-flex min-h-11 flex-1 items-center justify-center rounded-xl bg-line px-4 text-sm font-semibold text-slate"
+              className="ml-auto inline-flex min-h-11 flex-1 items-center justify-center rounded-xl bg-ember-cta/40 px-4 text-sm font-semibold text-on-ember"
             >
               Purchases paused
             </button>

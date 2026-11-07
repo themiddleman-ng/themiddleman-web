@@ -5,6 +5,7 @@ import { StarRatingDisplay } from "@/components/StarRating";
 import ProductCover from "./ProductCover";
 import { categoryTheme } from "@/lib/marketplace/categories";
 import { listingImageSrc } from "@/lib/marketplace/listing-image.mjs";
+import { EXAMPLE_HELLO_WORLD_ID } from "@/lib/design-preview/catalog";
 
 export type CardGig = { id: string; title: string; description: string; category: string; price_ngn: number; is_ai_assisted: boolean; gallery_image_paths?: string[]; seller_profiles: { display_name: string; verification_status: string } | null };
 export type CardRating = { average_rating: number; review_count: number };
@@ -76,8 +77,11 @@ export default function GigCard({ gig, rating }: { gig: CardGig; rating?: CardRa
           )}
         </div>
 
+        {gig.id === EXAMPLE_HELLO_WORLD_ID ? (
+          <p className="mt-1.5 text-[13px] font-medium leading-5 text-muted">Free in-app example. Not a seller listing.</p>
+        ) : null}
         <p className="mt-2 text-[16px] font-bold text-bone">
-          ₦{gig.price_ngn.toLocaleString("en-NG")}
+          {gig.id === EXAMPLE_HELLO_WORLD_ID ? "Free example" : `₦${gig.price_ngn.toLocaleString("en-NG")}`}
         </p>
       </div>
     </Link>

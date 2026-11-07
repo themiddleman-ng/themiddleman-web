@@ -1,5 +1,5 @@
 import { createClient } from "@supabase/supabase-js";
-import { DESIGN_PREVIEW_GIGS } from "@/lib/design-preview/catalog";
+import { DESIGN_PREVIEW_GIGS, EXAMPLE_HELLO_WORLD_ID } from "@/lib/design-preview/catalog";
 import { PRODUCT_ORIGIN, productShareImageUrl, productShareUrl } from "@/lib/share/product-link.mjs";
 
 export type PublicGigCard = {
@@ -32,6 +32,7 @@ export function fixtureGigCard(id: string): PublicGigCard | null {
 
 /** Active listings and the local sample catalogue only. Drafts and hidden rows return null. */
 export async function loadPublicGigCard(id: string): Promise<PublicGigCard | null> {
+  if (id === EXAMPLE_HELLO_WORLD_ID) return fixtureGigCard(id);
   if (!configured()) return fixtureGigCard(id);
 
   const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!, {
