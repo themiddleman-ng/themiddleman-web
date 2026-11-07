@@ -2,7 +2,9 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import type { ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
+import { useAdminAccount } from "@/lib/account/use-admin-account";
+import { supabase } from "@/lib/supabaseClient";
 import { UserCircleIcon } from '@phosphor-icons/react/dist/csr/UserCircle';
 import { PackageIcon } from '@phosphor-icons/react/dist/csr/Package';
 import { ChartBarIcon } from '@phosphor-icons/react/dist/csr/ChartBar';
@@ -20,17 +22,27 @@ const admin = [["/admin", "Overview"], ["/admin/products", "Products"], ["/admin
 
 export default function DesignFrame({ children }: { children: ReactNode }) {
   const pathname = usePathname();
+  const [userId, setUserId] = useState<string | null>(null);
+  const isAdminAccount = useAdminAccount(userId);
+  useEffect(() => {
+    let active = true;
+    void supabase.auth.getUser().then(({ data }) => {
+      if (active) setUserId(data.user?.id ?? null);
+    });
+    return () => { active = false; };
+  }, []);
   if (pathname === "/" || pathname === "/design-review") return children;
-  const isAdmin = pathname === "/admin" || pathname.startsWith("/admin/");
+  const onAdminPath = pathname === "/admin" || pathname.startsWith("/admin/");
+  const showAdminRail = onAdminPath && isAdminAccount;
   const isSeller = pathname === "/analytics" || pathname === "/seller-support" || pathname === "/gigs/mine" || pathname === "/gigs/new";
-  const hasRail = isAdmin || isSeller || account.some(([href]) => pathname === href) || pathname === "/account/delete";
+  const hasRail = showAdminRail || isSeller || account.some(([href]) => pathname === href) || pathname === "/account/delete";
   // Messaging keeps the full width for the inbox and conversation panes.
   const rail = hasRail && pathname !== "/messages";
   const family = pathname.split("/").filter(Boolean)[0] || "page";
-  const links = isAdmin ? admin : isSeller ? seller : account;
+  const links = showAdminRail ? admin : isSeller ? seller : account;
   return <div className={`mm-design mm-${family}${rail ? " mm-with-rail" : ""}`}>
-    {rail && <aside className="mm-workspace-rail" aria-label={isAdmin ? "Administration" : isSeller ? "Creator workspace" : "Account navigation"}>
-      <p className="mm-rail-label">{isAdmin ? "ADMIN WORKSPACE" : isSeller ? "CREATOR WORKSPACE" : "YOUR ACCOUNT"}</p>
+    {rail && <aside className="mm-workspace-rail" aria-label={showAdminRail ? "Administration" : isSeller ? "Creator workspace" : "Account navigation"}>
+      <p className="mm-rail-label">{showAdminRail ? "ADMIN WORKSPACE" : isSeller ? "CREATOR WORKSPACE" : "YOUR ACCOUNT"}</p>
       <nav>{links.map(([href, label]) => { const Icon = railIcons[href] || PackageIcon; return <Link key={href} href={href} aria-current={pathname === href ? "page" : undefined}><Icon size={19} weight="regular" aria-hidden="true" />{label}</Link>; })}</nav>
       <div className="mm-rail-footer"><Link href="/marketplace">Explore marketplace</Link><Link href="/onboarding/role">Buy and sell</Link></div>
     </aside>}

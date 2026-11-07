@@ -28,7 +28,9 @@ test("profile save returns to a read-only summary and keeps the sign-in email", 
 
 test("admin and authenticator are discoverable without weakening the gate", () => {
   assert.match(settings, /Set up authenticator/);
-  assert.match(settings, /Not an admin account/);
+  assert.match(settings, /\{isAdmin \? \([\s\S]*Admin workspace/);
+  assert.doesNotMatch(settings, /Not an admin account/);
+  assert.match(header, /\{isAdmin && <Link role="menuitem" href="\/admin"/);
   assert.match(security, /Google Authenticator or Authy/);
   assert.match(security, /needsAdminUnlock/);
   assert.match(security, /isAdmin &&/);

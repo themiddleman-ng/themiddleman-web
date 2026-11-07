@@ -91,21 +91,15 @@ export default function SettingsPageClient() {
             <Link href="/security" className="inline-flex min-h-11 w-full shrink-0 items-center justify-center rounded-xl border border-line px-4 text-sm font-semibold text-muted transition hover:bg-paper sm:w-auto">Set up authenticator</Link>
           </section>
 
-          <section className="flex flex-col gap-4 py-5 sm:flex-row sm:items-center sm:justify-between sm:py-6">
-            <div>
-              <p className="text-sm font-semibold text-muted">Admin workspace</p>
-              {isAdmin ? (
+          {isAdmin ? (
+            <section className="flex flex-col gap-4 py-5 sm:flex-row sm:items-center sm:justify-between sm:py-6">
+              <div>
+                <p className="text-sm font-semibold text-muted">Admin workspace</p>
                 <p className="mt-1 text-sm leading-6 text-muted">This account is a platform admin. Open Admin from here or the account photo menu. If it asks for a code first, finish the authenticator setup above.</p>
-              ) : (
-                <p className="mt-1 text-sm leading-6 text-muted">Admin tools are only shown to platform operators. This account is a regular buyer or seller, so there is no Admin page to open.</p>
-              )}
-            </div>
-            {isAdmin ? (
-              <Link href="/admin" className="inline-flex min-h-11 w-full shrink-0 items-center justify-center rounded-xl bg-paper px-4 text-sm font-semibold text-white transition hover:bg-paper sm:w-auto">Open admin</Link>
-            ) : (
-              <span className="inline-flex min-h-11 w-full shrink-0 items-center justify-center rounded-xl border border-line px-4 text-sm text-muted sm:w-auto">Not an admin account</span>
-            )}
-          </section>
+              </div>
+              <Link href="/admin" className="inline-flex min-h-11 w-full shrink-0 items-center justify-center rounded-xl bg-ember-cta px-4 text-sm font-semibold text-on-ember transition hover:bg-ember-hover sm:w-auto">Open admin</Link>
+            </section>
+          ) : null}
 
           <section className="flex flex-col gap-4 py-5 sm:flex-row sm:items-center sm:justify-between sm:py-6">
             <div>
