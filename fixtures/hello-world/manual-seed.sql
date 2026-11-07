@@ -1,0 +1,17 @@
+-- DO NOT RUN until the parent confirms which Supabase project is the isolated test project.
+-- Do not run against production. This file does not create auth users, orders, payments, or storage objects.
+-- It is a template for one clearly labeled TEST listing. Replace seller_profile_id first.
+-- Price 0 is test data, not a real offer.
+
+-- insert into public.gigs (
+--   id, seller_id, title, description, category, price_ngn, status, gallery_image_paths
+-- ) values (
+--   'hhhhhhhh-0000-4000-8000-000000000001',
+--   '<existing-test-seller-profile-id>',
+--   'TEST Hello World',
+--   'Test fixture only. A tiny program that prints Hello World. Not a real product and not for sale.',
+--   'development',
+--   0,
+--   'draft',
+--   ARRAY[]::text[]
+-- );
