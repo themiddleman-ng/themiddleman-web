@@ -1,6 +1,6 @@
 # Route checklist (7 Nov 2026)
 
-Default theme is still dark. The white screenshots are a local style injection, not a shipped theme.
+Default theme is still dark. A later local pass retook the white comparison with a #FFFFFF page background after listings finished loading. That injection is not a shipped theme. Unopened routes below stay incomplete.
 
 Reviewed in the browser this pass: `/`, `/marketplace`, `/gigs/preview-invoice-tracker`, `/design-review?screen=admin` (sample fixture, labeled as preview data). Dark and white, 1440 and 390.
 

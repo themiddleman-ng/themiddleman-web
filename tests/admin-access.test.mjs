@@ -45,5 +45,7 @@ test("admin pages use the server gate, and the menu does not trust user metadata
   assert.doesNotMatch(hook, /user_metadata/);
   assert.match(frame, /onAdminPath && isAdminAccount/);
   assert.match(sql, /current_user in \('authenticated', 'anon'\)/);
+  assert.match(sql, /protect_profile_role_insert/);
+  assert.match(sql, /protect_profile_role_update/);
   assert.match(sql, /profile role is assigned by the platform/);
 });
