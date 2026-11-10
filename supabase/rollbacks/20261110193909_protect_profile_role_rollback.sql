@@ -1,4 +1,4 @@
--- Rollback of the role guard only. FILE ONLY. Not applied.
+-- Rollback of 20261110193909_protect_profile_role.sql (role guard only). Run by hand only if needed.
 -- Never run on uwigyojtiudefnwjezhm.
 -- This drops the triggers and functions. It does not restore any role value,
 -- and it does not undo a privilege grant that already existed.

@@ -33,7 +33,7 @@ test("admin pages use the server gate, and the menu does not trust user metadata
   const adminUser = await readFile(new URL("../lib/server/marketplace.ts", import.meta.url), "utf8");
   const hook = await readFile(new URL("../lib/account/use-admin-account.ts", import.meta.url), "utf8");
   const frame = await readFile(new URL("../components/design/DesignFrame.tsx", import.meta.url), "utf8");
-  const sql = await readFile(new URL("../supabase/manual/20261107190000_protect_profile_role.sql", import.meta.url), "utf8");
+  const sql = await readFile(new URL("../supabase/migrations/20261110193909_protect_profile_role.sql", import.meta.url), "utf8");
   assert.match(page, /adminUser\(\)/);
   assert.match(page, /notFound\(\)/);
   assert.match(page, /redirect\("\/security\?next=admin"\)/);

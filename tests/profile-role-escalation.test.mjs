@@ -3,7 +3,7 @@ import test from "node:test";
 import { readFile } from "node:fs/promises";
 import { PGlite } from "@electric-sql/pglite";
 
-const sql = await readFile(new URL("../supabase/manual/20261107190000_protect_profile_role.sql", import.meta.url), "utf8");
+const sql = await readFile(new URL("../supabase/migrations/20261110193909_protect_profile_role.sql", import.meta.url), "utf8");
 const buyer = "11111111-1111-4111-8111-111111111111";
 
 async function setup() {

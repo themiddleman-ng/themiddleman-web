@@ -54,6 +54,8 @@ Run on the test project first. Repeat on production only after (a) and (b) look 
 18. `supabase/migrations/20261025120000_gig_wishlists.sql`
 19. `supabase/migrations/20261025130000_public_seller_profiles.sql`
 20. `supabase/migrations/20261025140000_pre_purchase_enquiry_limits.sql`
+21. `supabase/migrations/20261110193909_protect_profile_role.sql` (run `supabase/manual/20261110193909_protect_profile_role_preflight.sql` first; rollback in `supabase/rollbacks/`)
+22. `supabase/migrations/20261110193919_waitlist_admin_only_reads.sql` (any signed-in account can read waitlist rows until this runs; rollback in `supabase/rollbacks/`)
 
 Skip any version already present in `supabase_migrations.schema_migrations` for that project. Do not re-run a version that is already recorded.
 

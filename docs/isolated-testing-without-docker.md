@@ -95,6 +95,8 @@ Repo migration order:
 18. `20261025120000_gig_wishlists.sql`
 19. `20261025130000_public_seller_profiles.sql`
 20. `20261025140000_pre_purchase_enquiry_limits.sql`
+21. `20261110193909_protect_profile_role.sql` (read `supabase/manual/20261110193909_protect_profile_role_preflight.sql` first)
+22. `20261110193919_waitlist_admin_only_reads.sql`
 
 Then, by hand, only after preflight `long_message_count = 0`: `supabase/manual/20261025140001_validate_messages_body_max_length.sql`.
 

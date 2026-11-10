@@ -1,6 +1,6 @@
 -- READ ONLY. Do not run on uwigyojtiudefnwjezhm.
 -- Not executed against vhfskuabgsudbaiqotth by this change. No live inventory was verified.
--- Review the result before considering the trigger file. This file changes nothing.
+-- Review the result before applying supabase/migrations/20261110193909_protect_profile_role.sql. This file changes nothing.
 
 select current_database() as database_name, current_user as current_user;
 

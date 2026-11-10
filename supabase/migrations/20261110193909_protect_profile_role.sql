@@ -1,7 +1,8 @@
--- FILE ONLY. Not applied to any database.
--- Not verified against vhfskuabgsudbaiqotth. Never run this on uwigyojtiudefnwjezhm.
+-- Migration. Applied to the TEST project vhfskuabgsudbaiqotth on 2026-11-10 after
+-- supabase/manual/20261110193909_protect_profile_role_preflight.sql was read there.
+-- Production (uwigyojtiudefnwjezhm) is applied by Samuel only, after the same preflight.
+-- Rollback: supabase/rollbacks/20261110193909_protect_profile_role_rollback.sql
 -- PGlite regression coverage is in tests/profile-role-escalation.test.mjs.
--- Do not apply this until a human has read the preflight output on the intended project.
 --
 -- The app admin gate reads public.profiles.role (buyer | seller | admin).
 -- It does not read auth user_metadata and it does not read public.users.
