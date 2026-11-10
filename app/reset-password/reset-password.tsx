@@ -73,7 +73,7 @@ export default function ResetPassword() {
             type="button"
             onClick={() => setShowPassword((visible) => !visible)}
             aria-label={showPassword ? "Hide password" : "Show password"}
-            className="absolute right-3 top-1/2 -translate-y-1/2 rounded-md px-2 py-1 text-xs font-semibold text-slate hover:text-ember focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ember"
+            className="absolute right-3 top-1/2 -translate-y-1/2 rounded-md px-2 py-1 text-xs font-semibold text-slate hover:text-link focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ember"
           >
             {showPassword ? "Hide" : "Show"}
           </button>
@@ -91,7 +91,7 @@ export default function ResetPassword() {
           {message}
         </p>
       )}
-      <Link href="/signup?mode=signin" className="mt-5 block text-ember">
+      <Link href="/signup?mode=signin" className="mt-5 block text-link">
         Back to sign in
       </Link>
     </form>

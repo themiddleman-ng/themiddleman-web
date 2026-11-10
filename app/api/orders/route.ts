@@ -58,7 +58,10 @@ export async function GET() {
   const packagesEnabled = productPackagesEnabled();
   const productVersionFields = packagesEnabled ? ', product_version_id' : '';
   const [buyer, seller] = await Promise.all([
-    db.from('orders').select(`id, gig_id, amount, status, created_at, gigs(title), seller_profiles!orders_seller_id_fkey(display_name), ${deliveryFields}${productVersionFields}`)
+    // Buyer order rows do not embed seller_profiles. The buyer label is a hash
+    // of the order id, not the seller display name. Public seller fields, when
+    // a page needs them, come from public_seller_profiles (see messages).
+    db.from('orders').select(`id, gig_id, amount, status, created_at, gigs(title), ${deliveryFields}${productVersionFields}`)
       .eq('buyer_id', user.id).order('created_at', { ascending: false }),
     sellerProfile?.id
       ? db.from('orders').select(`id, gig_id, amount, status, created_at, gigs(title), ${deliveryFields}${productVersionFields}`)

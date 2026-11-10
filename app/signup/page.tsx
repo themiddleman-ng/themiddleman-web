@@ -1,7 +1,7 @@
 export const dynamic = 'force-dynamic';
 export const metadata = {
   title: 'Create an account',
-  description: 'Join The Middleman to buy or sell digital work with protected payments.',
+  description: 'Create an account to browse digital products or list one of your own. Purchases are paused, so signing up does not start a payment.',
   robots: { index: false, follow: true },
 };
 import PageClient from './PageClient';

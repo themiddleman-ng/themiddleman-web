@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TEST Hello World</title>
+<body style="margin:0;background:#ffffff;color:#1a1a1a;font-family:Georgia,serif">
+  <main style="max-width:640px;margin:48px auto;padding:24px">
+    <p style="margin:0;font-family:ui-monospace,monospace;font-size:12px;letter-spacing:.12em;color:#5c5c5c">TEST FIXTURE · NOT A LISTING · NOT FOR SALE</p>
+    <h1 style="font-size:32px;margin:12px 0">Hello World demo</h1>
+    <p style="line-height:1.5">This page has no network request. The button prints the same line as <code>node hello.mjs</code>.</p>
+    <button id="run" type="button" style="min-height:44px;padding:0 16px;border:0;border-radius:8px;background:#f97316;color:#111111;font-weight:700">Show Hello World</button>
+    <pre id="out" style="min-height:3rem;margin-top:16px;padding:16px;border:1px solid #e6e6e6;border-radius:12px;background:#ffffff;font-family:ui-monospace,monospace;font-size:20px"></pre>
+  </main>
+  <script>
+    document.getElementById("run").addEventListener("click", function () {
+      document.getElementById("out").textContent = "Hello World";
+    });
+  </script>
+</body>
+</html>

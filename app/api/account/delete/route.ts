@@ -54,7 +54,7 @@ function completionEmail() {
     '',
     `The Middleman · ${siteUrl}`,
   ].join('\n');
-  const html = `<div style="font-family:Arial,sans-serif;color:#243344;line-height:1.6;max-width:560px;margin:auto;padding:24px"><h1 style="font-size:24px">Your account has been deleted</h1><p>Your Middleman profile, conversations and seller payout details were removed, and active listings were archived.</p><p>Order and payment records may be kept in de-identified form for transaction history and legal obligations.</p><p>If you would like to share feedback, you can reply to this email.</p><p style="margin-top:28px;color:#6b7680">The Middleman</p><a href="${htmlEscape(siteUrl)}" style="color:#a94b18">Visit The Middleman</a></div>`;
+  const html = `<div style="font-family:Arial,sans-serif;color:#243344;line-height:1.6;max-width:560px;margin:auto;padding:24px"><h1 style="font-size:24px">Your account has been deleted</h1><p>Your Middleman profile, conversations and seller payout details were removed, and active listings were archived.</p><p>Order and payment records may be kept in de-identified form for transaction history and legal obligations.</p><p>If you would like to share feedback, you can reply to this email.</p><p style="margin-top:28px;color:#6b7680">The Middleman</p><a href="${htmlEscape(siteUrl)}" style="color:#111111">Visit The Middleman</a></div>`;
   return { text, html };
 }
 

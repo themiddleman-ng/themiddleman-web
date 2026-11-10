@@ -57,7 +57,7 @@ export default function SellerAnalyticsPage() {
       <section className="mx-auto max-w-6xl px-5 py-8 sm:px-7">
         <header className="flex flex-wrap items-end justify-between gap-4 border-b border-line pb-5">
           <div>
-            <p className="text-xs font-semibold tracking-[.14em] text-ember">SELLER PERFORMANCE</p>
+            <p className="text-xs font-semibold tracking-[.14em] text-link">SELLER PERFORMANCE</p>
             <h1 className="mt-2 font-display text-3xl font-bold">Product analytics</h1>
             <p className="mt-2 text-sm text-slate">Performance totals only. Buyers remain private.</p>
           </div>

@@ -1,11 +1,13 @@
 import type { Metadata } from "next";
-import { createClient } from "@supabase/supabase-js";
+import { notFound } from "next/navigation";
 import PageClient from "./PageClient";
 import { gatewayTestEnabled } from "@/lib/server/escrow-config.mjs";
+import { prePurchaseEnquiryEnabled } from "@/lib/server/messaging-config.mjs";
+import { loadGigPackageListing } from "@/lib/server/gig-package-listing";
+import { loadPublicGigCard } from "@/lib/og/public-gig";
+import { productShareImageUrl, productShareUrl, shareDescription } from "@/lib/share/product-link.mjs";
 
 export const dynamic = "force-dynamic";
-
-const SITE_URL = "https://themiddleman.com.ng";
 
 export async function generateMetadata({
   params,
@@ -13,78 +15,60 @@ export async function generateMetadata({
   params: Promise<{ id: string }>;
 }): Promise<Metadata> {
   const { id } = await params;
-  const canonical = "/gigs/" + encodeURIComponent(id);
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  const url = productShareUrl(id);
+  const gig = await loadPublicGigCard(id);
 
-  if (!supabaseUrl || !anonKey) {
-    return {
-      title: "Product listing",
-      alternates: { canonical },
-      robots: { index: false, follow: true },
-    };
-  }
-
-  const supabase = createClient(supabaseUrl, anonKey, {
-    auth: { autoRefreshToken: false, persistSession: false },
-  });
-  const { data, error } = await supabase
-    .from("gigs")
-    .select("title, description, gallery_image_paths")
-    .eq("id", id)
-    .eq("status", "active")
-    .maybeSingle();
-
-  if (error) {
-    console.error("Could not load product metadata.");
-    return {
-      title: "Digital product",
-      alternates: { canonical },
-      robots: { index: false, follow: true },
-    };
-  }
-
-  if (!data) {
+  if (!gig) {
     return {
       title: "Product unavailable",
-      alternates: { canonical },
+      description: "This product is not available on The Middleman.",
       robots: { index: false, follow: false },
+      openGraph: {
+        type: "website",
+        ...(url ? { url } : {}),
+        siteName: "The Middleman",
+        title: "Product unavailable",
+        description: "This product is not available on The Middleman.",
+      },
+      twitter: { card: "summary_large_image", title: "Product unavailable" },
     };
   }
 
-  const title = (data.title || "Digital product").trim().slice(0, 100);
-  const description = (data.description || "Explore this digital product on The Middleman.")
-    .replace(/\s+/g, " ")
-    .trim()
-    .slice(0, 200);
-  const imagePath = Array.isArray(data.gallery_image_paths) ? data.gallery_image_paths[0] : null;
-  const image = imagePath
-    ? supabase.storage.from("gig-media").getPublicUrl(imagePath).data.publicUrl
-    : SITE_URL + "/opengraph-image";
-  const url = SITE_URL + canonical;
-
+  const description = shareDescription({ sellerName: gig.sellerName, summary: gig.summary, priceLabel: gig.priceLabel });
+  const image = productShareImageUrl(id);
   return {
-    title,
+    title: gig.title,
     description,
-    alternates: { canonical },
+    ...(url ? { alternates: { canonical: url } } : {}),
     openGraph: {
       type: "website",
-      url,
+      ...(url ? { url } : {}),
       siteName: "The Middleman",
-      title,
+      title: gig.title,
       description,
-      images: [{ url: image }],
+      ...(image ? { images: [{ url: image, width: 1200, height: 630, alt: gig.title }] } : {}),
     },
     twitter: {
       card: "summary_large_image",
-      title,
+      title: gig.title,
       description,
-      images: [image],
+      ...(image ? { images: [image] } : {}),
     },
   };
 }
 
 export default async function Page({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  return <PageClient gigId={id} purchasesEnabled={gatewayTestEnabled()} />;
+  const gig = await loadPublicGigCard(id);
+  if (!gig) notFound();
+  const packageListing = await loadGigPackageListing(id);
+  return (
+    <PageClient
+      gigId={id}
+      shareUrl={productShareUrl(id) ?? ""}
+      purchasesEnabled={gatewayTestEnabled()}
+      prePurchaseEnquiryEnabled={prePurchaseEnquiryEnabled()}
+      packageListing={packageListing}
+    />
+  );
 }
