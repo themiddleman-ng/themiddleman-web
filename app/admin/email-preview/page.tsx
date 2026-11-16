@@ -21,7 +21,7 @@ function EmailPreview({ title, html }: { title: string; html: string }) {
         title={title}
         sandbox=""
         srcDoc={previewHtml}
-        className="h-[620px] w-full bg-[#f3f5f8]"
+        className="h-[620px] w-full bg-paper"
       />
     </section>
   );
@@ -59,10 +59,10 @@ export default async function AdminEmailPreviewPage() {
     <main className="min-h-screen bg-ink text-bone">
       <SiteHeader />
       <div className="mx-auto max-w-7xl px-5 py-8 md:py-12">
-        <Link href="/admin" className="text-sm font-medium text-ember hover:underline">← Admin workspace</Link>
+        <Link href="/admin" className="text-sm font-medium text-link hover:underline">← Admin workspace</Link>
         <div className="mt-5 flex flex-wrap items-end justify-between gap-4">
           <div>
-            <p className="text-xs font-bold uppercase tracking-[.16em] text-ember">Communications</p>
+            <p className="text-xs font-bold uppercase tracking-[.16em] text-link">Communications</p>
             <h1 className="mt-2 font-display text-3xl font-bold md:text-4xl">Email template previews</h1>
             <p className="mt-2 max-w-2xl text-sm leading-6 text-slate">
               Check the actual transactional email layouts with sample content before changing copy or styling.

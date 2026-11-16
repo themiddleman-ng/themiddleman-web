@@ -30,7 +30,7 @@ export default function NotificationRetryButton({ orderId }: { orderId: string }
 
   return <div className="flex items-center gap-2">
     <button type="button" disabled={busy} onClick={retry}
-      className="rounded-full border border-line px-3 py-1.5 text-xs font-semibold text-ember disabled:opacity-50">
+      className="rounded-full border border-line px-3 py-1.5 text-xs font-semibold text-link disabled:opacity-50">
       {busy ? 'Retrying…' : 'Retry email'}
     </button>
     {message && <span className="text-xs text-slate">{message}</span>}

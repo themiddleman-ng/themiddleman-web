@@ -2,9 +2,12 @@
 
 import Link from "next/link";
 import { Suspense, useEffect, useRef, useState } from "react";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { supabase } from "@/lib/supabaseClient";
 import SiteHeader from "@/components/SiteHeader";
+import { signinHref } from "@/lib/auth/signin-redirect.mjs";
+import DraftRestoredNotice from "@/components/forms/DraftRestoredNotice";
+import { usePersistedForm } from "@/lib/forms/usePersistedForm";
 
 // Design note: message threads use a calm correspondence layout with a
 // sender, timestamp and message text separated by a thin rule.
@@ -70,7 +73,7 @@ function formatTime(iso: string): string {
 
 function Avatar({ initials }: { initials: string }) {
   return (
-    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#e9e1d6] font-display text-xs font-bold text-[#29435a]">
+    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-ember-cta font-display text-xs font-bold text-on-ember">
       {initials}
     </div>
   );
@@ -90,38 +93,60 @@ function ConversationRowItem({
       type="button"
       onClick={onClick}
       aria-current={active ? "true" : undefined}
-      className={`flex w-full gap-3 border-b border-[#f0ece5] px-4 py-4 text-left transition-colors ${active ? "bg-[#fff0e5]" : "hover:bg-[#faf8f4]"}`}
+      className={`flex min-h-14 w-full gap-3 border-b border-line px-4 py-4 text-left transition-colors ${active ? "bg-elevated" : "hover:bg-ink"}`}
     >
       <Avatar initials={conversation.counterpartInitials} />
       <div className="min-w-0 flex-1">
-        <p className="truncate text-sm font-semibold text-[#25384a]">
+        <p className="truncate text-sm font-semibold text-bone">
           {conversation.counterpartName}
         </p>
-        <p className="mt-1 truncate text-xs text-[#75808a]">
+        <p className="mt-1 truncate text-[14px] text-slate">
           {conversation.gigTitle ?? "General inquiry"}
         </p>
       </div>
-      {active && <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-[#de641e]" aria-label="Selected conversation" />}
+      {active && <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-ember-cta" aria-label="Selected conversation" />}
     </button>
   );
 }
 
-function MessageEntry({ isYou, senderName, message }: { isYou: boolean; senderName: string; message: MessageRow }) {
+function MessageEntry({
+  isYou,
+  senderName,
+  message,
+  onReport,
+}: {
+  isYou: boolean;
+  senderName: string;
+  message: MessageRow;
+  onReport?: () => void;
+}) {
   return (
     <div className={`flex w-full items-end gap-2.5 ${isYou ? "justify-end" : "justify-start"}`}>
       {!isYou && <Avatar initials={initialsFrom(senderName)} />}
       <div className={`max-w-[82%] sm:max-w-[72%] ${isYou ? "items-end" : "items-start"}`}>
-        <p className={`mb-1 px-1 text-[11px] font-medium ${isYou ? "text-right text-[#78838d]" : "text-[#657482]"}`}>{senderName}</p>
-        <div className={`whitespace-pre-wrap break-words rounded-2xl px-3.5 py-2.5 text-sm leading-6 shadow-[0_2px_7px_rgba(30,40,50,.04)] ${isYou ? "rounded-br-md bg-[#ffeddf] text-[#273849]" : "rounded-bl-md bg-[#f1efeb] text-[#273849]"}`}>
+        <p className={`mb-1 px-1 text-[14px] font-medium text-slate ${isYou ? "text-right" : ""}`}>{senderName}</p>
+        <div className={`whitespace-pre-wrap break-words rounded-2xl px-3.5 py-2.5 text-[16px] leading-6 ${isYou ? "rounded-br-md bg-elevated text-bone" : "rounded-bl-md bg-ink text-bone"}`}>
           {message.body}
         </div>
-        <time className={`mt-1 block px-1 text-[10px] text-[#89929a] ${isYou ? "text-right" : ""}`} dateTime={message.created_at}>{formatTime(message.created_at)}</time>
+        <div className={`mt-1 flex items-center gap-2 px-1 ${isYou ? "justify-end" : ""}`}>
+          <time className="text-[14px] text-slate" dateTime={message.created_at}>{formatTime(message.created_at)}</time>
+          {!isYou && onReport && (
+            <button
+              type="button"
+              onClick={onReport}
+              className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-full px-2 text-[13px] font-semibold text-muted transition hover:bg-elevated hover:text-link"
+            >
+              Report
+            </button>
+          )}
+        </div>
       </div>
     </div>
   );
 }
 
 function MessagesPageInner() {
+  const router = useRouter();
   const searchParams = useSearchParams();
   const requestedConversationId = searchParams.get("conversation");
   const [conversationQuery, setConversationQuery] = useState("");
@@ -130,7 +155,22 @@ function MessagesPageInner() {
   const [activeId, setActiveId] = useState<string | null>(null);
   const [mobileThreadOpen, setMobileThreadOpen] = useState(false);
   const [messages, setMessages] = useState<MessageRow[]>([]);
-  const [draft, setDraft] = useState("");
+  const [composerDraft, setComposerDraft] = useState({ body: "" });
+  const {
+    restored: composerDraftRestored,
+    discardDraft: discardComposerDraft,
+    clearDraft: clearComposerDraft,
+  } = usePersistedForm({
+    formId: "messages-compose",
+    userId,
+    recordId: activeId || "none",
+    values: composerDraft,
+    setValues: setComposerDraft,
+    enabled: Boolean(userId && activeId),
+    storage: "session",
+  });
+  const draft = composerDraft.body;
+  const setDraft = (body: string) => setComposerDraft({ body });
   const [warning, setWarning] = useState<string | null>(null);
   const [noticeDismissed, setNoticeDismissed] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -152,10 +192,7 @@ function MessagesPageInner() {
 
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
-        if (!cancelled) {
-          setLoadError("Sign in to view your messages.");
-          setLoading(false);
-        }
+        if (!cancelled) router.replace(signinHref("/messages"));
         return;
       }
       if (!cancelled) setUserId(user.id);
@@ -189,7 +226,7 @@ function MessagesPageInner() {
     return () => {
       cancelled = true;
     };
-  }, [requestedConversationId]);
+  }, [requestedConversationId, router]);
 
   // Load messages for the active conversation, and subscribe to new ones.
   useEffect(() => {
@@ -291,6 +328,7 @@ function MessagesPageInner() {
     }
 
     setDraft("");
+    clearComposerDraft();
     setWarning(null);
     const refreshed = await fetch(`/api/conversations/${activeId}/messages`, { cache: 'no-store' });
     if (refreshed.ok) setMessages((await refreshed.json()).messages);
@@ -304,83 +342,82 @@ function MessagesPageInner() {
   }
 
   return (
-    <main className="flex min-h-[calc(100svh-4rem)] flex-col bg-[radial-gradient(ellipse_at_88%_0%,rgba(227,127,72,.12),transparent_28%),#f7f3ec] text-[#273849]">
+    <main className="flex min-h-[calc(100svh-4rem)] flex-col bg-ink text-bone">
       <SiteHeader hideOnMobile />
       <div className="mx-auto flex min-h-0 w-full max-w-6xl flex-1 flex-col px-0 pb-4 md:px-6">
         <div className="flex items-end justify-between gap-3 px-4 py-4 sm:px-6 md:px-0 md:py-6">
           <div>
-            <p className="text-sm font-medium text-[#a95320]">Your conversations</p>
-            <h1 className="mt-1 font-display text-2xl font-semibold tracking-[-.03em] text-[#1b3044] sm:text-3xl">Messages</h1>
-            <p className="mt-1 text-sm text-[#74808a]">Keep product conversations in one place.</p>
+            <p className="text-[14px] font-medium text-eyebrow">Your conversations</p>
+            <h1 className="mt-1 font-display text-2xl font-semibold tracking-[-.03em] text-bone sm:text-3xl">Messages</h1>
+            <p className="mt-1 text-[16px] text-slate">Keep product conversations in one place.</p>
           </div>
           {!loading && !loadError && conversations.length > 0 && (
-            <span className="mb-1 rounded-full bg-white/80 px-3 py-1.5 text-xs font-medium text-[#62717e]">
+            <span className="mb-1 rounded-full bg-paper px-3 py-1.5 text-[14px] font-medium text-slate">
               {conversations.length} {conversations.length === 1 ? "conversation" : "conversations"}
             </span>
           )}
         </div>
 
         {!noticeDismissed && (
-          <div className="mx-3 mb-3 flex items-start gap-3 rounded-2xl border border-[#ecd9c8] bg-[#fffaf4] px-4 py-3 text-[#5e5a54] sm:mx-6 md:mx-0">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#b5632b" strokeWidth="1.8" className="mt-0.5 shrink-0" aria-hidden="true">
+          <div className="mx-3 mb-3 flex items-start gap-3 rounded-2xl border border-line bg-elevated px-4 py-3 text-muted sm:mx-6 md:mx-0">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="mt-0.5 shrink-0 text-ember-cta" aria-hidden="true">
               <path d="M12 9v4m0 4h.01M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z" />
             </svg>
-            <p className="flex-1 text-xs leading-5">
+            <p className="flex-1 text-[14px] leading-5 text-muted sm:text-xs sm:text-slate">
               Keep messages about the product. Links, phone numbers and email addresses are blocked to help protect order conversations.
             </p>
-            <button type="button" onClick={() => setNoticeDismissed(true)} aria-label="Dismiss safety note" className="-mr-1 grid h-7 w-7 shrink-0 place-items-center rounded-full text-sm text-[#75808a] transition hover:bg-[#f5e9dc] hover:text-[#26384a]">
+            <button type="button" onClick={() => setNoticeDismissed(true)} aria-label="Dismiss safety note" className="-mr-1 grid h-11 w-11 shrink-0 place-items-center rounded-full text-sm text-muted transition hover:bg-elevated hover:text-bone">
               ×
             </button>
           </div>
         )}
 
         {loading && (
-          <div className="mx-3 flex-1 overflow-hidden rounded-[24px] bg-[#fffdf9] p-4 shadow-[0_12px_40px_rgba(48,40,31,.05)] sm:mx-6 md:mx-0 md:p-6" aria-label="Loading conversations">
+          <div className="flex-1 overflow-hidden border-t border-line bg-ink p-4 sm:p-6" aria-label="Loading conversations">
             <div className="flex animate-pulse gap-4">
-              <div className="h-11 w-11 rounded-full bg-[#eee8df]" />
-              <div className="flex-1 space-y-2 pt-1"><div className="h-3 w-1/3 rounded bg-[#eee8df]" /><div className="h-3 w-2/3 rounded bg-[#f3eee7]" /></div>
+              <div className="h-11 w-11 rounded-full bg-elevated" />
+              <div className="flex-1 space-y-2 pt-1"><div className="h-3 w-1/3 rounded bg-elevated" /><div className="h-3 w-2/3 rounded bg-elevated" /></div>
             </div>
-            <div className="mt-6 h-px bg-[#f0ece5]" />
-            <div className="mt-6 h-14 w-3/5 animate-pulse rounded-2xl bg-[#f3eee7]" />
-            <div className="ml-auto mt-5 h-14 w-1/2 animate-pulse rounded-2xl bg-[#e9edf0]" />
+            <div className="mt-6 h-px bg-line" />
+            <div className="mt-6 h-14 w-3/5 animate-pulse rounded-2xl bg-elevated" />
+            <div className="ml-auto mt-5 h-14 w-1/2 animate-pulse rounded-2xl bg-elevated" />
           </div>
         )}
 
         {!loading && loadError && (
-          <div className="mx-3 flex flex-1 items-center justify-center rounded-[24px] bg-[#fffdf9] px-6 py-12 text-center shadow-[0_12px_40px_rgba(48,40,31,.05)] sm:mx-6 md:mx-0">
+          <div className="flex flex-1 items-center justify-center border-t border-line px-6 py-12 text-center">
             <div className="max-w-md">
-              <p className="font-display text-xl font-semibold text-[#26384a]">We couldn’t load your messages</p>
-              <p className="mt-2 text-sm leading-6 text-[#6a7783]">{loadError}
+              <p className="font-display text-xl font-semibold text-bone">We couldn’t load your messages</p>
+              <p className="mt-2 text-[16px] leading-6 text-slate">{loadError}
                 {loadError.includes("relation") && (
-                  <> This may mean <code className="rounded bg-[#f3eee7] px-1.5 py-0.5 text-xs text-[#a95320]">supabase/messages_schema.sql</code> hasn’t been run against your project yet.</>
+                  <> This may mean <code className="rounded bg-elevated px-1.5 py-0.5 text-[14px] text-eyebrow">supabase/messages_schema.sql</code> hasn’t been run against your project yet.</>
                 )}
               </p>
-              {loadError.includes("Sign in") && <Link href="/signup?mode=signin" className="mt-4 inline-flex min-h-10 items-center rounded-full bg-[#de641e] px-4 text-sm font-semibold text-white">Log in</Link>}
             </div>
           </div>
         )}
 
         {!loading && !loadError && conversations.length === 0 && (
-          <div className="mx-3 flex flex-1 items-center justify-center rounded-[24px] bg-[#fffdf9] px-6 py-12 text-center shadow-[0_12px_40px_rgba(48,40,31,.05)] sm:mx-6 md:mx-0">
+          <div className="flex flex-1 items-center justify-center border-t border-line px-6 py-12 text-center">
             <div className="max-w-sm">
-              <div className="mx-auto grid h-12 w-12 place-items-center rounded-full bg-[#f2e8dc] text-[#a95320]" aria-hidden="true">
+              <div className="mx-auto grid h-12 w-12 place-items-center rounded-full bg-elevated text-eyebrow" aria-hidden="true">
                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d="M21 11.5a8.5 8.5 0 0 1-8.5 8.5H3l1.8-3.6A8.5 8.5 0 1 1 21 11.5Z" /></svg>
               </div>
-              <h2 className="mt-4 font-display text-xl font-semibold text-[#26384a]">No conversations yet</h2>
-              <p className="mt-2 text-sm leading-6 text-[#6a7783]">Messages about a paid product order will appear here, so you and the creator can keep everything together.</p>
-              <Link href="/marketplace" className="mt-4 inline-flex min-h-10 items-center rounded-full px-4 text-sm font-semibold text-[#a95320] transition hover:bg-[#f7f1e9]">Explore products</Link>
+              <h2 className="mt-4 font-display text-xl font-semibold text-bone">No conversations yet</h2>
+              <p className="mt-2 text-[16px] leading-6 text-slate">Messages about a paid product order will appear here, so you and the creator can keep everything together.</p>
+              <Link href="/marketplace" className="mt-4 inline-flex min-h-11 items-center rounded-full px-4 text-[16px] font-semibold text-eyebrow transition hover:bg-elevated">Explore products</Link>
             </div>
           </div>
         )}
 
         {!loading && !loadError && conversations.length > 0 && activeConversation && (
-          <div className="mx-3 flex min-h-[31rem] flex-1 overflow-hidden rounded-[24px] bg-[#fffdf9] shadow-[0_12px_40px_rgba(48,40,31,.07)] sm:mx-6 md:mx-0">
-            <section className={`${mobileThreadOpen ? "hidden" : "flex"} w-full shrink-0 flex-col overflow-y-auto md:flex md:w-[320px] md:border-r md:border-[#eee7de]`} aria-label="Conversation list">
-              <div className="flex items-center justify-between border-b border-[#eee7de] px-4 py-3.5">
-                <h2 className="text-sm font-semibold text-[#26384a]">Inbox</h2>
-                <span className="text-xs text-[#89929a]">{conversations.length}</span>
+          <div className="flex min-h-[31rem] min-w-0 flex-1 overflow-hidden border-t border-line bg-ink">
+            <section className={`${mobileThreadOpen ? "hidden" : "flex"} w-full shrink-0 flex-col overflow-y-auto md:flex md:w-[min(320px,38%)] md:max-w-sm md:border-r md:border-line`} aria-label="Conversation list">
+              <div className="flex items-center justify-between border-b border-line px-4 py-3.5">
+                <h2 className="text-[16px] font-semibold text-bone">Inbox</h2>
+                <span className="text-[14px] text-slate">{conversations.length}</span>
               </div>
-              <input type="search" aria-label="Search conversations" placeholder="Search conversations" value={conversationQuery} onChange={(event) => setConversationQuery(event.target.value)} />
+              <input type="search" aria-label="Search conversations" placeholder="Search conversations" value={conversationQuery} onChange={(event) => setConversationQuery(event.target.value)} className="mx-3 mb-1 mt-3 min-h-11 w-[calc(100%-1.5rem)] rounded-lg border border-line px-3 text-[16px] text-bone placeholder:text-muted" />
               {conversations.filter((conversation) => `${conversation.counterpartName} ${conversation.gigTitle || ''}`.toLowerCase().includes(conversationQuery.trim().toLowerCase())).map((conversation) => (
                 <ConversationRowItem
                   key={conversation.id}
@@ -396,23 +433,23 @@ function MessagesPageInner() {
               ))}
             </section>
 
-            <section className={`${mobileThreadOpen ? "flex" : "hidden"} min-w-0 flex-1 flex-col md:flex`} aria-label="Active conversation">
-              <div className="flex min-h-[4.5rem] items-center gap-3 border-b border-[#eee7de] px-3 py-3 sm:px-5">
-                <button type="button" onClick={() => setMobileThreadOpen(false)} aria-label="Back to conversations" className="grid h-9 w-9 shrink-0 place-items-center rounded-full text-[#516170] transition hover:bg-[#f4eee6] md:hidden">
+            <section className={`${mobileThreadOpen ? "flex" : "hidden"} min-w-0 w-full flex-1 flex-col md:flex`} aria-label="Active conversation">
+              <div className="flex min-h-[4.5rem] items-center gap-3 border-b border-line px-3 py-3 sm:px-5">
+                <button type="button" onClick={() => setMobileThreadOpen(false)} aria-label="Back to conversations" className="grid h-11 w-11 shrink-0 place-items-center rounded-full text-muted transition hover:bg-elevated md:hidden">
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6" /></svg>
                 </button>
                 <Avatar initials={activeConversation.counterpartInitials} />
                 <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm font-semibold text-[#24384b]">{activeConversation.counterpartName}</p>
-                  <p className="truncate text-xs text-[#79838c]">{activeConversation.gigTitle ?? "Product conversation"}</p>
+                  <p className="truncate text-[16px] font-semibold text-bone">{activeConversation.counterpartName}</p>
+                  <p className="truncate text-[14px] text-slate">{activeConversation.gigTitle ?? "Product conversation"}</p>
                 </div>
-                <span className="hidden rounded-full bg-[#f5f0e8] px-3 py-1.5 text-[11px] font-medium text-[#61717d] sm:inline-flex">Order conversation</span>
+                <span className="hidden rounded-full bg-elevated px-3 py-1.5 text-[14px] font-medium text-slate sm:inline-flex">Order conversation</span>
               </div>
 
-              <div ref={scrollRef} className="min-h-0 flex-1 overflow-y-auto bg-[linear-gradient(180deg,#fffdf9,#fbfaf7)] px-3 py-5 sm:px-5 sm:py-6">
+              <div ref={scrollRef} className="min-h-0 flex-1 overflow-y-auto bg-ink px-3 py-5 sm:px-5 sm:py-6">
                 <div className="flex min-h-full flex-col justify-end gap-4">
                   {messages.length === 0 && (
-                    <p className="my-auto text-center text-sm text-[#87919a]">Your conversation starts here.</p>
+                    <p className="my-auto text-center text-[16px] text-slate">Your conversation starts here.</p>
                   )}
                   {messages.map((message) => (
                     <MessageEntry
@@ -425,7 +462,7 @@ function MessagesPageInner() {
                   {otherTyping && (
                     <div className="flex items-end gap-2.5" aria-label="The other person is typing">
                       <Avatar initials={activeConversation.counterpartInitials} />
-                      <div className="flex items-center gap-1 rounded-2xl rounded-bl-md bg-[#f1efeb] px-3.5 py-3">
+                      <div className="flex items-center gap-1 rounded-2xl rounded-bl-md bg-elevated px-3.5 py-3">
                         <span className="typing-dot" /><span className="typing-dot" /><span className="typing-dot" />
                       </div>
                     </div>
@@ -433,9 +470,16 @@ function MessagesPageInner() {
                 </div>
               </div>
 
-              <div className="border-t border-[#eee7de] bg-[#fffdf9] px-3 py-3 sm:px-5 sm:py-4">
-                {warning && <p role="alert" className="mb-2 rounded-xl bg-[#fff2e8] px-3 py-2 text-xs leading-5 text-[#9a4b1e]">{warning}</p>}
-                <div className="flex items-end gap-2 rounded-2xl border border-[#e7e1d8] bg-[#faf8f4] p-2 focus-within:border-[#d8895e] focus-within:ring-4 focus-within:ring-[#de641e]/10">
+              <div className="w-full min-w-0 border-t border-line bg-paper px-3 py-3 sm:px-5 sm:py-4">
+                <DraftRestoredNotice
+                  visible={composerDraftRestored}
+                  onDiscard={() => {
+                    discardComposerDraft();
+                    setComposerDraft({ body: "" });
+                  }}
+                />
+                {warning && <p role="alert" className="mb-2 rounded-xl bg-ember-cta/10 px-3 py-2 text-xs leading-5 text-link">{warning}</p>}
+                <div className="flex w-full min-w-0 items-end gap-2 rounded-2xl border border-line bg-paper p-2 focus-within:border-link focus-within:ring-4 focus-within:ring-ember-cta/10">
                   <textarea
                     rows={1}
                     maxLength={2000}
@@ -444,28 +488,28 @@ function MessagesPageInner() {
                     onKeyDown={handleKeyDown}
                     placeholder="Write a message…"
                     aria-label="Write a message"
-                    className="max-h-28 min-h-10 flex-1 resize-y border-0 bg-transparent px-2 py-2 text-sm leading-5 text-[#273849] outline-none placeholder:text-[#89929a]"
+                    className="max-h-28 min-h-11 min-w-0 w-full flex-1 basis-0 resize-y border-0 bg-transparent px-2 py-2 text-[16px] leading-5 text-bone outline-none placeholder:text-muted"
                   />
                   <button
                     type="button"
                     onClick={handleSend}
                     disabled={!draft.trim()}
-                    className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-[#de641e] text-white transition hover:bg-[#c95415] disabled:cursor-not-allowed disabled:bg-[#e8dfd7] disabled:text-[#9b968f]"
+                    className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-ember-cta text-ink transition hover:bg-ember-hover disabled:cursor-not-allowed disabled:bg-elevated disabled:text-muted"
                     aria-label="Send message"
                   >
                     <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="m21 3-7.2 18-3.9-7.9L2 9.2 21 3Z" /><path d="M21 3 9.9 13.1" /></svg>
                   </button>
                 </div>
-                <p className="mt-2 px-1 text-[10px] text-[#89929a]">Enter to send · Shift + Enter for a new line</p>
+                <p className="mt-2 px-1 text-[14px] text-muted md:text-xs md:text-slate">Enter to send · Shift + Enter for a new line</p>
               </div>
             </section>
-            <aside className="hidden w-60 shrink-0 border-l border-[#e1e5ed] p-6 xl:block" aria-label="Conversation details">
+            <aside className="hidden w-60 shrink-0 border-l border-line p-6 xl:block" aria-label="Conversation details">
               <h2 className="text-sm font-semibold">Conversation details</h2>
-              <p className="mt-6 text-xs text-[#606b80]">Product</p>
+              <p className="mt-6 text-[14px] text-slate">Product</p>
               <p className="mt-2 text-sm font-semibold">{activeConversation.gigTitle || 'Product conversation'}</p>
-              {activeConversation.gig_id && <Link href={`/gigs/${activeConversation.gig_id}`} className="mt-5 block rounded-lg border border-[#e1e5ed] px-4 py-3 text-center text-sm font-medium">View product</Link>}
-              <Link href="/orders" className="mt-3 block rounded-lg bg-[#ed6509] px-4 py-3 text-center text-sm font-semibold text-white">View your orders</Link>
-              <p className="mt-6 text-xs leading-5 text-[#606b80]">Keep payments and delivery on The Middleman. Share files through the order flow.</p>
+              {activeConversation.gig_id && <Link href={`/gigs/${activeConversation.gig_id}`} className="mt-5 block rounded-lg border border-line px-4 py-3 text-center text-sm font-medium">View product</Link>}
+              <Link href="/orders" className="mt-3 flex min-h-11 items-center justify-center rounded-lg bg-ember-cta text-center text-sm font-semibold text-on-ember hover:bg-ember-hover">View your orders</Link>
+              <p className="mt-6 text-[14px] leading-5 text-slate">Keep payments and delivery on The Middleman. Share files through the order flow.</p>
             </aside>
           </div>
         )}

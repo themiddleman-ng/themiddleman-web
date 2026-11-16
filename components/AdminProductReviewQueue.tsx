@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 
 type ProductReview = {
   id: string;
@@ -84,7 +85,7 @@ function ReviewCard({ item, onReviewed }: { item: ProductReview; onReviewed: (em
   }
 
   return (
-    <article className="rounded-2xl border border-white/10 bg-paper p-5 text-bone">
+    <article id={`product-version-${item.id}`} className="rounded-2xl border border-white/10 bg-paper p-5 text-bone scroll-mt-24">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div className="min-w-0">
           <h2 className="font-display text-xl font-bold">{item.gig?.title || "Product listing"}</h2>
@@ -92,7 +93,7 @@ function ReviewCard({ item, onReviewed }: { item: ProductReview; onReviewed: (em
             {item.seller?.display_name || "Seller"} · {item.seller?.verification_status === "approved" ? "Verified seller" : "Seller verification needs attention"}
           </p>
         </div>
-        <span className="rounded-full bg-ember/10 px-3 py-1 text-xs font-medium text-ember">Awaiting review</span>
+        <span className="rounded-full bg-elevated px-3 py-1 text-xs font-medium text-link">Awaiting review</span>
       </div>
 
       {item.gig ? (
@@ -109,12 +110,12 @@ function ReviewCard({ item, onReviewed }: { item: ProductReview; onReviewed: (em
       {(item.gig?.media?.length || item.gig?.demo_links?.length || item.gig?.demo_video_url) ? (
         <div className="mt-4 flex flex-wrap gap-3 text-xs">
           {item.gig?.media?.map((media, index) => (
-            <a key={media.path} href={media.url} target="_blank" rel="noopener noreferrer" className="text-ember underline underline-offset-2">
+            <a key={media.path} href={media.url} target="_blank" rel="noopener noreferrer" className="text-link underline underline-offset-2">
               Preview image {index + 1}
             </a>
           ))}
-          {item.gig?.demo_video_url ? <a href={item.gig.demo_video_url} target="_blank" rel="noopener noreferrer" className="text-ember underline underline-offset-2">Demo video</a> : null}
-          {item.gig?.demo_links?.map((url) => <a key={url} href={url} target="_blank" rel="noopener noreferrer" className="text-ember underline underline-offset-2">External demo</a>)}
+          {item.gig?.demo_video_url ? <a href={item.gig.demo_video_url} target="_blank" rel="noopener noreferrer" className="text-link underline underline-offset-2">Demo video</a> : null}
+          {item.gig?.demo_links?.map((url) => <a key={url} href={url} target="_blank" rel="noopener noreferrer" className="text-link underline underline-offset-2">External demo</a>)}
         </div>
       ) : null}
 
@@ -124,7 +125,7 @@ function ReviewCard({ item, onReviewed }: { item: ProductReview; onReviewed: (em
             <h3 className="text-sm font-semibold">Private product package · v{item.version_number}</h3>
             <p className="mt-1 break-all text-xs text-slate">{item.original_filename} · {item.content_type} · {bytes(item.file_size)}</p>
           </div>
-          <a href={"/api/admin/products/" + item.id + "/file"} className="shrink-0 rounded-full border border-white/15 px-3 py-2 text-xs text-bone hover:border-ember">
+          <a href={"/api/admin/products/" + item.id + "/file"} className="shrink-0 rounded-full border border-white/15 px-3 py-2 text-xs text-bone hover:border-line">
             Download to inspect
           </a>
         </div>
@@ -173,6 +174,8 @@ function ReviewCard({ item, onReviewed }: { item: ProductReview; onReviewed: (em
 }
 
 export default function AdminProductReviewQueue() {
+  const searchParams = useSearchParams();
+  const focusVersion = searchParams.get("version");
   const [items, setItems] = useState<ProductReview[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -194,6 +197,12 @@ export default function AdminProductReviewQueue() {
   }, []);
 
   useEffect(() => { void load(); }, [load]);
+
+  useEffect(() => {
+    if (!focusVersion || loading) return;
+    const target = document.getElementById(`product-version-${focusVersion}`);
+    if (target) target.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, [focusVersion, loading, items.length]);
 
   async function retryReviewEmail() {
     if (!emailNotice) return;
